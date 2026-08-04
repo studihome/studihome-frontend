@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="id">
+<html lang="id" class="scroll-smooth">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -10,9 +10,22 @@
   <meta name="description" content="Studihome - Solusi pembelajaran AI modern, e-book, masterclass, otomasi spreadsheet, dan pengembangan web app kustom terintegrasi.">
   <meta name="keywords" content="Studihome, Otomasi AI, Prompt Engineering, Google Apps Script, Web App Serverless, Masterclass, E-Book AI">
   <meta name="author" content="Studihome">
-  <meta property="og:title" content="Studihome - AI & Digital Platform">
-  <meta property="og:description" content="Kuasai Otomasi AI dan Aplikasi Modern untuk Produktivitas Tanpa Batas!">
+  <meta name="robots" content="index, follow">
+  <link rel="canonical" href="https://studihome.id">
+
+  <!-- Open Graph / Social Media Metadata -->
+  <meta property="og:site_name" content="Studihome">
+  <meta property="og:title" content="Studihome - Solusi Pembelajaran & Layanan AI Modern">
+  <meta property="og:description" content="Kuasai Otomasi AI dan Aplikasi Modern untuk Produktivitas Tanpa Batas! Akses E-book, Webinar, Masterclass, dan Jasa Development.">
   <meta property="og:type" content="website">
+  <meta property="og:url" content="https://studihome.id">
+  <meta property="og:image" content="https://images.unsplash.com/photo-1540575467063-178a50c2df87?auto=format&fit=crop&w=1200&q=80">
+
+  <!-- Twitter Card Metadata -->
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="Studihome - Solusi Pembelajaran & Layanan AI Modern">
+  <meta name="twitter:description" content="Kuasai Otomasi AI dan Aplikasi Modern untuk Produktivitas Tanpa Batas!">
+  <meta name="twitter:image" content="https://images.unsplash.com/photo-1540575467063-178a50c2df87?auto=format&fit=crop&w=1200&q=80">
 
   <!-- Dynamic Animated SVG Favicon with Rotating Star ✦ -->
   <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><style>@keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } } .star { transform-origin: 50px 50px; animation: spin 5s linear infinite; fill: %23f1b32b; font-size: 70px; text-anchor: middle; dominant-baseline: central; font-family: sans-serif; font-weight: bold; }</style><text x='50' y='55' class='star'>✦</text></svg>">
@@ -69,6 +82,15 @@
       line-height: 1;
     }
 
+    /* HOT BADGE BLINKING ANIMATION */
+    @keyframes hotBlinkGlow {
+      0%, 100% { opacity: 1; transform: scale(1); filter: drop-shadow(0 0 4px rgba(241, 179, 43, 0.8)); }
+      50% { opacity: 0.35; transform: scale(0.92); filter: drop-shadow(0 0 1px rgba(241, 179, 43, 0.2)); }
+    }
+    .hot-badge-blink {
+      animation: hotBlinkGlow 1.2s infinite ease-in-out;
+    }
+
     /* Smooth Floating Animation */
     @keyframes smoothFloat {
       0%, 100% { transform: translateY(0px); }
@@ -101,6 +123,17 @@
       outline-offset: 2px !important;
     }
 
+    /* Skeleton Loading Wave */
+    @keyframes skeletonShimmer {
+      0% { background-position: -200% 0; }
+      100% { background-position: 200% 0; }
+    }
+    .skeleton-loading {
+      background: linear-gradient(90deg, #e2e8f0 25%, #f1f5f9 50%, #e2e8f0 75%);
+      background-size: 200% 100%;
+      animation: skeletonShimmer 1.5s infinite;
+    }
+
     ::-webkit-scrollbar { width: 6px; height: 6px; }
     ::-webkit-scrollbar-track { background: #dbe4ff; }
     ::-webkit-scrollbar-thumb { background: #94a3b8; border-radius: 9999px; }
@@ -108,7 +141,6 @@
 </head>
 <body class="min-h-screen flex flex-col justify-between antialiased selection:bg-blue-100 selection:text-blue-900">
 
-  <!-- HEADER -->
   <header class="sticky top-4 z-40 max-w-5xl mx-auto px-4 w-full">
     <div class="floating-capsule border border-blue-200/90 rounded-full py-2.5 px-5 shadow-sm flex items-center justify-between gap-3">
       
@@ -146,11 +178,11 @@
 
   <main class="flex-grow container mx-auto px-4 py-6 max-w-6xl">
 
-    <!-- VIEW: CATALOG (PUBLIC) -->
+    <!-- VIEW 1: CATALOG VIEW (PUBLIC) -->
     <section id="view-catalog" class="spa-view space-y-12">
       
       <!-- HERO WEBINAR BANNER ("teras") WITH TOGGLE SUPPORT -->
-      <div id="teras" class="pt-4 grid grid-cols-1 lg:grid-cols-12 gap-8 items-center max-w-5xl mx-auto">
+      <article id="teras" class="pt-4 grid grid-cols-1 lg:grid-cols-12 gap-8 items-center max-w-5xl mx-auto">
         <div class="lg:col-span-7 space-y-4 text-left">
           <div class="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-[#1b5df0]/10 text-[#1b5df0] text-xs font-extrabold uppercase tracking-wider border border-[#1b5df0]/20">
             <span id="hero-tag-display" class="flex items-center gap-1.5"><span class="animate-pulse" aria-hidden="true">🔴</span> WEBINAR SPESIAL INTERAKTIF 2026</span>
@@ -182,7 +214,7 @@
               <img id="hero-img-display" loading="lazy" decoding="async" src="https://images.unsplash.com/photo-1540575467063-178a50c2df87?auto=format&fit=crop&w=800&q=80" alt="Webinar AI Studihome Banner Flyer" class="w-full h-full object-cover" onerror="this.src='https://placehold.co/800x600/1b5df0/ffffff?text=Webinar+AI+Studihome'">
               <div class="absolute inset-0 bg-gradient-to-t from-slate-950/90 via-slate-950/30 to-transparent flex flex-col justify-end p-5 text-white">
                 <span class="text-[10px] font-black uppercase tracking-widest text-[#f1b32b]">LIMITED SEATS</span>
-                <h3 class="font-extrabold text-base md:text-lg leading-snug">Masterclass AI Automation & App Integration</h3>
+                <h2 class="font-extrabold text-base md:text-lg leading-snug">Masterclass AI Automation & App Integration</h2>
                 <p class="text-xs text-slate-300 mt-1">Live Demo + Q&A Interaktif dengan Expert</p>
               </div>
             </div>
@@ -190,55 +222,68 @@
           </div>
 
           <div class="pt-5 w-full flex justify-center">
-            <a id="hero-btn-link" href="#" target="_blank" rel="noopener noreferrer" class="w-full max-w-sm inline-flex items-center justify-center bg-[#1b5df0] hover:bg-[#1246c7] active:scale-95 text-white font-extrabold px-7 py-3.5 rounded-full shadow-lg text-sm transition-all animate-pulse hover:animate-none min-h-[48px]">
+            <!-- Intercept Amankan Kursi button to enforce login/register -->
+            <button onclick="handleProtectedCheckout('PRD-004')" class="w-full max-w-sm inline-flex items-center justify-center bg-[#1b5df0] hover:bg-[#1246c7] active:scale-95 text-white font-extrabold px-7 py-3.5 rounded-full shadow-lg text-sm md:text-base transition-all animate-pulse hover:animate-none min-h-[48px] cursor-pointer">
               <span id="hero-btn-text">Amankan Kursi</span>
-            </a>
+            </button>
           </div>
         </div>
-      </div>
+      </article>
 
-      <!-- CATEGORY TABS SWITCHER -->
-      <div class="flex flex-wrap justify-center items-center gap-3 my-8 pt-4" role="tablist" aria-label="Kategori Produk">
-        <button onclick="filterCategory('Belajar Apa?')" id="btn-cat-Belajar-Apa-" role="tab" aria-selected="true" class="cat-pill active px-6 py-2.5 rounded-full font-extrabold text-xs md:text-sm transition-all-fast bg-gradient-to-r from-[#1b5df0] to-[#1246c7] text-white shadow-md active:scale-95 border border-[#1b5df0] min-h-[42px]">
-          Belajar Apa?
-        </button>
-        <button onclick="filterCategory('Event')" id="btn-cat-Event" role="tab" aria-selected="false" class="cat-pill px-6 py-2.5 rounded-full font-extrabold text-xs md:text-sm transition-all-fast bg-white text-slate-700 border border-blue-200/90 hover:border-[#1b5df0] hover:text-[#1b5df0] active:scale-95 shadow-xs flex items-center gap-2 min-h-[42px]">
-          <span>Event</span> <span class="px-2.5 py-0.5 rounded-full bg-[#f1b32b] text-[#0b1a48] font-black text-[10px] uppercase shadow-2xs">Hot 🔥</span>
-        </button>
-        <button onclick="filterCategory('Bikin Apa?')" id="btn-cat-Bikin-Apa-" role="tab" aria-selected="false" class="cat-pill px-6 py-2.5 rounded-full font-extrabold text-xs md:text-sm transition-all-fast bg-white text-slate-700 border border-blue-200/90 hover:border-[#1b5df0] hover:text-[#1b5df0] active:scale-95 shadow-xs min-h-[42px]">
-          Bikin Apa?
-        </button>
-      </div>
+      <section aria-labelledby="cat-tabs-heading">
+        <h2 id="cat-tabs-heading" class="sr-only">Kategori Produk</h2>
+        <div class="flex flex-wrap justify-center items-center gap-3 md:gap-4 my-8 pt-4" role="tablist" aria-label="Kategori Produk">
+          
+          <!-- Category 1: Belajar Apa? -->
+          <button onclick="filterCategory('Belajar Apa?')" id="btn-cat-Belajar-Apa-" role="tab" aria-selected="true" data-cat="Belajar Apa?" class="cat-pill active px-7 py-3 md:px-8 md:py-3.5 rounded-full font-black text-sm md:text-base transition-all-fast bg-gradient-to-r from-[#1b5df0] to-[#1246c7] text-white shadow-md active:scale-95 border border-[#1b5df0] min-h-[46px] flex items-center justify-center gap-2">
+            <span>Belajar Apa?</span>
+          </button>
+          
+          <!-- Category 2: Event (Enlarged with Blinking HOT badge) -->
+          <button onclick="filterCategory('Event')" id="btn-cat-Event" role="tab" aria-selected="false" data-cat="Event" class="cat-pill px-7 py-3 md:px-8 md:py-3.5 rounded-full font-black text-sm md:text-base transition-all-fast bg-white text-slate-700 border border-blue-200/90 hover:border-[#1b5df0] hover:text-[#1b5df0] active:scale-95 shadow-xs flex items-center gap-2.5 min-h-[46px]">
+            <span>Event</span>
+            <span class="hot-badge-blink px-2.5 py-0.5 rounded-full bg-[#f1b32b] text-[#0b1a48] font-black text-[11px] md:text-xs uppercase shadow-xs">HOT 🔥</span>
+          </button>
+          
+          <!-- Category 3: Bikin Apa? -->
+          <button onclick="filterCategory('Bikin Apa?')" id="btn-cat-Bikin-Apa-" role="tab" aria-selected="false" data-cat="Bikin Apa?" class="cat-pill px-7 py-3 md:px-8 md:py-3.5 rounded-full font-black text-sm md:text-base transition-all-fast bg-white text-slate-700 border border-blue-200/90 hover:border-[#1b5df0] hover:text-[#1b5df0] active:scale-95 shadow-xs min-h-[46px] flex items-center justify-center gap-2">
+            <span>Bikin Apa?</span>
+          </button>
+        </div>
+      </section>
 
-      <!-- Catalog Cards Container -->
-      <div id="catalog-container" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 pt-2 items-center max-w-6xl mx-auto"></div>
+      <section aria-label="Daftar Produk Katalog">
+        <div id="catalog-container" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 pt-2 items-stretch max-w-6xl mx-auto">
+          <!-- Populated dynamically via JS renderCatalog() -->
+        </div>
+      </section>
 
       <!-- CUSTOM CONTENT BANNER -->
-      <div class="pt-10 max-w-4xl mx-auto">
+      <section class="pt-10 max-w-4xl mx-auto">
         <div class="bg-gradient-to-r from-[#1246c7] via-[#1b5df0] to-[#2563eb] rounded-3xl p-6 md:p-8 text-white shadow-lg flex flex-col md:flex-row justify-between items-center gap-6">
           <div class="text-left space-y-2">
             <span class="bg-white/20 text-white text-[10px] font-black uppercase tracking-wider px-3 py-1 rounded-full">✨ Solusi Digital Enterprise Profesional.</span>
-            <h4 class="font-extrabold text-lg md:text-xl text-[#f1b32b] drop-shadow-xs">Pesan Konten Digital sesuai kebutuhan Anda</h4>
+            <h3 class="font-extrabold text-lg md:text-xl text-[#f1b32b] drop-shadow-xs">Pesan Konten Digital sesuai kebutuhan Anda</h3>
             <p class="text-xs md:text-sm text-blue-100 leading-relaxed">Proses pengerjaan cepat dan revisi sampai tuntas dengan hasil berkualitas!</p>
           </div>
           <button onclick="openConsultModal('Pesan Khusus Konten Digital')" class="shrink-0 px-6 py-3.5 rounded-full bg-[#f1b32b] hover:bg-[#d99b1c] text-[#0b1a48] font-black text-sm shadow-md transition-all active:scale-95 min-h-[48px]">
             Konsultasi
           </button>
         </div>
-      </div>
+      </section>
 
-      <!-- B2B & Partnership Cards Grid (All 3 Cards) -->
-      <div class="pt-12 max-w-5xl mx-auto space-y-8">
+      <!-- B2B & PARTNERSHIP SECTION -->
+      <section class="pt-12 max-w-5xl mx-auto space-y-8">
         <div class="text-center space-y-2">
           <span class="px-3.5 py-1 rounded-full bg-[#1b5df0]/10 text-[#1b5df0] font-extrabold text-xs uppercase tracking-wider border border-[#1b5df0]/20">🤝 B2B & Partnership Solution</span>
           <h2 class="text-2xl md:text-3xl font-extrabold text-[#0b1a48]">Penawaran Khusus</h2>
           <p class="text-xs md:text-sm text-slate-600 max-w-2xl mx-auto">
-            Tingkatkan efisiensi operasional dan kapasitas teknologi tim Anda sekarang!.
+            Tingkatkan efisiensi operasional dan kapasitas teknologi tim Anda sekarang!
           </p>
         </div>
 
         <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-          <div class="bg-amber-50/90 border border-amber-200/80 p-6 rounded-3xl shadow-xs space-y-4 hover:border-[#f1b32b] transition-all flex flex-col justify-between">
+          <article class="bg-amber-50/90 border border-amber-200/80 p-6 rounded-3xl shadow-xs space-y-4 hover:border-[#f1b32b] transition-all flex flex-col justify-between">
             <div class="space-y-2">
               <h3 class="font-bold text-[#0b1a48] text-base">In-House AI Training & Workshop</h3>
               <p class="text-xs text-slate-600 leading-relaxed">Pelatihan intensif privat khusus karyawan/staf perusahaan Anda untuk menguasai otomasi AI & workflow digital.</p>
@@ -246,9 +291,9 @@
             <button onclick="openConsultModal('In-House AI Training & Workshop')" class="w-full text-center px-4 py-3 rounded-xl bg-[#f1b32b] hover:bg-[#d99b1c] text-[#0b1a48] font-extrabold text-xs transition-all shadow-xs min-h-[42px]">
               Konsultasikan Program
             </button>
-          </div>
+          </article>
 
-          <div class="bg-amber-50/90 border border-amber-200/80 p-6 rounded-3xl shadow-xs space-y-4 hover:border-[#f1b32b] transition-all flex flex-col justify-between">
+          <article class="bg-amber-50/90 border border-amber-200/80 p-6 rounded-3xl shadow-xs space-y-4 hover:border-[#f1b32b] transition-all flex flex-col justify-between">
             <div class="space-y-2">
               <h3 class="font-bold text-[#0b1a48] text-base">Pengembangan Sistem Otomasi</h3>
               <p class="text-xs text-slate-600 leading-relaxed">Pengembangan sistem web app custom, database spreadsheet, dan bot otomasi khusus kebutuhan instansi Anda.</p>
@@ -256,9 +301,9 @@
             <button onclick="openConsultModal('Pengembangan Sistem Otomasi')" class="w-full text-center px-4 py-3 rounded-xl bg-[#f1b32b] hover:bg-[#d99b1c] text-[#0b1a48] font-extrabold text-xs transition-all shadow-xs min-h-[42px]">
               Minta Penawaran
             </button>
-          </div>
+          </article>
 
-          <div class="bg-amber-50/90 border border-amber-200/80 p-6 rounded-3xl shadow-xs space-y-4 hover:border-[#f1b32b] transition-all flex flex-col justify-between">
+          <article class="bg-amber-50/90 border border-amber-200/80 p-6 rounded-3xl shadow-xs space-y-4 hover:border-[#f1b32b] transition-all flex flex-col justify-between">
             <div class="space-y-2">
               <h3 class="font-bold text-[#0b1a48] text-base">Bulk Partner Licensing & Support</h3>
               <p class="text-xs text-slate-600 leading-relaxed">Akses modul pembelajaran & lisensi e-book berskala besar dengan potongan harga khusus lisensi komunitas/kampus.</p>
@@ -266,22 +311,22 @@
             <button onclick="openConsultModal('Bulk Partner Licensing & Support')" class="w-full text-center px-4 py-3 rounded-xl bg-[#f1b32b] hover:bg-[#d99b1c] text-[#0b1a48] font-extrabold text-xs transition-all shadow-xs min-h-[42px]">
               Hubungi Tim Partnership
             </button>
-          </div>
+          </article>
         </div>
-      </div>
+      </section>
 
       <!-- TESTIMONIALS TICKER -->
-      <div id="testimoni" class="pt-12 max-w-3xl mx-auto space-y-6">
+      <section id="testimoni" class="pt-12 max-w-3xl mx-auto space-y-6">
         <div class="text-center"><h2 class="text-2xl md:text-3xl font-extrabold text-[#0b1a48]">Apa Kata Mereka??</h2></div>
         <div class="relative bg-transparent rounded-3xl p-2 md:p-3 h-[90px] overflow-hidden w-full max-w-3xl mx-auto border-none">
           <div class="single-testi-ticker space-y-3">
             <div id="testi-stream-container" class="space-y-3"></div>
           </div>
         </div>
-      </div>
+      </section>
 
       <!-- TECH MARQUEE WITH SPEECH BUBBLE -->
-      <div id="didukung-oleh" class="pt-8 max-w-5xl mx-auto space-y-4 text-center">
+      <section id="didukung-oleh" class="pt-8 max-w-5xl mx-auto space-y-4 text-center">
         <div class="relative w-full overflow-hidden py-3">
           <div class="absolute left-0 top-0 bottom-0 w-16 bg-gradient-to-r from-[#e8f0fe] to-transparent z-10 pointer-events-none"></div>
           <div class="absolute right-0 top-0 bottom-0 w-16 bg-gradient-to-l from-[#e8f0fe] to-transparent z-10 pointer-events-none"></div>
@@ -323,11 +368,11 @@
             <span class="font-semibold text-xs md:text-sm tracking-tight text-slate-900">✦ Temukan Mentor Anda yang Tersebar di 38 Provinsi dan 400+ Kabupaten/Kota ✦</span>
           </div>
         </div>
-      </div>
+      </section>
 
     </section>
 
-    <!-- VIEW: DASHBOARD (MEMBER & ADMIN) -->
+    <!-- VIEW 2: MEMBER & ADMIN DASHBOARD -->
     <section id="view-dashboard" class="spa-view hidden space-y-8">
       <div class="bg-white rounded-3xl p-6 md:p-8 shadow-sm border border-blue-200 flex flex-wrap justify-between items-center gap-4">
         <div>
@@ -354,6 +399,7 @@
         </div>
       </div>
 
+      <!-- Dashboard Tabs Header -->
       <div class="flex border-b border-blue-200 overflow-x-auto" role="tablist">
         <button onclick="switchDashTab('orders')" id="tab-btn-orders" role="tab" aria-selected="true" class="dash-tab-btn border-b-2 border-[#1b5df0] text-[#1b5df0] font-bold py-3 px-6 text-xs md:text-sm whitespace-nowrap min-h-[44px]">
           🛒 Pesanan Saya
@@ -494,6 +540,7 @@
       </div>
     </section>
 
+    
     <!-- PROOF PREVIEW POPUP MODAL (ADMIN) -->
     <div id="proof-modal" class="fixed inset-0 bg-slate-950/80 backdrop-blur-md z-50 modal-hidden items-center justify-center p-4" aria-modal="true" role="dialog" aria-labelledby="proof-modal-order-id">
       <div class="bg-white rounded-3xl max-w-xl w-full p-6 shadow-2xl border border-slate-800 space-y-4">
@@ -761,10 +808,14 @@
   </footer>
 
   <script>
-    // Explicit Google Apps Script Deployment Web App URL
-    const GAS_WEB_APP_URL = "https://script.google.com/macros/s/AKfycbxPxi2P0m1hvcECw2EYAweVDrEgu5aGqG1Xvh-tGHW-U6BXA0DNwdi832QlSbVd6xvCVg/exec";
+    /**
+     * STUDIHOME FRONTEND ENGINE - PRODUCTION ARCHITECTURE
+     * Version 10.0 Enterprise (Defensive Data Normalization & Protected Checkout Flow)
+     */
 
-    // Central App State with defensive parsing
+    const GAS_WEB_APP_URL = "https://script.google.com/macros/s/AKfycbzTos0YyhIh0FLgsQQeWiE5hUpVVJWgym491urL3_VUCNVkGeEiiEQpzm7cMpXoM5cv9w/exec";
+    const DEFAULT_PAID_DOWNLOAD_LINK = "https://drive.google.com/drive/folders/1BFGoYxZUM5xO8Z0RBy_I__pgvEho6JGX?usp=sharing";
+
     const AppState = {
       user: null,
       token: localStorage.getItem('studihome_token') || null,
@@ -775,7 +826,8 @@
       adminOrders: [],
       userOrders: [],
       selectedProductForCheckout: null,
-      pendingGuestOrder: null
+      pendingGuestOrder: null,
+      pendingCheckoutProductId: null
     };
 
     // Safely load cached user object
@@ -793,9 +845,6 @@
       { name: "Sarah A.", role: "Mahasiswa", text: "Jujur ngebantu bgt buat nyusun skripsi & olah data riset.", rating: 5, time: "8m lalu" }
     ];
 
-    const DEFAULT_PAID_DOWNLOAD_LINK = "https://drive.google.com/drive/folders/1BFGoYxZUM5xO8Z0RBy_I__pgvEho6JGX?usp=sharing";
-
-    // Initial Fallback Dummy Products
     const initialDummyProducts = [
       { id: 'PRD-001', title: 'E-Book Prompt AI Mastery 2026', category: 'Belajar Apa?', type: 'TOOLS', price_current: 100000, promo_price: 80000, access_link: DEFAULT_PAID_DOWNLOAD_LINK, buy_link: 'https://lynk.id/studihome', qris_url: '', popular: true, show_on_hero: true, description: "E-Book PDF & EPUB Full Edition (350+ Halaman)\n500+ Master Prompts Siap Pakai (Copy-Paste)\nCheatsheet Prompt Engineering Midjourney & DALL-E\nScript Otomasi Copywriting Marketing & Ads\nGuide Monetisasi AI untuk Content Creator\nTemplate Workflow Prompt Google Gemini & Claude\nModul Framework DeepSeek untuk Data Analysis\nAkses Update Materi Gratis Selamanya\nKomunitas VIP Telegram Diskusi AI\nSertifikat Digital Completion Studihome" },
       { id: 'PRD-002', title: 'E-Book Modern Web App Architecture', category: 'Belajar Apa?', type: 'LESSON', price_current: 120000, promo_price: 95000, access_link: DEFAULT_PAID_DOWNLOAD_LINK, buy_link: '', qris_url: '', popular: false, show_on_hero: true, description: "Modul Panduan Arsitektur Serverless $0 Cost\nSource Code SPA HTML/JS Clean Architecture\nPanduan Integrasi Google Apps Script REST API\nTemplate Database Relasional Google Sheets\nScript Keamanan Hash Password Salt + SHA-256\nGuide Deployment Vercel & Netlify Hosting\nModul Handling CORS & Webhook WhatsApp\nDokumentasi Lengkap & Diagram Sistem\nAkses Repository GitHub Private\nSesi Konsultasi Q&A via Group Komunitas" },
@@ -817,8 +866,25 @@
       { id: 'MOD-006', product_id: 'PRD-006', title: 'Google Sheets DB Architecture', media_url: '', content: '# Masterclass Database Sheets\n\nMerancang database relational pada Spreadsheet.\n\n- Pemisahan tabel Users & Orders\n- Penggunaan Primary Key & Foreign Key\n- Handling pagination data' },
       { id: 'MOD-007', product_id: 'PRD-007', title: 'Custom Web App Development Setup', media_url: '', content: '# Custom App Setup Guide\n\nSpesifikasi & panduan pengerjaan proyek custom.\n\n- Pendampingan Go-Live\n- Integrasi REST API Apps Script\n- Garansi maintenance 3 bulan' },
       { id: 'MOD-008', product_id: 'PRD-008', title: 'Sheet Database & System Audit', media_url: '', content: '# Audit & Restrukturisasi System\n\nLangkah optimalisasi spreadsheet bisnis.\n\n- Pembersihan formula berat\n- Penggunaan CacheService\n- Auto recap laporan harian' },
-      { id: 'MOD-009', product_id: 'PRD-009', title: 'API Integration & Webhook Guide', media_url: '', content: '# Panduan Integrasi API & Webhook\n\nLangkah menghubungkan service external.\n\n- Setup endpoint REST API\n- Handling CORS & payload security\n- Monitoring log eksekusi' }
+      { id: 'MOD-009', product_id: 'PRD-009', title: 'Integration & API Setup Service', media_url: '', content: '# Panduan Integrasi API & Webhook\n\nLangkah menghubungkan service external.\n\n- Setup endpoint REST API\n- Handling CORS & payload security\n- Monitoring log eksekusi' }
     ];
+
+    /**
+     * Defensive string normalization helper to match categories reliably
+     */
+    function normalizeCategory(str) {
+      if (str === null || str === undefined) return '';
+      return String(str).trim().toLowerCase().replace(/[^a-z0-9]/g, '');
+    }
+
+    function isProductActive(prod) {
+      if (!prod || typeof prod !== 'object') return false;
+      if (prod.is_active === undefined || prod.is_active === null || prod.is_active === '') return true;
+      if (typeof prod.is_active === 'boolean') return prod.is_active;
+      if (typeof prod.is_active === 'number') return prod.is_active === 1;
+      const str = String(prod.is_active).trim().toUpperCase();
+      return str === 'TRUE' || str === '1' || str === 'YES' || str === 'ACTIVE';
+    }
 
     function formatIDR(amount) {
       try {
@@ -854,6 +920,261 @@
       modals.forEach(m => closeModal(m));
     }
 
+    function renderCatalogLoadingSkeleton() {
+      const container = document.getElementById('catalog-container');
+      if (!container) return;
+      container.innerHTML = Array(3).fill(0).map(() => `
+        <div class="bg-white rounded-3xl p-6 border border-blue-100 shadow-xs space-y-4">
+          <div class="flex justify-between items-center">
+            <div class="h-5 w-20 skeleton-loading rounded-full"></div>
+            <div class="h-4 w-16 skeleton-loading rounded-md"></div>
+          </div>
+          <div class="h-6 w-3/4 skeleton-loading rounded-lg"></div>
+          <div class="h-10 w-full skeleton-loading rounded-xl"></div>
+          <div class="space-y-2 pt-2">
+            <div class="h-3 w-full skeleton-loading rounded"></div>
+            <div class="h-3 w-5/6 skeleton-loading rounded"></div>
+            <div class="h-3 w-4/6 skeleton-loading rounded"></div>
+          </div>
+          <div class="h-11 w-full skeleton-loading rounded-full pt-4"></div>
+        </div>
+      `).join('');
+    }
+
+    function filterCategory(catName) {
+      try {
+        if (!catName || typeof catName !== 'string') return;
+        AppState.selectedCategory = catName.trim();
+
+        const targetNorm = normalizeCategory(catName);
+
+        document.querySelectorAll('.cat-pill').forEach(btn => {
+          const btnCat = btn.getAttribute('data-cat') || btn.innerText || '';
+          if (normalizeCategory(btnCat) === targetNorm) {
+            btn.classList.remove('bg-white', 'text-slate-700', 'border-blue-200/90');
+            btn.classList.add('bg-gradient-to-r', 'from-[#1b5df0]', 'to-[#1246c7]', 'text-white', 'shadow-md', 'border-[#1b5df0]', 'active');
+            btn.setAttribute('aria-selected', 'true');
+          } else {
+            btn.classList.remove('bg-gradient-to-r', 'from-[#1b5df0]', 'to-[#1246c7]', 'text-white', 'shadow-md', 'border-[#1b5df0]', 'active');
+            btn.classList.add('bg-white', 'text-slate-700', 'border', 'border-blue-200/90');
+            btn.setAttribute('aria-selected', 'false');
+          }
+        });
+
+        renderCatalog();
+      } catch (err) {
+        console.error('Error filtering category:', err);
+      }
+    }
+
+    function loadCatalogData() {
+      try {
+        renderCatalogLoadingSkeleton();
+        
+        try {
+          const cached = localStorage.getItem('studihome_cached_catalog');
+          if (cached) {
+            const parsed = JSON.parse(cached);
+            if (Array.isArray(parsed) && parsed.length > 0) {
+              AppState.catalogData = parsed;
+              renderCatalog();
+            }
+          }
+        } catch (e) {
+          console.warn('Catalog cache load failed:', e);
+        }
+
+        apiRequest('getCatalog').then(res => {
+          if (res && res.success && Array.isArray(res.data) && res.data.length > 0) {
+            AppState.catalogData = res.data;
+            localStorage.setItem('studihome_cached_catalog', JSON.stringify(res.data));
+          } else if (!AppState.catalogData || AppState.catalogData.length === 0) {
+            AppState.catalogData = initialDummyProducts;
+          }
+          renderCatalog();
+        }).catch(() => {
+          if (!AppState.catalogData || AppState.catalogData.length === 0) {
+            AppState.catalogData = initialDummyProducts;
+          }
+          renderCatalog();
+        });
+      } catch (err) {
+        console.error('Error loading catalog data:', err);
+        AppState.catalogData = initialDummyProducts;
+        renderCatalog();
+      }
+    }
+
+    function renderCatalog() {
+      try {
+        const container = document.getElementById('catalog-container');
+        if (!container) return;
+
+        if (!Array.isArray(AppState.catalogData) || AppState.catalogData.length === 0) {
+          AppState.catalogData = initialDummyProducts;
+        }
+
+        const selectedCatNorm = normalizeCategory(AppState.selectedCategory || 'Belajar Apa?');
+
+        const filtered = AppState.catalogData.filter(p => {
+          if (!p || typeof p !== 'object') return false;
+          const catMatch = normalizeCategory(p.category) === selectedCatNorm;
+          const activeMatch = isProductActive(p);
+          return catMatch && activeMatch;
+        });
+
+        if (filtered.length === 0) {
+          container.innerHTML = `
+            <div class="col-span-full text-center py-12 text-slate-400 bg-white rounded-3xl border border-dashed border-blue-200 space-y-3 p-6">
+              <div class="text-3xl">🔍</div>
+              <p class="text-base font-bold text-[#0b1a48]">Belum ada produk pada kategori "${AppState.selectedCategory}"</p>
+              <p class="text-xs text-slate-500">Silakan pilih kategori lain atau muat ulang katalog.</p>
+              <button onclick="loadCatalogData()" class="px-5 py-2 rounded-full bg-[#1b5df0] text-white text-xs font-bold shadow-xs hover:bg-[#1246c7] active:scale-95 transition-all">
+                🔄 Muat Ulang Katalog
+              </button>
+            </div>
+          `;
+          return;
+        }
+
+        container.innerHTML = filtered.map((prod) => {
+          if (!prod || typeof prod !== 'object') return '';
+
+          const isPopular = prod.popular === true || String(prod.popular || '').toUpperCase() === 'TRUE';
+          const priceCurrent = (typeof prod.price_current === 'number' && !isNaN(prod.price_current)) ? prod.price_current : (Number(prod.price_current || prod.price) || 0);
+          const pricePromo = (typeof prod.promo_price === 'number' && !isNaN(prod.promo_price)) ? prod.promo_price : (Number(prod.promo_price || prod.price_promo) || 0);
+          const hasPromo = pricePromo > 0 && pricePromo < priceCurrent;
+
+          const rawDesc = typeof prod.description === 'string' ? prod.description : '';
+          const rawFacilities = rawDesc ? rawDesc.split('\n').map(f => f.trim()).filter(Boolean) : [];
+          const facilities = rawFacilities.slice(0, 10);
+
+          if (isPopular) {
+            // POPULAR PRODUCT CARD
+            return `
+              <article class="bg-amber-50/95 rounded-3xl p-6 md:py-8 border-2 border-amber-300/90 shadow-md hover:shadow-xl md:scale-[1.02] transition-all flex flex-col justify-between relative text-[#0b1a48] z-10 my-2">
+                <span class="absolute -top-3.5 left-1/2 -translate-x-1/2 bg-[#1b5df0] text-[#f1b32b] text-[10px] font-black uppercase tracking-widest px-4 py-1.5 rounded-full shadow-md">✦ TERPOPULER</span>
+
+                <div class="space-y-4 pt-1">
+                  <div class="flex justify-between items-start gap-2">
+                    <span class="px-3 py-1 rounded-full bg-[#1b5df0] text-[#f1b32b] font-extrabold text-[10px] uppercase tracking-wider">${prod.type || 'TOOLS'}</span>
+                    <span class="text-[11px] font-black text-amber-800 uppercase">${prod.category || ''}</span>
+                  </div>
+
+                  <div>
+                    <h3 class="font-extrabold text-[#1b5df0] text-xl leading-tight">${prod.title || 'Produk Studihome'}</h3>
+                  </div>
+
+                  <div class="py-2.5 border-y border-amber-200/80">
+                    ${hasPromo ? `
+                      <div class="text-xs text-slate-500 line-through font-bold">${formatIDR(priceCurrent)}</div>
+                      <div class="text-3xl font-black text-[#1b5df0]">${formatIDR(pricePromo)}</div>
+                    ` : `
+                      <div class="text-3xl font-black text-[#1b5df0]">${formatIDR(priceCurrent)}</div>
+                    `}
+                  </div>
+
+                  <div class="space-y-2 pt-1">
+                    <p class="text-[11px] font-black text-[#1b5df0] uppercase tracking-wider">Fasilitas Utama:</p>
+                    <ul class="space-y-1.5 text-xs text-slate-800 font-medium">
+                      ${facilities.map(feat => `
+                        <li class="flex items-start gap-2 leading-snug">
+                          <span class="font-black text-[#1b5df0] shrink-0" aria-hidden="true">✓</span>
+                          <span>${feat}</span>
+                        </li>
+                      `).join('')}
+                    </ul>
+                  </div>
+                </div>
+
+                <div class="pt-6">
+                  <button onclick="handleProtectedCheckout('${prod.id}')" class="w-full py-3.5 rounded-full bg-[#1b5df0] hover:bg-[#1246c7] text-white font-extrabold text-xs transition-all shadow-md active:scale-95 min-h-[48px]">
+                    Dapatkan Sekarang!
+                  </button>
+                </div>
+              </article>
+            `;
+          } else {
+            // REGULAR PRODUCT CARD
+            return `
+              <article class="bg-sky-50/90 text-[#0b1a48] rounded-3xl p-6 border border-sky-200/90 shadow-sm hover:shadow-md transition-all flex flex-col justify-between relative my-2">
+                <div class="space-y-4">
+                  <div class="flex justify-between items-start gap-2">
+                    <span class="px-3 py-1 rounded-full bg-sky-200/80 text-[#1b5df0] font-extrabold text-[10px] uppercase tracking-wider">${prod.type || 'TOOLS'}</span>
+                    <span class="text-[11px] font-bold text-sky-800">${prod.category || ''}</span>
+                  </div>
+
+                  <div>
+                    <h3 class="font-extrabold text-slate-900 text-lg leading-tight">${prod.title || 'Produk Studihome'}</h3>
+                  </div>
+
+                  <div class="py-2 border-y border-sky-200/70">
+                    ${hasPromo ? `
+                      <div class="text-xs text-slate-400 line-through font-semibold">${formatIDR(priceCurrent)}</div>
+                      <div class="text-2xl font-extrabold text-[#1b5df0]">${formatIDR(pricePromo)}</div>
+                    ` : `
+                      <div class="text-2xl font-extrabold text-[#1b5df0]">${formatIDR(priceCurrent)}</div>
+                    `}
+                  </div>
+
+                  <div class="space-y-2 pt-1">
+                    <p class="text-[11px] font-extrabold text-[#1b5df0] uppercase tracking-wider">Fasilitas Utama:</p>
+                    <ul class="space-y-1.5 text-slate-700 text-xs">
+                      ${facilities.map(feat => `
+                        <li class="flex items-start gap-2 leading-snug">
+                          <span class="text-[#1b5df0] font-extrabold shrink-0" aria-hidden="true">✓</span>
+                          <span>${feat}</span>
+                        </li>
+                      `).join('')}
+                    </ul>
+                  </div>
+                </div>
+
+                <div class="pt-6">
+                  <button onclick="handleProtectedCheckout('${prod.id}')" class="w-full py-3 rounded-full bg-[#1b5df0] hover:bg-[#1246c7] text-white font-extrabold text-xs transition-all shadow-xs active:scale-95 min-h-[44px]">
+                    Dapatkan Sekarang!
+                  </button>
+                </div>
+              </article>
+            `;
+          }
+        }).join('');
+      } catch (err) {
+        console.error('Error rendering catalog:', err);
+      }
+    }
+
+    /**
+     * Intercepts order/checkout button clicks. Enforces login/registration BEFORE checkout opens.
+     */
+    function handleProtectedCheckout(prodId) {
+      try {
+        if (!AppState.user) {
+          AppState.pendingCheckoutProductId = prodId;
+          showToast('Silakan masuk atau daftar akun terlebih dahulu untuk melanjutkan pesanan.', 'info');
+          
+          const regMode = document.getElementById('auth-mode');
+          if (regMode) regMode.value = 'register';
+          const titleModal = document.getElementById('auth-modal-title');
+          if (titleModal) titleModal.innerText = 'Daftar Akun Baru Baru';
+          
+          document.getElementById('field-fullname').classList.remove('hidden');
+          document.getElementById('field-phone').classList.remove('hidden');
+          
+          const btnSubmit = document.getElementById('btn-auth-submit');
+          if (btnSubmit) btnSubmit.innerText = 'Daftar & Lanjutkan Pesanan';
+          
+          openAuthModal();
+          return;
+        }
+
+        openCheckoutModal(prodId);
+      } catch (err) {
+        console.error('Error in handleProtectedCheckout:', err);
+        openCheckoutModal(prodId);
+      }
+    }
+
     window.onload = function() {
       try {
         updateAuthUi();
@@ -861,7 +1182,6 @@
         loadCatalogData();
         loadModulesData();
         
-        // Global Escape Key Listener
         window.addEventListener('keydown', function(e) {
           if (e && e.key === 'Escape') closeAllModals();
         });
@@ -1102,50 +1422,6 @@
       }
     }
 
-    function filterCategory(catName) {
-      try {
-        AppState.selectedCategory = catName;
-        document.querySelectorAll('.cat-pill').forEach(btn => {
-          btn.classList.remove('bg-gradient-to-r', 'from-[#1b5df0]', 'to-[#1246c7]', 'text-white', 'shadow-md', 'border-[#1b5df0]');
-          btn.classList.add('bg-white', 'text-slate-700', 'border', 'border-blue-200/90');
-          btn.setAttribute('aria-selected', 'false');
-        });
-        const activePill = document.getElementById('btn-cat-' + catName.replace(/[^a-zA-Z0-9]/g, '-'));
-        if (activePill) {
-          activePill.classList.remove('bg-white', 'text-slate-700', 'border-blue-200/90');
-          activePill.classList.add('bg-gradient-to-r', 'from-[#1b5df0]', 'to-[#1246c7]', 'text-white', 'shadow-md', 'border-[#1b5df0]');
-          activePill.setAttribute('aria-selected', 'true');
-        }
-        renderCatalog();
-      } catch (err) {
-        console.error('Error filtering category:', err);
-      }
-    }
-
-    function loadCatalogData() {
-      try {
-        const cached = localStorage.getItem('studihome_cached_catalog');
-        if (cached) AppState.catalogData = JSON.parse(cached);
-      } catch (e) {
-        console.warn('Catalog cache load failed:', e);
-      }
-
-      apiRequest('getCatalog').then(res => {
-        if (res && res.success && Array.isArray(res.data) && res.data.length > 0) {
-          AppState.catalogData = res.data;
-          localStorage.setItem('studihome_cached_catalog', JSON.stringify(res.data));
-        } else if (!AppState.catalogData || AppState.catalogData.length === 0) {
-          AppState.catalogData = initialDummyProducts;
-        }
-        renderCatalog();
-      }).catch(() => {
-        if (!AppState.catalogData || AppState.catalogData.length === 0) {
-          AppState.catalogData = initialDummyProducts;
-        }
-        renderCatalog();
-      });
-    }
-
     function loadModulesData() {
       try {
         const cached = localStorage.getItem('studihome_cached_modules');
@@ -1168,142 +1444,6 @@
         }
         renderAdminModulesList();
       });
-    }
-
-    function renderCatalog() {
-      try {
-        const container = document.getElementById('catalog-container');
-        if (!container) return;
-
-        if (!Array.isArray(AppState.catalogData)) {
-          AppState.catalogData = [];
-        }
-
-        const selectedCat = String(AppState.selectedCategory || '').trim();
-
-        const filtered = AppState.catalogData.filter(p => {
-          if (!p || typeof p !== 'object') return false;
-          const catMatch = String(p.category || '').trim() === selectedCat;
-          const activeMatch = p.is_active === undefined || p.is_active === 'TRUE' || p.is_active === true;
-          const heroMatch = p.show_on_hero === undefined || p.show_on_hero === 'TRUE' || p.show_on_hero === true;
-          return catMatch && activeMatch && heroMatch;
-        });
-
-        if (filtered.length === 0) {
-          container.innerHTML = `
-            <div class="col-span-full text-center py-12 text-slate-400 bg-white rounded-3xl border border-dashed border-blue-200">
-              <p class="text-base font-bold text-slate-600">Belum ada produk pada kategori "${selectedCat}"</p>
-              <p class="text-xs mt-1">Silakan pilih kategori lain.</p>
-            </div>
-          `;
-          return;
-        }
-
-        container.innerHTML = filtered.map((prod) => {
-          if (!prod || typeof prod !== 'object') return '';
-
-          const isPopular = prod.popular === true || String(prod.popular || '').toUpperCase() === 'TRUE';
-          const priceCurrent = (typeof prod.price_current === 'number' && !isNaN(prod.price_current)) ? prod.price_current : (Number(prod.price_current || prod.price) || 0);
-          const pricePromo = (typeof prod.promo_price === 'number' && !isNaN(prod.promo_price)) ? prod.promo_price : (Number(prod.promo_price || prod.price_promo) || 0);
-          const hasPromo = pricePromo > 0 && pricePromo < priceCurrent;
-
-          const rawDesc = typeof prod.description === 'string' ? prod.description : '';
-          const rawFacilities = rawDesc ? rawDesc.split('\n').map(f => f.trim()).filter(Boolean) : [];
-          const facilities = rawFacilities.slice(0, 10);
-
-          if (isPopular) {
-            // POPULAR PRODUCT CARD
-            return `
-              <div class="bg-amber-50/95 rounded-3xl p-6 md:py-8 border-2 border-amber-300/90 shadow-md hover:shadow-xl md:scale-[1.03] transition-all flex flex-col justify-between relative text-[#0b1a48] z-10 my-2">
-                <span class="absolute -top-3.5 left-1/2 -translate-x-1/2 bg-[#1b5df0] text-[#f1b32b] text-[10px] font-black uppercase tracking-widest px-4 py-1.5 rounded-full shadow-md">✦ TERPOPULER</span>
-
-                <div class="space-y-4 pt-1">
-                  <div class="flex justify-between items-start gap-2">
-                    <span class="px-3 py-1 rounded-full bg-[#1b5df0] text-[#f1b32b] font-extrabold text-[10px] uppercase tracking-wider">${prod.type || 'TOOLS'}</span>
-                    <span class="text-[11px] font-black text-amber-800 uppercase">${prod.category || ''}</span>
-                  </div>
-
-                  <div>
-                    <h3 class="font-extrabold text-[#1b5df0] text-xl leading-tight">${prod.title || 'Produk Studihome'}</h3>
-                  </div>
-
-                  <div class="py-2.5 border-y border-amber-200/80">
-                    ${hasPromo ? `
-                      <div class="text-xs text-slate-500 line-through font-bold">${formatIDR(priceCurrent)}</div>
-                      <div class="text-3xl font-black text-[#1b5df0]">${formatIDR(pricePromo)}</div>
-                    ` : `
-                      <div class="text-3xl font-black text-[#1b5df0]">${formatIDR(priceCurrent)}</div>
-                    `}
-                  </div>
-
-                  <div class="space-y-2 pt-1">
-                    <p class="text-[11px] font-black text-[#1b5df0] uppercase tracking-wider">Fasilitas Utama:</p>
-                    <ul class="space-y-1.5 text-xs text-slate-800 font-medium">
-                      ${facilities.map(feat => `
-                        <li class="flex items-start gap-2 leading-snug">
-                          <span class="font-black text-[#1b5df0] shrink-0" aria-hidden="true">✓</span>
-                          <span>${feat}</span>
-                        </li>
-                      `).join('')}
-                    </ul>
-                  </div>
-                </div>
-
-                <div class="pt-6">
-                  <button onclick="openCheckoutModal('${prod.id}')" class="w-full py-3.5 rounded-full bg-[#1b5df0] hover:bg-[#1246c7] text-white font-extrabold text-xs transition-all shadow-md active:scale-95 min-h-[48px]">
-                    Dapatkan Sekarang!
-                  </button>
-                </div>
-              </div>
-            `;
-          } else {
-            // REGULAR PRODUCT CARD
-            return `
-              <div class="bg-sky-50/90 text-[#0b1a48] rounded-3xl p-6 border border-sky-200/90 shadow-sm hover:shadow-md transition-all flex flex-col justify-between relative my-2">
-                <div class="space-y-4">
-                  <div class="flex justify-between items-start gap-2">
-                    <span class="px-3 py-1 rounded-full bg-sky-200/80 text-[#1b5df0] font-extrabold text-[10px] uppercase tracking-wider">${prod.type || 'TOOLS'}</span>
-                    <span class="text-[11px] font-bold text-sky-800">${prod.category || ''}</span>
-                  </div>
-
-                  <div>
-                    <h3 class="font-extrabold text-slate-900 text-lg leading-tight">${prod.title || 'Produk Studihome'}</h3>
-                  </div>
-
-                  <div class="py-2 border-y border-sky-200/70">
-                    ${hasPromo ? `
-                      <div class="text-xs text-slate-400 line-through font-semibold">${formatIDR(priceCurrent)}</div>
-                      <div class="text-2xl font-extrabold text-[#1b5df0]">${formatIDR(pricePromo)}</div>
-                    ` : `
-                      <div class="text-2xl font-extrabold text-[#1b5df0]">${formatIDR(priceCurrent)}</div>
-                    `}
-                  </div>
-
-                  <div class="space-y-2 pt-1">
-                    <p class="text-[11px] font-extrabold text-[#1b5df0] uppercase tracking-wider">Fasilitas Utama:</p>
-                    <ul class="space-y-1.5 text-slate-700 text-xs">
-                      ${facilities.map(feat => `
-                        <li class="flex items-start gap-2 leading-snug">
-                          <span class="text-[#1b5df0] font-extrabold shrink-0" aria-hidden="true">✓</span>
-                          <span>${feat}</span>
-                        </li>
-                      `).join('')}
-                    </ul>
-                  </div>
-                </div>
-
-                <div class="pt-6">
-                  <button onclick="openCheckoutModal('${prod.id}')" class="w-full py-3 rounded-full bg-[#1b5df0] hover:bg-[#1246c7] text-white font-extrabold text-xs transition-all shadow-xs active:scale-95 min-h-[44px]">
-                    Dapatkan Sekarang!
-                  </button>
-                </div>
-              </div>
-            `;
-          }
-        }).join('');
-      } catch (err) {
-        console.error('Error rendering catalog:', err);
-      }
     }
 
     function navigateTo(viewName) {
@@ -1369,7 +1509,14 @@
             showToast('Login Admin Berhasil!', 'success');
             closeModal('auth-modal');
             updateAuthUi();
-            navigateTo('dashboard');
+            
+            if (AppState.pendingCheckoutProductId) {
+              const pendingProd = AppState.pendingCheckoutProductId;
+              AppState.pendingCheckoutProductId = null;
+              openCheckoutModal(pendingProd);
+            } else {
+              navigateTo('dashboard');
+            }
             if (AppState.pendingGuestOrder) executePendingCheckout();
             return;
           }
@@ -1384,7 +1531,14 @@
               showToast(res.message || 'Berhasil masuk!', 'success');
               closeModal('auth-modal');
               updateAuthUi();
-              navigateTo('dashboard');
+
+              if (AppState.pendingCheckoutProductId) {
+                const pendingProd = AppState.pendingCheckoutProductId;
+                AppState.pendingCheckoutProductId = null;
+                openCheckoutModal(pendingProd);
+              } else {
+                navigateTo('dashboard');
+              }
 
               if (AppState.pendingGuestOrder) executePendingCheckout();
             } else {
@@ -1412,7 +1566,14 @@
                 showToast('Berhasil masuk! Selamat datang ' + loggedInUser.full_name, 'success');
                 closeModal('auth-modal');
                 updateAuthUi();
-                navigateTo('dashboard');
+
+                if (AppState.pendingCheckoutProductId) {
+                  const pendingProd = AppState.pendingCheckoutProductId;
+                  AppState.pendingCheckoutProductId = null;
+                  openCheckoutModal(pendingProd);
+                } else {
+                  navigateTo('dashboard');
+                }
                 if (AppState.pendingGuestOrder) executePendingCheckout();
               }
             }
@@ -1441,7 +1602,14 @@
               showToast('Berhasil masuk! Selamat datang ' + loggedInUser.full_name, 'success');
               closeModal('auth-modal');
               updateAuthUi();
-              navigateTo('dashboard');
+
+              if (AppState.pendingCheckoutProductId) {
+                const pendingProd = AppState.pendingCheckoutProductId;
+                AppState.pendingCheckoutProductId = null;
+                openCheckoutModal(pendingProd);
+              } else {
+                navigateTo('dashboard');
+              }
               if (AppState.pendingGuestOrder) executePendingCheckout();
             }
           });
@@ -1484,7 +1652,14 @@
             showToast('Registrasi Akun Berhasil!', 'success');
             closeModal('auth-modal');
             updateAuthUi();
-            navigateTo('dashboard');
+
+            if (AppState.pendingCheckoutProductId) {
+              const pendingProd = AppState.pendingCheckoutProductId;
+              AppState.pendingCheckoutProductId = null;
+              openCheckoutModal(pendingProd);
+            } else {
+              navigateTo('dashboard');
+            }
 
             if (AppState.pendingGuestOrder) executePendingCheckout();
           }).catch(() => {
@@ -1496,7 +1671,14 @@
             showToast('Registrasi Akun Berhasil!', 'success');
             closeModal('auth-modal');
             updateAuthUi();
-            navigateTo('dashboard');
+
+            if (AppState.pendingCheckoutProductId) {
+              const pendingProd = AppState.pendingCheckoutProductId;
+              AppState.pendingCheckoutProductId = null;
+              openCheckoutModal(pendingProd);
+            } else {
+              navigateTo('dashboard');
+            }
 
             if (AppState.pendingGuestOrder) executePendingCheckout();
           });
@@ -1748,25 +1930,6 @@
               proof_base64: compressedBase64 || ''
             };
 
-            if (!AppState.user) {
-              AppState.pendingGuestOrder = payload;
-              closeModal('checkout-modal');
-              resetCheckoutButton();
-              showToast('Silakan selesaikan pendaftaran akun baru terlebih dahulu!', 'info');
-              
-              const regMode = document.getElementById('auth-mode');
-              if (regMode) regMode.value = 'register';
-              document.getElementById('auth-modal-title').innerText = 'Daftar Akun Baru';
-              document.getElementById('field-fullname').classList.remove('hidden');
-              document.getElementById('field-phone').classList.remove('hidden');
-              document.getElementById('auth-fullname').value = payload.user_name;
-              document.getElementById('auth-phone').value = payload.user_phone;
-              document.getElementById('auth-email').value = payload.user_email;
-              document.getElementById('btn-auth-submit').innerText = 'Daftar & Lanjutkan Pesanan';
-              openAuthModal();
-              return;
-            }
-
             executeOrderCreation(payload);
           } catch (err) {
             console.error('Error in compression handler:', err);
@@ -1829,14 +1992,13 @@
         if (!AppState.userOrders) AppState.userOrders = [];
         AppState.userOrders.unshift(localOrderObj);
 
-        // Persistent local storage per user email to ensure purchases stay stored permanently
+        // Persistent local storage per user email
         try {
           const userKey = 'studihome_user_orders_' + (payload.user_email || 'user').toLowerCase();
           const existingUserOrders = JSON.parse(localStorage.getItem(userKey)) || [];
           existingUserOrders.unshift(localOrderObj);
           localStorage.setItem(userKey, JSON.stringify(existingUserOrders));
 
-          // Global order cache for offline/local admin verification sync
           const globalOrders = JSON.parse(localStorage.getItem('studihome_global_orders')) || [];
           globalOrders.unshift(localOrderObj);
           localStorage.setItem('studihome_global_orders', JSON.stringify(globalOrders));
@@ -1912,7 +2074,6 @@
         apiRequest('getUserOrders', { email: AppState.user ? AppState.user.email : '' }).then(res => {
           let serverOrders = (res && res.success && Array.isArray(res.data) && res.data.length > 0) ? res.data : [];
           
-          // Merge local and server orders seamlessly
           const mergedMap = new Map();
           [...localPersistentOrders, ...(AppState.userOrders || []), ...serverOrders].forEach(ord => {
             if (ord && (ord.order_id || ord.id)) {
