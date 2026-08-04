@@ -222,7 +222,7 @@
           </div>
 
           <div class="pt-5 w-full flex justify-center">
-            <!-- Intercept Amankan Kursi button to enforce login/register -->
+            <!-- Intercept Amankan Kursi button to enforce login -->
             <button onclick="handleProtectedCheckout('PRD-004')" class="w-full max-w-sm inline-flex items-center justify-center bg-[#1b5df0] hover:bg-[#1246c7] active:scale-95 text-white font-extrabold px-7 py-3.5 rounded-full shadow-lg text-sm md:text-base transition-all animate-pulse hover:animate-none min-h-[48px] cursor-pointer">
               <span id="hero-btn-text">Amankan Kursi</span>
             </button>
@@ -588,7 +588,7 @@
       </div>
     </div>
 
-    <!-- AUTH MODAL -->
+    <!-- AUTH MODAL WITH YELLOW ACTION TOGGLE BUTTON -->
     <div id="auth-modal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 modal-hidden items-center justify-center p-4" aria-modal="true" role="dialog" aria-labelledby="auth-modal-title">
       <div class="bg-white rounded-3xl max-w-md w-full p-6 md:p-8 shadow-2xl border border-slate-100">
         <div class="flex justify-between items-center mb-6">
@@ -624,18 +624,20 @@
           </button>
         </form>
 
-        <div class="mt-4 text-center text-xs text-slate-500">
+        <div class="mt-5 pt-3 border-t border-slate-100 flex items-center justify-center gap-2 text-xs text-slate-600">
           <span id="auth-toggle-text">Belum punya akun?</span>
-          <button onclick="toggleAuthMode()" id="btn-auth-toggle" class="text-[#1b5df0] font-bold underline ml-1 px-1 py-0.5">Daftar Baru</button>
+          <button onclick="toggleAuthMode()" id="btn-auth-toggle" class="bg-[#f1b32b] hover:bg-[#d99b1c] text-[#0b1a48] font-black text-xs px-3.5 py-1.5 rounded-lg shadow-xs transition-all active:scale-95">
+            Daftar Baru
+          </button>
         </div>
       </div>
     </div>
 
-    <!-- CHECKOUT MODAL -->
+    <!-- PAYMENT MODAL ("Pembayaran") -->
     <div id="checkout-modal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 modal-hidden items-center justify-center p-4" aria-modal="true" role="dialog" aria-labelledby="checkout-modal-title">
       <div class="bg-white rounded-3xl max-w-lg w-full p-6 md:p-8 shadow-2xl border border-slate-100 max-h-[90vh] overflow-y-auto">
         <div class="flex justify-between items-center mb-4 pb-3 border-b">
-          <h3 id="checkout-modal-title" class="text-xl font-extrabold text-[#0b1a48]">Checkout & Pembayaran</h3>
+          <h3 id="checkout-modal-title" class="text-xl font-extrabold text-[#0b1a48]">Pembayaran</h3>
           <button onclick="closeModal('checkout-modal')" aria-label="Tutup Modal" class="text-slate-400 text-2xl font-bold px-2">&times;</button>
         </div>
         <div id="checkout-product-details" class="bg-blue-50 p-4 rounded-2xl mb-4 font-bold text-xs text-[#1b5df0]"></div>
@@ -648,13 +650,13 @@
             <p class="text-[10px] text-slate-500 font-semibold mt-1.5">Scan menggunakan DANA, GoPay, OVO, ShopeePay, BCA, Mandiri, atau m-Banking.</p>
           </div>
 
-          <!-- Custom Buy Link Buttons: lynk.id & WhatsApp -->
-          <div id="checkout-custom-buy-container" class="pt-2 border-t border-slate-100 flex flex-col sm:flex-row gap-2">
-            <a id="checkout-custom-buy-btn" href="https://lynk.id/studihome" target="_blank" rel="noopener noreferrer" class="flex-1 py-2.5 px-3 rounded-xl bg-slate-900 hover:bg-slate-800 text-white font-extrabold text-xs flex items-center justify-center gap-1.5 shadow-xs transition-all active:scale-95 text-center">
-              <span>🛒 Beli di lynk.id</span>
+          <!-- Side-by-side Gray Direct Action Buttons: lynk.id & WA -->
+          <div id="checkout-custom-buy-container" class="pt-2 border-t border-slate-100 flex flex-row gap-2">
+            <a id="checkout-custom-buy-btn" href="https://lynk.id/studihome" target="_blank" rel="noopener noreferrer" class="flex-1 py-2.5 px-3 rounded-xl bg-slate-700 hover:bg-slate-800 text-white font-extrabold text-xs flex items-center justify-center gap-1.5 shadow-xs transition-all active:scale-95 text-center">
+              <span>lynk.id</span>
             </a>
-            <a id="checkout-wa-buy-btn" href="https://wa.me/6285111581115" target="_blank" rel="noopener noreferrer" class="flex-1 py-2.5 px-3 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-extrabold text-xs flex items-center justify-center gap-1.5 shadow-xs transition-all active:scale-95 text-center">
-              <span>💬 Beli di WhatsApp</span>
+            <a id="checkout-wa-buy-btn" href="https://wa.me/6285111581115" target="_blank" rel="noopener noreferrer" class="flex-1 py-2.5 px-3 rounded-xl bg-slate-700 hover:bg-slate-800 text-white font-extrabold text-xs flex items-center justify-center gap-1.5 shadow-xs transition-all active:scale-95 text-center">
+              <span>WA</span>
             </a>
           </div>
         </div>
@@ -810,10 +812,10 @@
   <script>
     /**
      * STUDIHOME FRONTEND ENGINE - PRODUCTION ARCHITECTURE
-     * Version 10.0 Enterprise (Defensive Data Normalization & Protected Checkout Flow)
+     * Version 11.0 Enterprise (Realtime Sync & Strict Auth Logic)
      */
 
-    const GAS_WEB_APP_URL = "https://script.google.com/macros/s/AKfycbzTos0YyhIh0FLgsQQeWiE5hUpVVJWgym491urL3_VUCNVkGeEiiEQpzm7cMpXoM5cv9w/exec";
+    const GAS_WEB_APP_URL = "https://script.google.com/macros/s/AKfycbxX5QxbLpU2FwMfpkBUjRXAv-DXktTf9Ovi_i0BTaLDx5bLAuPBabA36ehzqvXUn_IMlQ/exec";
     const DEFAULT_PAID_DOWNLOAD_LINK = "https://drive.google.com/drive/folders/1BFGoYxZUM5xO8Z0RBy_I__pgvEho6JGX?usp=sharing";
 
     const AppState = {
@@ -1145,24 +1147,38 @@
     }
 
     /**
-     * Intercepts order/checkout button clicks. Enforces login/registration BEFORE checkout opens.
+     * Intercepts order/checkout button clicks.
+     * IF unauthenticated -> Opens Login Modal by default, styled with Yellow toggle action button.
+     * IF authenticated -> Bypasses auth, auto-fills all user profile data into Payment Modal!
      */
     function handleProtectedCheckout(prodId) {
       try {
         if (!AppState.user) {
           AppState.pendingCheckoutProductId = prodId;
-          showToast('Silakan masuk atau daftar akun terlebih dahulu untuk melanjutkan pesanan.', 'info');
+          showToast('Silakan masuk ke akun Anda terlebih dahulu untuk melanjutkan pembayaran.', 'info');
           
-          const regMode = document.getElementById('auth-mode');
-          if (regMode) regMode.value = 'register';
+          const modeInput = document.getElementById('auth-mode');
+          if (modeInput) modeInput.value = 'login';
+          
           const titleModal = document.getElementById('auth-modal-title');
-          if (titleModal) titleModal.innerText = 'Daftar Akun Baru Baru';
+          if (titleModal) titleModal.innerText = 'Masuk Akun Studihome';
           
-          document.getElementById('field-fullname').classList.remove('hidden');
-          document.getElementById('field-phone').classList.remove('hidden');
+          const fieldName = document.getElementById('field-fullname');
+          const fieldPhone = document.getElementById('field-phone');
+          if (fieldName) fieldName.classList.add('hidden');
+          if (fieldPhone) fieldPhone.classList.add('hidden');
           
           const btnSubmit = document.getElementById('btn-auth-submit');
-          if (btnSubmit) btnSubmit.innerText = 'Daftar & Lanjutkan Pesanan';
+          if (btnSubmit) btnSubmit.innerText = 'Masuk Sekarang';
+          
+          const toggleText = document.getElementById('auth-toggle-text');
+          if (toggleText) toggleText.innerText = 'Belum punya akun?';
+          
+          const btnToggle = document.getElementById('btn-auth-toggle');
+          if (btnToggle) {
+            btnToggle.innerText = 'Daftar Baru';
+            btnToggle.className = 'bg-[#f1b32b] hover:bg-[#d99b1c] text-[#0b1a48] font-black text-xs px-3.5 py-1.5 rounded-lg shadow-xs transition-all active:scale-95';
+          }
           
           openAuthModal();
           return;
@@ -1482,7 +1498,8 @@
         if (registeredUsers.length === 0) {
           registeredUsers = [
             { email: 'admin', password: 'admin', full_name: 'Administrator Studihome', phone: '085111581115', is_admin: true },
-            { email: 'admin@studihome.com', password: 'admin', full_name: 'Administrator Studihome', phone: '085111581115', is_admin: true }
+            { email: 'admin@studihome.com', password: 'admin', full_name: 'Administrator Studihome', phone: '085111581115', is_admin: true },
+            { email: 'user@studihome.com', password: 'user123', full_name: 'Sobat Studihome Member', phone: '081234567890', is_admin: false }
           ];
         }
 
@@ -1498,6 +1515,7 @@
               full_name: 'Administrator Studihome',
               email: 'admin@studihome.com',
               plain_pass: 'admin',
+              phone: '085111581115',
               is_admin: true,
               session_token: 'STOK_ADMIN_' + Date.now()
             };
@@ -1774,7 +1792,10 @@
           if (fieldPhone) fieldPhone.classList.remove('hidden');
           if (btnSubmit) btnSubmit.innerText = 'Daftar Sekarang';
           if (toggleText) toggleText.innerText = 'Sudah punya akun?';
-          if (btnToggle) btnToggle.innerText = 'Masuk';
+          if (btnToggle) {
+            btnToggle.innerText = 'Masuk';
+            btnToggle.className = 'bg-[#f1b32b] hover:bg-[#d99b1c] text-[#0b1a48] font-black text-xs px-3.5 py-1.5 rounded-lg shadow-xs transition-all active:scale-95';
+          }
         } else {
           modeInput.value = 'login';
           if (title) title.innerText = 'Masuk Akun Studihome';
@@ -1782,7 +1803,10 @@
           if (fieldPhone) fieldPhone.classList.add('hidden');
           if (btnSubmit) btnSubmit.innerText = 'Masuk Sekarang';
           if (toggleText) toggleText.innerText = 'Belum punya akun?';
-          if (btnToggle) btnToggle.innerText = 'Daftar Baru';
+          if (btnToggle) {
+            btnToggle.innerText = 'Daftar Baru';
+            btnToggle.className = 'bg-[#f1b32b] hover:bg-[#d99b1c] text-[#0b1a48] font-black text-xs px-3.5 py-1.5 rounded-lg shadow-xs transition-all active:scale-95';
+          }
         }
       } catch (err) {
         console.error('Error toggling auth mode:', err);
@@ -1814,7 +1838,7 @@
             : "https://api.qrserver.com/v1/create-qr-code/?size=180x180&data=00020101021126580014ID.LINKAJA.WWW01189360091100220088010215200812345678905204581253033605802ID5909STUDIHOME6007JAKARTA61051234562070703A0163041A2B";
         }
 
-        // Custom Buy Links Setup
+        // Side-by-side Gray Buttons setup
         const buyContainer = document.getElementById('checkout-custom-buy-container');
         const buyBtn = document.getElementById('checkout-custom-buy-btn');
         const waBtn = document.getElementById('checkout-wa-buy-btn');
@@ -1832,6 +1856,7 @@
           waBtn.href = `https://wa.me/6285111581115?text=${waMsg}`;
         }
 
+        // AUTO-FILL ALL USER DETAILS IF LOGGED IN
         if (AppState.user) {
           const chkName = document.getElementById('chk-full-name');
           const chkPhone = document.getElementById('chk-phone');
@@ -1844,7 +1869,7 @@
         toggleModal('checkout-modal', true);
       } catch (err) {
         console.error('Error opening checkout modal:', err);
-        showToast('Gagal membuka modal checkout', 'error');
+        showToast('Gagal membuka modal pembayaran', 'error');
       }
     }
 
@@ -1902,7 +1927,7 @@
 
         const fileInput = document.getElementById('proof-file-input');
         if (!fileInput || !fileInput.files || fileInput.files.length === 0) {
-          showToast('Unggah bukti transfer wajib diisi!', 'error');
+          showToast('Unggah foto bukti transfer wajib diisi!', 'error');
           return;
         }
 
