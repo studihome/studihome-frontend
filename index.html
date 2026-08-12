@@ -4,9 +4,9 @@
     <!-- Primary Meta Tags -->
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Studihome - Platform Pembelajaran Digital & Otomasi AI</title>
-<meta name="title" content="Studihome - Platform Pembelajaran Digital & Otomasi AI">
-<meta name="description" content="Studihome adalah platform produk digital, modul pembelajaran, prompt AI, template interaktif, dan otomasi bisnis untuk guru, profesional, kreator, dan UMKM di Indonesia.">
+<title>Studihome - Platform Pembelajaran Digital, Otomasi dan Agency AI</title>
+<meta name="title" content="Studihome - Platform Pembelajaran Digital, Otomasi dan Agency AI">
+<meta name="description" content="Studihome adalah platform produk digital, modul pembelajaran, serta penyedia layanan Agency AI & otomasi bisnis terdepan untuk guru, profesional, kreator, dan UMKM di Indonesia.">
 <meta name="author" content="Studihome">
 <meta name="publisher" content="Studihome">
 <meta name="language" content="id-ID">
@@ -24,30 +24,37 @@
 <meta property="og:type" content="website">
 <meta property="og:locale" content="id_ID">
 <meta property="og:site_name" content="Studihome">
-<meta property="og:title" content="Studihome | Platform Pembelajaran Digital & Otomasi AI">
-<meta property="og:description" content="Tingkatkan efisiensi kerja hingga 10x lipat dengan modul pembelajaran, prompt AI interaktif, dan otomasi bisnis dari Studihome.">
+<meta property="og:title" content="Studihome | Platform Pembelajaran Digital, Otomasi & Agency AI">
+<meta property="og:description" content="Tingkatkan efisiensi kerja hingga 10x lipat dengan modul pembelajaran, prompt AI interaktif, solusi Agency AI kustom, dan otomasi bisnis dari Studihome.">
 <meta property="og:url" content="https://studihome.id/">
 <meta property="og:image" content="https://studihome.id/assets/og-image.png">
 
 <!-- Twitter / X -->
 <meta name="twitter:card" content="summary_large_image">
-<meta name="twitter:title" content="Studihome | Produk Digital & Otomasi AI">
-<meta name="twitter:description" content="Tingkatkan produktivitas dengan produk digital, modul, prompt AI, dan otomasi bisnis praktis untuk Indonesia.">
+<meta name="twitter:title" content="Studihome | Pembelajaran Digital, Otomasi & Agency AI">
+<meta name="twitter:description" content="Layanan Agency AI, otomasi bisnis, modul interaktif, dan produk digital praktis untuk percepatan bisnis dan produktivitas di Indonesia.">
 <meta name="twitter:url" content="https://studihome.id/">
 <meta name="twitter:image" content="https://studihome.id/assets/og-image.png">
 
-<!-- Structured Data / Schema.org (JSON-LD untuk AI & Search Engine Knowledge Graph) -->
+<!-- Structured Data / Schema.org (JSON-LD untuk AI Engine & Knowledge Graph) -->
 <script type="application/ld+json">
 {
   "@context": "https://schema.org",
   "@graph": [
     {
-      "@type": "Organization",
+      "@type": ["Organization", "ProfessionalService"],
       "@id": "https://studihome.id/#organization",
       "name": "Studihome",
       "url": "https://studihome.id/",
       "logo": "https://studihome.id/assets/logo.png",
-      "description": "Platform produk digital, modul pembelajaran, prompt AI, dan otomasi bisnis di Indonesia.",
+      "description": "Platform produk digital, modul pembelajaran, otomasi bisnis, serta penyedia solusi Agency AI kustom di Indonesia.",
+      "knowsAbout": [
+        "Pembelajaran Digital",
+        "Otomasi AI",
+        "Agency AI",
+        "Pengembangan Prompt AI",
+        "Otomasi Bisnis & UMKM"
+      ],
       "sameAs": [
         "https://x.com/studihome",
         "https://tiktok.com/@studihome"
@@ -66,7 +73,7 @@
 </script>
 
     <!-- Tailwind CSS CDN -->
-    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="./assets/tailwind.css">
     <!-- FontAwesome Icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <!-- Google Fonts Inter -->
@@ -207,17 +214,6 @@
             filter: drop-shadow(-2px 2px 2px rgba(15, 23, 42, 0.08));
         }
 
-
-        @media (max-width: 767px) {
-            #module-modal { padding: 0 !important; }
-            #module-modal > .card-3d { width: 100vw !important; max-width: none !important; height: 100dvh !important; max-height: 100dvh !important; border-radius: 0 !important; padding: 1rem !important; }
-            #module-modal-content { padding-right: 0 !important; }
-            #module-modal .aspect-video { border-radius: 0.875rem; }
-        }
-        @media (min-width: 768px) {
-            #module-modal > .card-3d { max-height: 92vh; }
-        }
-
         /* Custom Scrollbar */
         ::-webkit-scrollbar {
             width: 6px;
@@ -232,6 +228,88 @@
         }
         ::-webkit-scrollbar-thumb:hover {
             background: #151c75;
+        }
+
+        /* Modern centered 3D notices */
+        #toast-container {
+            position: fixed;
+            inset: 0;
+            z-index: 80;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            pointer-events: none;
+            padding: 1rem;
+        }
+        .studihome-notice {
+            width: min(92vw, 430px);
+            border-radius: 1.5rem;
+            padding: 1rem 1.15rem;
+            background: rgba(255,255,255,.96);
+            border: 1px solid rgba(255,255,255,.95);
+            box-shadow: 0 24px 60px rgba(15,23,42,.22), 0 8px 22px rgba(21,28,117,.14);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            display: flex;
+            align-items: flex-start;
+            gap: .85rem;
+            transform: translateY(12px) scale(.97);
+            opacity: 0;
+            transition: opacity .24s ease, transform .24s ease;
+            pointer-events: auto;
+        }
+        .studihome-notice.is-visible {
+            opacity: 1;
+            transform: translateY(0) scale(1);
+        }
+        .studihome-notice .notice-icon {
+            width: 2.65rem;
+            height: 2.65rem;
+            flex: 0 0 auto;
+            border-radius: 1rem;
+            display: grid;
+            place-items: center;
+            box-shadow: inset 0 1px rgba(255,255,255,.8), 0 8px 18px rgba(15,23,42,.12);
+        }
+        .studihome-notice.notice-success .notice-icon { background: #ecfdf5; color: #059669; }
+        .studihome-notice.notice-error .notice-icon { background: #fef2f2; color: #dc2626; }
+        .studihome-notice.notice-info .notice-icon { background: #eff6ff; color: #1d4ed8; }
+        .studihome-notice .notice-title { font-weight: 900; color: #151c75; font-size: .78rem; letter-spacing: .02em; }
+        .studihome-notice .notice-body { margin-top: .2rem; color: #475569; font-size: .78rem; line-height: 1.45; font-weight: 600; }
+        .studihome-notice .notice-close {
+            margin-left: auto;
+            width: 2rem;
+            height: 2rem;
+            border-radius: .75rem;
+            border: 1px solid rgba(59,130,246,.22);
+            background: rgba(191,219,254,.38);
+            color: #2563eb;
+            display: grid;
+            place-items: center;
+            flex: 0 0 auto;
+            transition: background .18s ease, transform .18s ease;
+        }
+        .studihome-notice .notice-close:hover { background: rgba(147,197,253,.5); transform: scale(1.04); }
+        .modal-close-blue {
+            background: rgba(191,219,254,.62) !important;
+            color: #1d4ed8 !important;
+            border: 1px solid rgba(59,130,246,.25) !important;
+            box-shadow: 0 8px 20px rgba(37,99,235,.14) !important;
+            backdrop-filter: blur(8px);
+            -webkit-backdrop-filter: blur(8px);
+        }
+        .module-mobile-fullscreen {
+            width: min(100%, 980px);
+            max-height: 92dvh;
+        }
+        .module-visual-stage { aspect-ratio: 16 / 9; }
+        .module-visual-stage img, .module-visual-stage iframe { width: 100%; height: 100%; display: block; object-fit: contain; background: #0f172a; }
+        @media (max-width: 767px) {
+            #module-modal { padding: 0 !important; }
+            #module-modal > div { width: 100vw !important; max-width: none !important; height: 100dvh !important; max-height: 100dvh !important; border-radius: 0 !important; padding: 4.25rem .9rem .9rem !important; }
+            #module-modal-content { padding-right: 0 !important; }
+            .module-mobile-fullscreen { width: 100%; max-height: none; }
+            .module-visual-stage { aspect-ratio: 16 / 10; min-height: min(62vh, 520px); }
         }
     </style>
 </head>
@@ -283,7 +361,7 @@
     </nav>
 
     <!-- TOAST NOTIFICATION CONTAINER -->
-    <div id="toast-container" class="fixed top-16 right-4 z-50 flex flex-col gap-2 pointer-events-none max-w-sm w-full px-2"></div>
+    <div id="toast-container" aria-live="polite" aria-atomic="true"></div>
 
     <!-- MAIN CONTENT VIEW ROUTER CONTAINER -->
     <main id="main-content" class="flex-1 max-w-7xl w-full mx-auto px-3 sm:px-6 py-4 sm:py-8 mb-16 md:mb-0">
@@ -311,7 +389,7 @@
     <!-- AUTHENTICATION MODAL -->
     <div id="auth-modal" class="fixed inset-0 z-50 hidden bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-3 sm:p-4">
         <div class="card-3d w-full max-w-md p-5 sm:p-7 rounded-3xl relative bg-white my-auto">
-            <button onclick="App.ui.toggleModal('auth-modal', false)" class="absolute top-4 right-4 w-8 h-8 rounded-full btn-brand-amber text-slate-900 flex items-center justify-center transition-all shadow-md font-extrabold hover:brightness-110 z-10">
+            <button onclick="App.ui.toggleModal('auth-modal', false)" class="absolute top-4 right-4 w-8 h-8 rounded-full modal-close-blue text-slate-900 flex items-center justify-center transition-all shadow-md font-extrabold hover:brightness-110 z-10">
                 <i class="fa-solid fa-xmark"></i>
             </button>
             
@@ -377,7 +455,7 @@
     <div id="product-detail-modal" class="fixed inset-0 z-50 hidden bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-3 sm:p-4">
         <div class="card-3d w-full max-w-xl p-5 sm:p-6 rounded-3xl relative bg-white max-h-[90vh] overflow-y-auto my-auto">
             <!-- Modal Close Button repositioned to extreme top-right corner z-30 -->
-            <button onclick="App.ui.toggleModal('product-detail-modal', false)" class="absolute top-3 right-3 sm:top-4 sm:right-4 w-9 h-9 rounded-full btn-brand-amber text-slate-900 flex items-center justify-center transition-all shadow-lg font-extrabold hover:brightness-110 z-30">
+            <button onclick="App.ui.toggleModal('product-detail-modal', false)" class="absolute top-3 right-3 sm:top-4 sm:right-4 w-9 h-9 rounded-full modal-close-blue text-slate-900 flex items-center justify-center transition-all shadow-lg font-extrabold hover:brightness-110 z-30">
                 <i class="fa-solid fa-xmark text-sm"></i>
             </button>
             <div id="product-detail-modal-content">
@@ -389,7 +467,7 @@
     <!-- CHECKOUT MODAL -->
     <div id="checkout-modal" class="fixed inset-0 z-50 hidden bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-3 sm:p-4">
         <div class="card-3d w-full max-w-lg p-5 sm:p-6 rounded-3xl relative bg-white max-h-[90vh] overflow-y-auto my-auto">
-            <button onclick="App.ui.toggleModal('checkout-modal', false)" class="absolute top-4 right-4 w-8 h-8 rounded-full btn-brand-amber text-slate-900 flex items-center justify-center transition-all shadow-md font-extrabold hover:brightness-110 z-20">
+            <button onclick="App.ui.toggleModal('checkout-modal', false)" class="absolute top-4 right-4 w-8 h-8 rounded-full modal-close-blue text-slate-900 flex items-center justify-center transition-all shadow-md font-extrabold hover:brightness-110 z-20">
                 <i class="fa-solid fa-xmark"></i>
             </button>
             <div id="checkout-modal-content">
@@ -400,8 +478,8 @@
 
     <!-- MODULE PLAYER MODAL -->
     <div id="module-modal" class="fixed inset-0 z-50 hidden bg-slate-900/75 backdrop-blur-md flex items-center justify-center p-3 sm:p-4">
-        <div class="card-3d w-full max-w-4xl p-5 sm:p-6 rounded-3xl relative max-h-[92vh] flex flex-col bg-white my-auto">
-            <button onclick="App.ui.toggleModal('module-modal', false)" class="absolute top-4 right-4 w-9 h-9 btn-brand-amber text-slate-900 rounded-full flex items-center justify-center font-extrabold z-20 shadow-md hover:brightness-110">
+        <div class="card-3d w-full max-w-4xl p-5 sm:p-6 rounded-3xl relative max-h-[92vh] flex flex-col bg-white my-auto module-mobile-fullscreen">
+            <button onclick="App.ui.toggleModal('module-modal', false)" class="absolute top-4 right-4 w-9 h-9 modal-close-blue text-slate-900 rounded-full flex items-center justify-center font-extrabold z-20 shadow-md hover:brightness-110">
                 <i class="fa-solid fa-xmark text-lg"></i>
             </button>
             <div id="module-modal-content" class="flex-1 overflow-y-auto pr-1">
@@ -603,19 +681,27 @@
                 toast: (msg, type = 'info') => {
                     const cont = document.getElementById('toast-container');
                     if (!cont) return;
+
+                    const friendly = App.utils.friendlyNotice(msg, type);
                     const el = document.createElement('div');
-                    el.className = `card-3d px-4 py-3 text-xs sm:text-sm font-bold text-slate-800 flex items-center gap-3 shadow-lg border-l-4 transition-all duration-300 pointer-events-auto bg-white ${
-                        type === 'success' ? 'border-emerald-500' : type === 'error' ? 'border-red-500' : 'border-[#151c75]'
-                    }`;
+                    el.className = `studihome-notice notice-${type === 'success' ? 'success' : type === 'error' ? 'error' : 'info'}`;
+                    const icon = type === 'success' ? 'fa-circle-check' : type === 'error' ? 'fa-triangle-exclamation' : 'fa-circle-info';
+                    const title = type === 'success' ? 'Berhasil' : type === 'error' ? 'Ups, ada sedikit kendala' : 'Info Studihome';
                     el.innerHTML = `
-                        <i class="fa-solid ${type === 'success' ? 'fa-circle-check text-emerald-500' : type === 'error' ? 'fa-triangle-exclamation text-red-500' : 'fa-circle-info text-[#151c75]'} text-base"></i>
-                        <span>${App.utils.escapeHtml(msg)}</span>
+                        <div class="notice-icon"><i class="fa-solid ${icon}"></i></div>
+                        <div class="min-w-0 flex-1">
+                            <div class="notice-title">${title}</div>
+                            <div class="notice-body">${App.utils.escapeHtml(friendly)}</div>
+                        </div>
+                        <button type="button" class="notice-close" aria-label="Tutup pemberitahuan"><i class="fa-solid fa-xmark text-xs"></i></button>
                     `;
+                    el.querySelector('.notice-close').addEventListener('click', () => { el.remove(); });
                     cont.appendChild(el);
+                    requestAnimationFrame(() => el.classList.add('is-visible'));
                     setTimeout(() => {
-                        el.style.opacity = '0';
-                        setTimeout(() => el.remove(), 300);
-                    }, 3500);
+                        el.classList.remove('is-visible');
+                        setTimeout(() => el.remove(), 240);
+                    }, 3600);
                 },
 
                 updateApiStatus: (status) => {
@@ -771,7 +857,7 @@
                     if (!user) return null;
                     const { data, error } = await supabaseClient.from('profiles').select('id,name,phone,role,status,created_at,updated_at,email').eq('id', user.id).single();
                     if (error) throw error;
-                    return { ...data, email: data.email || user.email || '', emailConfirmedAt: user.email_confirmed_at || null, registeredAt: data.created_at };
+                    return { ...data, email: data.email || user.email || '', registeredAt: data.created_at };
                 },
                 _public: async () => {
                     const [settingsRes, productsRes, aiRes, testimonialsRes] = await withTimeout(
@@ -1033,9 +1119,9 @@
 
                     try {
                         const res = await App.api.post('AUTH_REGISTER', { name, email, phone, password });
-                        if (res.requiresEmailConfirmation && !res.user) {
+                        if (res.requiresEmailConfirmation) {
                             App.ui.toggleModal('auth-modal', false);
-                            App.ui.toast('Akun dibuat. Silakan selesaikan verifikasi email sebelum masuk.', 'info');
+                            App.ui.toast('Akun dibuat. Silakan cek email untuk konfirmasi sebelum masuk.', 'success');
                             return;
                         }
                         const userData = res.user || res;
@@ -1521,14 +1607,6 @@
                                     </div>
                                 </div>
                             </div>
-                            <div class="w-full sm:flex-1 sm:ml-4">
-                                ${!App.state.user.emailConfirmedAt ? `
-                                    <div class="mt-2 sm:mt-0 rounded-2xl border border-amber-200 bg-amber-50 px-3 py-2 text-[10px] sm:text-xs text-amber-800">
-                                        <div class="font-extrabold mb-0.5">Email belum terverifikasi</div>
-                                        <div>Buka email verifikasi dari Supabase lalu klik tautannya. Setelah selesai, login ulang untuk memperbarui status.</div>
-                                    </div>
-                                ` : ''}
-                            </div>
                             <div class="text-left sm:text-right text-xs">
                                 <span class="text-slate-500 block text-[10px]">Terdaftar Sejak:</span>
                                 <span class="font-bold text-slate-800">${App.state.user.registeredAt || '2026-08-10'}</span>
@@ -1682,11 +1760,22 @@
                                     <div class="card-3d-inset p-4 sm:p-5 rounded-2xl space-y-3.5">
                                         <h3 class="font-bold text-sm text-[#151c75]">${App.utils.escapeHtml(m.title)}</h3>
                                         
-                                        ${m.yt_url ? `
-                                            <div class="aspect-video w-full rounded-xl overflow-hidden card-3d">
-                                                <iframe class="w-full h-full" src="${App.utils.safeUrl(m.yt_url)}" title="Video Tutorial" frameborder="0" allowfullscreen referrerpolicy="strict-origin-when-cross-origin"></iframe>
-                                            </div>
-                                        ` : ''}
+                                        ${(() => {
+                                            const visual = App.utils.resolveVisualSource(m.yt_url);
+                                            if (!visual) return '';
+                                            if (visual.type === 'image') return `
+                                                <div class="module-visual-stage w-full rounded-xl overflow-hidden card-3d bg-slate-900">
+                                                    <img src="${visual.url}" alt="Visual modul" loading="lazy" referrerpolicy="no-referrer">
+                                                </div>`;
+                                            if (visual.type === 'iframe') return `
+                                                <div class="module-visual-stage w-full rounded-xl overflow-hidden card-3d bg-slate-900">
+                                                    <iframe class="w-full h-full" src="${visual.url}" title="Media Modul" frameborder="0" allow="autoplay; fullscreen; picture-in-picture" allowfullscreen referrerpolicy="strict-origin-when-cross-origin"></iframe>
+                                                </div>`;
+                                            return `
+                                                <a href="${visual.url}" target="_blank" rel="noopener noreferrer" class="block rounded-xl border border-blue-100 bg-blue-50 px-4 py-3 text-xs font-bold text-[#151c75]">
+                                                    <i class="fa-solid fa-arrow-up-right-from-square mr-1"></i> Buka media modul
+                                                </a>`;
+                                        })()}
 
                                         <div class="card-3d p-4 rounded-xl text-xs sm:text-sm text-slate-700 whitespace-pre-line leading-relaxed bg-white">
                                             ${App.utils.escapeHtml(m.markdown || '')}
@@ -1810,10 +1899,10 @@
                                                         <td class="py-3 px-2">
                                                             <div class="flex gap-1.5 flex-wrap">
                                                                 <button ${o.status === 'VERIFIED' || o.status === 'REJECTED' ? 'disabled' : ''} onclick="App.admin.verifyOrder('${o.id}')" class="px-2.5 py-1 rounded-lg text-[10px] font-bold text-emerald-700 bg-emerald-50 border border-emerald-200 hover:bg-emerald-100 flex items-center gap-1">
-                                                                    <i class="fa-solid fa-lock-open"></i> Verifikasi (Buka Akses)
+                                                                    <i class="fa-solid fa-lock-open"></i> Buka Akses
                                                                 </button>
                                                                 <button ${o.status === 'VERIFIED' || o.status === 'REJECTED' ? 'disabled' : ''} onclick="App.admin.rejectOrder('${o.id}')" class="px-2.5 py-1 rounded-lg text-[10px] font-bold text-red-700 bg-red-50 border border-red-200 hover:bg-red-100 flex items-center gap-1">
-                                                                    <i class="fa-solid fa-lock"></i> Tolak (Terkunci)
+                                                                    <i class="fa-solid fa-lock"></i> Tolak
                                                                 </button>
                                                             </div>
                                                         </td>
@@ -2251,8 +2340,9 @@
                                 <input type="text" id="m-title" required value="${App.utils.escapeHtml(m.title)}" placeholder="Judul Modul" class="w-full card-3d-inset px-3 py-2 rounded-xl text-xs">
                             </div>
                             <div>
-                                <label class="block text-[10px] font-bold text-slate-600 mb-1">URL Embed YouTube</label>
-                                <input type="url" id="m-yt" value="${App.utils.escapeHtml(m.yt_url)}" placeholder="https://www.youtube.com/embed/..." class="w-full card-3d-inset px-3 py-2 rounded-xl text-xs">
+                                <label class="block text-[10px] font-bold text-slate-600 mb-1">URL Video / Visual</label>
+                                <input type="url" id="m-yt" value="${App.utils.escapeHtml(m.yt_url)}" placeholder="YouTube, Google Drive, atau URL gambar" class="w-full card-3d-inset px-3 py-2 rounded-xl text-xs">
+                                <p class="text-[10px] text-slate-400 mt-1">Bisa YouTube biasa, Google Drive, atau tautan gambar. Tidak perlu URL embed.</p>
                             </div>
                             <div>
                                 <label class="block text-[10px] font-bold text-slate-600 mb-1">Isi Modul (Markdown / Teks)</label>
@@ -2262,18 +2352,29 @@
                                 <label class="block text-[10px] font-bold text-slate-600 mb-1">URL Download File Asset</label>
                                 <input type="url" id="m-dl" value="${App.utils.escapeHtml(m.download_url)}" placeholder="https://..." class="w-full card-3d-inset px-3 py-2 rounded-xl text-xs">
                             </div>
-                            <div class="space-y-3">
-                                ${[0,1].map((idx) => `
-                                <div class="grid grid-cols-1 sm:grid-cols-2 gap-2 rounded-2xl border border-slate-200 p-3 bg-slate-50">
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-2.5">
+                                <div class="card-3d-inset p-3 rounded-xl space-y-2">
+                                    <div class="text-[10px] font-extrabold text-[#151c75] uppercase">Tautan Kustom 1</div>
                                     <div>
-                                        <label class="block text-[10px] font-bold text-slate-600 mb-1">Nama/Label Link Kustom ${idx + 1}</label>
-                                        <input type="text" id="m-link-label-${idx + 1}" value="${App.utils.escapeHtml(m.links?.[idx]?.label || '')}" placeholder="Mis. Template PDF" class="w-full card-3d-inset px-3 py-2 rounded-xl text-xs bg-white">
+                                        <label class="block text-[10px] font-bold text-slate-600 mb-1">Nama / Label Link Kustom 1</label>
+                                        <input type="text" id="m-link-label-1" value="${App.utils.escapeHtml(m.links?.[0]?.label || '')}" placeholder="Mis. Template Modul" class="w-full card-3d-inset px-3 py-2 rounded-xl text-xs">
                                     </div>
                                     <div>
-                                        <label class="block text-[10px] font-bold text-slate-600 mb-1">URL Link Kustom ${idx + 1}</label>
-                                        <input type="url" id="m-link-url-${idx + 1}" value="${App.utils.escapeHtml(m.links?.[idx]?.url || '')}" placeholder="https://..." class="w-full card-3d-inset px-3 py-2 rounded-xl text-xs bg-white">
+                                        <label class="block text-[10px] font-bold text-slate-600 mb-1">URL Link Kustom 1</label>
+                                        <input type="url" id="m-link-url-1" value="${App.utils.escapeHtml(m.links?.[0]?.url || '')}" placeholder="https://..." class="w-full card-3d-inset px-3 py-2 rounded-xl text-xs">
                                     </div>
-                                </div>`).join('')}
+                                </div>
+                                <div class="card-3d-inset p-3 rounded-xl space-y-2">
+                                    <div class="text-[10px] font-extrabold text-[#151c75] uppercase">Tautan Kustom 2</div>
+                                    <div>
+                                        <label class="block text-[10px] font-bold text-slate-600 mb-1">Nama / Label Link Kustom 2</label>
+                                        <input type="text" id="m-link-label-2" value="${App.utils.escapeHtml(m.links?.[1]?.label || '')}" placeholder="Mis. Worksheet / Resource" class="w-full card-3d-inset px-3 py-2 rounded-xl text-xs">
+                                    </div>
+                                    <div>
+                                        <label class="block text-[10px] font-bold text-slate-600 mb-1">URL Link Kustom 2</label>
+                                        <input type="url" id="m-link-url-2" value="${App.utils.escapeHtml(m.links?.[1]?.url || '')}" placeholder="https://..." class="w-full card-3d-inset px-3 py-2 rounded-xl text-xs">
+                                    </div>
+                                </div>
                             </div>
                             <div class="flex items-center gap-2 pt-2">
                                 <button type="submit" class="btn-brand-gradient px-4 py-2 rounded-xl text-xs font-bold">Simpan Modul</button>
@@ -2285,12 +2386,13 @@
 
                 saveModule: async (e, productId, editModuleId = '') => {
                     e.preventDefault();
+                    const label1 = document.getElementById('m-link-label-1')?.value?.trim() || '';
+                    const url1 = document.getElementById('m-link-url-1')?.value?.trim() || '';
+                    const label2 = document.getElementById('m-link-label-2')?.value?.trim() || '';
+                    const url2 = document.getElementById('m-link-url-2')?.value?.trim() || '';
                     const links = [];
-                    for (let i = 1; i <= 2; i++) {
-                        const label = document.getElementById(`m-link-label-${i}`).value.trim();
-                        const url = document.getElementById(`m-link-url-${i}`).value.trim();
-                        if (label && url) links.push({ label, url });
-                    }
+                    if (label1 && url1) links.push({ label: label1, url: url1 });
+                    if (label2 && url2) links.push({ label: label2, url: url2 });
 
                     const moduleData = {
                         id: editModuleId || undefined,
@@ -2595,7 +2697,7 @@
                         container.innerHTML = `
                             <div class="text-center space-y-3.5">
                                 <h3 class="text-base sm:text-lg font-bold text-[#151c75]">Pembayaran QRIS Studihome</h3>
-                                <p class="text-xs text-slate-500">Gunakan Dana, GoPay, OVO, DANA, dan ShopeePay, atau mobile banking BCA, Mandiri, BRI, BNI, CIMB, dll.</p>
+                                <p class="text-xs text-slate-500">Bayar sesuai nominal berikut menggunakan aplikasi pembayaran QRIS Anda.</p>
                                 <div class="card-3d p-3.5 rounded-2xl inline-block mx-auto bg-white border border-slate-200">
                                     <img src="${App.utils.safeUrl(qris.qrisUrl)}" alt="QRIS ${App.utils.escapeHtml(p.title)}" class="w-44 h-44 sm:w-48 sm:h-48 mx-auto rounded-xl object-contain" loading="eager" referrerpolicy="no-referrer">
                                 </div>
@@ -2606,12 +2708,12 @@
                                 </div>
                                 <label class="flex items-start gap-2 text-left bg-amber-50 border border-amber-200 rounded-xl p-3 cursor-pointer">
                                     <input id="confirm-payment-checkbox" type="checkbox" onchange="App.shop.updatePaymentConfirmButton()" class="mt-0.5 shrink-0">
-                                    <span class="text-xs text-slate-700 leading-relaxed">Saya menyatakan bahwa saya <strong>sudah melakukan pembayaran</strong> sesuai nominal order.</span>
+                                    <span class="text-xs text-slate-700 leading-relaxed">Saya menyatakan bahwa saya <strong>sudah melakukan pembayaran</strong> sesuai nominal order ini dan siap menunggu verifikasi manual Admin.</span>
                                 </label>
                                 <button id="btn-confirm-payment" disabled onclick="App.shop.submitPaymentConfirmation()" class="w-full py-3 rounded-xl text-xs sm:text-sm font-extrabold text-white bg-emerald-600 disabled:bg-slate-300 disabled:cursor-not-allowed hover:bg-emerald-700 flex items-center justify-center gap-2 shadow-md transition-all">
-                                    <i class="fa-solid fa-check"></i> Konfirmasi Pembayaran
+                                    <i class="fa-solid fa-check"></i> Konfirmasi Pembayaran & Hubungi Admin
                                 </button>
-                                <p class="text-[10px] text-slate-500">Proses Verifikasi lebih cepat dengan melakukan konfirmasi.</p>
+                                <p class="text-[10px] text-slate-500">Setelah konfirmasi, order menjadi <strong>MENUNGGU VERIFIKASI</strong> dan modul tetap terkunci.</p>
                                 <button onclick="App.ui.toggleModal('checkout-modal', false)" class="text-xs font-bold text-slate-500 hover:text-slate-800">Tutup</button>
                             </div>`;
                         App.state.checkout.waUrl = waUrl;
@@ -2722,7 +2824,7 @@
                         App.shop.openWhatsAppConfirmation(App.state.checkout.waUrl);
                     } catch (err) {
                         btn.disabled = false;
-                        btn.innerHTML = '<i class="fa-solid fa-check"></i> Konfirmasi Pembayaran';
+                        btn.innerHTML = '<i class="fa-solid fa-check"></i> Konfirmasi Pembayaran & Hubungi Admin';
                         App.ui.toast('Konfirmasi pembayaran gagal: ' + (err?.message || 'Terjadi kesalahan.'), 'error');
                     }
                 },
@@ -2736,6 +2838,36 @@
             },
 
             utils: {
+                friendlyNotice: (msg, type = 'info') => {
+                    const raw = String(msg || 'Terjadi sesuatu.').replace(/^Backend:\s*/i, '').trim();
+                    const rules = [
+                        [/Anda sudah memiliki akses ke produk ini\.?/i, 'Produk ini sudah ada di akunmu. Yuk lanjut buka Dashboard dan belajar.'],
+                        [/Anda sudah memiliki pesanan yang sedang menunggu pembayaran atau verifikasi\.?/i, 'Order ini sudah ada. Lanjutkan pembayaran dari Dashboard, ya.'],
+                        [/Anda sudah memiliki pesanan yang sedang menunggu pembayaran\.?/i, 'Order ini sudah ada. Tinggal lanjutkan prosesnya dari Dashboard.'],
+                        [/Order hanya dapat diverifikasi setelah member mengonfirmasi pembayaran\.?/i, 'Order ini belum dikonfirmasi member. Tunggu sampai konfirmasi masuk, baru bisa dibuka aksesnya.'],
+                        [/Order hanya dapat ditolak setelah member mengonfirmasi pembayaran\.?/i, 'Order ini belum dikonfirmasi member. Setelah konfirmasi masuk, barulah bisa ditolak.'],
+                        [/Akses admin diperlukan\.?/i, 'Menu ini khusus Admin Studihome.'],
+                        [/Produk tidak ditemukan\.?/i, 'Produknya belum ketemu. Coba refresh sebentar, ya.'],
+                        [/Produk tidak tersedia\.?/i, 'Produk ini sedang tidak tersedia. Coba pilih produk lain dulu.'],
+                        [/Akun Anda tidak aktif atau telah diblokir oleh Admin\.?/i, 'Akunmu sedang tidak aktif. Cek kembali atau hubungi Admin Studihome.'],
+                        [/Gagal membuat\/melanjutkan order:\s*/i, 'Order belum bisa dilanjutkan: '],
+                        [/Gagal memverifikasi order:\s*/i, 'Verifikasi belum berhasil: '],
+                        [/Gagal menolak order:\s*/i, 'Order belum bisa ditolak: '],
+                        [/Konfirmasi pembayaran gagal:\s*/i, 'Konfirmasi pembayaran belum berhasil: '],
+                        [/Konfirmasi pembayaran tersimpan\. Order menunggu verifikasi Admin\.?/i, 'Mantap! Konfirmasi sudah masuk. Admin tinggal cek dan buka aksesnya.'],
+                        [/Pembayaran order ini sudah dikonfirmasi dan sedang menunggu verifikasi Admin\.?/i, 'Konfirmasi pembayaran sudah masuk. Sekarang tinggal tunggu Admin mengecek, ya.'],
+                        [/new row violates row-level security policy/i, 'Data belum bisa disimpan. Coba login ulang dan pastikan akunmu punya akses yang sesuai.'],
+                        [/duplicate key value violates unique constraint/i, 'Data ini sudah ada. Tidak perlu dibuat dua kali.'],
+                        [/JWT|token is expired|invalid JWT/i, 'Sesi login sudah kedaluwarsa. Yuk login lagi.'],
+                        [/Failed to fetch|NetworkError|network request failed/i, 'Koneksi lagi kurang mulus. Coba refresh sebentar, ya.']
+                    ];
+                    let text = raw;
+                    for (const [pattern, replacement] of rules) {
+                        if (pattern.test(text)) { text = text.replace(pattern, replacement); break; }
+                    }
+                    return text;
+                },
+
                 safeUrl: (url, fallback = '#') => {
                     const value = String(url || '').trim();
                     if (!value) return fallback;
@@ -2746,6 +2878,39 @@
                     } catch (e) {
                         return fallback;
                     }
+                },
+
+                resolveVisualSource: (url) => {
+                    const value = String(url || '').trim();
+                    if (!value) return null;
+                    const safe = App.utils.safeUrl(value, '');
+                    if (!safe) return null;
+
+                    // YouTube watch / shorts / youtu.be -> embeddable iframe URL
+                    try {
+                        const u = new URL(safe);
+                        const host = u.hostname.replace(/^www\./, '').toLowerCase();
+                        if (host === 'youtube.com' || host === 'm.youtube.com' || host === 'youtu.be') {
+                            let id = '';
+                            if (host === 'youtu.be') id = u.pathname.replace(/^\//, '').split('/')[0];
+                            else if (u.pathname === '/watch') id = u.searchParams.get('v') || '';
+                            else if (u.pathname.startsWith('/shorts/')) id = u.pathname.split('/')[2] || '';
+                            else if (u.pathname.startsWith('/embed/')) id = u.pathname.split('/')[2] || '';
+                            if (id) return { type: 'iframe', url: `https://www.youtube.com/embed/${encodeURIComponent(id)}` };
+                        }
+
+                        // Google Drive file share -> preview iframe; direct image preview via uc export is used for images.
+                        if (host === 'drive.google.com') {
+                            const match = u.pathname.match(/\/file\/d\/([^/]+)/);
+                            if (match?.[1]) return { type: 'iframe', url: `https://drive.google.com/file/d/${encodeURIComponent(match[1])}/preview` };
+                        }
+
+                        // Direct image URL
+                        if (/\.(png|jpe?g|gif|webp|svg|avif)(?:\?|#|$)/i.test(u.pathname)) return { type: 'image', url: safe };
+                    } catch (e) {}
+
+                    // Fallback: treat other HTTPS links as normal external resources.
+                    return { type: 'link', url: safe };
                 },
 
                 updateClock: () => {
