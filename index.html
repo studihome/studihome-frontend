@@ -175,8 +175,8 @@
 
         /* Marquee Animation — seamless continuous loop */
         @keyframes marqueeLtr {
-            0% { transform: translate3d(0, 0, 0); }
-            100% { transform: translate3d(-50%, 0, 0); }
+            0% { transform: translate3d(-50%, 0, 0); }
+            100% { transform: translate3d(0, 0, 0); }
         }
         .animate-marquee-ltr {
             display: flex;
@@ -361,6 +361,12 @@
 
             <!-- Top Right Utilities -->
             <div class="flex items-center gap-2 sm:gap-3">
+                <!-- Global Search — Desktop -->
+                <div class="hidden lg:flex items-center gap-1.5 bg-white px-2.5 py-1.5 rounded-xl border border-blue-100 shadow-2xs w-56 xl:w-64">
+                    <i class="fa-solid fa-magnifying-glass text-[#151c75] text-xs shrink-0"></i>
+                    <input id="global-search-desktop" type="search" autocomplete="off" placeholder="Cari produk..." class="w-full bg-transparent text-xs font-semibold text-slate-700 outline-none placeholder:text-slate-400" oninput="App.search.handle(this.value)" onkeydown="if(event.key==='Enter') App.search.submit(this.value)">
+                </div>
+
                 <!-- System Clock Widget -->
                 <div class="hidden lg:flex items-center gap-2 bg-white px-3 py-1.5 rounded-xl text-xs border border-blue-100 shadow-2xs">
                     <i class="fa-regular fa-clock text-[#151c75]"></i>
@@ -368,10 +374,16 @@
                 </div>
 
                 <!-- Server Connection Status: dot only -->
-                <div id="api-status-badge" class="hidden sm:flex items-center justify-center w-4 h-4 cursor-help server-status-tooltip" data-status="connecting" data-tooltip="Sedang menghubungkan ke Supabase" aria-label="Status koneksi Studihome" tabindex="0">
+                <div id="api-status-badge" class="hidden sm:flex items-center justify-center w-4 h-4 cursor-help server-status-tooltip border-0 bg-transparent shadow-none" data-status="connecting" data-tooltip="Sedang menghubungkan ke Supabase" aria-label="Status koneksi Studihome" tabindex="0">
                     <span id="api-status-dot" class="block w-2.5 h-2.5 rounded-full bg-sky-500 animate-pulse" aria-hidden="true"></span>
                 </div>
                 
+                <!-- Global Search — Mobile -->
+                <div class="flex sm:hidden items-center gap-1.5 bg-white px-2.5 py-1.5 rounded-xl border border-blue-100 shadow-2xs w-32 xs:w-40">
+                    <i class="fa-solid fa-magnifying-glass text-[#151c75] text-xs shrink-0"></i>
+                    <input id="global-search-mobile" type="search" autocomplete="off" placeholder="Cari..." class="w-full bg-transparent text-[11px] font-semibold text-slate-700 outline-none placeholder:text-slate-400" oninput="App.search.handle(this.value)" onkeydown="if(event.key==='Enter') App.search.submit(this.value)">
+                </div>
+
                 <!-- Auth Action Area -->
                 <div id="top-auth-area">
                     <!-- Injected dynamically -->
@@ -389,7 +401,7 @@
     </nav>
 
     <!-- TOAST NOTIFICATION CONTAINER -->
-    <div id="toast-container" class="fixed bottom-[5.5rem] sm:bottom-5 left-3 sm:left-5 z-[80] flex flex-col items-start gap-3 pointer-events-none max-w-md w-[calc(100%-1.5rem)] sm:w-[34rem] px-0"></div>
+    <div id="toast-container" class="fixed top-[4.75rem] sm:top-[4.9rem] left-3 sm:left-5 z-[80] flex flex-col items-start gap-3 pointer-events-none max-w-md w-[calc(100%-1.5rem)] sm:w-[34rem] px-0"></div>
 
     <!-- MAIN CONTENT VIEW ROUTER CONTAINER -->
     <main id="main-content" class="flex-1 max-w-7xl w-full mx-auto px-3 sm:px-6 py-4 sm:py-8 mb-16 md:mb-0">
@@ -613,14 +625,9 @@
                 channel.on('postgres_changes', { event: '*', schema: 'public', table: 'entitlements', filter: `user_id=eq.${userId}` }, refresh);
             }
 
-            channel.subscribe((status) => {
-                if (status === 'SUBSCRIBED') {
-                    window.App.ui.updateApiStatus('online');
-                } else if (status === 'CHANNEL_ERROR' || status === 'TIMED_OUT' || status === 'CLOSED') {
-                    window.App.ui.updateApiStatus('error');
-                }
-            });
-
+            // Realtime is supplemental. Do not downgrade the main server indicator
+            // when the realtime channel is unavailable; the indicator reflects core API health.
+            channel.subscribe();
             window.App.state.realtimeChannel = channel;
         }
 
@@ -666,6 +673,8 @@ const App = {
                 memberData: null,
                 activeTab: 'home',
                 adminTab: 'orders',
+                adminOrderSearch: '',
+                adminUserSearch: '',
                 pendingCheckoutProductId: null,
                 leftIndex: 0,
                 rightIndex: 1,
@@ -673,6 +682,8 @@ const App = {
                 rightTestimonialTimer: null,
                 realtimeChannel: null,
                 realtimeRefreshTimer: null,
+                adminOrderSearchTimer: null,
+                adminUserSearchTimer: null,
                 checkout: {
                     step: 1,
                     product: null,
@@ -682,8 +693,8 @@ const App = {
                     hero: {},
                     aiLinks: [],
                     testimonials: [
-                        { id: 'demo-t1', name: 'Dr. Raka Prasetyo', role: 'Dosen Perguruan Tinggi', text: 'Template dan alur kerja AI Studihome membantu saya menyiapkan bahan ajar dan materi kuliah jauh lebih rapi dan cepat.' },
-                        { id: 'demo-t2', name: 'Novi Lestari', role: 'Guru SD', text: 'Saya paling suka karena prompt-nya praktis. Tinggal sesuaikan kebutuhan kelas, lalu langsung bisa dipakai.' },
+                        { id: 'demo-t1', name: 'Raka Prasetyo', role: 'Dosen Perguruan Tinggi', demoOnly: true, text: 'Alur kerja AI-nya membantu saya merapikan bahan ajar, materi kuliah, dan pekerjaan akademik tanpa harus mulai dari nol setiap kali.' },
+                        { id: 'demo-t2', name: 'Novi Lestari', role: 'Guru SD', demoOnly: true, text: 'Prompt-nya praktis dan gampang disesuaikan dengan kebutuhan kelas. Jadi lebih cepat menyiapkan materi dan aktivitas pembelajaran.' },
                         { id: 'demo-t3', name: 'Ayu Maharani', role: 'Pemilik UMKM', text: 'Ide konten, pencatatan dan workflow usaha jadi lebih terarah. Cocok buat yang ingin mulai pakai AI tanpa ribet.' }
                     ],
                     products: [
@@ -806,6 +817,46 @@ const App = {
                 App.router.handleHash();
             },
 
+            search: {
+                timer: null,
+                handle: (term) => {
+                    clearTimeout(App.search.timer);
+                    App.search.timer = setTimeout(() => App.search.renderResults(term), 180);
+                },
+                submit: (term) => {
+                    App.search.renderResults(term, true);
+                },
+                renderResults: (term, navigate = false) => {
+                    const q = String(term || '').trim().toLowerCase();
+                    if (!q) return;
+                    const data = App.state.publicData || App.api.getMockData('GET_PUBLIC');
+                    const products = (data.products || []).filter(p => {
+                        const hay = [p.title, p.desc, p.category, p.features].join(' ').toLowerCase();
+                        return hay.includes(q);
+                    });
+                    if (products.length === 0) {
+                        App.ui.toast('Belum ketemu yang cocok 😅 Coba kata kunci lain, ya.', 'info');
+                        return;
+                    }
+                    if (navigate || products.length === 1) {
+                        App.router.navigate('products');
+                        setTimeout(() => {
+                            const cards = document.querySelectorAll('[data-product-card]');
+                            cards.forEach(card => {
+                                const title = (card.getAttribute('data-product-title') || '').toLowerCase();
+                                card.style.display = title.includes(q) ? '' : 'none';
+                            });
+                        }, 40);
+                    }
+                },
+                clear: () => {
+                    ['global-search-desktop','global-search-mobile'].forEach(id => {
+                        const el = document.getElementById(id);
+                        if (el) el.value = '';
+                    });
+                }
+            },
+
             ui: {
                 toast: (msg, type = 'info') => {
                     const cont = document.getElementById('toast-container');
@@ -885,12 +936,12 @@ const App = {
                     if (!badge || !dot) return;
 
                     const tooltip = status === 'online'
-                        ? 'Terhubung — Supabase aktif'
+                        ? 'Sip!'
                         : status === 'connecting'
-                            ? 'Sedang menghubungkan ke Supabase'
+                            ? 'Nyambung!'
                             : status === 'error'
-                                ? 'Koneksi ke Supabase bermasalah'
-                                : 'Status koneksi Studihome';
+                                ? 'Waduh!'
+                                : 'Siap!';
 
                     badge.title = tooltip;
                     badge.dataset.tooltip = tooltip;
@@ -926,11 +977,25 @@ const App = {
                         </div>`;
                 },
 
+                stopModuleMedia: () => {
+                    const modal = document.getElementById('module-modal');
+                    if (!modal) return;
+                    modal.querySelectorAll('video').forEach(video => {
+                        try { video.pause(); video.currentTime = 0; } catch (_) {}
+                    });
+                    modal.querySelectorAll('iframe').forEach(frame => {
+                        try { frame.setAttribute('src', 'about:blank'); } catch (_) {}
+                    });
+                },
+
                 toggleModal: (id, show) => {
                     const modal = document.getElementById(id);
                     if (!modal) return;
                     if (show) modal.classList.remove('hidden');
-                    else modal.classList.add('hidden');
+                    else {
+                        if (id === 'module-modal') App.ui.stopModuleMedia();
+                        modal.classList.add('hidden');
+                    }
                 },
 
                 renderNavigation: () => {
@@ -1423,33 +1488,41 @@ const App = {
                     }
                 },
 
+                pickRandomTestimonial: (testimonials, excludeNames = []) => {
+                    const pool = testimonials.filter(t => t && t.name && !excludeNames.includes(String(t.name)));
+                    if (!pool.length) return testimonials[0] || null;
+                    return pool[Math.floor(Math.random() * pool.length)];
+                },
+
                 startTestimonialCycle: () => {
                     if (App.state.leftTestimonialTimer) clearInterval(App.state.leftTestimonialTimer);
                     if (App.state.rightTestimonialTimer) clearInterval(App.state.rightTestimonialTimer);
 
-                    App.state.leftTestimonialTimer = setInterval(() => {
+                    const getPool = () => {
                         const data = App.state.publicData || App.api.getMockData('GET_PUBLIC');
-                        const testimonials = data.testimonials || App.state.demo.testimonials;
-                        if (testimonials.length > 0) {
-                            App.state.leftIndex = (App.state.leftIndex + 1) % testimonials.length;
-                            App.home.animateTestimonialChange('testimonial-card-left', testimonials[App.state.leftIndex]);
-                        }
+                        return (data.testimonials || App.state.demo.testimonials).filter(Boolean);
+                    };
+
+                    App.state.leftTestimonialTimer = setInterval(() => {
+                        const testimonials = getPool();
+                        if (!testimonials.length) return;
+                        const currentRightName = document.querySelector('#testimonial-card-right h4')?.textContent || '';
+                        const next = App.home.pickRandomTestimonial(testimonials, [currentRightName]);
+                        App.home.animateTestimonialChange('testimonial-card-left', next);
                     }, 4500);
 
                     App.state.rightTestimonialTimer = setInterval(() => {
-                        const data = App.state.publicData || App.api.getMockData('GET_PUBLIC');
-                        const testimonials = data.testimonials || App.state.demo.testimonials;
-                        if (testimonials.length > 0) {
-                            App.state.rightIndex = (App.state.rightIndex + 1) % testimonials.length;
-                            App.home.animateTestimonialChange('testimonial-card-right', testimonials[App.state.rightIndex]);
-                        }
+                        const testimonials = getPool();
+                        if (!testimonials.length) return;
+                        const currentLeftName = document.querySelector('#testimonial-card-left h4')?.textContent || '';
+                        const next = App.home.pickRandomTestimonial(testimonials, [currentLeftName]);
+                        App.home.animateTestimonialChange('testimonial-card-right', next);
                     }, 7000);
                 },
 
                 animateTestimonialChange: (elementId, item) => {
                     const el = document.getElementById(elementId);
-                    if (!el) return;
-                    
+                    if (!el || !item) return;
                     el.classList.add('testimonial-fade-out');
                     setTimeout(() => {
                         el.innerHTML = App.home.renderSingleChatBubbleHTML(item);
@@ -1483,8 +1556,8 @@ const App = {
                                     <span class="text-[10px] font-semibold text-amber-600 block">${App.utils.escapeHtml(t.role)}</span>
                                 </div>
                             </div>
-                            <span class="text-[9px] sm:text-[10px] ${/draft/i.test(String(t.role || '')) ? 'text-slate-600 bg-slate-100 border-slate-200' : 'text-emerald-600 bg-emerald-50 border-emerald-100'} font-extrabold px-2 py-0.5 rounded-lg border flex items-center gap-1">
-                                <i class="fa-solid ${/draft/i.test(String(t.role || '')) ? 'fa-circle-info' : 'fa-circle-check'}"></i> ${/draft/i.test(String(t.role || '')) ? 'Contoh' : 'Verified'}
+                            <span class="text-[9px] sm:text-[10px] ${(t.demoOnly || /draft/i.test(String(t.role || ''))) ? 'text-slate-600 bg-slate-100 border-slate-200' : 'text-emerald-600 bg-emerald-50 border-emerald-100'} font-extrabold px-2 py-0.5 rounded-lg border flex items-center gap-1">
+                                <i class="fa-solid ${(t.demoOnly || /draft/i.test(String(t.role || ''))) ? 'fa-circle-info' : 'fa-circle-check'}"></i> ${(t.demoOnly || /draft/i.test(String(t.role || ''))) ? 'Contoh' : 'Verified'}
                             </span>
                         </div>
                     `;
@@ -1495,11 +1568,19 @@ const App = {
                     if (!container) return;
 
                     const data = App.state.publicData || App.api.getMockData('GET_PUBLIC');
-                    const testimonials = data.testimonials || App.state.demo.testimonials;
+                    const rawTestimonials = data.testimonials || App.state.demo.testimonials;
+                    const seenNames = new Set();
+                    const testimonials = rawTestimonials.filter(t => {
+                        const name = String(t?.name || '').trim().toLowerCase();
+                        if (!name || seenNames.has(name)) return false;
+                        seenNames.add(name);
+                        return true;
+                    });
                     if (testimonials.length === 0) return;
 
-                    const t1 = testimonials[App.state.leftIndex % testimonials.length];
-                    const t2 = testimonials[App.state.rightIndex % testimonials.length] || t1;
+                    const shuffled = [...testimonials].sort(() => Math.random() - 0.5);
+                    const t1 = shuffled[0];
+                    const t2 = App.home.pickRandomTestimonial(shuffled, [String(t1?.name || '')]) || t1;
 
                     container.innerHTML = `
                         <div id="testimonial-card-left" class="card-3d p-5 sm:p-6 rounded-3xl flex flex-col justify-between chat-bubble-left relative bg-white border border-blue-100 testimonial-fade">
@@ -1605,7 +1686,12 @@ const App = {
                 render: () => {
                     const main = document.getElementById('main-content');
                     const data = App.state.publicData || App.api.getMockData('GET_PUBLIC');
-                    const products = data.products || [];
+                    const q = String(document.getElementById('global-search-desktop')?.value || document.getElementById('global-search-mobile')?.value || '').trim().toLowerCase();
+                    const products = (data.products || []).filter(p => {
+                        if (!q) return true;
+                        const hay = [p.title, p.desc, p.category, p.features].join(' ').toLowerCase();
+                        return hay.includes(q);
+                    });
 
                     main.innerHTML = `
                         <div class="mb-6 sm:mb-8">
@@ -1741,7 +1827,7 @@ const App = {
                     }
 
                     return `
-                        <div class="card-3d rounded-3xl overflow-hidden flex flex-col justify-between p-4 sm:p-5 bg-white hover:translate-y-[-2px] transition-all border border-slate-200/80">
+                        <div data-product-card data-product-title="${App.utils.escapeHtml(p.title)}" class="card-3d rounded-3xl overflow-hidden flex flex-col justify-between p-4 sm:p-5 bg-white hover:translate-y-[-2px] transition-all border border-slate-200/80">
                             <div>
                                 <div onclick="App.products.openDetailModal('${p.id}')" class="relative h-40 sm:h-44 rounded-2xl overflow-hidden mb-3 card-3d-inset cursor-pointer group">
                                     <img src="${p.imgUrl}" alt="${App.utils.escapeHtml(p.title)}" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300">
@@ -1998,13 +2084,13 @@ const App = {
                     const isImage = /\.(png|jpe?g|gif|webp|svg)(?:$|[?#])/i.test(lower);
 
                     if (isImage) {
-                        return `<div class="module-media-frame aspect-video w-full rounded-xl overflow-hidden card-3d bg-slate-50 flex items-center justify-center"><img src="${safe}" alt="${App.utils.escapeHtml(title || 'Visual modul')}" class="w-full h-full object-contain" loading="lazy" referrerpolicy="no-referrer"></div>`;
+                        return `<div class="module-media-frame aspect-video w-full rounded-xl overflow-hidden card-3d bg-slate-50 flex items-center justify-center" data-module-media="image"><img src="${safe}" alt="${App.utils.escapeHtml(title || 'Visual modul')}" class="w-full h-full object-contain" loading="lazy" referrerpolicy="no-referrer"></div>`;
                     }
 
                     const ytMatch = value.match(/(?:youtube\.com\/(?:watch\?v=|shorts\/|live\/)|youtu\.be\/)([A-Za-z0-9_-]{6,})/i);
                     if (ytMatch) {
                         const embed = `https://www.youtube.com/embed/${ytMatch[1]}`;
-                        return `<div class="module-media-frame aspect-video w-full rounded-xl overflow-hidden card-3d"><iframe class="w-full h-full" src="${embed}" title="${App.utils.escapeHtml(title || 'Video Tutorial')}" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen referrerpolicy="strict-origin-when-cross-origin"></iframe></div>`;
+                        return `<div class="module-media-frame aspect-video w-full rounded-xl overflow-hidden card-3d" data-module-media="youtube"><iframe class="w-full h-full" src="${embed}" title="${App.utils.escapeHtml(title || 'Video Tutorial')}" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen referrerpolicy="strict-origin-when-cross-origin"></iframe></div>`;
                     }
 
                     if (parsed && /(^|\.)drive\.google\.com$/i.test(parsed.hostname)) {
@@ -2012,8 +2098,12 @@ const App = {
                         const fileId = match ? match[0] : '';
                         if (fileId) {
                             const preview = `https://drive.google.com/file/d/${fileId}/preview`;
-                            return `<div class="module-media-frame aspect-video w-full rounded-xl overflow-hidden card-3d"><iframe class="w-full h-full" src="${preview}" title="${App.utils.escapeHtml(title || 'Materi Google Drive')}" frameborder="0" allow="autoplay" allowfullscreen></iframe></div>`;
+                            return `<div class="module-media-frame aspect-video w-full rounded-xl overflow-hidden card-3d" data-module-media="drive"><iframe class="w-full h-full" src="${preview}" title="${App.utils.escapeHtml(title || 'Materi Google Drive')}" frameborder="0" allow="autoplay; fullscreen" allowfullscreen></iframe></div>`;
                         }
+                    }
+
+                    if (/\.(mp4|webm|ogg)(?:$|[?#])/i.test(lower)) {
+                        return `<div class="module-media-frame aspect-video w-full rounded-xl overflow-hidden card-3d bg-black" data-module-media="video"><video class="w-full h-full object-contain" controls playsinline preload="metadata"><source src="${safe}"></video></div>`;
                     }
 
                     return `<a href="${safe}" target="_blank" rel="noopener noreferrer" class="module-media-frame card-3d p-5 rounded-2xl flex items-center gap-3 text-[#151c75] font-bold text-sm hover:bg-blue-50 transition-all"><span class="w-10 h-10 rounded-xl bg-blue-50 flex items-center justify-center"><i class="fa-solid fa-arrow-up-right-from-square"></i></span><span>Buka media / resource</span></a>`;
@@ -2143,8 +2233,12 @@ const App = {
                         if (tab === 'orders') {
                             area.innerHTML = `
                                 <div>
-                                    <div class="flex items-center justify-between mb-4">
+                                    <div class="flex items-center justify-between gap-3 mb-4 flex-wrap">
                                         <h3 class="font-bold text-sm text-[#151c75]">Daftar Transaksi Masuk (${(adminData.orders || []).length})</h3>
+                                        <div class="flex items-center gap-2 bg-white px-2.5 py-1.5 rounded-xl border border-blue-100 shadow-2xs w-full sm:w-64">
+                                            <i class="fa-solid fa-magnifying-glass text-[#151c75] text-xs"></i>
+                                            <input type="search" value="${App.utils.escapeHtml(App.state.adminOrderSearch || '')}" placeholder="Cari transaksi..." class="w-full bg-transparent text-xs outline-none" oninput="App.admin.setOrderSearch(this.value)">
+                                        </div>
                                     </div>
                                     <div class="overflow-x-auto">
                                         <table class="w-full text-left text-xs">
@@ -2160,7 +2254,11 @@ const App = {
                                                 </tr>
                                             </thead>
                                             <tbody>
-                                                ${(adminData.orders || []).map(o => {
+                                                ${(adminData.orders || []).filter(o => {
+                                                    const q = String(App.state.adminOrderSearch || '').trim().toLowerCase();
+                                                    if (!q) return true;
+                                                    return [o.id, o.userName, o.userEmail, o.userPhone, o.productTitle, o.status, o.paymentStatus].join(' ').toLowerCase().includes(q);
+                                                }).map(o => {
                                                     const wa = o.userPhone ? 'https://wa.me/' + String(o.userPhone).replace(/\D/g, '').replace(/^0/, '62') + '?text=' + encodeURIComponent('Halo, kami dari Studihome, silahkan lakukan pembayaran dan akses fasilitas dengan masuk ke akun kamu di studihome.id.') : '';
                                                     const paymentTime = o.paymentConfirmedAt ? new Date(o.paymentConfirmedAt).toLocaleString('id-ID', {day:'2-digit', month:'2-digit', year:'numeric', hour:'2-digit', minute:'2-digit', second:'2-digit'}) : 'Belum ada';
                                                     return `
@@ -2394,7 +2492,13 @@ const App = {
                         } else if (tab === 'users') {
                             area.innerHTML = `
                                 <div>
-                                    <h3 class="font-bold text-sm text-[#151c75] mb-4">Kelola Pengguna Terdaftar (${(adminData.users || []).length})</h3>
+                                    <div class="flex items-center justify-between gap-3 mb-4 flex-wrap">
+                                        <h3 class="font-bold text-sm text-[#151c75]">Kelola Pengguna Terdaftar (${(adminData.users || []).length})</h3>
+                                        <div class="flex items-center gap-2 bg-white px-2.5 py-1.5 rounded-xl border border-blue-100 shadow-2xs w-full sm:w-64">
+                                            <i class="fa-solid fa-magnifying-glass text-[#151c75] text-xs"></i>
+                                            <input type="search" value="${App.utils.escapeHtml(App.state.adminUserSearch || '')}" placeholder="Cari pengguna..." class="w-full bg-transparent text-xs outline-none" oninput="App.admin.setUserSearch(this.value)">
+                                        </div>
+                                    </div>
                                     <div class="overflow-x-auto">
                                         <table class="w-full text-left text-xs">
                                             <thead>
@@ -2408,7 +2512,11 @@ const App = {
                                                 </tr>
                                             </thead>
                                             <tbody>
-                                                ${(adminData.users || []).map(u => {
+                                                ${(adminData.users || []).filter(u => {
+                                                    const q = String(App.state.adminUserSearch || '').trim().toLowerCase();
+                                                    if (!q) return true;
+                                                    return [u.name, u.email, u.phone, u.role, u.status].join(' ').toLowerCase().includes(q);
+                                                }).map(u => {
                                                     const isAdmin = u.role === 'admin';
                                                     const isBlocked = String(u.status || '').toLowerCase() === 'blocked';
                                                     return `
@@ -2449,6 +2557,18 @@ const App = {
                             `;
                         }
                     } catch (e) {}
+                },
+
+                setOrderSearch: (value) => {
+                    App.state.adminOrderSearch = String(value || '');
+                    clearTimeout(App.state.adminOrderSearchTimer);
+                    App.state.adminOrderSearchTimer = setTimeout(() => App.admin.renderSubTab(), 220);
+                },
+
+                setUserSearch: (value) => {
+                    App.state.adminUserSearch = String(value || '');
+                    clearTimeout(App.state.adminUserSearchTimer);
+                    App.state.adminUserSearchTimer = setTimeout(() => App.admin.renderSubTab(), 220);
                 },
 
                 verifyOrder: async (orderId) => {
