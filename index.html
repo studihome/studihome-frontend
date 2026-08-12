@@ -4,19 +4,17 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Studihome - Platform Pembelajaran Digital & Otomasi AI</title>
-    <meta name="google-site-verification" content="p1hKfmYu1aRIYgy_JUzcCrax8bZ_js5aASJkD5cxSSY" />
+     <meta name="google-site-verification" content="p1hKfmYu1aRIYgy_JUzcCrax8bZ_js5aASJkD5cxSSY" />
     <!-- Static SVG Retina Blue Favicon (100% Size) -->
 <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'>
     <style>.star { fill: %231b5df0; font-size: 100px; text-anchor: middle; dominant-baseline: central; font-family: sans-serif; font-weight: bold; }</style>
     <text x='50' y='50' class='star'>✦</text></svg>">
 
-    
-   <!-- SEO & Social Metadata -->
-  <meta name="description" content="Studihome - Solusi pembelajaran AI modern, e-book, masterclass, otomasi spreadsheet, dan pengembangan web app kustom terintegrasi.">
-  <meta name="keywords" content="Studihome, Otomasi AI, Prompt Engineering, Google Apps Script, Web App Serverless, Masterclass, E-Book AI">
-  <meta name="author" content="Studihome">
-  <meta name="robots" content="index, follow">
-  <link rel="canonical" href="https://studihome.id">
+    <!-- SEO & Open Graph Meta Tags -->
+    <meta name="description" content="Platform Produk Digital & Otomasi AI #1 Indonesia. Tingkatkan efisiensi kerja hingga 10x lipat dengan modul & template AI interaktif.">
+    <meta property="og:title" content="Studihome - Platform Pembelajaran Digital & Otomasi AI">
+    <meta property="og:description" content="Kerja cerdas, hasil tuntas, cuan melesat tanpa batas dengan teknologi AI Studihome.">
+    <meta property="og:type" content="website">
 
     <!-- Tailwind CSS CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
@@ -179,6 +177,7 @@
 </head>
 <body class="min-h-full flex flex-col antialiased selection:bg-amber-400 selection:text-slate-900 text-slate-800">
 
+    <!-- TOP NAVIGATION BAR -->
     <header class="sticky top-0 z-40 bg-white/95 backdrop-blur-md border-b border-blue-100 px-3 sm:px-6 py-3 shadow-xs">
         <div class="max-w-7xl mx-auto flex items-center justify-between gap-2 sm:gap-4">
             
@@ -298,8 +297,8 @@
                     <input type="tel" id="reg-phone" required placeholder="081234567890" class="w-full card-3d-inset px-3.5 py-2.5 sm:py-3 rounded-xl text-xs sm:text-sm outline-none focus:ring-2 focus:ring-[#151c75]">
                 </div>
                 <div>
-                    <label class="block text-xs sm:text-sm font-bold text-slate-700 mb-1">Kata Sandi (Min 10 Karakter) <span class="text-red-500">*</span></label>
-                    <input type="password" id="reg-password" minlength="10" required placeholder="••••••••••" class="w-full card-3d-inset px-3.5 py-2.5 sm:py-3 rounded-xl text-xs sm:text-sm outline-none focus:ring-2 focus:ring-[#151c75]">
+                    <label class="block text-xs sm:text-sm font-bold text-slate-700 mb-1">Kata Sandi <span class="text-red-500">*</span></label>
+                    <input type="password" id="reg-password" required placeholder="••••••••" class="w-full card-3d-inset px-3.5 py-2.5 sm:py-3 rounded-xl text-xs sm:text-sm outline-none focus:ring-2 focus:ring-[#151c75]">
                 </div>
                 <button type="submit" class="w-full btn-brand-amber py-3 sm:py-3.5 rounded-xl text-xs sm:text-sm font-extrabold transition-all shadow-md mt-2">
                     Buat Akun Sekarang
@@ -375,14 +374,24 @@
         </div>
     </div>
 
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script>
-        // CONFIGURATION: Set Google Apps Script Web App Executable URL here for Live Production Database
-        const API_BASE_URL = "https://script.google.com/macros/s/AKfycbwArHIzA8hEYiohWm1sWq5LqGAhtJ4ZrHJARFQRj7Imfy0fULXXuPXzroQXM0QUNP85/exec"; // Empty string triggers local seed fallback mode
+        // SUPABASE CONFIGURATION — isi dua nilai ini dari Supabase > Project Settings > API
+        const SUPABASE_URL = window.STUDIHOME_SUPABASE_URL;
+        const SUPABASE_ANON_KEY = window.STUDIHOME_SUPABASE_ANON_KEY;
+
+        const supabaseClient = window.supabase.createClient(
+    SUPABASE_URL,
+    SUPABASE_ANON_KEY
+);;
+
+        // Supabase configuration is defined above. Google Apps Script is not used.
 
         const App = {
             state: {
                 user: null,
                 publicData: null,
+                memberData: null,
                 activeTab: 'home',
                 adminTab: 'orders',
                 pendingCheckoutProductId: null,
@@ -511,31 +520,31 @@
             init: async () => {
                 setInterval(App.utils.updateClock, 1000);
                 App.utils.updateClock();
-
-                const savedSession = App.storage.get('studihome_session');
-                if (savedSession) {
-                    try {
-                        App.state.user = JSON.parse(savedSession);
-                    } catch (e) {
-                        App.storage.remove('studihome_session');
+                try {
+                    App.api._requireConfig();
+                    const { data: { session } } = await supabaseClient.auth.getSession();
+                    if (session?.user) {
+                        try {
+                            App.state.user = await App.api._profile();
+                            if (App.state.user && String(App.state.user.status).toLowerCase() === 'active') {
+                                App.state.memberData = await App.api.post('GET_MEMBER_DASHBOARD');
+                            } else {
+                                await supabaseClient.auth.signOut(); App.state.user = null;
+                            }
+                        } catch (e) { await supabaseClient.auth.signOut(); App.state.user = null; }
                     }
+                    App.ui.renderTopAuth();
+                    await App.home.load();
+                    supabaseClient.auth.onAuthStateChange(async (_event, sessionNow) => {
+                        if (!sessionNow?.user) { App.state.user = null; App.state.memberData = null; App.ui.renderTopAuth(); return; }
+                        try { App.state.user = await App.api._profile(); App.ui.renderTopAuth(); } catch(e) {}
+                    });
+                } catch (e) {
+                    App.ui.updateApiStatus('error');
+                    App.ui.toast(e.message || 'Supabase belum dikonfigurasi.', 'error');
+                    App.ui.renderTopAuth();
+                    await App.home.load().catch(()=>{});
                 }
-
-                App.ui.renderTopAuth();
-                await App.home.load();
-
-                if (API_BASE_URL && API_BASE_URL.trim() !== '' && App.state.user?.token) {
-                    try {
-                        const verified = await App.api.post('AUTH_SESSION');
-                        if (verified && verified.user) {
-                            App.state.user = { ...App.state.user, ...verified.user };
-                            App.ui.renderTopAuth();
-                        }
-                    } catch (sessionErr) {
-                        App.auth.logout();
-                    }
-                }
-
                 window.addEventListener('hashchange', App.router.handleHash);
                 App.router.handleHash();
             },
@@ -684,228 +693,162 @@
             },
 
             api: {
-                getMockData: (action, payload) => {
-                    if (action === 'GET_PUBLIC') {
-                        return {
-                            hero: App.state.demo.hero,
-                            aiLinks: App.state.demo.aiLinks,
-                            products: App.state.demo.products,
-                            testimonials: App.state.demo.testimonials
-                        };
-                    } else if (action === 'AUTH_LOGIN') {
-                        const targetUser = App.state.demo.users.find(u => u.email.toLowerCase() === payload.email.toLowerCase());
-                        if (targetUser && targetUser.status === 'Blocked') {
-                            throw new Error('Akun Anda telah dinonaktifkan/diblokir oleh Admin.');
-                        }
-                        const isAdmin = payload.email.includes('admin');
-                        return {
-                            token: 'tok-' + Date.now(),
-                            name: targetUser ? targetUser.name : (isAdmin ? 'Admin Studihome' : (payload.email.split('@')[0] || 'Member')),
-                            email: payload.email,
-                            phone: targetUser ? targetUser.phone : '085111581115',
-                            role: targetUser ? targetUser.role : (isAdmin ? 'admin' : 'member'),
-                            status: targetUser ? targetUser.status : 'Active',
-                            registeredAt: targetUser ? targetUser.registeredAt : '2026-08-10'
-                        };
-                    } else if (action === 'AUTH_REGISTER') {
-                        const newUser = {
-                            id: 'u-' + Date.now(),
-                            name: payload.name,
-                            email: payload.email,
-                            phone: payload.phone,
-                            role: 'member',
-                            status: 'Active',
-                            registeredAt: new Date().toISOString().split('T')[0]
-                        };
-                        App.state.demo.users.push(newUser);
-                        return {
-                            token: 'tok-' + newUser.id,
-                            name: payload.name,
-                            email: payload.email,
-                            phone: payload.phone,
-                            role: 'member',
-                            status: 'Active',
-                            registeredAt: newUser.registeredAt
-                        };
-                    } else if (action === 'CREATE_ORDER') {
-                        const newId = 'ORD-' + Math.floor(100000 + Math.random() * 900000);
-                        const prod = App.state.demo.products.find(p => p.id === payload.productId) || App.state.demo.products[0];
-                        App.state.demo.orders.unshift({
-                            id: newId,
-                            userName: payload.name || App.state.user?.name || 'Pelanggan',
-                            userEmail: App.state.user?.email || 'guest@email.com',
-                            productId: prod.id,
-                            productTitle: prod.title,
-                            price: prod.price,
-                            status: 'PENDING_PAYMENT',
-                            createdAt: new Date().toISOString().split('T')[0]
-                        });
-                        return { orderId: newId };
-                    } else if (action === 'CLAIM_FREE_PRODUCT') {
-                        const email = App.state.user?.email || 'guest@email.com';
-                        if (!App.state.demo.ownedProductsByUser[email]) {
-                            App.state.demo.ownedProductsByUser[email] = [];
-                        }
-                        if (!App.state.demo.ownedProductsByUser[email].includes(payload.productId)) {
-                            App.state.demo.ownedProductsByUser[email].push(payload.productId);
-                        }
-                        return { success: true };
-                    } else if (action === 'ADMIN_VERIFY_ORDER') {
-                        const ord = App.state.demo.orders.find(o => o.id === payload.orderId);
-                        if (ord) {
-                            ord.status = 'VERIFIED';
-                            const email = ord.userEmail;
-                            if (!App.state.demo.ownedProductsByUser[email]) {
-                                App.state.demo.ownedProductsByUser[email] = [];
-                            }
-                            if (!App.state.demo.ownedProductsByUser[email].includes(ord.productId)) {
-                                App.state.demo.ownedProductsByUser[email].push(ord.productId);
-                            }
-                        }
-                        return { success: true };
-                    } else if (action === 'ADMIN_REJECT_ORDER') {
-                        const ord = App.state.demo.orders.find(o => o.id === payload.orderId);
-                        if (ord) {
-                            ord.status = 'REJECTED';
-                            const email = ord.userEmail;
-                            if (App.state.demo.ownedProductsByUser[email]) {
-                                App.state.demo.ownedProductsByUser[email] = App.state.demo.ownedProductsByUser[email].filter(id => id !== ord.productId);
-                            }
-                        }
-                        return { success: true };
-                    } else if (action === 'ADMIN_SAVE_PRODUCT') {
-                        const pData = payload.product;
-                        if (pData.id) {
-                            const idx = App.state.demo.products.findIndex(p => p.id === pData.id);
-                            if (idx !== -1) App.state.demo.products[idx] = { ...App.state.demo.products[idx], ...pData };
-                        } else {
-                            pData.id = 'p-' + Date.now();
-                            App.state.demo.products.unshift(pData);
-                        }
-                        return { success: true };
-                    } else if (action === 'ADMIN_DELETE_PRODUCT') {
-                        App.state.demo.products = App.state.demo.products.filter(p => p.id !== payload.productId);
-                        return { success: true };
-                    } else if (action === 'ADMIN_SAVE_MODULE') {
-                        const { productId, moduleData } = payload;
-                        if (!App.state.demo.modules[productId]) App.state.demo.modules[productId] = [];
-                        if (moduleData.id) {
-                            const idx = App.state.demo.modules[productId].findIndex(m => m.id === moduleData.id);
-                            if (idx !== -1) App.state.demo.modules[productId][idx] = moduleData;
-                        } else {
-                            moduleData.id = 'm-' + Date.now();
-                            App.state.demo.modules[productId].push(moduleData);
-                        }
-                        return { success: true };
-                    } else if (action === 'ADMIN_DELETE_MODULE') {
-                        const { productId, moduleId } = payload;
-                        if (App.state.demo.modules[productId]) {
-                            App.state.demo.modules[productId] = App.state.demo.modules[productId].filter(m => m.id !== moduleId);
-                        }
-                        return { success: true };
-                    } else if (action === 'ADMIN_SAVE_MASTER') {
-                        App.state.demo.master = { ...App.state.demo.master, ...payload };
-                        return { success: true };
-                    } else if (action === 'ADMIN_SAVE_HERO') {
-                        App.state.demo.hero = { ...App.state.demo.hero, ...payload };
-                        return { success: true };
-                    } else if (action === 'ADMIN_SAVE_AI_LINKS') {
-                        App.state.demo.aiLinks = payload.aiLinks;
-                        return { success: true };
-                    } else if (action === 'ADMIN_SAVE_TESTIMONIAL') {
-                        const tData = payload.testimonial;
-                        if (tData.id) {
-                            const idx = App.state.demo.testimonials.findIndex(t => t.id === tData.id);
-                            if (idx !== -1) App.state.demo.testimonials[idx] = tData;
-                        } else {
-                            tData.id = 't-' + Date.now();
-                            App.state.demo.testimonials.push(tData);
-                        }
-                        return { success: true };
-                    } else if (action === 'ADMIN_DELETE_TESTIMONIAL') {
-                        App.state.demo.testimonials = App.state.demo.testimonials.filter(t => t.id !== payload.testimonialId);
-                        return { success: true };
-                    } else if (action === 'ADMIN_TOGGLE_USER_STATUS') {
-                        const usr = App.state.demo.users.find(u => u.id === payload.userId || u.email === payload.email);
-                        if (usr && usr.role !== 'admin') {
-                            usr.status = usr.status === 'Active' ? 'Blocked' : 'Active';
-                        }
-                        return { success: true };
-                    } else if (action === 'GET_MEMBER_DASHBOARD') {
-                        const userEmail = App.state.user?.email || 'guest';
-                        const verifiedIds = App.state.demo.ownedProductsByUser[userEmail] || [];
-                        const verifiedProducts = App.state.demo.products.filter(p => verifiedIds.includes(p.id));
-                        const userOrders = App.state.demo.orders.filter(o => o.userEmail === userEmail);
-                        
-                        return {
-                            verifiedProducts: verifiedProducts,
-                            userOrders: userOrders
-                        };
-                    } else if (action === 'GET_PRODUCT_MODULES') {
-                        const prod = App.state.demo.products.find(p => p.id === payload.productId) || App.state.demo.products[0];
-                        const mods = App.state.demo.modules[payload.productId] || App.state.demo.modules['p1'] || [];
-                        return {
-                            productTitle: prod.title,
-                            modules: mods
-                        };
-                    } else if (action === 'GET_ADMIN_DATA') {
-                        return {
-                            hero: App.state.demo.hero,
-                            aiLinks: App.state.demo.aiLinks,
-                            testimonials: App.state.demo.testimonials,
-                            orders: App.state.demo.orders,
-                            products: App.state.demo.products,
-                            modules: App.state.demo.modules,
-                            master: App.state.demo.master,
-                            users: App.state.demo.users
-                        };
+                _requireConfig: () => {
+                    if (SUPABASE_URL.includes('PASTE_') || SUPABASE_ANON_KEY.includes('PASTE_')) {
+                        throw new Error('Supabase belum dikonfigurasi. Isi SUPABASE_URL dan SUPABASE_ANON_KEY di index.html.');
                     }
-                    return {};
                 },
-
+                _profile: async () => {
+                    const { data: { user }, error: authErr } = await supabaseClient.auth.getUser();
+                    if (authErr) throw authErr;
+                    if (!user) return null;
+                    const { data, error } = await supabaseClient.from('profiles').select('id,name,phone,role,status,created_at,updated_at,email').eq('id', user.id).single();
+                    if (error) throw error;
+                    return { ...data, email: data.email || user.email || '', registeredAt: data.created_at };
+                },
+                _public: async () => {
+                    const [settingsRes, productsRes, aiRes, testimonialsRes] = await Promise.all([
+                        supabaseClient.from('site_settings').select('*').eq('id', 1).single(),
+                        supabaseClient.from('products').select('*').eq('is_active', true).order('created_at', { ascending: false }),
+                        supabaseClient.from('ai_links').select('*').order('sort_order', { ascending: true }),
+                        supabaseClient.from('testimonials').select('*').order('created_at', { ascending: false })
+                    ]);
+                    for (const r of [settingsRes, productsRes, aiRes, testimonialsRes]) if (r.error) throw r.error;
+                    const s = settingsRes.data || {};
+                    return {
+                        hero: {
+                            badge: s.badge || '', title: s.hero_title || '', subtitle: s.hero_subtitle || '',
+                            ctaPrimaryLabel: s.cta_primary_label || 'Jelajahi Produk', ctaPrimaryUrl: s.cta_primary_url || '#products',
+                            ctaSecondaryLabel: s.cta_secondary_label || 'Klaim Prompt Gratis', ctaSecondaryUrl: s.cta_secondary_url || '#p4'
+                        },
+                        aiLinks: (aiRes.data || []).map(x => ({ id: x.id, name: x.name, icon: x.icon, sortOrder: x.sort_order })),
+                        products: (productsRes.data || []).map(App.api._mapProduct),
+                        testimonials: testimonialsRes.data || [],
+                        master: { qrisSlots: s.qris_slots || [] }
+                    };
+                },
+                _mapProduct: (p) => ({
+                    id: p.id, title: p.title, desc: p.description, price: Number(p.price), priceOriginal: Number(p.price_original),
+                    badge: p.badge, category: p.category, imgUrl: p.image_url, features: p.features,
+                    isFree: !!p.is_free, isActive: !!p.is_active
+                }),
+                getMockData: () => App.state.publicData || { hero: App.state.demo.hero, aiLinks: App.state.demo.aiLinks, products: App.state.demo.products, testimonials: App.state.demo.testimonials, master: App.state.demo.master },
                 post: async (action, payload = {}) => {
-                    const isDemo = !API_BASE_URL || API_BASE_URL.trim() === '';
-
-                    if (isDemo) {
-                        App.ui.updateApiStatus('ready');
-                        await new Promise(r => setTimeout(r, 100));
-                        return App.api.getMockData(action, payload);
-                    }
-
+                    App.api._requireConfig();
                     App.ui.updateApiStatus('connecting');
-
                     try {
-                        const controller = new AbortController();
-                        const timeoutId = setTimeout(() => controller.abort(), 12000);
-
-                        const response = await fetch(API_BASE_URL, {
-                            method: 'POST',
-                            headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-                            body: JSON.stringify({ action, payload, token: App.state.user?.token }),
-                            signal: controller.signal
-                        });
-                        
-                        clearTimeout(timeoutId);
-                        const text = await response.text();
-                        let result;
-                        
-                        try {
-                            result = JSON.parse(text);
-                        } catch (parseErr) {
-                            throw new Error("Respon server bukan format JSON valid.");
-                        }
-
-                        if (!result.success) {
-                            throw new Error(result.error?.message || result.error || 'Terjadi kesalahan pada server Apps Script.');
-                        }
-
-                        App.ui.updateApiStatus('online');
-                        return result.data;
-                    } catch (e) {
-                        App.ui.updateApiStatus('error');
-                        App.ui.toast("Koneksi Backend Gagal: " + e.message, "error");
-                        throw e;
-                    }
+                        let data = null;
+                        if (action === 'GET_PUBLIC') {
+                            data = await App.api._public();
+                        } else if (action === 'AUTH_LOGIN') {
+                            const { data: auth, error } = await supabaseClient.auth.signInWithPassword({ email: payload.email, password: payload.password });
+                            if (error) throw error;
+                            const profile = await App.api._profile();
+                            if (!profile || String(profile.status).toLowerCase() === 'blocked') {
+                                await supabaseClient.auth.signOut();
+                                throw new Error('Akun Anda tidak aktif atau telah diblokir oleh Admin.');
+                            }
+                            data = { user: profile };
+                        } else if (action === 'AUTH_REGISTER') {
+                            const { data: auth, error } = await supabaseClient.auth.signUp({
+                                email: payload.email, password: payload.password,
+                                options: { data: { name: payload.name, phone: payload.phone } }
+                            });
+                            if (error) throw error;
+                            if (!auth.session) {
+                                data = { requiresEmailConfirmation: true, user: auth.user };
+                            } else {
+                                data = { user: await App.api._profile() };
+                            }
+                        } else if (action === 'AUTH_LOGOUT') {
+                            const { error } = await supabaseClient.auth.signOut();
+                            if (error) throw error;
+                            data = { success: true };
+                        } else if (action === 'GET_MEMBER_DASHBOARD') {
+                            const user = await App.api._profile();
+                            if (!user) throw new Error('Sesi login tidak ditemukan.');
+                            const [eRes, oRes] = await Promise.all([
+                                supabaseClient.from('entitlements').select('product_id,status').eq('user_id', user.id).eq('status', 'ACTIVE'),
+                                supabaseClient.from('orders').select('id,user_id,product_id,unit_price,total_amount,status,payment_status,created_at,products(title),profiles!orders_user_id_fkey(name,email)').eq('user_id', user.id).order('created_at', { ascending: false })
+                            ]);
+                            if (eRes.error) throw eRes.error; if (oRes.error) throw oRes.error;
+                            const ids = (eRes.data || []).map(e => e.product_id);
+                            const freeRes = await supabaseClient.from('products').select('*').in('id', ids.length ? ids : ['00000000-0000-0000-0000-000000000000']);
+                            if (freeRes.error) throw freeRes.error;
+                            const products = (freeRes.data || []).map(App.api._mapProduct);
+                            const orders = (oRes.data || []).map(o => ({
+                                id: o.id, userEmail: o.profiles?.email || user.email, userName: o.profiles?.name || user.name,
+                                productId: o.product_id, productTitle: o.products?.title || '', price: Number(o.total_amount || o.unit_price),
+                                status: o.status, paymentStatus: o.payment_status, createdAt: o.created_at
+                            }));
+                            data = { verifiedProducts: products, userOrders: orders };
+                            App.state.memberData = data;
+                        } else if (action === 'GET_PRODUCT_MODULES') {
+                            const { data: mods, error } = await supabaseClient.from('modules').select('*').eq('product_id', payload.productId).order('created_at', { ascending: true });
+                            if (error) throw error;
+                            const product = (App.state.publicData?.products || []).find(p => p.id === payload.productId);
+                            data = { productTitle: product?.title || '', modules: (mods || []).map(m => ({ id: m.id, title: m.title, yt_url: m.youtube_url, markdown: m.markdown, download_url: m.download_url, links: m.links_json || [] })) };
+                        } else if (action === 'GET_ADMIN_DATA') {
+                            const [sRes,pRes,mRes,aRes,tRes,oRes,uRes] = await Promise.all([
+                                supabaseClient.from('site_settings').select('*').eq('id',1).single(),
+                                supabaseClient.from('products').select('*').order('created_at',{ascending:false}),
+                                supabaseClient.from('modules').select('*').order('created_at',{ascending:true}),
+                                supabaseClient.from('ai_links').select('*').order('sort_order',{ascending:true}),
+                                supabaseClient.from('testimonials').select('*').order('created_at',{ascending:false}),
+                                supabaseClient.from('orders').select('id,user_id,product_id,unit_price,total_amount,status,payment_status,created_at,products(title),profiles!orders_user_id_fkey(name,email)').order('created_at',{ascending:false}),
+                                supabaseClient.from('profiles').select('id,name,email,phone,role,status,created_at').order('created_at',{ascending:false})
+                            ]);
+                            for (const r of [sRes,pRes,mRes,aRes,tRes,oRes,uRes]) if (r.error) throw r.error;
+                            const s=sRes.data||{};
+                            const grouped={}; (mRes.data||[]).forEach(m => { (grouped[m.product_id] ||= []).push({id:m.id,title:m.title,yt_url:m.youtube_url,markdown:m.markdown,download_url:m.download_url,links:m.links_json||[]}); });
+                            data={
+                                hero:{badge:s.badge||'',title:s.hero_title||'',subtitle:s.hero_subtitle||'',ctaPrimaryLabel:s.cta_primary_label||'',ctaPrimaryUrl:s.cta_primary_url||'#products',ctaSecondaryLabel:s.cta_secondary_label||'',ctaSecondaryUrl:s.cta_secondary_url||'#p4'},
+                                master:{qrisSlots:s.qris_slots||[]}, aiLinks:(aRes.data||[]).map(x=>({id:x.id,name:x.name,icon:x.icon,sortOrder:x.sort_order})),
+                                testimonials:tRes.data||[], products:(pRes.data||[]).map(App.api._mapProduct), modules:grouped,
+                                orders:(oRes.data||[]).map(o=>({id:o.id,userId:o.user_id,userName:o.profiles?.name||'',userEmail:o.profiles?.email||'',productId:o.product_id,productTitle:o.products?.title||'',price:Number(o.total_amount||o.unit_price),status:o.status,paymentStatus:o.payment_status,createdAt:o.created_at})),
+                                users:uRes.data||[]
+                            };
+                            App.state.demo.hero=data.hero; App.state.demo.master=data.master; App.state.demo.aiLinks=data.aiLinks; App.state.demo.testimonials=data.testimonials; App.state.demo.products=data.products; App.state.demo.modules=data.modules; App.state.demo.orders=data.orders; App.state.demo.users=data.users;
+                        } else if (action === 'CREATE_ORDER') {
+                            const { data: rpc, error } = await supabaseClient.rpc('create_order', { p_product_id: payload.productId, p_name: payload.name, p_phone: payload.phone });
+                            if (error) throw error; data = rpc;
+                        } else if (action === 'CLAIM_FREE_PRODUCT') {
+                            const { data: rpc, error } = await supabaseClient.rpc('claim_free_product', { p_product_id: payload.productId });
+                            if (error) throw error; data = rpc;
+                        } else if (action === 'ADMIN_VERIFY_ORDER') {
+                            const { data: rpc, error } = await supabaseClient.rpc('admin_verify_order', { p_order_id: payload.orderId });
+                            if (error) throw error; data = rpc;
+                        } else if (action === 'ADMIN_REJECT_ORDER') {
+                            const { data: rpc, error } = await supabaseClient.rpc('admin_reject_order', { p_order_id: payload.orderId });
+                            if (error) throw error; data = rpc;
+                        } else if (action === 'ADMIN_SAVE_PRODUCT') {
+                            const p=payload.product; const row={ title:p.title,description:p.desc,price:Number(p.price),price_original:Number(p.priceOriginal||p.price),badge:p.badge||'',category:p.category||'General',image_url:p.imgUrl||'',features:p.features||'',is_free:Number(p.price)===0,is_active:p.isActive!==false,updated_at:new Date().toISOString() };
+                            if (p.id) row.id=p.id;
+                            const {data:r,error}=await supabaseClient.from('products').upsert(row).select().single(); if(error)throw error; data={product:App.api._mapProduct(r)};
+                        } else if (action === 'ADMIN_DELETE_PRODUCT') {
+                            const {error}=await supabaseClient.from('products').update({is_active:false,updated_at:new Date().toISOString()}).eq('id',payload.productId); if(error)throw error; data={success:true};
+                        } else if (action === 'ADMIN_SAVE_MODULE') {
+                            const m=payload.moduleData; const row={product_id:payload.productId,title:m.title,youtube_url:m.yt_url||'',markdown:m.markdown||'',download_url:m.download_url||'',links_json:m.links||[],updated_at:new Date().toISOString()}; if(m.id)row.id=m.id;
+                            const {data:r,error}=await supabaseClient.from('modules').upsert(row).select().single(); if(error)throw error; data={module:r};
+                        } else if (action === 'ADMIN_DELETE_MODULE') {
+                            const {error}=await supabaseClient.from('modules').delete().eq('id',payload.moduleId); if(error)throw error; data={success:true};
+                        } else if (action === 'ADMIN_SAVE_HERO') {
+                            const {error}=await supabaseClient.from('site_settings').update({badge:payload.badge,hero_title:payload.title,hero_subtitle:payload.subtitle,cta_primary_label:payload.ctaPrimaryLabel,cta_primary_url:payload.ctaPrimaryUrl,cta_secondary_label:payload.ctaSecondaryLabel,cta_secondary_url:payload.ctaSecondaryUrl,updated_at:new Date().toISOString()}).eq('id',1); if(error)throw error; data={success:true};
+                        } else if (action === 'ADMIN_SAVE_AI_LINKS') {
+                            const links=payload.aiLinks||[]; const {error:dErr}=await supabaseClient.from('ai_links').delete().neq('id','00000000-0000-0000-0000-000000000000'); if(dErr)throw dErr;
+                            const rows=links.map((x,i)=>({name:x.name,icon:x.icon,sort_order:i+1})); if(rows.length){const {error:iErr}=await supabaseClient.from('ai_links').insert(rows);if(iErr)throw iErr;} data={success:true};
+                        } else if (action === 'ADMIN_SAVE_TESTIMONIAL') {
+                            const t=payload.testimonial; const row={name:t.name,role:t.role,text:t.text}; if(t.id)row.id=t.id; const {data:r,error}=await supabaseClient.from('testimonials').upsert(row).select().single(); if(error)throw error; data={testimonial:r};
+                        } else if (action === 'ADMIN_DELETE_TESTIMONIAL') {
+                            const {error}=await supabaseClient.from('testimonials').delete().eq('id',payload.testimonialId);if(error)throw error;data={success:true};
+                        } else if (action === 'ADMIN_SAVE_MASTER') {
+                            const {error}=await supabaseClient.from('site_settings').update({qris_slots:payload.qrisSlots||[],updated_at:new Date().toISOString()}).eq('id',1);if(error)throw error;data={success:true};
+                        } else if (action === 'ADMIN_TOGGLE_USER_STATUS') {
+                            const {data:u,error:gErr}=await supabaseClient.from('profiles').select('status,role').eq('id',payload.userId).single();if(gErr)throw gErr;if(u.role==='admin')throw new Error('Admin tidak dapat diblokir dari panel ini.');
+                            const next=String(u.status).toLowerCase()==='active'?'blocked':'active'; const {error}=await supabaseClient.from('profiles').update({status:next,updated_at:new Date().toISOString()}).eq('id',payload.userId);if(error)throw error;data={success:true};
+                        } else { throw new Error('Aksi tidak dikenali: '+action); }
+                        App.ui.updateApiStatus('online'); return data;
+                    } catch(e) { App.ui.updateApiStatus('error'); App.ui.toast('Backend: '+(e.message||'Terjadi kesalahan.'),'error'); throw e; }
                 }
             },
 
@@ -935,9 +878,8 @@
                         const userData = res.user || res;
                         
                         App.state.user = userData;
-                        if (res.token) App.state.user.token = res.token;
+                        App.state.memberData = await App.api.post('GET_MEMBER_DASHBOARD');
 
-                        App.storage.set('studihome_session', JSON.stringify(App.state.user));
                         App.ui.renderTopAuth();
                         App.ui.toggleModal('auth-modal', false);
                         App.ui.toast(`Selamat datang kembali, ${userData.name}!`, 'success');
@@ -967,19 +909,16 @@
                         return;
                     }
 
-                    if (password.length < 10) {
-                        App.ui.toast('Kata sandi minimal 10 karakter!', 'error');
-                        return;
-                    }
-
                     try {
                         const res = await App.api.post('AUTH_REGISTER', { name, email, phone, password });
+                        if (res.requiresEmailConfirmation) {
+                            App.ui.toggleModal('auth-modal', false);
+                            App.ui.toast('Akun dibuat. Silakan cek email untuk konfirmasi sebelum masuk.', 'success');
+                            return;
+                        }
                         const userData = res.user || res;
-
                         App.state.user = userData;
-                        if (res.token) App.state.user.token = res.token;
-
-                        App.storage.set('studihome_session', JSON.stringify(App.state.user));
+                        App.state.memberData = await App.api.post('GET_MEMBER_DASHBOARD');
                         App.ui.renderTopAuth();
                         App.ui.toggleModal('auth-modal', false);
                         App.ui.toast('Akun berhasil dibuat!', 'success');
@@ -997,11 +936,9 @@
                 },
 
                 logout: async () => {
-                    if (API_BASE_URL && API_BASE_URL.trim() !== '' && App.state.user?.token) {
-                        try { await App.api.post('AUTH_LOGOUT'); } catch (e) {}
-                    }
+                    try { await App.api.post('AUTH_LOGOUT'); } catch (e) {}
                     App.state.user = null;
-                    App.storage.remove('studihome_session');
+                    App.state.memberData = null;
                     App.ui.renderTopAuth();
                     App.ui.toast('Anda telah keluar.', 'info');
                     App.router.navigate('home');
@@ -1235,17 +1172,11 @@
                 },
 
                 getUserProductStatus: (productId) => {
-                    const userEmail = App.state.user?.email;
-                    if (!userEmail) return 'NONE';
-
-                    const ownedList = App.state.demo.ownedProductsByUser[userEmail] || [];
-                    if (ownedList.includes(productId)) return 'OWNED';
-
-                    const orders = App.state.demo.orders || [];
-                    const pendingOrder = orders.find(o => o.userEmail === userEmail && o.productId === productId && o.status === 'PENDING_PAYMENT');
-                    if (pendingOrder) return 'PENDING';
-
-                    return 'NONE';
+                    if (!App.state.user) return 'NONE';
+                    const owned = (App.state.memberData?.verifiedProducts || []).some(p => p.id === productId);
+                    if (owned) return 'OWNED';
+                    const pending = (App.state.memberData?.userOrders || []).some(o => o.productId === productId && (o.status === 'PENDING_PAYMENT' || o.paymentStatus === 'PENDING'));
+                    return pending ? 'PENDING' : 'NONE';
                 },
 
                 openDetailModal: (productId) => {
