@@ -3,13 +3,58 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Studihome - Platform Pembelajaran Digital & Otomasi AI</title>
-    
-    <!-- SEO & Open Graph Meta Tags -->
-    <meta name="description" content="Platform Produk Digital & Otomasi AI #1 Indonesia. Tingkatkan efisiensi kerja hingga 10x lipat dengan modul & template AI interaktif.">
-    <meta property="og:title" content="Studihome - Platform Pembelajaran Digital & Otomasi AI">
-    <meta property="og:description" content="Kerja cerdas, hasil tuntas, cuan melesat tanpa batas dengan teknologi AI Studihome.">
+    <title>Studihome | Produk Digital, Modul Pembelajaran & Otomasi AI</title>
+    <meta name="google-site-verification" content="p1hKfmYu1aRIYgy_JUzcCrax8bZ_js5aASJkD5cxSSY">
+
+    <!-- Static SVG Retina Blue Favicon (100% Size) -->
+    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><style>.star { fill: %231b5df0; font-size: 100px; text-anchor: middle; dominant-baseline: central; font-family: sans-serif; font-weight: bold; }</style><text x='50' y='50' class='star'>✦</text></svg>">
+
+    <!-- SEO Core -->
+    <meta name="description" content="Studihome menyediakan produk digital, modul pembelajaran, template, prompt AI, otomasi bisnis, dan resource praktis untuk guru, profesional, kreator, dan UMKM di Indonesia.">
+    <meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1">
+    <meta name="author" content="Studihome">
+    <meta name="language" content="id-ID">
+    <meta name="theme-color" content="#151c75">
+    <meta name="format-detection" content="telephone=no">
+    <link rel="canonical" href="https://studihome.id/">
+
+    <!-- Open Graph -->
+    <meta property="og:locale" content="id_ID">
+    <meta property="og:site_name" content="Studihome">
+    <meta property="og:title" content="Studihome | Produk Digital, Modul Pembelajaran & Otomasi AI">
+    <meta property="og:description" content="Produk digital, modul pembelajaran, prompt AI, template, dan otomasi praktis untuk meningkatkan produktivitas dan efisiensi kerja.">
     <meta property="og:type" content="website">
+    <meta property="og:url" content="https://studihome.id/">
+
+    <!-- Twitter / X -->
+    <meta name="twitter:card" content="summary">
+    <meta name="twitter:title" content="Studihome | Produk Digital & Otomasi AI">
+    <meta name="twitter:description" content="Produk digital, modul, prompt AI, template, dan otomasi praktis untuk Indonesia.">
+
+    <!-- Structured data: organization + website -->
+    <script type="application/ld+json" id="studihome-schema">
+    {
+      "@context":"https://schema.org",
+      "@graph":[
+        {
+          "@type":"Organization",
+          "@id":"https://studihome.id/#organization",
+          "name":"Studihome",
+          "url":"https://studihome.id/"
+        },
+        {
+          "@type":"WebSite",
+          "@id":"https://studihome.id/#website",
+          "url":"https://studihome.id/",
+          "name":"Studihome",
+          "inLanguage":"id-ID",
+          "publisher":{"@id":"https://studihome.id/#organization"}
+        }
+      ]
+    }
+    </script>
+
+    <script type="application/ld+json" id="studihome-product-schema">{"@context":"https://schema.org","@graph":[]}</script>
 
     <!-- Tailwind CSS CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
@@ -1006,6 +1051,20 @@
                 load: async () => {
                     try {
                         App.state.publicData = await App.api.post('GET_PUBLIC');
+                        App.utils.updateSeoForProducts(App.state.publicData?.products || []);
+                        const productParam = new URLSearchParams(window.location.search).get('product');
+                        if (productParam) {
+                            const product = (App.state.publicData.products || []).find(x => x.id === productParam);
+                            if (product) {
+                                const canonical = document.querySelector('link[rel="canonical"]');
+                                if (canonical) canonical.href = 'https://studihome.id/?product=' + encodeURIComponent(product.id);
+                                const title = document.querySelector('title');
+                                const description = document.querySelector('meta[name="description"]');
+                                if (title) title.textContent = `${product.title} | Studihome`;
+                                if (description) description.setAttribute('content', product.desc || `Pelajari ${product.title} di Studihome.`);
+                                setTimeout(() => App.products.openDetailModal(product.id), 0);
+                            }
+                        }
                         App.home.startTestimonialCycle();
                         App.ui.updateApiStatus('online');
                     } catch (e) {
@@ -1357,7 +1416,7 @@
                     return `
                         <div class="card-3d rounded-3xl overflow-hidden flex flex-col justify-between p-4 sm:p-5 bg-white hover:translate-y-[-2px] transition-all border border-slate-200/80">
                             <div>
-                                <div onclick="App.products.openDetailModal('${p.id}')" class="relative h-40 sm:h-44 rounded-2xl overflow-hidden mb-3 card-3d-inset cursor-pointer group">
+                                <a href="?product=${encodeURIComponent(p.id)}" onclick="event.preventDefault(); App.products.openDetailModal('${p.id}')" class="relative h-40 sm:h-44 rounded-2xl overflow-hidden mb-3 card-3d-inset cursor-pointer group block">
                                     <img src="${p.imgUrl}" alt="${App.utils.escapeHtml(p.title)}" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300">
                                     <span class="absolute top-3 right-3 px-2.5 py-1 rounded-xl text-[10px] font-black shadow-md ${
                                         p.isFree ? 'bg-emerald-500 text-white' : 'bg-[#151c75] text-[#FACC15]'
@@ -1736,11 +1795,11 @@
                                                         </td>
                                                         <td class="py-3 px-2">
                                                             <div class="flex gap-1.5 flex-wrap">
-                                                                <button ${o.status === 'VERIFIED' || o.status === 'REJECTED' ? 'disabled' : ''} onclick="App.admin.verifyOrder('${o.id}')" class="px-2.5 py-1 rounded-lg text-[10px] font-bold text-emerald-700 bg-emerald-50 border border-emerald-200 hover:bg-emerald-100 flex items-center gap-1">
-                                                                    <i class="fa-solid fa-lock-open"></i> Verifikasi (Buka Akses)
+                                                                <button ${o.status !== 'PAYMENT_REVIEW' ? 'disabled title="Menunggu konfirmasi pembayaran member"' : ''} onclick="App.admin.verifyOrder('${o.id}')" class="px-2.5 py-1 rounded-lg text-[10px] font-bold text-emerald-700 bg-emerald-50 border border-emerald-200 ${o.status !== 'PAYMENT_REVIEW' ? 'opacity-50 cursor-not-allowed' : 'hover:bg-emerald-100'} flex items-center gap-1">
+                                                                    <i class="fa-solid fa-lock-open"></i> Buka Akses
                                                                 </button>
-                                                                <button ${o.status === 'VERIFIED' || o.status === 'REJECTED' ? 'disabled' : ''} onclick="App.admin.rejectOrder('${o.id}')" class="px-2.5 py-1 rounded-lg text-[10px] font-bold text-red-700 bg-red-50 border border-red-200 hover:bg-red-100 flex items-center gap-1">
-                                                                    <i class="fa-solid fa-lock"></i> Tolak (Terkunci)
+                                                                <button ${o.status !== 'PAYMENT_REVIEW' ? 'disabled title="Tunggu sampai member mengonfirmasi pembayaran"' : ''} onclick="App.admin.rejectOrder('${o.id}')" class="px-2.5 py-1 rounded-lg text-[10px] font-bold text-red-700 bg-red-50 border border-red-200 ${o.status !== 'PAYMENT_REVIEW' ? 'opacity-50 cursor-not-allowed' : 'hover:bg-red-100'} flex items-center gap-1">
+                                                                    <i class="fa-solid fa-xmark"></i> Tolak
                                                                 </button>
                                                             </div>
                                                         </td>
@@ -2001,21 +2060,31 @@
                 },
 
                 verifyOrder: async (orderId) => {
-                    if (!confirm('Verifikasi pembayaran order ini dan buka akses produknya?')) return;
+                    const order = (App.state.demo.orders || []).find(o => o.id === orderId);
+                    if (order && order.status !== 'PAYMENT_REVIEW') {
+                        App.ui.toast('Order belum dapat dibuka. Tunggu member melakukan konfirmasi pembayaran.', 'info');
+                        return;
+                    }
+                    if (!confirm('Buka akses produk untuk order ini?')) return;
                     try {
                         await App.api.post('ADMIN_VERIFY_ORDER', { orderId });
-                        App.ui.toast(`Akses modul untuk Order ${orderId} berhasil dibuka!`, 'success');
+                        App.ui.toast(`Akses produk untuk Order ${orderId} berhasil dibuka!`, 'success');
                         App.admin.render();
                     } catch (e) {
-                        App.ui.toast('Gagal memverifikasi order: ' + e.message, 'error');
+                        App.ui.toast('Gagal membuka akses: ' + e.message, 'error');
                     }
                 },
 
                 rejectOrder: async (orderId) => {
-                    if (!confirm('Tolak pembayaran order ini? Akses produk tidak akan diberikan.')) return;
+                    const order = (App.state.demo.orders || []).find(o => o.id === orderId);
+                    if (order && order.status !== 'PAYMENT_REVIEW') {
+                        App.ui.toast('Order belum dapat ditolak. Tunggu member melakukan konfirmasi pembayaran.', 'info');
+                        return;
+                    }
+                    if (!confirm('Tolak order ini? Akses produk tidak akan diberikan.')) return;
                     try {
                         await App.api.post('ADMIN_REJECT_ORDER', { orderId });
-                        App.ui.toast(`Akses modul untuk Order ${orderId} telah dikunci/ditolak.`, 'info');
+                        App.ui.toast(`Order ${orderId} ditolak.`, 'info');
                         App.admin.render();
                     } catch (e) {
                         App.ui.toast('Gagal menolak order: ' + e.message, 'error');
@@ -2189,14 +2258,22 @@
                                 <label class="block text-[10px] font-bold text-slate-600 mb-1">URL Download File Asset</label>
                                 <input type="url" id="m-dl" value="${App.utils.escapeHtml(m.download_url)}" placeholder="https://..." class="w-full card-3d-inset px-3 py-2 rounded-xl text-xs">
                             </div>
-                            <div class="grid grid-cols-2 gap-2">
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-2">
                                 <div>
                                     <label class="block text-[10px] font-bold text-slate-600 mb-1">Label Link Kustom 1</label>
-                                    <input type="text" id="m-link-label" value="${App.utils.escapeHtml(m.links?.[0]?.label || '')}" placeholder="Label Link (mis. Sheet)" class="w-full card-3d-inset px-3 py-2 rounded-xl text-xs">
+                                    <input type="text" id="m-link-label-1" value="${App.utils.escapeHtml(m.links?.[0]?.label || '')}" placeholder="Mis. Template / Sheet" class="w-full card-3d-inset px-3 py-2 rounded-xl text-xs">
                                 </div>
                                 <div>
                                     <label class="block text-[10px] font-bold text-slate-600 mb-1">URL Link Kustom 1</label>
-                                    <input type="url" id="m-link-url" value="${App.utils.escapeHtml(m.links?.[0]?.url || '')}" placeholder="https://..." class="w-full card-3d-inset px-3 py-2 rounded-xl text-xs">
+                                    <input type="url" id="m-link-url-1" value="${App.utils.escapeHtml(m.links?.[0]?.url || '')}" placeholder="https://..." class="w-full card-3d-inset px-3 py-2 rounded-xl text-xs">
+                                </div>
+                                <div>
+                                    <label class="block text-[10px] font-bold text-slate-600 mb-1">Label Link Kustom 2</label>
+                                    <input type="text" id="m-link-label-2" value="${App.utils.escapeHtml(m.links?.[1]?.label || '')}" placeholder="Mis. Resource / Website" class="w-full card-3d-inset px-3 py-2 rounded-xl text-xs">
+                                </div>
+                                <div>
+                                    <label class="block text-[10px] font-bold text-slate-600 mb-1">URL Link Kustom 2</label>
+                                    <input type="url" id="m-link-url-2" value="${App.utils.escapeHtml(m.links?.[1]?.url || '')}" placeholder="https://..." class="w-full card-3d-inset px-3 py-2 rounded-xl text-xs">
                                 </div>
                             </div>
                             <div class="flex items-center gap-2 pt-2">
@@ -2209,9 +2286,13 @@
 
                 saveModule: async (e, productId, editModuleId = '') => {
                     e.preventDefault();
-                    const linkLabel = document.getElementById('m-link-label').value;
-                    const linkUrl = document.getElementById('m-link-url').value;
-                    const links = (linkLabel && linkUrl) ? [{ label: linkLabel, url: linkUrl }] : [];
+                    const linkLabel1 = document.getElementById('m-link-label-1')?.value.trim();
+                    const linkUrl1 = document.getElementById('m-link-url-1')?.value.trim();
+                    const linkLabel2 = document.getElementById('m-link-label-2')?.value.trim();
+                    const linkUrl2 = document.getElementById('m-link-url-2')?.value.trim();
+                    const links = [];
+                    if (linkLabel1 && linkUrl1) links.push({ label: linkLabel1, url: linkUrl1 });
+                    if (linkLabel2 && linkUrl2) links.push({ label: linkLabel2, url: linkUrl2 });
 
                     const moduleData = {
                         id: editModuleId || undefined,
@@ -2532,7 +2613,7 @@
                                 <button id="btn-confirm-payment" disabled onclick="App.shop.submitPaymentConfirmation()" class="w-full py-3 rounded-xl text-xs sm:text-sm font-extrabold text-white bg-emerald-600 disabled:bg-slate-300 disabled:cursor-not-allowed hover:bg-emerald-700 flex items-center justify-center gap-2 shadow-md transition-all">
                                     <i class="fa-solid fa-check"></i> Konfirmasi Pembayaran & Hubungi Admin
                                 </button>
-                                <p class="text-[10px] text-slate-500">Setelah konfirmasi, order menjadi <strong>MENUNGGU VERIFIKASI</strong> dan modul tetap terkunci.</p>
+                                <p class="text-[10px] text-slate-500">Proses <strong>VERIFIKASI</strong> lebih cepat dengan melakukan <strong>VERIFIKASI</strong>.</p>
                                 <button onclick="App.ui.toggleModal('checkout-modal', false)" class="text-xs font-bold text-slate-500 hover:text-slate-800">Tutup</button>
                             </div>`;
                         App.state.checkout.waUrl = waUrl;
@@ -2657,6 +2738,57 @@
             },
 
             utils: {
+                updateSeoForProducts: (products = []) => {
+                    const baseTitle = 'Studihome | Produk Digital, Modul Pembelajaran & Otomasi AI';
+                    const baseDescription = 'Studihome menyediakan produk digital, modul pembelajaran, template, prompt AI, otomasi bisnis, dan resource praktis untuk guru, profesional, kreator, dan UMKM di Indonesia.';
+                    const safeProducts = Array.isArray(products) ? products.filter(p => p && p.isActive !== false) : [];
+                    const titleEl = document.querySelector('title');
+                    const descEl = document.querySelector('meta[name="description"]');
+                    if (titleEl) titleEl.textContent = baseTitle;
+                    if (descEl) descEl.setAttribute('content', baseDescription);
+
+                    const schemaEl = document.getElementById('studihome-product-schema');
+                    const itemList = {
+                        '@type': 'ItemList',
+                        'name': 'Produk Digital Studihome',
+                        'itemListElement': safeProducts.map((p, index) => ({
+                            '@type': 'ListItem',
+                            'position': index + 1,
+                            'name': p.title,
+                            'url': 'https://studihome.id/?product=' + encodeURIComponent(p.id)
+                        }))
+                    };
+                    const productGraph = safeProducts.slice(0, 20).map(p => ({
+                        '@type': 'Product',
+                        'name': p.title,
+                        'description': p.desc || '',
+                        'image': p.imgUrl ? [p.imgUrl] : undefined,
+                        'offers': {
+                            '@type': 'Offer',
+                            'priceCurrency': 'IDR',
+                            'price': Number(p.price || 0),
+                            'availability': 'https://schema.org/InStock',
+                            'url': 'https://studihome.id/?product=' + encodeURIComponent(p.id)
+                        }
+                    }));
+                    const payload = {
+                        '@context': 'https://schema.org',
+                        '@graph': [itemList, ...productGraph].map(x => {
+                            if (x && x.image === undefined) delete x.image;
+                            return x;
+                        })
+                    };
+                    if (schemaEl) {
+                        schemaEl.textContent = JSON.stringify(payload);
+                    } else {
+                        const script = document.createElement('script');
+                        script.type = 'application/ld+json';
+                        script.id = 'studihome-product-schema';
+                        script.textContent = JSON.stringify(payload);
+                        document.head.appendChild(script);
+                    }
+                },
+
                 safeUrl: (url, fallback = '#') => {
                     const value = String(url || '').trim();
                     if (!value) return fallback;
