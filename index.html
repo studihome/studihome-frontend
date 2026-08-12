@@ -4,7 +4,11 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Studihome - Platform Pembelajaran Digital & Otomasi AI</title>
-    
+    <!-- Static SVG Retina Blue Favicon (100% Size) -->
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'>
+    <style>.star { fill: %231b5df0; font-size: 100px; text-anchor: middle; dominant-baseline: central; font-family: sans-serif; font-weight: bold; }</style>
+    <text x='50' y='50' class='star'>✦</text></svg>">
+
     <!-- SEO & Open Graph Meta Tags -->
     <meta name="description" content="Platform Produk Digital & Otomasi AI #1 Indonesia. Tingkatkan efisiensi kerja hingga 10x lipat dengan modul & template AI interaktif.">
     <meta property="og:title" content="Studihome - Platform Pembelajaran Digital & Otomasi AI">
@@ -369,15 +373,12 @@
         </div>
     </div>
 
-    <!-- Supabase client + public project configuration -->
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2" crossorigin="anonymous"></script>
     <script src="./supabase-config.js"></script>
     <script>
-        // Supabase configuration is loaded from supabase-config.js.
-        // Only the public/publishable key belongs in the frontend.
+        // SUPABASE CLIENT BOOTSTRAP
         const SUPABASE_URL = window.STUDIHOME_SUPABASE_URL || '';
         const SUPABASE_ANON_KEY = window.STUDIHOME_SUPABASE_ANON_KEY || '';
-
         let supabaseClient = null;
 
         function initSupabase() {
@@ -385,7 +386,7 @@
                 throw new Error('Library Supabase belum berhasil dimuat.');
             }
             if (!SUPABASE_URL || !SUPABASE_ANON_KEY) {
-                throw new Error('Konfigurasi Supabase belum tersedia. Pastikan supabase-config.js ada di repository.');
+                throw new Error('Konfigurasi Supabase belum tersedia. Periksa supabase-config.js.');
             }
             if (!/^https:\/\//i.test(SUPABASE_URL)) {
                 throw new Error('SUPABASE_URL tidak valid.');
@@ -400,7 +401,13 @@
             return supabaseClient;
         }
 
-        // Supabase configuration is defined above. Google Apps Script is not used.
+        function withTimeout(promise, ms, label) {
+            let timer;
+            const timeout = new Promise((_, reject) => {
+                timer = setTimeout(() => reject(new Error(label || `Operasi melebihi ${ms} ms.`)), ms);
+            });
+            return Promise.race([promise, timeout]).finally(() => clearTimeout(timer));
+        }
 
         const App = {
             state: {
@@ -420,88 +427,14 @@
                     orderId: null
                 },
                 demo: {
-                    hero: {
-                        badge: "✦ Platform Produk Digital & Otomasi AI #1 Indonesia",
-                        title: "Kerja cerdas, hasil tuntas, cuan melesat tanpa batas!",
-                        subtitle: "Temukan kemudahan otomasi digital dengan teknologi AI interaktif di Studihome. Ribuan guru, profesional, dan pengusaha telah mempercepat efisiensi kerja mereka hingga 10x lipat.",
-                        ctaPrimaryLabel: "Jelajahi Produk",
-                        ctaPrimaryUrl: "#products",
-                        ctaSecondaryLabel: "Klaim Prompt Gratis",
-                        ctaSecondaryUrl: "#p4"
-                    },
-                    aiLinks: [
-                        { icon: "fa-solid fa-bolt text-amber-500", name: "ChatGPT 4o" },
-                        { icon: "fa-solid fa-brain text-purple-500", name: "Claude 3.5 Sonnet" },
-                        { icon: "fa-solid fa-gem text-blue-500", name: "Google Gemini" },
-                        { icon: "fa-solid fa-robot text-emerald-500", name: "N8N Automation" },
-                        { icon: "fa-solid fa-image text-pink-500", name: "Midjourney v6" },
-                        { icon: "fa-solid fa-video text-sky-500", name: "Runway Gen-3" },
-                        { icon: "fa-solid fa-microphone text-indigo-500", name: "ElevenLabs AI" }
-                    ],
-                    testimonials: [
-                        { id: 't1', name: 'Siti Rahma', role: 'Guru SMA', text: 'Administrasi KOSP AI membantu saya hemat waktu hingga 80%! RPP selesai dalam hitungan menit.' },
-                        { id: 't2', name: 'Budi Santoso', role: 'Digital Marketer', text: 'Prompt Copywriting AI bikin konversi iklan saya naik 3x lipat. Sangat worth it!' },
-                        { id: 't3', name: 'Rina Wijaya', role: 'Pemilik UMKM', text: 'Modul AI Finance buat laporan keuangan toko online saya jadi super rapi dan otomatis.' },
-                        { id: 't4', name: 'Ahmad Fauzi', role: 'Content Creator', text: 'Template N8N workflow hemat jam kerja tim saya. Customer service berjalan 24 jam nonstop.' },
-                        { id: 't5', name: 'Nadia Putri', role: 'Desainer Grafis', text: 'Tutorial Generator Video AI sangat practical dan mudah dipahami langsung oleh pemula.' }
-                    ],
-                    products: [
-                        { id: 'p1', title: 'Administrasi Guru KOSP AI', desc: 'Otomasi RPP, CP, TP, dan modul ajar Kurikulum Merdeka instan.', price: 149000, priceOriginal: 299000, isFree: false, imgUrl: 'https://images.unsplash.com/photo-1580582932707-520aed937b7b?auto=format&fit=crop&w=600&q=80', features: 'Otomasi Modul Ajar\nAnalisis CP otomatis\nExport Word & PDF\nAnalisis Capaian Pembelajaran\nBank Soal HOTS Otomatis', category: 'Guru & Pendidikan', badge: 'TERLARIS' },
-                        { id: 'p2', title: 'Konten Kreator & Copywriting AI', desc: 'Script TikTok, Reels, Ads Copy, dan pilar konten bulanan sekali klik.', price: 99000, priceOriginal: 199000, isFree: false, imgUrl: 'https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?auto=format&fit=crop&w=600&q=80', features: '100+ Prompt Hook Viral\nScript Video AI\nContent Calendar\nTemplate Carousel Canva\nFormula Headline High Conversion', category: 'Digital Marketing', badge: 'POPULER' },
-                        { id: 'p3', title: 'Agen Otomasi AI B2B', desc: 'Sistem agen AI cerdas untuk layanan otomatisasi klien perusahaan.', price: 249000, priceOriginal: 499000, isFree: false, imgUrl: 'https://images.unsplash.com/photo-1677442136019-21780efad99a?auto=format&fit=crop&w=600&q=80', features: 'SOP Agen AI\nWorkflow N8N B2B\nPanduan Pitching Klien\nProposal Penawaran B2B', category: 'Automation B2B', badge: 'PREMIUM' },
-                        { id: 'p4', title: 'Starter Prompt Guide AI Gratis', desc: 'Kumpulan 50+ prompt rahasia pemula untuk produktivitas harian.', price: 0, priceOriginal: 99000, isFree: true, imgUrl: 'https://images.unsplash.com/photo-1516321318423-f06f85e504b3?auto=format&fit=crop&w=600&q=80', features: '50+ Prompt Praktis\nCheat Sheet ChatGPT\nPanduan Dasar Prompt Engineering', category: 'Prompts', badge: 'GRATIS' },
-                        { id: 'p5', title: 'N8N Workflows Otomasi Bisnis', desc: 'Template workflow N8N siap import untuk otomatisasi lead & CRM.', price: 179000, priceOriginal: 349000, isFree: false, imgUrl: 'https://images.unsplash.com/photo-1551288049-bebda4e38f71?auto=format&fit=crop&w=600&q=80', features: '10+ JSON N8N Workflow\nIntegrasi Google Sheets & WA\nWebhooks Notifikasi Instan', category: 'Automation B2B', badge: 'BARU' },
-                        { id: 'p6', title: 'Generator Video AI Studio', desc: 'Panduan komprehensif membuat avatar 3D dan pengisi suara AI realistis.', price: 129000, priceOriginal: 259000, isFree: false, imgUrl: 'https://images.unsplash.com/photo-1574717024653-61fd2cf4d44d?auto=format&fit=crop&w=600&q=80', features: 'Tutorial HeyGen & ElevenLabs\nPrompt Visual Midjourney\nEditing CapCut Pro AI', category: 'Digital Marketing', badge: 'REKOMENDASI' },
-                        { id: 'p7', title: 'Bundle Master AI All-in-One', desc: 'Akses seluruh produk, template, workflow, dan pembaruan seumur hidup.', price: 299000, priceOriginal: 899000, isFree: false, imgUrl: 'https://images.unsplash.com/photo-1620712943543-bcc4688e7485?auto=format&fit=crop&w=600&q=80', features: 'Semua Fitur P1 s/d P9\nGrup Diskusi VIP\nUpdate Bulanan Gratis\nAkses Resource Master Drive', category: 'Bundle', badge: 'VIP' },
-                        { id: 'p8', title: 'AI Finance & Laporan Otomatis', desc: 'Otomasi pencatatan keuangan, kas, dan analisa profit UMKM.', price: 159000, priceOriginal: 319000, isFree: false, imgUrl: 'https://images.unsplash.com/photo-1554224155-8d04cb21cd6c?auto=format&fit=crop&w=600&q=80', features: 'Formula Sheet Otomatis\nDashboard Keuangan AI\nAnalisis Cashflow Bulanan', category: 'Keuangan', badge: 'PRO' },
-                        { id: 'p9', title: 'Chatbot & CS AI Otomatis', desc: 'Instalasi bot WhatsApp customer service cerdas 24 jam non-stop.', price: 189000, priceOriginal: 379000, isFree: false, imgUrl: 'https://images.unsplash.com/photo-1531746790731-6c087fecd65a?auto=format&fit=crop&w=600&q=80', features: 'Bot WA Auto Reply\nIntegrasi Database Produk\nSistem Ticketing CS', category: 'Automation B2B', badge: 'BEST BUY' }
-                    ],
-                    orders: [
-                        { id: 'ORD-882191', userName: 'Siti Rahma', userEmail: 'siti@gmail.com', productId: 'p1', productTitle: 'Administrasi Guru KOSP AI', price: 149000, status: 'PENDING_PAYMENT', createdAt: '2026-08-10' },
-                        { id: 'ORD-710293', userName: 'Budi Santoso', userEmail: 'budi@gmail.com', productId: 'p2', productTitle: 'Konten Kreator AI', price: 99000, status: 'VERIFIED', createdAt: '2026-08-09' }
-                    ],
-                    users: [
-                        { id: 'u1', name: 'Admin Studihome', email: 'admin@platform.com', phone: '085111581115', role: 'admin', status: 'Active', registeredAt: '2026-08-01' },
-                        { id: 'u2', name: 'Siti Rahma', email: 'siti@gmail.com', phone: '081987654321', role: 'member', status: 'Active', registeredAt: '2026-08-10' },
-                        { id: 'u3', name: 'Budi Santoso', email: 'budi@gmail.com', phone: '081223344556', role: 'member', status: 'Active', registeredAt: '2026-08-09' }
-                    ],
-                    modules: {
-                        'p1': [
-                            {
-                                id: 'm1',
-                                title: '1. Pengenalan & Quickstart Modul KOSP AI',
-                                yt_url: 'https://www.youtube.com/embed/dQw4w9WgXcQ',
-                                markdown: '### Selamat Datang di Modul KOSP AI Studihome\n\n- **Langkah 1:** Salin prompt ke ChatGPT/Gemini.\n- **Langkah 2:** Masukkan data Capaian Pembelajaran.\n- **Langkah 3:** Export dokumen ke Word.',
-                                download_url: 'https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf',
-                                links: [
-                                    { label: 'Template Google Sheets', url: 'https://docs.google.com' }
-                                ]
-                            }
-                        ],
-                        'p4': [
-                            {
-                                id: 'm4',
-                                title: 'Starter Prompt AI Pemula',
-                                yt_url: 'https://www.youtube.com/embed/dQw4w9WgXcQ',
-                                markdown: '### 50+ Prompt Praktis AI\n\n1. Prompt Ringkasan Dokumen\n2. Prompt Pembuat Email Profesional\n3. Prompt Ide Konten Sosmed',
-                                download_url: 'https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf',
-                                links: []
-                            }
-                        ]
-                    },
-                    master: {
-                        qrisSlots: [
-                            { slot: 1, name: 'Paket Basic (Rp 99.000)', price: 99000, qrisUrl: 'https://placehold.co/300x300/151c75/ffffff?text=QRIS+STUDIHOME+99K' },
-                            { slot: 2, name: 'Paket Studio (Rp 129.000)', price: 129000, qrisUrl: 'https://placehold.co/300x300/151c75/ffffff?text=QRIS+STUDIHOME+129K' },
-                            { slot: 3, name: 'Paket Guru KOSP (Rp 149.000)', price: 149000, qrisUrl: 'https://placehold.co/300x300/151c75/ffffff?text=QRIS+STUDIHOME+149K' },
-                            { slot: 4, name: 'Paket Otomasi N8N (Rp 179.000)', price: 179000, qrisUrl: 'https://placehold.co/300x300/151c75/ffffff?text=QRIS+STUDIHOME+179K' },
-                            { slot: 5, name: 'Paket Chatbot CS (Rp 189.000)', price: 189000, qrisUrl: 'https://placehold.co/300x300/151c75/ffffff?text=QRIS+STUDIHOME+189K' },
-                            { slot: 6, name: 'Paket Bundle VIP (Rp 299.000)', price: 299000, qrisUrl: 'https://placehold.co/300x300/151c75/ffffff?text=QRIS+STUDIHOME+299K' }
-                        ]
-                    },
-                    ownedProductsByUser: {
-                        'budi@gmail.com': ['p2', 'p4']
-                    }
+                    hero: {},
+                    aiLinks: [],
+                    testimonials: [],
+                    products: [],
+                    orders: [],
+                    users: [],
+                    modules: {},
+                    master: { qrisSlots: [] }
                 }
             },
 
@@ -535,33 +468,72 @@
             init: async () => {
                 setInterval(App.utils.updateClock, 1000);
                 App.utils.updateClock();
+                App.ui.updateApiStatus('connecting');
+
                 try {
                     initSupabase();
                     App.api._requireConfig();
-                    App.ui.updateApiStatus('connecting');
-                    const { data: { session } } = await supabaseClient.auth.getSession();
+
+                    const sessionResult = await withTimeout(
+                        supabaseClient.auth.getSession(),
+                        8000,
+                        'Koneksi sesi Supabase terlalu lama.'
+                    );
+                    const session = sessionResult?.data?.session || null;
+
                     if (session?.user) {
                         try {
-                            App.state.user = await App.api._profile();
-                            if (App.state.user && String(App.state.user.status).toLowerCase() === 'active') {
-                                App.state.memberData = await App.api.post('GET_MEMBER_DASHBOARD');
-                            } else {
-                                await supabaseClient.auth.signOut(); App.state.user = null;
+                            App.state.user = await withTimeout(
+                                App.api._profile(),
+                                8000,
+                                'Profil pengguna tidak dapat dimuat.'
+                            );
+                            if (!App.state.user || String(App.state.user.status).toLowerCase() !== 'active') {
+                                await supabaseClient.auth.signOut();
+                                App.state.user = null;
                             }
-                        } catch (e) { await supabaseClient.auth.signOut(); App.state.user = null; }
+                        } catch (e) {
+                            await supabaseClient.auth.signOut().catch(() => {});
+                            App.state.user = null;
+                            throw e;
+                        }
                     }
+
                     App.ui.renderTopAuth();
                     await App.home.load();
+
                     supabaseClient.auth.onAuthStateChange(async (_event, sessionNow) => {
-                        if (!sessionNow?.user) { App.state.user = null; App.state.memberData = null; App.ui.renderTopAuth(); return; }
-                        try { App.state.user = await App.api._profile(); App.ui.renderTopAuth(); } catch(e) {}
+                        if (!sessionNow?.user) {
+                            App.state.user = null;
+                            App.state.memberData = null;
+                            App.ui.renderTopAuth();
+                            return;
+                        }
+                        try {
+                            const profile = await App.api._profile();
+                            if (!profile || String(profile.status).toLowerCase() !== 'active') {
+                                await supabaseClient.auth.signOut();
+                                App.state.user = null;
+                            } else {
+                                App.state.user = profile;
+                            }
+                            App.ui.renderTopAuth();
+                        } catch (e) {
+                            App.state.user = null;
+                            App.state.memberData = null;
+                            App.ui.renderTopAuth();
+                        }
                     });
+
+                    App.ui.updateApiStatus('online');
                 } catch (e) {
+                    console.error('[Studihome bootstrap]', e);
+                    App.state.publicData = null;
                     App.ui.updateApiStatus('error');
-                    App.ui.toast(e.message || 'Supabase belum dikonfigurasi.', 'error');
                     App.ui.renderTopAuth();
-                    await App.home.load().catch(()=>{});
+                    App.ui.showBackendError(e);
                 }
+
                 window.addEventListener('hashchange', App.router.handleHash);
                 App.router.handleHash();
             },
@@ -607,6 +579,23 @@
                         text.textContent = 'Sistem Siap';
                         text.className = 'text-blue-700 uppercase';
                     }
+                },
+
+                showBackendError: (error) => {
+                    const main = document.getElementById('main-content');
+                    if (!main) return;
+                    const message = error?.message || 'Koneksi ke Supabase gagal.';
+                    main.innerHTML = `
+                        <div class="card-3d p-6 sm:p-8 rounded-3xl text-center max-w-lg mx-auto my-8 bg-white">
+                            <i class="fa-solid fa-triangle-exclamation text-4xl text-red-500 mb-3"></i>
+                            <h2 class="text-base sm:text-lg font-extrabold text-slate-800 mb-2">Website belum dapat terhubung</h2>
+                            <p class="text-xs sm:text-sm text-slate-500 leading-relaxed mb-4">Supabase belum merespons dengan benar. Silakan coba muat ulang halaman.</p>
+                            <details class="text-left bg-slate-50 rounded-xl p-3 border border-slate-200">
+                                <summary class="text-[11px] font-bold text-slate-600 cursor-pointer">Detail teknis</summary>
+                                <pre class="mt-2 whitespace-pre-wrap text-[10px] text-red-600 break-words">${App.utils.escapeHtml(message)}</pre>
+                            </details>
+                            <button onclick="window.location.reload()" class="btn-brand-gradient px-5 py-2.5 rounded-xl text-xs font-bold mt-4">Muat Ulang</button>
+                        </div>`;
                 },
 
                 toggleModal: (id, show) => {
@@ -711,8 +700,8 @@
 
             api: {
                 _requireConfig: () => {
-                    if (SUPABASE_URL.includes('PASTE_') || SUPABASE_ANON_KEY.includes('PASTE_')) {
-                        throw new Error('Supabase belum dikonfigurasi. Isi SUPABASE_URL dan SUPABASE_ANON_KEY di index.html.');
+                    if (!SUPABASE_URL || !SUPABASE_ANON_KEY) {
+                        throw new Error('Supabase belum dikonfigurasi. Pastikan supabase-config.js dimuat dan berisi Project URL + Publishable/Anon Key.');
                     }
                 },
                 _profile: async () => {
@@ -724,24 +713,36 @@
                     return { ...data, email: data.email || user.email || '', registeredAt: data.created_at };
                 },
                 _public: async () => {
-                    const [settingsRes, productsRes, aiRes, testimonialsRes] = await Promise.all([
-                        supabaseClient.from('site_settings').select('*').eq('id', 1).single(),
-                        supabaseClient.from('products').select('*').eq('is_active', true).order('created_at', { ascending: false }),
-                        supabaseClient.from('ai_links').select('*').order('sort_order', { ascending: true }),
-                        supabaseClient.from('testimonials').select('*').order('created_at', { ascending: false })
-                    ]);
-                    for (const r of [settingsRes, productsRes, aiRes, testimonialsRes]) if (r.error) throw r.error;
+                    const [settingsRes, productsRes, aiRes, testimonialsRes] = await withTimeout(
+                        Promise.all([
+                            supabaseClient.from('site_settings').select('*').eq('id', 1).maybeSingle(),
+                            supabaseClient.from('products').select('id,title,description,price,price_original,badge,category,image_url,features,is_free,is_active,created_at,updated_at').eq('is_active', true).order('created_at', { ascending: false }),
+                            supabaseClient.from('ai_links').select('id,name,icon,sort_order,created_at').order('sort_order', { ascending: true }),
+                            supabaseClient.from('testimonials').select('id,name,role,text,created_at').order('created_at', { ascending: false })
+                        ]),
+                        10000,
+                        'Data publik Supabase terlalu lama dimuat.'
+                    );
+
+                    for (const r of [settingsRes, productsRes, aiRes, testimonialsRes]) {
+                        if (r.error) throw r.error;
+                    }
+
                     const s = settingsRes.data || {};
                     return {
                         hero: {
-                            badge: s.badge || '', title: s.hero_title || '', subtitle: s.hero_subtitle || '',
-                            ctaPrimaryLabel: s.cta_primary_label || 'Jelajahi Produk', ctaPrimaryUrl: s.cta_primary_url || '#products',
-                            ctaSecondaryLabel: s.cta_secondary_label || 'Klaim Prompt Gratis', ctaSecondaryUrl: s.cta_secondary_url || '#p4'
+                            badge: s.badge || 'Platform Produk Digital & Otomasi AI',
+                            title: s.hero_title || 'Studihome',
+                            subtitle: s.hero_subtitle || '',
+                            ctaPrimaryLabel: s.cta_primary_label || 'Jelajahi Produk',
+                            ctaPrimaryUrl: s.cta_primary_url || '#products',
+                            ctaSecondaryLabel: s.cta_secondary_label || 'Klaim Produk Gratis',
+                            ctaSecondaryUrl: s.cta_secondary_url || '#products'
                         },
                         aiLinks: (aiRes.data || []).map(x => ({ id: x.id, name: x.name, icon: x.icon, sortOrder: x.sort_order })),
                         products: (productsRes.data || []).map(App.api._mapProduct),
                         testimonials: testimonialsRes.data || [],
-                        master: { qrisSlots: s.qris_slots || [] }
+                        master: { qrisSlots: Array.isArray(s.qris_slots) ? s.qris_slots : [] }
                     };
                 },
                 _mapProduct: (p) => ({
@@ -749,7 +750,7 @@
                     badge: p.badge, category: p.category, imgUrl: p.image_url, features: p.features,
                     isFree: !!p.is_free, isActive: !!p.is_active
                 }),
-                getMockData: () => App.state.publicData || { hero: App.state.demo.hero, aiLinks: App.state.demo.aiLinks, products: App.state.demo.products, testimonials: App.state.demo.testimonials, master: App.state.demo.master },
+                getMockData: () => App.state.publicData || { hero: {}, aiLinks: [], products: [], testimonials: [], master: { qrisSlots: [] } },
                 post: async (action, payload = {}) => {
                     App.api._requireConfig();
                     App.ui.updateApiStatus('connecting');
@@ -784,27 +785,66 @@
                         } else if (action === 'GET_MEMBER_DASHBOARD') {
                             const user = await App.api._profile();
                             if (!user) throw new Error('Sesi login tidak ditemukan.');
-                            const [eRes, oRes] = await Promise.all([
-                                supabaseClient.from('entitlements').select('product_id,status').eq('user_id', user.id).eq('status', 'ACTIVE'),
-                                supabaseClient.from('orders').select('id,user_id,product_id,unit_price,total_amount,status,payment_status,created_at,products(title),profiles!orders_user_id_fkey(name,email)').eq('user_id', user.id).order('created_at', { ascending: false })
-                            ]);
-                            if (eRes.error) throw eRes.error; if (oRes.error) throw oRes.error;
+
+                            const [eRes, oRes] = await withTimeout(
+                                Promise.all([
+                                    supabaseClient.from('entitlements').select('product_id,status').eq('user_id', user.id).eq('status', 'ACTIVE'),
+                                    supabaseClient.from('orders').select('id,product_id,unit_price,total_amount,status,payment_status,created_at,products(title)').eq('user_id', user.id).order('created_at', { ascending: false })
+                                ]),
+                                10000,
+                                'Dashboard member terlalu lama dimuat.'
+                            );
+                            if (eRes.error) throw eRes.error;
+                            if (oRes.error) throw oRes.error;
+
                             const ids = (eRes.data || []).map(e => e.product_id);
-                            const freeRes = await supabaseClient.from('products').select('*').in('id', ids.length ? ids : ['00000000-0000-0000-0000-000000000000']);
-                            if (freeRes.error) throw freeRes.error;
-                            const products = (freeRes.data || []).map(App.api._mapProduct);
+                            let products = [];
+                            if (ids.length) {
+                                const freeRes = await supabaseClient.from('products').select('id,title,description,price,price_original,badge,category,image_url,features,is_free,is_active,created_at,updated_at').in('id', ids);
+                                if (freeRes.error) throw freeRes.error;
+                                products = (freeRes.data || []).map(App.api._mapProduct);
+                            }
+
                             const orders = (oRes.data || []).map(o => ({
-                                id: o.id, userEmail: o.profiles?.email || user.email, userName: o.profiles?.name || user.name,
-                                productId: o.product_id, productTitle: o.products?.title || '', price: Number(o.total_amount || o.unit_price),
-                                status: o.status, paymentStatus: o.payment_status, createdAt: o.created_at
+                                id: o.id,
+                                userEmail: user.email || '',
+                                userName: user.name || '',
+                                productId: o.product_id,
+                                productTitle: o.products?.title || '',
+                                price: Number(o.total_amount || o.unit_price),
+                                status: o.status,
+                                paymentStatus: o.payment_status,
+                                createdAt: o.created_at
                             }));
+
                             data = { verifiedProducts: products, userOrders: orders };
                             App.state.memberData = data;
                         } else if (action === 'GET_PRODUCT_MODULES') {
-                            const { data: mods, error } = await supabaseClient.from('modules').select('*').eq('product_id', payload.productId).order('created_at', { ascending: true });
+                            const user = await App.api._profile();
+                            if (!user) throw new Error('Anda harus login terlebih dahulu.');
+
+                            const { data: entitlement, error: eErr } = await supabaseClient
+                                .from('entitlements')
+                                .select('id')
+                                .eq('user_id', user.id)
+                                .eq('product_id', payload.productId)
+                                .eq('status', 'ACTIVE')
+                                .maybeSingle();
+                            if (eErr) throw eErr;
+                            if (!entitlement && String(user.role || '').toLowerCase() !== 'admin') throw new Error('Akses modul terkunci. Produk belum diverifikasi.');
+
+                            const { data: mods, error } = await supabaseClient
+                                .from('modules')
+                                .select('id,product_id,title,youtube_url,markdown,download_url,links_json,created_at,updated_at')
+                                .eq('product_id', payload.productId)
+                                .order('created_at', { ascending: true });
                             if (error) throw error;
+
                             const product = (App.state.publicData?.products || []).find(p => p.id === payload.productId);
-                            data = { productTitle: product?.title || '', modules: (mods || []).map(m => ({ id: m.id, title: m.title, yt_url: m.youtube_url, markdown: m.markdown, download_url: m.download_url, links: m.links_json || [] })) };
+                            data = {
+                                productTitle: product?.title || '',
+                                modules: (mods || []).map(m => ({ id: m.id, title: m.title, yt_url: m.youtube_url, markdown: m.markdown, download_url: m.download_url, links: Array.isArray(m.links_json) ? m.links_json : [] }))
+                            };
                         } else if (action === 'GET_ADMIN_DATA') {
                             const [sRes,pRes,mRes,aRes,tRes,oRes,uRes] = await Promise.all([
                                 supabaseClient.from('site_settings').select('*').eq('id',1).single(),
@@ -827,16 +867,20 @@
                             };
                             App.state.demo.hero=data.hero; App.state.demo.master=data.master; App.state.demo.aiLinks=data.aiLinks; App.state.demo.testimonials=data.testimonials; App.state.demo.products=data.products; App.state.demo.modules=data.modules; App.state.demo.orders=data.orders; App.state.demo.users=data.users;
                         } else if (action === 'CREATE_ORDER') {
-                            const { data: rpc, error } = await supabaseClient.rpc('create_order', { p_product_id: payload.productId, p_name: payload.name, p_phone: payload.phone });
+                            const { data: rpc, error } = await withTimeout(supabaseClient.rpc('create_order', { p_product_id: payload.productId, p_name: payload.name, p_phone: payload.phone }), 10000, 'Pembuatan order terlalu lama.');
                             if (error) throw error; data = rpc;
                         } else if (action === 'CLAIM_FREE_PRODUCT') {
                             const { data: rpc, error } = await supabaseClient.rpc('claim_free_product', { p_product_id: payload.productId });
                             if (error) throw error; data = rpc;
+                        } else if (action === 'SUBMIT_PAYMENT') {
+                            const { data: rpc, error } = await withTimeout(supabaseClient.rpc('submit_payment_confirmation', { p_order_id: payload.orderId }), 10000, 'Konfirmasi pembayaran terlalu lama.');
+                            if (error) throw error;
+                            data = rpc;
                         } else if (action === 'ADMIN_VERIFY_ORDER') {
-                            const { data: rpc, error } = await supabaseClient.rpc('admin_verify_order', { p_order_id: payload.orderId });
+                            const { data: rpc, error } = await withTimeout(supabaseClient.rpc('admin_verify_order', { p_order_id: payload.orderId }), 10000, 'Verifikasi order terlalu lama.');
                             if (error) throw error; data = rpc;
                         } else if (action === 'ADMIN_REJECT_ORDER') {
-                            const { data: rpc, error } = await supabaseClient.rpc('admin_reject_order', { p_order_id: payload.orderId });
+                            const { data: rpc, error } = await withTimeout(supabaseClient.rpc('admin_reject_order', { p_order_id: payload.orderId }), 10000, 'Penolakan order terlalu lama.');
                             if (error) throw error; data = rpc;
                         } else if (action === 'ADMIN_SAVE_PRODUCT') {
                             const p=payload.product; const row={ title:p.title,description:p.desc,price:Number(p.price),price_original:Number(p.priceOriginal||p.price),badge:p.badge||'',category:p.category||'General',image_url:p.imgUrl||'',features:p.features||'',is_free:Number(p.price)===0,is_active:p.isActive!==false,updated_at:new Date().toISOString() };
@@ -850,7 +894,7 @@
                         } else if (action === 'ADMIN_DELETE_MODULE') {
                             const {error}=await supabaseClient.from('modules').delete().eq('id',payload.moduleId); if(error)throw error; data={success:true};
                         } else if (action === 'ADMIN_SAVE_HERO') {
-                            const {error}=await supabaseClient.from('site_settings').update({badge:payload.badge,hero_title:payload.title,hero_subtitle:payload.subtitle,cta_primary_label:payload.ctaPrimaryLabel,cta_primary_url:payload.ctaPrimaryUrl,cta_secondary_label:payload.ctaSecondaryLabel,cta_secondary_url:payload.ctaSecondaryUrl,updated_at:new Date().toISOString()}).eq('id',1); if(error)throw error; data={success:true};
+                            const {error}=await supabaseClient.from('site_settings').upsert({id:1,badge:payload.badge||'',hero_title:payload.title||'',hero_subtitle:payload.subtitle||'',cta_primary_label:payload.ctaPrimaryLabel||'Jelajahi Produk',cta_primary_url:payload.ctaPrimaryUrl||'#products',cta_secondary_label:payload.ctaSecondaryLabel||'Klaim Produk Gratis',cta_secondary_url:payload.ctaSecondaryUrl||'#products',qris_slots:App.state.publicData?.master?.qrisSlots || [],updated_at:new Date().toISOString()},{onConflict:'id'}); if(error)throw error; data={success:true};
                         } else if (action === 'ADMIN_SAVE_AI_LINKS') {
                             const links=payload.aiLinks||[]; const {error:dErr}=await supabaseClient.from('ai_links').delete().neq('id','00000000-0000-0000-0000-000000000000'); if(dErr)throw dErr;
                             const rows=links.map((x,i)=>({name:x.name,icon:x.icon,sort_order:i+1})); if(rows.length){const {error:iErr}=await supabaseClient.from('ai_links').insert(rows);if(iErr)throw iErr;} data={success:true};
@@ -859,7 +903,7 @@
                         } else if (action === 'ADMIN_DELETE_TESTIMONIAL') {
                             const {error}=await supabaseClient.from('testimonials').delete().eq('id',payload.testimonialId);if(error)throw error;data={success:true};
                         } else if (action === 'ADMIN_SAVE_MASTER') {
-                            const {error}=await supabaseClient.from('site_settings').update({qris_slots:payload.qrisSlots||[],updated_at:new Date().toISOString()}).eq('id',1);if(error)throw error;data={success:true};
+                            const {error}=await supabaseClient.from('site_settings').upsert({id:1,qris_slots:Array.isArray(payload.qrisSlots)?payload.qrisSlots:[],updated_at:new Date().toISOString()},{onConflict:'id'});if(error)throw error;data={success:true};
                         } else if (action === 'ADMIN_TOGGLE_USER_STATUS') {
                             const {data:u,error:gErr}=await supabaseClient.from('profiles').select('status,role').eq('id',payload.userId).single();if(gErr)throw gErr;if(u.role==='admin')throw new Error('Admin tidak dapat diblokir dari panel ini.');
                             const next=String(u.status).toLowerCase()==='active'?'blocked':'active'; const {error}=await supabaseClient.from('profiles').update({status:next,updated_at:new Date().toISOString()}).eq('id',payload.userId);if(error)throw error;data={success:true};
@@ -967,8 +1011,12 @@
                     try {
                         App.state.publicData = await App.api.post('GET_PUBLIC');
                         App.home.startTestimonialCycle();
+                        App.ui.updateApiStatus('online');
                     } catch (e) {
-                        return;
+                        App.state.publicData = null;
+                        App.ui.updateApiStatus('error');
+                        App.ui.showBackendError(e);
+                        throw e;
                     }
                 },
 
@@ -1533,7 +1581,7 @@
                                         
                                         ${m.yt_url ? `
                                             <div class="aspect-video w-full rounded-xl overflow-hidden card-3d">
-                                                <iframe class="w-full h-full" src="${m.yt_url}" title="Video Tutorial" frameborder="0" allowfullscreen></iframe>
+                                                <iframe class="w-full h-full" src="${App.utils.safeUrl(m.yt_url)}" title="Video Tutorial" frameborder="0" allowfullscreen referrerpolicy="strict-origin-when-cross-origin"></iframe>
                                             </div>
                                         ` : ''}
 
@@ -1543,12 +1591,12 @@
 
                                         <div class="flex flex-wrap gap-2 pt-1">
                                             ${(m.links || []).map(l => `
-                                                <a href="${l.url}" target="_blank" class="px-3 py-1.5 rounded-xl text-xs font-bold text-[#151c75] bg-white border border-slate-200 hover:bg-slate-50">
+                                                <a href="${App.utils.safeUrl(l.url)}" target="_blank" rel="noopener noreferrer" class="px-3 py-1.5 rounded-xl text-xs font-bold text-[#151c75] bg-white border border-slate-200 hover:bg-slate-50">
                                                     <i class="fa-solid fa-link mr-1"></i> ${App.utils.escapeHtml(l.label)}
                                                 </a>
                                             `).join('')}
                                             ${m.download_url ? `
-                                                <a href="${m.download_url}" target="_blank" download class="px-3 py-1.5 rounded-xl text-xs font-bold text-white bg-emerald-600 hover:bg-emerald-700 shadow-2xs">
+                                                <a href="${App.utils.safeUrl(m.download_url)}" target="_blank" rel="noopener noreferrer" download class="px-3 py-1.5 rounded-xl text-xs font-bold text-white bg-emerald-600 hover:bg-emerald-700 shadow-2xs">
                                                     <i class="fa-solid fa-download mr-1"></i> Unduh File
                                                 </a>
                                             ` : ''}
@@ -1658,10 +1706,10 @@
                                                         </td>
                                                         <td class="py-3 px-2">
                                                             <div class="flex gap-1.5 flex-wrap">
-                                                                <button onclick="App.admin.verifyOrder('${o.id}')" class="px-2.5 py-1 rounded-lg text-[10px] font-bold text-emerald-700 bg-emerald-50 border border-emerald-200 hover:bg-emerald-100 flex items-center gap-1">
+                                                                <button ${o.status === 'VERIFIED' || o.status === 'REJECTED' ? 'disabled' : ''} onclick="App.admin.verifyOrder('${o.id}')" class="px-2.5 py-1 rounded-lg text-[10px] font-bold text-emerald-700 bg-emerald-50 border border-emerald-200 hover:bg-emerald-100 flex items-center gap-1">
                                                                     <i class="fa-solid fa-lock-open"></i> Verifikasi (Buka Akses)
                                                                 </button>
-                                                                <button onclick="App.admin.rejectOrder('${o.id}')" class="px-2.5 py-1 rounded-lg text-[10px] font-bold text-red-700 bg-red-50 border border-red-200 hover:bg-red-100 flex items-center gap-1">
+                                                                <button ${o.status === 'VERIFIED' || o.status === 'REJECTED' ? 'disabled' : ''} onclick="App.admin.rejectOrder('${o.id}')" class="px-2.5 py-1 rounded-lg text-[10px] font-bold text-red-700 bg-red-50 border border-red-200 hover:bg-red-100 flex items-center gap-1">
                                                                     <i class="fa-solid fa-lock"></i> Tolak (Terkunci)
                                                                 </button>
                                                             </div>
@@ -1869,7 +1917,7 @@
                                             <tbody>
                                                 ${(adminData.users || []).map(u => {
                                                     const isAdmin = u.role === 'admin';
-                                                    const isBlocked = u.status === 'Blocked';
+                                                    const isBlocked = String(u.status || '').toLowerCase() === 'blocked';
                                                     return `
                                                         <tr class="border-b border-slate-100">
                                                             <td class="py-3 px-2 font-bold text-[#151c75]">${App.utils.escapeHtml(u.name)}</td>
@@ -1911,6 +1959,7 @@
                 },
 
                 verifyOrder: async (orderId) => {
+                    if (!confirm('Verifikasi pembayaran order ini dan buka akses produknya?')) return;
                     try {
                         await App.api.post('ADMIN_VERIFY_ORDER', { orderId });
                         App.ui.toast(`Akses modul untuk Order ${orderId} berhasil dibuka!`, 'success');
@@ -1921,6 +1970,7 @@
                 },
 
                 rejectOrder: async (orderId) => {
+                    if (!confirm('Tolak pembayaran order ini? Akses produk tidak akan diberikan.')) return;
                     try {
                         await App.api.post('ADMIN_REJECT_ORDER', { orderId });
                         App.ui.toast(`Akses modul untuk Order ${orderId} telah dikunci/ditolak.`, 'info');
@@ -2332,6 +2382,7 @@
                     const container = document.getElementById('checkout-modal-content');
                     const p = App.state.checkout.product;
                     const step = App.state.checkout.step;
+                    if (!container || !p) return;
 
                     if (step === 1) {
                         container.innerHTML = `
@@ -2343,80 +2394,131 @@
                             </div>
                             <form onsubmit="App.shop.submitOrderStep1(event)" class="space-y-3.5">
                                 <div>
-                                    <label class="block text-xs font-bold text-slate-700 mb-1">Nama Lengkap Member</label>
-                                    <input type="text" id="co-name" required value="${App.state.user?.name || ''}" class="w-full card-3d-inset px-3.5 py-2.5 rounded-xl text-xs sm:text-sm outline-none">
+                                    <label class="block text-xs sm:text-sm font-bold text-slate-700 mb-1">Nama Lengkap Member</label>
+                                    <input type="text" id="co-name" required value="${App.utils.escapeHtml(App.state.user?.name || '')}" class="w-full card-3d-inset px-3.5 py-2.5 rounded-xl text-xs sm:text-sm outline-none">
                                 </div>
                                 <div>
-                                    <label class="block text-xs font-bold text-slate-700 mb-1">WhatsApp <span class="text-red-500">*</span></label>
-                                    <input type="tel" id="co-phone" required value="${App.state.user?.phone || ''}" class="w-full card-3d-inset px-3.5 py-2.5 rounded-xl text-xs sm:text-sm outline-none">
+                                    <label class="block text-xs sm:text-sm font-bold text-slate-700 mb-1">WhatsApp <span class="text-red-500">*</span></label>
+                                    <input type="tel" id="co-phone" required value="${App.utils.escapeHtml(App.state.user?.phone || '')}" class="w-full card-3d-inset px-3.5 py-2.5 rounded-xl text-xs sm:text-sm outline-none">
                                 </div>
-                                <button type="submit" class="w-full btn-brand-gradient py-3 rounded-xl text-xs sm:text-sm font-bold">
+                                <button id="btn-create-order" type="submit" class="w-full btn-brand-gradient py-3 rounded-xl text-xs sm:text-sm font-bold">
                                     Lanjut ke Pembayaran QRIS <i class="fa-solid fa-arrow-right ml-1 text-[#FACC15]"></i>
                                 </button>
                             </form>
                         `;
-                    } else if (step === 2) {
-                        const qrisUrl = App.state.demo.master?.qrisSlots[0]?.qrisUrl || 'https://placehold.co/300x300/151c75/ffffff?text=QRIS+STUDIHOME';
-                        const userName = App.state.user?.name || 'Pelanggan';
-                        const waUrl = App.shop.generateWaUrl(userName, App.state.checkout.orderId, p.title, p.price);
+                        return;
+                    }
 
+                    if (step === 2) {
+                        const slots = Array.isArray(App.state.publicData?.master?.qrisSlots) ? App.state.publicData.master.qrisSlots : [];
+                        const qris = slots.find(q => Number(q.price) === Number(p.price));
+                        const userName = App.state.user?.name || 'Member';
+                        const orderId = App.state.checkout.orderId;
+                        if (!qris?.qrisUrl) {
+                            container.innerHTML = `
+                                <div class="p-6 text-center">
+                                    <i class="fa-solid fa-qrcode text-4xl text-red-500 mb-3"></i>
+                                    <h3 class="font-extrabold text-[#151c75]">QRIS untuk produk ini belum dikonfigurasi</h3>
+                                    <p class="text-xs text-slate-500 mt-1">Admin perlu mengatur nominal QRIS yang sama dengan harga produk.</p>
+                                </div>`;
+                            return;
+                        }
+                        const waUrl = App.shop.generateWaUrl(userName, orderId, p.title, p.price);
                         container.innerHTML = `
                             <div class="text-center space-y-3.5">
                                 <h3 class="text-base sm:text-lg font-bold text-[#151c75]">Pembayaran QRIS Studihome</h3>
-                                <p class="text-xs text-slate-500">Scan QRIS di bawah ini melalui BCA, Mandiri, BRI, GoPay, Dana, OVO, atau ShopeePay</p>
-                                
+                                <p class="text-xs text-slate-500">Bayar sesuai nominal berikut menggunakan aplikasi pembayaran QRIS Anda.</p>
                                 <div class="card-3d p-3.5 rounded-2xl inline-block mx-auto bg-white border border-slate-200">
-                                    <img src="${qrisUrl}" alt="QRIS Studihome" class="w-44 h-44 sm:w-48 sm:h-48 mx-auto rounded-xl object-contain">
+                                    <img src="${App.utils.safeUrl(qris.qrisUrl)}" alt="QRIS ${App.utils.escapeHtml(p.title)}" class="w-44 h-44 sm:w-48 sm:h-48 mx-auto rounded-xl object-contain" loading="eager" referrerpolicy="no-referrer">
                                 </div>
-
                                 <div class="card-3d-inset p-3 rounded-xl text-left text-xs space-y-1">
-                                    <div class="flex justify-between">
-                                        <span class="text-slate-500">ID Order:</span>
-                                        <span class="font-bold font-mono text-[#151c75]">${App.state.checkout.orderId}</span>
-                                    </div>
-                                    <div class="flex justify-between">
-                                        <span class="text-slate-500">Total Tagihan:</span>
-                                        <span class="font-black text-[#151c75]">Rp ${Number(p.price).toLocaleString('id-ID')}</span>
-                                    </div>
+                                    <div class="flex justify-between gap-3"><span class="text-slate-500">Produk:</span><span class="font-bold text-[#151c75] text-right">${App.utils.escapeHtml(p.title)}</span></div>
+                                    <div class="flex justify-between gap-3"><span class="text-slate-500">ID Order:</span><span class="font-bold font-mono text-[#151c75]">${App.utils.escapeHtml(orderId)}</span></div>
+                                    <div class="flex justify-between gap-3"><span class="text-slate-500">Total:</span><span class="font-black text-[#151c75]">Rp ${Number(qris.price).toLocaleString('id-ID')}</span></div>
                                 </div>
-
-                                <div class="pt-1">
-                                    <button onclick="App.shop.confirmAndOpenWa('${waUrl}')" class="w-full py-3 rounded-xl text-xs sm:text-sm font-extrabold text-white bg-emerald-600 hover:bg-emerald-700 flex items-center justify-center gap-2 shadow-md transition-all">
-                                        <i class="fa-brands fa-whatsapp text-base"></i> Konfirmasi Pembayaran
-                                    </button>
-                                    <p class="text-[10px] text-slate-500 mt-2">Konfirmasi Lebih Cepat dengan Hubungi Admin</p>
-                                </div>
-                            </div>
-                        `;
+                                <label class="flex items-start gap-2 text-left bg-amber-50 border border-amber-200 rounded-xl p-3 cursor-pointer">
+                                    <input id="confirm-payment-checkbox" type="checkbox" onchange="App.shop.updatePaymentConfirmButton()" class="mt-0.5 shrink-0">
+                                    <span class="text-xs text-slate-700 leading-relaxed">Saya menyatakan bahwa saya <strong>sudah melakukan pembayaran</strong> sesuai nominal order ini dan siap menunggu verifikasi manual Admin.</span>
+                                </label>
+                                <button id="btn-confirm-payment" disabled onclick="App.shop.submitPaymentConfirmation()" class="w-full py-3 rounded-xl text-xs sm:text-sm font-extrabold text-white bg-emerald-600 disabled:bg-slate-300 disabled:cursor-not-allowed hover:bg-emerald-700 flex items-center justify-center gap-2 shadow-md transition-all">
+                                    <i class="fa-solid fa-check"></i> Konfirmasi Pembayaran & Hubungi Admin
+                                </button>
+                                <p class="text-[10px] text-slate-500">Setelah konfirmasi, order menjadi <strong>MENUNGGU VERIFIKASI</strong> dan modul tetap terkunci.</p>
+                                <button onclick="App.ui.toggleModal('checkout-modal', false)" class="text-xs font-bold text-slate-500 hover:text-slate-800">Tutup</button>
+                            </div>`;
+                        App.state.checkout.waUrl = waUrl;
                     }
                 },
 
                 submitOrderStep1: async (e) => {
                     e.preventDefault();
-                    const name = document.getElementById('co-name').value;
-                    const phone = document.getElementById('co-phone').value;
-
+                    const btn = document.getElementById('btn-create-order');
+                    const name = document.getElementById('co-name')?.value?.trim();
+                    const phone = document.getElementById('co-phone')?.value?.trim();
+                    if (!name || !phone) return;
+                    btn.disabled = true;
+                    btn.innerHTML = '<i class="fa-solid fa-spinner animate-spin"></i> Memproses...';
                     try {
                         const res = await App.api.post('CREATE_ORDER', {
                             productId: App.state.checkout.product.id,
                             name,
                             phone
                         });
-                        App.state.checkout.orderId = res.orderId || ('ORD-' + Math.floor(100000 + Math.random() * 900000));
+                        App.state.checkout.orderId = res.orderId;
+                        if (!App.state.checkout.orderId) throw new Error('Order ID tidak diterima dari Supabase.');
                         App.state.checkout.step = 2;
                         App.shop.renderCheckout();
-                    } catch (err) {}
+                    } catch (err) {
+                        btn.disabled = false;
+                        btn.innerHTML = 'Coba Lagi';
+                    }
                 },
 
-                confirmAndOpenWa: (waUrl) => {
-                    window.open(waUrl, '_blank', 'noopener,noreferrer');
+                updatePaymentConfirmButton: () => {
+                    const checkbox = document.getElementById('confirm-payment-checkbox');
+                    const btn = document.getElementById('btn-confirm-payment');
+                    if (checkbox && btn) btn.disabled = !checkbox.checked;
+                },
+
+                submitPaymentConfirmation: async () => {
+                    const checkbox = document.getElementById('confirm-payment-checkbox');
+                    const btn = document.getElementById('btn-confirm-payment');
+                    if (!checkbox?.checked) {
+                        App.ui.toast('Centang konfirmasi pembayaran terlebih dahulu.', 'error');
+                        return;
+                    }
+                    btn.disabled = true;
+                    btn.innerHTML = '<i class="fa-solid fa-spinner animate-spin"></i> Mengonfirmasi...';
+                    try {
+                        await App.api.post('SUBMIT_PAYMENT', { orderId: App.state.checkout.orderId });
+                        App.shop.openWhatsAppConfirmation(App.state.checkout.waUrl);
+                    } catch (err) {
+                        btn.disabled = false;
+                        btn.innerHTML = 'Konfirmasi Pembayaran & Hubungi Admin';
+                    }
+                },
+
+                openWhatsAppConfirmation: (waUrl) => {
+                    if (waUrl) window.open(waUrl, '_blank', 'noopener,noreferrer');
                     App.ui.toggleModal('checkout-modal', false);
-                    App.ui.toast('Pesanan dicatat! Produk Anda berada dalam status TERKUNCI sampai disetujui Admin.', 'info');
+                    App.ui.toast('Konfirmasi pembayaran tersimpan. Order menunggu verifikasi Admin.', 'success');
                     App.router.navigate('dashboard');
                 }
             },
 
             utils: {
+                safeUrl: (url, fallback = '#') => {
+                    const value = String(url || '').trim();
+                    if (!value) return fallback;
+                    try {
+                        const parsed = new URL(value, window.location.origin);
+                        if (parsed.protocol !== 'https:' && parsed.protocol !== 'http:') return fallback;
+                        return parsed.href;
+                    } catch (e) {
+                        return fallback;
+                    }
+                },
+
                 updateClock: () => {
                     const el = document.getElementById('live-clock');
                     if (!el) return;
