@@ -1,6 +1,4 @@
 {
-  "installCommand": "npm install",
-  "buildCommand": "npm run build",
   "cleanUrls": true,
   "trailingSlash": false,
   "headers": [
