@@ -173,19 +173,20 @@
             animation: spinSlow 16s linear infinite;
         }
 
-        /* Marquee Animation Left-to-Right */
+        /* Marquee Animation — seamless continuous loop */
         @keyframes marqueeLtr {
-            0% { transform: translateX(-50%); }
-            100% { transform: translateX(0%); }
+            0% { transform: translate3d(0, 0, 0); }
+            100% { transform: translate3d(-50%, 0, 0); }
         }
         .animate-marquee-ltr {
             display: flex;
-            width: 200%;
-            animation: marqueeLtr 22s linear infinite;
+            width: max-content;
+            min-width: max-content;
+            animation: marqueeLtr 28s linear infinite;
+            will-change: transform;
+            backface-visibility: hidden;
         }
-        .animate-marquee-ltr:hover {
-            animation-play-state: paused;
-        }
+        .animate-marquee-ltr:hover { animation-play-state: paused; }
 
         /* Chat Speech Bubble Tails */
         .chat-bubble-left::before {
@@ -213,7 +214,7 @@
             filter: drop-shadow(-2px 2px 2px rgba(15, 23, 42, 0.08));
         }
 
-        /* Modern speech-bubble notices */
+        /* Modern floating speech-bubble notices */
         .toast-bubble {
             position: relative;
             width: min(100%, 34rem);
@@ -221,27 +222,33 @@
             padding: .8rem 1rem;
             background: rgba(255,255,255,.97);
             border: 1px solid rgba(209,226,255,.95);
-            box-shadow: 0 18px 45px rgba(21,28,117,.14), 0 6px 16px rgba(15,23,42,.08);
+            box-shadow: 0 22px 50px rgba(21,28,117,.16), 0 8px 20px rgba(15,23,42,.10);
             backdrop-filter: blur(12px);
-            transform: translateY(-8px) scale(.98);
+            transform: translateY(10px) translateX(-6px) scale(.98);
             opacity: 0;
             animation: toastBubbleIn .24s ease-out forwards;
         }
         .toast-bubble::after {
             content: '';
             position: absolute;
-            left: 50%;
+            left: 28px;
             bottom: -8px;
             width: 16px;
             height: 16px;
             background: rgba(255,255,255,.97);
             border-right: 1px solid rgba(209,226,255,.95);
             border-bottom: 1px solid rgba(209,226,255,.95);
-            transform: translateX(-50%) rotate(45deg);
+            transform: rotate(45deg);
+            filter: drop-shadow(3px 5px 4px rgba(15,23,42,.08));
         }
         .toast-bubble.toast-hide { animation: toastBubbleOut .22s ease-in forwards; }
-        @keyframes toastBubbleIn { to { opacity:1; transform:translateY(0) scale(1); } }
-        @keyframes toastBubbleOut { to { opacity:0; transform:translateY(-6px) scale(.98); } }
+        @keyframes toastBubbleIn { to { opacity:1; transform:translateY(0) translateX(0) scale(1); } }
+        @keyframes toastBubbleOut { to { opacity:0; transform:translateY(7px) translateX(-4px) scale(.98); } }
+
+        #api-status-badge[data-status="online"] { border-color: rgba(167,243,208,.8); }
+        #api-status-badge[data-status="connecting"] { border-color: rgba(125,211,252,.8); }
+        #api-status-badge[data-status="error"] { border-color: rgba(254,202,202,.8); }
+        .hero-star-vector { shape-rendering: geometricPrecision; text-rendering: geometricPrecision; }
 
         /* Light blue translucent close buttons */
         .modal-close-btn {
@@ -310,12 +317,11 @@
                 </div>
 
                 <!-- Server Connection Status Badge -->
-                <div id="api-status-badge" class="hidden sm:flex items-center gap-2 bg-white px-3 py-1.5 rounded-xl text-[10px] font-extrabold border border-blue-100 shadow-2xs">
-                    <span id="api-status-dot" class="w-2 h-2 rounded-full bg-blue-500"></span>
-                    <span id="api-status-text" class="text-blue-700 uppercase tracking-wider">Checking...</span>
+                <div id="api-status-badge" class="hidden sm:flex items-center justify-center w-9 h-9 rounded-xl bg-white/95 border border-blue-100 shadow-2xs cursor-help" title="Status koneksi Studihome ke Supabase" aria-label="Status koneksi Studihome ke Supabase">
+                    <i id="api-status-icon" class="fa-regular fa-clock text-sky-500 text-sm" aria-hidden="true"></i>
                 </div>
-
-                <!-- Auth Action Area -->
+                
+                <!-- Auth Action Area --><!-- Auth Action Area -->
                 <div id="top-auth-area">
                     <!-- Injected dynamically -->
                 </div>
@@ -332,7 +338,7 @@
     </nav>
 
     <!-- TOAST NOTIFICATION CONTAINER -->
-    <div id="toast-container" class="fixed top-[5.5rem] left-1/2 -translate-x-1/2 z-[80] flex flex-col items-center gap-3 pointer-events-none max-w-md w-[calc(100%-1.5rem)] px-2"></div>
+    <div id="toast-container" class="fixed bottom-[5.5rem] sm:bottom-5 left-3 sm:left-5 z-[80] flex flex-col items-start gap-3 pointer-events-none max-w-md w-[calc(100%-1.5rem)] sm:w-[34rem] px-0"></div>
 
     <!-- MAIN CONTENT VIEW ROUTER CONTAINER -->
     <main id="main-content" class="flex-1 max-w-7xl w-full mx-auto px-3 sm:px-6 py-4 sm:py-8 mb-16 md:mb-0">
@@ -502,7 +508,50 @@
                 throw new Error('SUPABASE_URL tidak valid.');
             }
             supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
-                auth: {
+                realtime: {
+                setup: async () => {
+                    if (!supabaseClient || !App.state.user) return;
+                    if (App.state.realtimeChannel) {
+                        try { await supabaseClient.removeChannel(App.state.realtimeChannel); } catch (_) {}
+                        App.state.realtimeChannel = null;
+                    }
+                    const userId = App.state.user.id;
+                    const isAdmin = String(App.state.user.role || '').toLowerCase() === 'admin';
+                    const channel = supabaseClient.channel(`studihome-live-${userId}`);
+                    const refresh = () => {
+                        clearTimeout(App.state.realtimeRefreshTimer);
+                        App.state.realtimeRefreshTimer = setTimeout(async () => {
+                            try {
+                                if (isAdmin) {
+                                    if (App.state.activeTab === 'admin') await App.admin.renderSubTab();
+                                } else {
+                                    App.state.memberData = await App.api.post('GET_MEMBER_DASHBOARD');
+                                    if (App.state.activeTab === 'dashboard') await App.dashboard.render();
+                                    else if (App.state.activeTab === 'products') App.products.render();
+                                }
+                            } catch (_) {}
+                        }, 250);
+                    };
+                    if (isAdmin) {
+                        channel.on('postgres_changes', { event: '*', schema: 'public', table: 'orders' }, refresh);
+                        channel.on('postgres_changes', { event: '*', schema: 'public', table: 'entitlements' }, refresh);
+                    } else {
+                        channel.on('postgres_changes', { event: '*', schema: 'public', table: 'orders', filter: `user_id=eq.${userId}` }, refresh);
+                        channel.on('postgres_changes', { event: '*', schema: 'public', table: 'entitlements', filter: `user_id=eq.${userId}` }, refresh);
+                    }
+                    channel.subscribe();
+                    App.state.realtimeChannel = channel;
+                },
+                cleanup: async () => {
+                    clearTimeout(App.state.realtimeRefreshTimer);
+                    if (App.state.realtimeChannel) {
+                        try { await supabaseClient.removeChannel(App.state.realtimeChannel); } catch (_) {}
+                        App.state.realtimeChannel = null;
+                    }
+                }
+            },
+
+            auth: {
                     persistSession: true,
                     autoRefreshToken: true,
                     detectSessionInUrl: true
@@ -554,13 +603,13 @@ const App = {
                 rightIndex: 1,
                 leftTestimonialTimer: null,
                 rightTestimonialTimer: null,
+                realtimeChannel: null,
+                realtimeRefreshTimer: null,
                 checkout: {
                     step: 1,
                     product: null,
                     orderId: null
                 },
-                realtimeChannels: [],
-                realtimeStarted: false,
                 demo: {
                     hero: {},
                     aiLinks: [],
@@ -640,7 +689,7 @@ const App = {
 
                     supabaseClient.auth.onAuthStateChange(async (_event, sessionNow) => {
                         if (!sessionNow?.user) {
-                            await App.realtime.stop();
+                            await App.realtime.cleanup();
                             App.state.user = null;
                             App.state.memberData = null;
                             App.ui.renderTopAuth();
@@ -653,16 +702,18 @@ const App = {
                                 App.state.user = null;
                             } else {
                                 App.state.user = profile;
-                                await App.realtime.start();
                             }
                             App.ui.renderTopAuth();
+                            await App.realtime.setup();
                         } catch (e) {
                             App.state.user = null;
                             App.state.memberData = null;
+                            await App.realtime.cleanup();
                             App.ui.renderTopAuth();
                         }
                     });
 
+                    if (App.state.user) await App.realtime.setup();
                     App.ui.updateApiStatus('online');
                 } catch (e) {
                     console.error('[Studihome bootstrap]', e);
@@ -709,9 +760,16 @@ const App = {
                         [/^Order hanya dapat diverifikasi/i, 'Order ini belum masuk tahap review. Tunggu konfirmasi pembayaran dari member dulu.'],
                         [/^Order hanya dapat ditolak/i, 'Order ini belum siap ditolak. Tunggu konfirmasi pembayaran dari member dulu.'],
                         [/^Gagal membuat\/melanjutkan order:/i, 'Order belum berhasil dilanjutkan. Coba lagi sebentar, ya.'],
-                        [/^Konfirmasi pembayaran gagal:/i, 'Konfirmasinya belum terkirim. Coba lagi sebentar, ya.'],
+                        [/^Konfirmasi pembayaran gagal:/i, 'Konfirmasi belum berhasil dikirim. Coba lagi sebentar.'],
                         [/^Gagal menyimpan QRIS:/i, 'QRIS belum berhasil disimpan. Coba cek file dan pengaturannya.'],
-                        [/^Backend:/i, raw.replace(/^Backend:\s*/i, '')],
+                                                [/^Email not confirmed$/i, 'Emailmu belum dikonfirmasi. Santai, kamu tetap bisa masuk. Cek inbox untuk verifikasi email.'],
+                        [/^Invalid login credentials$/i, 'Email atau password belum cocok. Coba cek lagi, ya.'],
+                        [/^User already registered$/i, 'Email ini sudah terdaftar. Langsung masuk saja, yuk.'],
+                        [/^Failed to fetch$/i, 'Koneksi lagi kurang lancar. Coba beberapa detik lagi, ya.'],
+                        [/^JWT expired$/i, 'Sesi loginmu sudah habis. Yuk masuk lagi.'],
+                        [/^Password should be at least (.+)$/i, 'Password minimal $1 karakter, ya.'],
+                        [/^new row violates row-level security policy/i, 'Akses penyimpanan ditolak oleh sistem. Coba lagi atau hubungi admin.'],
+[/^Backend:/i, raw.replace(/^Backend:\s*/i, '')],
                     ];
                     let friendly = raw;
                     for (const [pattern, replacement] of friendlyMap) {
@@ -743,26 +801,29 @@ const App = {
                 },
 
                 updateApiStatus: (status) => {
-                    const dot = document.getElementById('api-status-dot');
-                    const text = document.getElementById('api-status-text');
-                    if (!dot || !text) return;
+                    const badge = document.getElementById('api-status-badge');
+                    const icon = document.getElementById('api-status-icon');
+                    if (!badge || !icon) return;
+
+                    badge.title = status === 'online'
+                        ? 'Terhubung — Supabase aktif'
+                        : status === 'connecting'
+                            ? 'Sedang menghubungkan ke Supabase'
+                            : status === 'error'
+                                ? 'Koneksi ke Supabase bermasalah'
+                                : 'Status koneksi Studihome';
 
                     if (status === 'online') {
-                        dot.className = 'w-2 h-2 rounded-full bg-emerald-500 animate-pulse';
-                        text.textContent = '';
-                        text.className = 'text-emerald-700 uppercase';
+                        icon.className = 'fa-regular fa-clock text-emerald-500 text-sm';
+                        icon.classList.remove('animate-pulse','animate-spin');
                     } else if (status === 'connecting') {
-                        dot.className = 'w-2 h-2 rounded-full bg-sky-500 animate-ping';
-                        text.textContent = 'Menghubungkan...';
-                        text.className = 'text-sky-700 uppercase';
+                        icon.className = 'fa-regular fa-clock text-sky-500 text-sm animate-pulse';
                     } else if (status === 'error') {
-                        dot.className = 'w-2 h-2 rounded-full bg-red-500';
-                        text.textContent = 'Server Bermasalah';
-                        text.className = 'text-red-600 uppercase';
+                        icon.className = 'fa-regular fa-clock text-red-500 text-sm';
+                        icon.classList.remove('animate-pulse','animate-spin');
                     } else {
-                        dot.className = 'w-2 h-2 rounded-full bg-blue-500';
-                        text.textContent = 'Sistem Siap';
-                        text.className = 'text-blue-700 uppercase';
+                        icon.className = 'fa-regular fa-clock text-blue-500 text-sm';
+                        icon.classList.remove('animate-pulse','animate-spin');
                     }
                 },
 
@@ -989,7 +1050,7 @@ const App = {
                             const [eRes, oRes] = await withTimeout(
                                 Promise.all([
                                     supabaseClient.from('entitlements').select('product_id,status').eq('user_id', user.id).eq('status', 'ACTIVE'),
-                                    supabaseClient.from('orders').select('id,product_id,unit_price,total_amount,status,payment_status,payment_confirmed_at,created_at,updated_at,products(title)').eq('user_id', user.id).order('created_at', { ascending: false })
+                                    supabaseClient.from('orders').select('id,product_id,unit_price,total_amount,status,payment_status,created_at,products(title)').eq('user_id', user.id).order('created_at', { ascending: false })
                                 ]),
                                 10000,
                                 'Dashboard member terlalu lama dimuat.'
@@ -1014,9 +1075,7 @@ const App = {
                                 price: Number(o.total_amount || o.unit_price),
                                 status: o.status,
                                 paymentStatus: o.payment_status,
-                                paymentConfirmedAt: o.payment_confirmed_at,
-                                createdAt: o.created_at,
-                                updatedAt: o.updated_at
+                                createdAt: o.created_at
                             }));
 
                             data = { verifiedProducts: products, userOrders: orders };
@@ -1054,7 +1113,7 @@ const App = {
                                 supabaseClient.from('modules').select('*').order('created_at',{ascending:true}),
                                 supabaseClient.from('ai_links').select('*').order('sort_order',{ascending:true}),
                                 supabaseClient.from('testimonials').select('*').order('created_at',{ascending:false}),
-                                supabaseClient.from('orders').select('id,user_id,product_id,unit_price,total_amount,status,payment_status,payment_confirmed_at,created_at,updated_at,products(title),profiles!orders_user_id_fkey(name,email,phone)').order('created_at',{ascending:false}),
+                                supabaseClient.from('orders').select('id,user_id,product_id,unit_price,total_amount,status,payment_status,payment_confirmed_at,created_at,products(title),profiles!orders_user_id_fkey(name,email,phone)').order('created_at',{ascending:false}),
                                 supabaseClient.from('profiles').select('id,name,email,phone,role,status,created_at').order('created_at',{ascending:false})
                             ]);
                             for (const r of [sRes,pRes,mRes,aRes,tRes,oRes,uRes]) if (r.error) throw r.error;
@@ -1064,7 +1123,7 @@ const App = {
                                 hero:{badge:s.badge||'',title:s.hero_title||'',subtitle:s.hero_subtitle||'',ctaPrimaryLabel:s.cta_primary_label||'',ctaPrimaryUrl:s.cta_primary_url||'#products',ctaSecondaryLabel:s.cta_secondary_label||'',ctaSecondaryUrl:s.cta_secondary_url||'#p4'},
                                 master:{qrisSlots:s.qris_slots||[]}, aiLinks:(aRes.data||[]).map(x=>({id:x.id,name:x.name,icon:x.icon,sortOrder:x.sort_order})),
                                 testimonials:tRes.data||[], products:(pRes.data||[]).map(App.api._mapProduct), modules:grouped,
-                                orders:(oRes.data||[]).map(o=>({id:o.id,userId:o.user_id,userName:o.profiles?.name||'',userEmail:o.profiles?.email||'',productId:o.product_id,productTitle:o.products?.title||'',price:Number(o.total_amount||o.unit_price),status:o.status,paymentStatus:o.payment_status,paymentConfirmedAt:o.payment_confirmed_at,createdAt:o.created_at,updatedAt:o.updated_at,phone:o.profiles?.phone||''})),
+                                orders:(oRes.data||[]).map(o=>({id:o.id,userId:o.user_id,userName:o.profiles?.name||'',userEmail:o.profiles?.email||'',userPhone:o.profiles?.phone||'',productId:o.product_id,productTitle:o.products?.title||'',price:Number(o.total_amount||o.unit_price),status:o.status,paymentStatus:o.payment_status,paymentConfirmedAt:o.payment_confirmed_at||null,createdAt:o.created_at})),
                                 users:uRes.data||[]
                             };
                             App.state.demo.hero=data.hero; App.state.demo.master=data.master; App.state.demo.aiLinks=data.aiLinks; App.state.demo.testimonials=data.testimonials; App.state.demo.products=data.products; App.state.demo.modules=data.modules; App.state.demo.orders=data.orders; App.state.demo.users=data.users;
@@ -1190,7 +1249,6 @@ const App = {
                         const userData = res.user || res;
                         
                         App.state.user = userData;
-                        await App.realtime.start();
                         App.state.memberData = await App.api.post('GET_MEMBER_DASHBOARD');
 
                         App.ui.renderTopAuth();
@@ -1240,51 +1298,13 @@ const App = {
                 },
 
                 logout: async () => {
+                    await App.realtime.cleanup();
                     try { await App.api.post('AUTH_LOGOUT'); } catch (e) {}
-                    await App.realtime.stop();
                     App.state.user = null;
                     App.state.memberData = null;
                     App.ui.renderTopAuth();
                     App.ui.toast('Sampai jumpa lagi 👋 Akunmu sudah keluar dengan aman.', 'info');
                     App.router.navigate('home');
-                }
-            },
-
-            realtime: {
-                start: async () => {
-                    if (App.state.realtimeStarted || !App.state.user?.id) return;
-                    App.state.realtimeStarted = true;
-                    try {
-                        const userId = App.state.user.id;
-                        const ordersChannel = supabaseClient
-                            .channel(`member-orders-${userId}`)
-                            .on('postgres_changes', { event: '*', schema: 'public', table: 'orders', filter: `user_id=eq.${userId}` }, async () => {
-                                try {
-                                    App.state.memberData = await App.api.post('GET_MEMBER_DASHBOARD');
-                                    if (App.state.activeTab === 'dashboard') await App.dashboard.render();
-                                } catch (_) {}
-                            })
-                            .subscribe();
-
-                        const entitlementsChannel = supabaseClient
-                            .channel(`member-entitlements-${userId}`)
-                            .on('postgres_changes', { event: '*', schema: 'public', table: 'entitlements', filter: `user_id=eq.${userId}` }, async () => {
-                                try {
-                                    App.state.memberData = await App.api.post('GET_MEMBER_DASHBOARD');
-                                    if (App.state.activeTab === 'dashboard') await App.dashboard.render();
-                                } catch (_) {}
-                            })
-                            .subscribe();
-
-                        App.state.realtimeChannels = [ordersChannel, entitlementsChannel];
-                    } catch (_) {}
-                },
-                stop: async () => {
-                    for (const ch of App.state.realtimeChannels || []) {
-                        try { await supabaseClient.removeChannel(ch); } catch (_) {}
-                    }
-                    App.state.realtimeChannels = [];
-                    App.state.realtimeStarted = false;
                 }
             },
 
@@ -1362,7 +1382,7 @@ const App = {
                         <div class="flex items-center justify-between mb-2.5 border-b border-blue-50 pb-2">
                             <div class="flex items-center gap-1.5">
                                 <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
-                                <span class="text-[10px] font-extrabold text-slate-500 uppercase tracking-wider">Live Chat Review</span>
+                                <span class="text-[10px] font-extrabold text-slate-500 uppercase tracking-wider">Ulasan dari Pengguna</span>
                             </div>
                             <div class="flex items-center gap-1 text-amber-400 text-xs">
                                 <i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i>
@@ -1425,9 +1445,7 @@ const App = {
                     main.innerHTML = `
                         <!-- HERO SECTION -->
                         <div class="card-3d p-6 sm:p-10 md:p-12 rounded-3xl mb-8 sm:mb-10 relative overflow-hidden bg-gradient-to-br from-[#151c75] to-[#3f48bf] text-white border border-blue-900/30 shadow-2xl">
-                            <div class="absolute -right-10 -bottom-10 md:right-0 md:bottom-[-20px] text-[200px] sm:text-[320px] text-blue-200/20 select-none pointer-events-none animate-spin-slow font-black flex items-center justify-center leading-none">
-                                ✦
-                            </div>
+                            <div class="absolute -right-10 -bottom-10 md:right-0 md:bottom-[-20px] text-[200px] sm:text-[320px] text-blue-200/20 select-none pointer-events-none animate-spin-slow font-black flex items-center justify-center leading-none">✦</div>
                             <div class="max-w-3xl relative z-10">
                                 <div class="inline-flex items-center gap-1.5 bg-white/10 backdrop-blur-md border border-white/20 px-3.5 py-1.5 rounded-2xl text-xs font-bold text-amber-300 mb-4 sm:mb-6 shadow-2xs">
                                     <span class="animate-spin-slow text-[#FACC15] font-black text-sm">✦</span> ${App.utils.escapeHtml(hero.badge)}
@@ -1466,11 +1484,11 @@ const App = {
                         <div class="mb-8 sm:mb-10">
                             <div class="flex items-center justify-between mb-4 sm:mb-6">
                                 <div>
-                                    <h2 class="text-lg sm:text-xl font-extrabold text-[#151c75]">Produk Unggulan Studihome</h2>
+                                    <h2 class="text-lg sm:text-xl font-extrabold text-[#151c75]">Paling banyak diminati</h2>
                                     <p class="text-xs text-slate-500">Solusi paling populer pilihan komunitas</p>
                                 </div>
                                 <button onclick="App.router.navigate('products')" class="text-xs font-bold text-[#151c75] hover:underline flex items-center gap-1">
-                                    <span>Lihat Semua (${data.products?.length || 9})</span>
+                                    <span>Lainnya</span>
                                     <i class="fa-solid fa-chevron-right text-amber-500"></i>
                                 </button>
                             </div>
@@ -1483,11 +1501,11 @@ const App = {
                         <div class="mb-6">
                             <div class="flex items-center justify-between mb-4 sm:mb-6">
                                 <div>
-                                    <h2 class="text-lg sm:text-xl font-extrabold text-[#151c75] mb-0.5">Kata Mereka Tentang Studihome</h2>
-                                    <p class="text-xs text-slate-500">Ulasan langsung dari pengguna modul AI kami</p>
+                                    <h2 class="text-lg sm:text-xl font-extrabold text-[#151c75] mb-0.5">Kata Mereka . . .</h2>
+                                    <p class="text-xs text-slate-500">Ulasan Pengguna Studihome</p>
                                 </div>
                                 <div class="flex items-center gap-1 text-xs text-slate-400 font-bold">
-                                    <i class="fa-solid fa-rotate text-[#151c75] animate-spin-slow"></i> Update Otomatis
+                                    <i class="fa-solid fa-rotate text-[#151c75] animate-spin-slow"></i> Auto
                                 </div>
                             </div>
                             <div id="home-testimonials-grid" class="grid grid-cols-1 md:grid-cols-2 gap-6 sm:gap-8">
@@ -1707,7 +1725,7 @@ const App = {
                             <div class="card-3d p-6 sm:p-8 rounded-3xl text-center max-w-md mx-auto my-8 sm:my-12 bg-white">
                                 <i class="fa-solid fa-lock text-3xl sm:text-4xl text-[#151c75] mb-3"></i>
                                 <h2 class="text-base sm:text-lg font-bold text-slate-800 mb-2">Akses Terbatas</h2>
-                                <p class="text-xs text-slate-500 mb-5">Silakan masuk ke akun Anda untuk mengakses Studio dan Rumahku...</p>
+                                <p class="text-xs text-slate-500 mb-5">Silakan masuk ke akun Anda untuk mengakses Dashboard Member Studihome.</p>
                                 <button onclick="App.ui.toggleModal('auth-modal', true)" class="btn-brand-gradient px-6 py-2.5 sm:py-3 rounded-xl text-xs sm:text-sm font-bold">
                                     Masuk Ke Akun
                                 </button>
@@ -1719,8 +1737,8 @@ const App = {
                     main.innerHTML = `
                         <div class="mb-6 flex items-center justify-between">
                             <div>
-                                <h1 class="text-xl sm:text-2xl font-black text-[#151c75]">Studio dan Rumahku..</h1>
-                                <p class="text-xs sm:text-sm text-slate-500">Tempat buat ngatur modul belajarmu dan ngecek status orderan.</p>
+                                <h1 class="text-xl sm:text-2xl font-black text-[#151c75]">Dashboard Member Studihome</h1>
+                                <p class="text-xs sm:text-sm text-slate-500">Kelola modul pembelajaran dan status transaksi produk Anda</p>
                             </div>
                         </div>
 
@@ -1850,10 +1868,10 @@ const App = {
                                     ? 'MENUNGGU VERIFIKASI ADMIN'
                                     : 'DITOLAK';
                             const description = isPending
-                                ? 'Lanjut scan QRIS, lalu tekan konfirmasi kalau sudah bayar. Biar Admin bisa langsung cek.'
+                                ? 'Silakan lanjutkan pembayaran melalui QRIS. Setelah pembayaran, tekan tombol konfirmasi agar Admin dapat melakukan verifikasi.'
                                 : isReview
-                                    ? 'Konfirmasimu sudah masuk. Sekarang tinggal tunggu Admin selesai mengecek. Modul akan terbuka setelah disetujui.'
-                                    : 'Order ini belum lolos pengecekan. Kalau ada yang bikin bingung, langsung chat Admin aja.';
+                                    ? 'Konfirmasi pembayaran sudah diterima. Order sedang diperiksa Admin. Modul tetap terkunci sampai pembayaran disetujui.'
+                                    : 'Transaksi ini ditolak oleh Admin. Silakan hubungi Bantuan jika ada kendala.';
 
                             html += `
                                 <div class="card-3d p-4 sm:p-5 rounded-2xl flex flex-col justify-between border-l-4 ${borderClass} bg-white">
@@ -2060,13 +2078,25 @@ const App = {
                                                 </tr>
                                             </thead>
                                             <tbody>
-                                                ${(adminData.orders || []).map(o => `
+                                                ${(adminData.orders || []).map(o => {
+                                                    const wa = o.userPhone ? 'https://wa.me/' + String(o.userPhone).replace(/\D/g, '').replace(/^0/, '62') + '?text=' + encodeURIComponent('Halo, kami dari Studihome, silahkan lakukan pembayaran dan akses fasilitas dengan masuk ke akun kamu di studihome.id.') : '';
+                                                    const paymentTime = o.paymentConfirmedAt ? new Date(o.paymentConfirmedAt).toLocaleString('id-ID', {day:'2-digit', month:'2-digit', year:'numeric', hour:'2-digit', minute:'2-digit', second:'2-digit'}) : 'Belum ada';
+                                                    return `
                                                     <tr class="border-b border-slate-100">
                                                         <td class="py-3 px-2 font-mono font-bold text-[#151c75]">${o.id}</td>
                                                         <td class="py-3 px-2">${App.utils.escapeHtml(o.userName || o.userEmail)}<br><span class="text-[10px] text-slate-400">${App.utils.escapeHtml(o.userEmail)}</span></td>
                                                         <td class="py-3 px-2 font-medium">${App.utils.escapeHtml(o.productTitle)}</td>
                                                         <td class="py-3 px-2 font-bold text-[#151c75]">Rp ${Number(o.price).toLocaleString('id-ID')}</td>
-                                                        <td class="py-3 px-2 text-[10px] font-semibold text-slate-600">${o.paymentConfirmedAt ? App.utils.formatDateTime(o.paymentConfirmedAt) : '<span class="text-slate-400">Belum ada konfirmasi</span>'}</td>
+                                                        <td class="py-3 px-2">
+                                                            <div class="text-[10px] font-bold text-slate-700 whitespace-nowrap">${paymentTime}</div>
+                                                            ${wa ? `
+                                                                <a href="${wa}" target="_blank" rel="noopener noreferrer" class="mt-1.5 inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-[10px] font-bold text-emerald-700 bg-emerald-50 border border-emerald-200 hover:bg-emerald-100 shadow-2xs">
+                                                                    <i class="fa-brands fa-whatsapp"></i> ${App.utils.escapeHtml(o.userPhone)}
+                                                                </a>
+                                                            ` : `
+                                                                <span class="mt-1 block text-[10px] text-slate-400">Nomor WA belum tersedia</span>
+                                                            `}
+                                                        </td>
                                                         <td class="py-3 px-2">
                                                             <span class="px-2 py-0.5 rounded-md text-[10px] font-extrabold ${
                                                                 o.status === 'VERIFIED' ? 'bg-emerald-100 text-emerald-800' : o.status === 'REJECTED' ? 'bg-red-100 text-red-800' : 'bg-amber-100 text-amber-800'
@@ -2074,7 +2104,6 @@ const App = {
                                                         </td>
                                                         <td class="py-3 px-2">
                                                             <div class="flex gap-1.5 flex-wrap">
-                                                                ${o.phone ? `<a href="${App.utils.buildAdminMemberWaUrl(o.phone)}" target="_blank" rel="noopener noreferrer" class="px-2.5 py-1 rounded-lg text-[10px] font-bold text-emerald-700 bg-emerald-50 border border-emerald-200 hover:bg-emerald-100 flex items-center gap-1" title="Hubungi member via WhatsApp">${App.utils.escapeHtml(App.utils.normalizePhone(o.phone))}</a>` : ''}
                                                                 <button ${o.status === 'VERIFIED' || o.status === 'REJECTED' ? 'disabled' : ''} onclick="App.admin.verifyOrder('${o.id}')" class="px-2.5 py-1 rounded-lg text-[10px] font-bold text-emerald-700 bg-emerald-50 border border-emerald-200 hover:bg-emerald-100 flex items-center gap-1">
                                                                     <i class="fa-solid fa-lock-open"></i> Buka Akses
                                                                 </button>
@@ -2084,7 +2113,8 @@ const App = {
                                                             </div>
                                                         </td>
                                                     </tr>
-                                                `).join('')}
+                                                `;
+                                                }).join('')}
                                             </tbody>
                                         </table>
                                     </div>
@@ -2830,7 +2860,7 @@ const App = {
 
                     if (step === 1) {
                         container.innerHTML = `
-                            <h3 class="text-base sm:text-lg font-extrabold text-[#151c75] mb-2">Pilihan Pemesanan Terbaik</h3>
+                            <h3 class="text-base sm:text-lg font-extrabold text-[#151c75] mb-2">Formulir Pemesanan Studihome</h3>
                             <div class="card-3d-inset p-3.5 rounded-2xl mb-4">
                                 <span class="text-[10px] font-bold text-amber-600 uppercase">PRODUK DIPILIH</span>
                                 <h4 class="font-bold text-sm text-[#151c75]">${App.utils.escapeHtml(p.title)}</h4>
@@ -2838,7 +2868,7 @@ const App = {
                             </div>
                             <form onsubmit="App.shop.submitOrderStep1(event)" class="space-y-3.5">
                                 <div>
-                                    <label class="block text-xs sm:text-sm font-bold text-slate-700 mb-1">Nama Lengkapmu</label>
+                                    <label class="block text-xs sm:text-sm font-bold text-slate-700 mb-1">Nama Lengkap Member</label>
                                     <input type="text" id="co-name" required value="${App.utils.escapeHtml(App.state.user?.name || '')}" class="w-full card-3d-inset px-3.5 py-2.5 rounded-xl text-xs sm:text-sm outline-none">
                                 </div>
                                 <div>
@@ -2870,8 +2900,8 @@ const App = {
                         const waUrl = App.shop.generateWaUrl(userName, orderId, p.title, p.price);
                         container.innerHTML = `
                             <div class="text-center space-y-3.5">
-                                <h3 class="text-base sm:text-lg font-bold text-[#151c75]">Bayarnya Pake QRIS Ya..</h3>
-                                <p class="text-xs text-slate-500">Bayar gampang tinggal scan QRIS pakai aplikasi andalanmu. Mau pakai BRImo, BCA, BNI, Mandiri, GoPay, OVO, DANA, ShopeePay atau m-banking lainnya bisa semua!</p>
+                                <h3 class="text-base sm:text-lg font-bold text-[#151c75]">Pembayaran QRIS Studihome</h3>
+                                <p class="text-xs text-slate-500">Bayar sesuai nominal berikut menggunakan aplikasi pembayaran QRIS Anda.</p>
                                 <div class="card-3d p-3.5 rounded-2xl inline-block mx-auto bg-white border border-slate-200">
                                     <img src="${App.utils.safeUrl(qris.qrisUrl)}" alt="QRIS ${App.utils.escapeHtml(p.title)}" class="w-44 h-44 sm:w-48 sm:h-48 mx-auto rounded-xl object-contain" loading="eager" referrerpolicy="no-referrer">
                                 </div>
@@ -2882,12 +2912,12 @@ const App = {
                                 </div>
                                 <label class="flex items-start gap-2 text-left bg-amber-50 border border-amber-200 rounded-xl p-3 cursor-pointer">
                                     <input id="confirm-payment-checkbox" type="checkbox" onchange="App.shop.updatePaymentConfirmButton()" class="mt-0.5 shrink-0">
-                                    <span class="text-xs text-slate-700 leading-relaxed">Aku sudah bayar pas sesuai nominal dan siap beraksi!!.</span>
+                                    <span class="text-xs text-slate-700 leading-relaxed">Saya menyatakan bahwa saya <strong>sudah melakukan pembayaran</strong> sesuai nominal order ini dan siap menunggu verifikasi manual Admin.</span>
                                 </label>
                                 <button id="btn-confirm-payment" disabled onclick="App.shop.submitPaymentConfirmation()" class="w-full py-3 rounded-xl text-xs sm:text-sm font-extrabold text-white bg-emerald-600 disabled:bg-slate-300 disabled:cursor-not-allowed hover:bg-emerald-700 flex items-center justify-center gap-2 shadow-md transition-all">
-                                    <i class="fa-solid fa-check"></i> KONFIRMASI PEMBAYARAN
+                                    <i class="fa-solid fa-check"></i> Konfirmasi Pembayaran & Hubungi Admin
                                 </button>
-                                <p class="text-[10px] text-slate-500">Nggak bisa pakai QRIS? Santai, langsung chat admin aja di 085111581115.</p>
+                                <p class="text-[10px] text-slate-500">Setelah konfirmasi, order menjadi <strong>MENUNGGU VERIFIKASI</strong> dan modul tetap terkunci.</p>
                                 <button onclick="App.ui.toggleModal('checkout-modal', false)" class="text-xs font-bold text-slate-500 hover:text-slate-800">Tutup</button>
                             </div>`;
                         App.state.checkout.waUrl = waUrl;
@@ -2904,7 +2934,7 @@ const App = {
                     if (!name || !phone || !productId) return;
 
                     btn.disabled = true;
-                    btn.innerHTML = '<i class="fa-solid fa-spinner animate-spin"></i> Sebentar, lagi diproses...';
+                    btn.innerHTML = '<i class="fa-solid fa-spinner animate-spin"></i> Memproses...';
 
                     try {
                         const currentUserId = App.state.user?.id;
@@ -2921,7 +2951,7 @@ const App = {
                                     .order('created_at', { ascending: false })
                                     .limit(1),
                                 10000,
-                                'Cek order sebelumnya agak lama. Coba lagi sebentar, ya.'
+                                'Pengecekan order sebelumnya terlalu lama.'
                             );
 
                             if (existingErr) throw existingErr;
@@ -2952,7 +2982,7 @@ const App = {
 
                         App.state.checkout.orderId = res?.orderId;
                         if (!App.state.checkout.orderId) {
-                            throw new Error('Order belum berhasil dibuat. Coba lagi, ya.');
+                            throw new Error('Order ID tidak diterima dari Supabase.');
                         }
 
                         App.state.checkout.step = 2;
@@ -2977,11 +3007,11 @@ const App = {
                     const orderId = App.state.checkout.orderId;
 
                     if (!checkbox?.checked) {
-                        App.ui.toast('Centang dulu konfirmasi pembayarannya, ya.', 'error');
+                        App.ui.toast('Centang konfirmasi pembayaran terlebih dahulu.', 'error');
                         return;
                     }
                     if (!orderId) {
-                        App.ui.toast('ID order belum ketemu. Yuk, ulangi checkout.', 'error');
+                        App.ui.toast('ID Order tidak ditemukan. Silakan ulangi checkout.', 'error');
                         return;
                     }
 
@@ -2991,14 +3021,14 @@ const App = {
                     try {
                         const result = await App.api.post('SUBMIT_PAYMENT', { orderId });
                         if (!result?.success) {
-                            throw new Error('Konfirmasi pembayarannya belum berhasil diproses.');
+                            throw new Error('Konfirmasi pembayaran tidak berhasil diproses.');
                         }
 
                         App.state.memberData = await App.api.post('GET_MEMBER_DASHBOARD');
                         App.shop.openWhatsAppConfirmation(App.state.checkout.waUrl);
                     } catch (err) {
                         btn.disabled = false;
-                        btn.innerHTML = '<i class="fa-solid fa-check"></i> KONFIRMASI PEMBAYARAN';
+                        btn.innerHTML = '<i class="fa-solid fa-check"></i> Konfirmasi Pembayaran & Hubungi Admin';
                         App.ui.toast('Konfirmasi pembayaran gagal: ' + (err?.message || 'Terjadi kesalahan.'), 'error');
                     }
                 },
@@ -3006,30 +3036,12 @@ const App = {
                 openWhatsAppConfirmation: (waUrl) => {
                     if (waUrl) window.open(waUrl, '_blank', 'noopener,noreferrer');
                     App.ui.toggleModal('checkout-modal', false);
-                    App.ui.toast('Mantap! Konfirmasi pembayaran sudah masuk. Sekarang tinggal tunggu Admin cek, ya.', 'success');
+                    App.ui.toast('Konfirmasi pembayaran tersimpan. Order menunggu verifikasi Admin.', 'success');
                     App.router.navigate('dashboard');
                 }
             },
 
             utils: {
-                formatDateTime: (value) => {
-                    if (!value) return '-';
-                    const d = new Date(value);
-                    if (Number.isNaN(d.getTime())) return '-';
-                    return new Intl.DateTimeFormat('id-ID', { day:'2-digit', month:'2-digit', year:'numeric', hour:'2-digit', minute:'2-digit', second:'2-digit', hour12:false, timeZone:'Asia/Jakarta' }).format(d);
-                },
-                normalizePhone: (phone) => {
-                    const raw = String(phone || '').replace(/\D/g,'');
-                    if (!raw) return '';
-                    if (raw.startsWith('0')) return '62' + raw.slice(1);
-                    if (raw.startsWith('62')) return raw;
-                    return raw;
-                },
-                buildAdminMemberWaUrl: (phone) => {
-                    const number = App.utils.normalizePhone(phone);
-                    const msg = 'Halo, kami dari Studihome, silahkan lakukan pembayaran dan akses fasilitas dengan masuk ke akun kamu di studihome.id.';
-                    return `https://wa.me/${number}?text=${encodeURIComponent(msg)}`;
-                },
                 safeUrl: (url, fallback = '#') => {
                     const value = String(url || '').trim();
                     if (!value) return fallback;
@@ -3046,7 +3058,7 @@ const App = {
                     const el = document.getElementById('live-clock');
                     if (!el) return;
                     const now = new Date();
-                    el.textContent = now.toTimeString().split(' ')[0];
+                    el.textContent = now.toLocaleTimeString('id-ID', { hour12: false, timeZone: 'Asia/Jakarta' }) + ' WIB';
                 },
 
                 escapeHtml: (str) => {
