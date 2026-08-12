@@ -331,13 +331,21 @@
         @media (max-width: 767px) { .site-footer { display: none !important; } }
         @media (max-width: 640px) {
             .hero-star-mark {
-                right: -1rem !important;
-                bottom: -0.75rem !important;
-                font-size: 8rem !important;
-                line-height: .9 !important;
-                transform: translate3d(0,0,0) scale(.9);
-                transform-origin: bottom right;
+                right: .5rem !important;
+                bottom: .25rem !important;
+                font-size: 9rem !important;
+                line-height: 1 !important;
+                width: 9rem !important;
+                height: 9rem !important;
+                transform: none !important;
+                transform-origin: 50% 50% !important;
+                overflow: visible !important;
+                animation: spinHeroStar 16s linear infinite !important;
             }
+        }
+        @keyframes spinHeroStar {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
         }
 
         /* Custom Scrollbar */
@@ -733,9 +741,9 @@ const App = {
                         { id: 'demo-t3', name: 'Ayu Maharani', role: 'Pemilik UMKM', text: 'Ide konten, pencatatan dan workflow usaha jadi lebih terarah. Cocok buat yang ingin mulai pakai AI tanpa ribet.' }
                     ],
                     products: [
-                        { id: 'demo-p10', title: 'AI Dosen & Akademik Pro', desc: 'Paket prompt dan template AI untuk bahan ajar, riset, administrasi, dan aktivitas akademik.', price: 169000, priceOriginal: 299000, isFree: false, imgUrl: 'https://images.unsplash.com/photo-1523240795612-9a054b0db644?auto=format&fit=crop&w=600&q=80', features: 'Prompt Bahan Ajar & RPS\nTemplate Riset & Ringkasan Jurnal\nAdministrasi Akademik\nGenerator Materi Presentasi', category: 'Guru & Pendidikan', badge: 'BARU' },
-                        { id: 'demo-p11', title: 'AI Guru Produktif Pack', desc: 'Koleksi workflow dan prompt untuk perangkat ajar, asesmen, konten kelas, dan administrasi guru.', price: 119000, priceOriginal: 219000, isFree: false, imgUrl: 'https://images.unsplash.com/photo-1509062522246-3755977927d7?auto=format&fit=crop&w=600&q=80', features: 'Prompt Modul Ajar\nBank Soal & Asesmen\nKonten Kelas\nChecklist Administrasi', category: 'Guru & Pendidikan', badge: 'POPULER' },
-                        { id: 'demo-p12', title: 'AI UMKM Sales & Content Kit', desc: 'Paket praktis untuk konten jualan, follow-up pelanggan, promosi, dan otomasi kerja UMKM.', price: 109000, priceOriginal: 199000, isFree: false, imgUrl: 'https://images.unsplash.com/photo-1556761175-b413da4baf72?auto=format&fit=crop&w=600&q=80', features: 'Prompt Konten Jualan\nFollow-up Pelanggan\nCalendar Konten\nWorkflow Promosi', category: 'Digital Marketing', badge: 'REKOMENDASI' },
+                        { id: 'demo-p10', title: 'AI Dosen & Akademik Pro', desc: 'Paket prompt dan template AI untuk bahan ajar, riset, administrasi, dan aktivitas akademik.', price: 169000, priceOriginal: 299000, isFree: false, imgUrl: 'https://images.unsplash.com/photo-1523240795612-9a054b0db644?auto=format&fit=crop&w=600&q=80', features: 'Prompt Bahan Ajar & RPS\nTemplate Riset & Ringkasan Jurnal\nAdministrasi Akademik\nGenerator Materi Presentasi', category: 'Guru & Pendidikan', badge: 'BARU', isFeatured: true },
+                        { id: 'demo-p11', title: 'AI Guru Produktif Pack', desc: 'Koleksi workflow dan prompt untuk perangkat ajar, asesmen, konten kelas, dan administrasi guru.', price: 119000, priceOriginal: 219000, isFree: false, imgUrl: 'https://images.unsplash.com/photo-1509062522246-3755977927d7?auto=format&fit=crop&w=600&q=80', features: 'Prompt Modul Ajar\nBank Soal & Asesmen\nKonten Kelas\nChecklist Administrasi', category: 'Guru & Pendidikan', badge: 'POPULER', isFeatured: true },
+                        { id: 'demo-p12', title: 'AI UMKM Sales & Content Kit', desc: 'Paket praktis untuk konten jualan, follow-up pelanggan, promosi, dan otomasi kerja UMKM.', price: 109000, priceOriginal: 199000, isFree: false, imgUrl: 'https://images.unsplash.com/photo-1556761175-b413da4baf72?auto=format&fit=crop&w=600&q=80', features: 'Prompt Konten Jualan\nFollow-up Pelanggan\nCalendar Konten\nWorkflow Promosi', category: 'Digital Marketing', badge: 'REKOMENDASI', isFeatured: true },
                     ],
                     orders: [],
                     users: [],
@@ -1162,7 +1170,7 @@ const App = {
                     const [settingsRes, productsRes, aiRes, testimonialsRes] = await withTimeout(
                         Promise.all([
                             supabaseClient.from('site_settings').select('*').eq('id', 1).maybeSingle(),
-                            supabaseClient.from('products').select('id,title,description,price,price_original,badge,category,image_url,features,is_free,is_active,created_at,updated_at').eq('is_active', true).order('created_at', { ascending: false }),
+                            supabaseClient.from('products').select('id,title,description,price,price_original,badge,category,image_url,features,is_free,is_active,is_featured,created_at,updated_at').eq('is_active', true).order('created_at', { ascending: false }),
                             supabaseClient.from('ai_links').select('id,name,icon,sort_order,created_at').order('sort_order', { ascending: true }),
                             supabaseClient.from('testimonials').select('id,name,role,text,created_at').order('created_at', { ascending: false })
                         ]),
@@ -1194,7 +1202,7 @@ const App = {
                 _mapProduct: (p) => ({
                     id: p.id, title: p.title, desc: p.description, price: Number(p.price), priceOriginal: Number(p.price_original),
                     badge: p.badge, category: p.category, imgUrl: p.image_url, features: p.features,
-                    isFree: !!p.is_free, isActive: !!p.is_active
+                    isFree: !!p.is_free, isActive: !!p.is_active, isFeatured: !!p.is_featured
                 }),
                 getMockData: () => App.state.publicData || { hero: {}, aiLinks: [], products: [], testimonials: [], master: { qrisSlots: [] } },
                 post: async (action, payload = {}) => {
@@ -1261,7 +1269,7 @@ const App = {
                             const ids = (eRes.data || []).map(e => e.product_id);
                             let products = [];
                             if (ids.length) {
-                                const freeRes = await supabaseClient.from('products').select('id,title,description,price,price_original,badge,category,image_url,features,is_free,is_active,created_at,updated_at').in('id', ids);
+                                const freeRes = await supabaseClient.from('products').select('id,title,description,price,price_original,badge,category,image_url,features,is_free,is_active,is_featured,created_at,updated_at').in('id', ids);
                                 if (freeRes.error) throw freeRes.error;
                                 products = (freeRes.data || []).map(App.api._mapProduct);
                             }
@@ -1344,9 +1352,18 @@ const App = {
                             const { data: rpc, error } = await withTimeout(supabaseClient.rpc('admin_reject_order', { p_order_id: payload.orderId }), 10000, 'Penolakan order terlalu lama.');
                             if (error) throw error; data = rpc;
                         } else if (action === 'ADMIN_SAVE_PRODUCT') {
-                            const p=payload.product; const row={ title:p.title,description:p.desc,price:Number(p.price),price_original:Number(p.priceOriginal||p.price),badge:p.badge||'',category:p.category||'General',image_url:p.imgUrl||'',features:p.features||'',is_free:Number(p.price)===0,is_active:p.isActive!==false,updated_at:new Date().toISOString() };
+                            const p=payload.product; const row={ title:p.title,description:p.desc,price:Number(p.price),price_original:Number(p.priceOriginal||p.price),badge:p.badge||'',category:p.category||'General',image_url:p.imgUrl||'',features:p.features||'',is_free:Number(p.price)===0,is_active:p.isActive!==false,is_featured:!!p.isFeatured,updated_at:new Date().toISOString() };
                             if (p.id) row.id=p.id;
                             const {data:r,error}=await supabaseClient.from('products').upsert(row).select().single(); if(error)throw error; data={product:App.api._mapProduct(r)};
+                        } else if (action === 'ADMIN_TOGGLE_FEATURED_PRODUCT') {
+                            const { data: updated, error } = await supabaseClient
+                                .from('products')
+                                .update({ is_featured: !!payload.isFeatured, updated_at: new Date().toISOString() })
+                                .eq('id', payload.productId)
+                                .select('id,is_featured')
+                                .single();
+                            if (error) throw error;
+                            data = { success: true, product: updated };
                         } else if (action === 'ADMIN_DELETE_PRODUCT') {
                             const {error}=await supabaseClient.from('products').update({is_active:false,updated_at:new Date().toISOString()}).eq('id',payload.productId); if(error)throw error; data={success:true};
                         } else if (action === 'ADMIN_SAVE_MODULE') {
@@ -1651,7 +1668,7 @@ const App = {
 
                     const hero = data.hero || App.state.demo.hero;
                     const aiLinks = data.aiLinks || App.state.demo.aiLinks;
-                    const featuredProducts = (data.products || []).slice(0, 3);
+                    const featuredProducts = (data.products || []).filter(p => p.isFeatured).slice(0, 3);
 
                     const primaryLabel = hero.ctaPrimaryLabel || hero.ctaPrimary || 'Jelajahi Produk';
                     const primaryUrl = hero.ctaPrimaryUrl || '#products';
@@ -1959,7 +1976,7 @@ const App = {
                         <div class="mb-6 flex items-center justify-between">
                             <div>
                                 <h1 class="text-xl sm:text-2xl font-black text-[#151c75]">Studio dan Rumahku..</h1>
-                                <p class="text-xs sm:text-sm text-slate-500">Tempat buat ngatur modul belajarmu dan ngecek status orderan.</p>
+                                <p class="text-xs sm:text-sm text-slate-500">Ruang tumbuh dan ladang cuan kamu.</p>
                             </div>
                         </div>
 
@@ -2358,7 +2375,7 @@ const App = {
                             area.innerHTML = `
                                 <div class="space-y-6">
                                     <div class="flex items-center justify-between">
-                                        <h3 class="font-bold text-sm text-[#151c75]">Kelola Katalog Produk</h3>
+                                        <div><h3 class="font-bold text-sm text-[#151c75]">Kelola Katalog Produk</h3><p class="text-[10px] text-slate-500 mt-0.5">Centang "Homepage" untuk memilih produk yang tampil di Teras.</p></div>
                                         <button onclick="App.admin.showProductForm()" class="btn-brand-gradient px-3.5 py-2 rounded-xl text-xs font-bold">
                                             <i class="fa-solid fa-plus mr-1 text-[#FACC15]"></i> Tambah Produk Baru
                                         </button>
@@ -2376,7 +2393,11 @@ const App = {
                                                         <span class="text-[10px] font-bold text-amber-600 block">Rp ${Number(p.price).toLocaleString('id-ID')} | ${App.utils.escapeHtml(p.badge || 'PREMIUM')}</span>
                                                     </div>
                                                 </div>
-                                                <div class="flex items-center gap-1.5 shrink-0">
+                                                <div class="flex items-center gap-2 shrink-0">
+                                                    <label class="inline-flex items-center gap-1.5 text-[10px] font-bold text-slate-600 cursor-pointer select-none" title="Atur produk agar tampil di homepage">
+                                                        <input type="checkbox" ${p.isFeatured ? 'checked' : ''} onchange="App.admin.toggleFeaturedProduct('${p.id}', this.checked)" class="w-3.5 h-3.5 rounded border-slate-300 text-[#151c75] focus:ring-[#151c75]">
+                                                        <span class="hidden sm:inline">Homepage</span>
+                                                    </label>
                                                     <button onclick="App.admin.showProductForm('${p.id}')" class="w-8 h-8 rounded-xl text-xs text-[#151c75] bg-slate-100 flex items-center justify-center hover:bg-slate-200" title="Edit Produk">
                                                         <i class="fa-solid fa-pen-to-square"></i>
                                                     </button>
@@ -2743,11 +2764,26 @@ const App = {
                         category: document.getElementById('p-category').value || 'General',
                         imgUrl: document.getElementById('p-img').value,
                         features: document.getElementById('p-features').value,
-                        isFree: priceVal === 0
+                        isFree: priceVal === 0,
+                        isFeatured: editProductId ? !!(App.state.demo.products.find(item => item.id === editProductId)?.isFeatured) : false
                     };
                     await App.api.post('ADMIN_SAVE_PRODUCT', { product });
                     App.ui.toast('Produk berhasil disimpan!', 'success');
                     App.admin.render();
+                },
+
+                toggleFeaturedProduct: async (productId, isFeatured) => {
+                    try {
+                        await App.api.post('ADMIN_TOGGLE_FEATURED_PRODUCT', { productId, isFeatured });
+                        const product = (App.state.demo.products || []).find(p => p.id === productId);
+                        if (product) product.isFeatured = !!isFeatured;
+                        App.ui.toast(isFeatured ? 'Produk ini siap tampil di homepage. Mantap! ✨' : 'Produk ini disembunyikan dari homepage.', 'info');
+                        App.state.publicData = await App.api.post('GET_PUBLIC');
+                        App.admin.renderSubTab();
+                    } catch (e) {
+                        App.ui.toast('Pilihan homepage belum berhasil disimpan. Coba lagi, ya.', 'error');
+                        App.admin.renderSubTab();
+                    }
                 },
 
                 deleteProduct: async (productId) => {
@@ -3157,7 +3193,7 @@ const App = {
                         container.innerHTML = `
                             <div class="text-center space-y-3.5">
                                 <h3 class="text-base sm:text-lg font-bold text-[#151c75]">Bayarnya Pake QRIS Ya..</h3>
-                                <p class="text-xs text-slate-500">Bayar gampang tinggal scan QRIS pakai aplikasi andalanmu. Mau pakai BRImo, BCA, BNI, Mandiri, GoPay, OVO, DANA, ShopeePay atau m-banking lainnya bisa semua!</p>
+                                <p class="text-xs text-slate-500">Bayar gampang tinggal scan QRIS pakai aplikasi andalanmu. Mau pakai BRImo, BCA, BNI, Mandiri, GoPay, OVO, DANA, ShopeePay atau m-banking lainnya. Bisa kok!</p>
                                 <div class="card-3d p-3.5 rounded-2xl inline-block mx-auto bg-white border border-slate-200">
                                     <img src="${App.utils.safeUrl(qris.qrisUrl)}" alt="QRIS ${App.utils.escapeHtml(p.title)}" class="w-44 h-44 sm:w-48 sm:h-48 mx-auto rounded-xl object-contain" loading="eager" referrerpolicy="no-referrer">
                                 </div>
@@ -3168,12 +3204,12 @@ const App = {
                                 </div>
                                 <label class="flex items-start gap-2 text-left bg-amber-50 border border-amber-200 rounded-xl p-3 cursor-pointer">
                                     <input id="confirm-payment-checkbox" type="checkbox" onchange="App.shop.updatePaymentConfirmButton()" class="mt-0.5 shrink-0">
-                                    <span class="text-xs text-slate-700 leading-relaxed">Saya menyatakan bahwa saya <strong>sudah melakukan pembayaran</strong> sesuai nominal order ini dan siap menunggu verifikasi manual Admin.</span>
+                                    <span class="text-xs text-slate-700 leading-relaxed">Saya <strong>sudah melakukan pembayaran</strong> sesuai nominal</span>
                                 </label>
                                 <button id="btn-confirm-payment" disabled onclick="App.shop.submitPaymentConfirmation()" class="w-full py-3 rounded-xl text-xs sm:text-sm font-extrabold text-white bg-emerald-600 disabled:bg-slate-300 disabled:cursor-not-allowed hover:bg-emerald-700 flex items-center justify-center gap-2 shadow-md transition-all">
                                     <i class="fa-solid fa-check"></i> KONFIRMASI PEMBAYARAN
                                 </button>
-                                <p class="text-[10px] text-slate-500">Setelah konfirmasi, order menjadi <strong>MENUNGGU VERIFIKASI</strong> dan modul tetap terkunci.</p>
+                                <p class="text-[10px] text-slate-500">Jika ada kendala pembayaran, hubungi Admin ya..</p>
                                 <button onclick="App.ui.toggleModal('checkout-modal', false)" class="text-xs font-bold text-slate-500 hover:text-slate-800">Tutup</button>
                             </div>`;
                         App.state.checkout.waUrl = waUrl;
