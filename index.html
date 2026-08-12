@@ -331,16 +331,18 @@
         @media (max-width: 767px) { .site-footer { display: none !important; } }
         @media (max-width: 640px) {
             .hero-star-mark {
-                right: .5rem !important;
-                bottom: .25rem !important;
-                font-size: 9rem !important;
+                right: .45rem !important;
+                bottom: .45rem !important;
+                font-size: 9.5rem !important;
                 line-height: 1 !important;
-                width: 9rem !important;
-                height: 9rem !important;
-                transform: none !important;
+                width: 9.5rem !important;
+                height: 9.5rem !important;
+                transform: rotate(0deg) !important;
                 transform-origin: 50% 50% !important;
                 overflow: visible !important;
                 animation: spinHeroStar 16s linear infinite !important;
+                will-change: transform;
+                backface-visibility: hidden;
             }
         }
         @keyframes spinHeroStar {
@@ -3193,18 +3195,21 @@ const App = {
                         container.innerHTML = `
                             <div class="text-center space-y-3.5">
                                 <h3 class="text-base sm:text-lg font-bold text-[#151c75]">Bayarnya Pake QRIS Ya..</h3>
-                                <p class="text-xs text-slate-500">Bayar gampang tinggal scan QRIS pakai aplikasi andalanmu. Mau pakai BRImo, BCA, BNI, Mandiri, GoPay, OVO, DANA, ShopeePay atau m-banking lainnya. Bisa kok!</p>
+                                <p class="text-xs text-slate-500">Mau pakai BRImo, BCA, BNI, Mandiri, GoPay, OVO, DANA, ShopeePay atau m-banking lainnya. Bisa kok!</p>
                                 <div class="card-3d p-3.5 rounded-2xl inline-block mx-auto bg-white border border-slate-200">
                                     <img src="${App.utils.safeUrl(qris.qrisUrl)}" alt="QRIS ${App.utils.escapeHtml(p.title)}" class="w-44 h-44 sm:w-48 sm:h-48 mx-auto rounded-xl object-contain" loading="eager" referrerpolicy="no-referrer">
                                 </div>
+                                <div class="mt-2 px-3 py-2 rounded-xl bg-blue-50/70 border border-blue-100 text-center overflow-x-auto whitespace-nowrap">
+                                    <span class="text-[10px] text-slate-500 font-semibold">ID Order:</span>
+                                    <span class="ml-1 font-bold font-mono text-[#151c75] text-[10px] sm:text-xs">${App.utils.escapeHtml(orderId)}</span>
+                                </div>
                                 <div class="card-3d-inset p-3 rounded-xl text-left text-xs space-y-1">
                                     <div class="flex justify-between gap-3"><span class="text-slate-500">Produk:</span><span class="font-bold text-[#151c75] text-right">${App.utils.escapeHtml(p.title)}</span></div>
-                                    <div class="flex justify-between gap-3"><span class="text-slate-500">ID Order:</span><span class="font-bold font-mono text-[#151c75]">${App.utils.escapeHtml(orderId)}</span></div>
                                     <div class="flex justify-between gap-3"><span class="text-slate-500">Total:</span><span class="font-black text-[#151c75]">Rp ${Number(qris.price).toLocaleString('id-ID')}</span></div>
                                 </div>
                                 <label class="flex items-start gap-2 text-left bg-amber-50 border border-amber-200 rounded-xl p-3 cursor-pointer">
                                     <input id="confirm-payment-checkbox" type="checkbox" onchange="App.shop.updatePaymentConfirmButton()" class="mt-0.5 shrink-0">
-                                    <span class="text-xs text-slate-700 leading-relaxed">Saya <strong>sudah melakukan pembayaran</strong> sesuai nominal</span>
+                                    <span class="text-xs text-slate-700 leading-relaxed"><strong>Lakukan Pembayaran lalu Centang ya</strong></span>
                                 </label>
                                 <button id="btn-confirm-payment" disabled onclick="App.shop.submitPaymentConfirmation()" class="w-full py-3 rounded-xl text-xs sm:text-sm font-extrabold text-white bg-emerald-600 disabled:bg-slate-300 disabled:cursor-not-allowed hover:bg-emerald-700 flex items-center justify-center gap-2 shadow-md transition-all">
                                     <i class="fa-solid fa-check"></i> KONFIRMASI PEMBAYARAN
