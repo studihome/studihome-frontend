@@ -213,6 +213,60 @@
             filter: drop-shadow(-2px 2px 2px rgba(15, 23, 42, 0.08));
         }
 
+        /* Modern speech-bubble notices */
+        .toast-bubble {
+            position: relative;
+            width: min(100%, 34rem);
+            border-radius: 1.1rem;
+            padding: .8rem 1rem;
+            background: rgba(255,255,255,.97);
+            border: 1px solid rgba(209,226,255,.95);
+            box-shadow: 0 18px 45px rgba(21,28,117,.14), 0 6px 16px rgba(15,23,42,.08);
+            backdrop-filter: blur(12px);
+            transform: translateY(-8px) scale(.98);
+            opacity: 0;
+            animation: toastBubbleIn .24s ease-out forwards;
+        }
+        .toast-bubble::after {
+            content: '';
+            position: absolute;
+            left: 50%;
+            bottom: -8px;
+            width: 16px;
+            height: 16px;
+            background: rgba(255,255,255,.97);
+            border-right: 1px solid rgba(209,226,255,.95);
+            border-bottom: 1px solid rgba(209,226,255,.95);
+            transform: translateX(-50%) rotate(45deg);
+        }
+        .toast-bubble.toast-hide { animation: toastBubbleOut .22s ease-in forwards; }
+        @keyframes toastBubbleIn { to { opacity:1; transform:translateY(0) scale(1); } }
+        @keyframes toastBubbleOut { to { opacity:0; transform:translateY(-6px) scale(.98); } }
+
+        /* Light blue translucent close buttons */
+        .modal-close-btn {
+            background: rgba(191,219,254,.78) !important;
+            color: #151c75 !important;
+            border: 1px solid rgba(147,197,253,.75);
+            backdrop-filter: blur(8px);
+        }
+        .modal-close-btn:hover { background: rgba(147,197,253,.9) !important; }
+
+        /* Fullscreen-friendly module viewport on mobile/tablet */
+        @media (max-width: 1023px) {
+            #module-modal { padding: 0 !important; align-items: stretch !important; }
+            #module-modal > div {
+                width: 100% !important;
+                max-width: none !important;
+                height: 100dvh !important;
+                max-height: none !important;
+                border-radius: 0 !important;
+                padding: 1rem !important;
+            }
+            #module-modal-content { padding-bottom: env(safe-area-inset-bottom, 0px); }
+            .module-media-frame { min-height: 42vh; }
+        }
+
         /* Custom Scrollbar */
         ::-webkit-scrollbar {
             width: 6px;
@@ -278,7 +332,7 @@
     </nav>
 
     <!-- TOAST NOTIFICATION CONTAINER -->
-    <div id="toast-container" class="fixed top-16 right-4 z-50 flex flex-col gap-2 pointer-events-none max-w-sm w-full px-2"></div>
+    <div id="toast-container" class="fixed top-[5.5rem] left-1/2 -translate-x-1/2 z-[80] flex flex-col items-center gap-3 pointer-events-none max-w-md w-[calc(100%-1.5rem)] px-2"></div>
 
     <!-- MAIN CONTENT VIEW ROUTER CONTAINER -->
     <main id="main-content" class="flex-1 max-w-7xl w-full mx-auto px-3 sm:px-6 py-4 sm:py-8 mb-16 md:mb-0">
@@ -294,8 +348,8 @@
                 <span class="text-blue-100">&copy; 2026. All Rights Reserved.</span>
             </div>
             <div class="flex items-center gap-4 sm:gap-6">
-                <a href="#privacy" onclick="App.ui.toast('Kebijakan Privasi: Semua data pengguna dilindungi.', 'info')" class="text-blue-100 hover:text-white transition-colors">Privasi</a>
-                <a href="#terms" onclick="App.ui.toast('Syarat & Ketentuan: Pembelian lisensi bersifat seumur hidup.', 'info')" class="text-blue-100 hover:text-white transition-colors">Ketentuan</a>
+                <a href="#privacy" onclick="App.ui.toast('Tenang, data kamu kami kelola dengan aman dan seperlunya.', 'info')" class="text-blue-100 hover:text-white transition-colors">Privasi</a>
+                <a href="#terms" onclick="App.ui.toast('Syaratnya simpel: gunakan layanan dengan wajar dan sesuai ketentuan Studihome.', 'info')" class="text-blue-100 hover:text-white transition-colors">Ketentuan</a>
                 <a href="https://wa.me/6285111581115" target="_blank" class="hover:brightness-110 font-bold flex items-center gap-1.5 text-slate-900 bg-gradient-to-r from-[#EAB308] to-[#F59E0B] px-3.5 py-1.5 rounded-xl shadow-xs transition-all text-xs">
                     <i class="fa-brands fa-whatsapp text-slate-900 text-sm"></i> Bantuan
                 </a>
@@ -306,7 +360,7 @@
     <!-- AUTHENTICATION MODAL -->
     <div id="auth-modal" class="fixed inset-0 z-50 hidden bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-3 sm:p-4">
         <div class="card-3d w-full max-w-md p-5 sm:p-7 rounded-3xl relative bg-white my-auto">
-            <button onclick="App.ui.toggleModal('auth-modal', false)" class="absolute top-4 right-4 w-8 h-8 rounded-full btn-brand-amber text-slate-900 flex items-center justify-center transition-all shadow-md font-extrabold hover:brightness-110 z-10">
+            <button onclick="App.ui.toggleModal('auth-modal', false)" class="modal-close-btn absolute top-4 right-4 w-8 h-8 rounded-full flex items-center justify-center transition-all shadow-md font-extrabold hover:brightness-110 z-10">
                 <i class="fa-solid fa-xmark"></i>
             </button>
             
@@ -372,7 +426,7 @@
     <div id="product-detail-modal" class="fixed inset-0 z-50 hidden bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-3 sm:p-4">
         <div class="card-3d w-full max-w-xl p-5 sm:p-6 rounded-3xl relative bg-white max-h-[90vh] overflow-y-auto my-auto">
             <!-- Modal Close Button repositioned to extreme top-right corner z-30 -->
-            <button onclick="App.ui.toggleModal('product-detail-modal', false)" class="absolute top-3 right-3 sm:top-4 sm:right-4 w-9 h-9 rounded-full btn-brand-amber text-slate-900 flex items-center justify-center transition-all shadow-lg font-extrabold hover:brightness-110 z-30">
+            <button onclick="App.ui.toggleModal('product-detail-modal', false)" class="modal-close-btn absolute top-3 right-3 sm:top-4 sm:right-4 w-9 h-9 rounded-full flex items-center justify-center transition-all shadow-lg font-extrabold hover:brightness-110 z-30">
                 <i class="fa-solid fa-xmark text-sm"></i>
             </button>
             <div id="product-detail-modal-content">
@@ -384,7 +438,7 @@
     <!-- CHECKOUT MODAL -->
     <div id="checkout-modal" class="fixed inset-0 z-50 hidden bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-3 sm:p-4">
         <div class="card-3d w-full max-w-lg p-5 sm:p-6 rounded-3xl relative bg-white max-h-[90vh] overflow-y-auto my-auto">
-            <button onclick="App.ui.toggleModal('checkout-modal', false)" class="absolute top-4 right-4 w-8 h-8 rounded-full btn-brand-amber text-slate-900 flex items-center justify-center transition-all shadow-md font-extrabold hover:brightness-110 z-20">
+            <button onclick="App.ui.toggleModal('checkout-modal', false)" class="modal-close-btn absolute top-4 right-4 w-8 h-8 rounded-full flex items-center justify-center transition-all shadow-md font-extrabold hover:brightness-110 z-20">
                 <i class="fa-solid fa-xmark"></i>
             </button>
             <div id="checkout-modal-content">
@@ -396,7 +450,7 @@
     <!-- MODULE PLAYER MODAL -->
     <div id="module-modal" class="fixed inset-0 z-50 hidden bg-slate-900/75 backdrop-blur-md flex items-center justify-center p-3 sm:p-4">
         <div class="card-3d w-full max-w-4xl p-5 sm:p-6 rounded-3xl relative max-h-[92vh] flex flex-col bg-white my-auto">
-            <button onclick="App.ui.toggleModal('module-modal', false)" class="absolute top-4 right-4 w-9 h-9 btn-brand-amber text-slate-900 rounded-full flex items-center justify-center font-extrabold z-20 shadow-md hover:brightness-110">
+            <button onclick="App.ui.toggleModal('module-modal', false)" class="modal-close-btn absolute top-4 right-4 w-9 h-9 rounded-full flex items-center justify-center font-extrabold z-20 shadow-md hover:brightness-110">
                 <i class="fa-solid fa-xmark text-lg"></i>
             </button>
             <div id="module-modal-content" class="flex-1 overflow-y-auto pr-1">
@@ -408,7 +462,7 @@
     <!-- AI LINK EDIT MODAL (ADMIN) -->
     <div id="ai-link-modal" class="fixed inset-0 z-50 hidden bg-slate-900/50 backdrop-blur-sm flex items-center justify-center p-3 sm:p-4">
         <div class="card-3d w-full max-w-md p-5 sm:p-6 rounded-3xl relative bg-white my-auto">
-            <button onclick="App.ui.toggleModal('ai-link-modal', false)" class="absolute top-4 right-4 w-8 h-8 btn-brand-amber text-slate-900 rounded-full flex items-center justify-center font-extrabold shadow-md hover:brightness-110 z-20">
+            <button onclick="App.ui.toggleModal('ai-link-modal', false)" class="modal-close-btn absolute top-4 right-4 w-8 h-8 rounded-full flex items-center justify-center font-extrabold shadow-md hover:brightness-110 z-20">
                 <i class="fa-solid fa-xmark"></i>
             </button>
             <h3 id="ai-link-modal-title" class="text-base font-extrabold text-[#151c75] mb-4">Kelola Tautan AI</h3>
@@ -598,19 +652,66 @@
                 toast: (msg, type = 'info') => {
                     const cont = document.getElementById('toast-container');
                     if (!cont) return;
+
+                    const raw = String(msg || '').trim();
+                    const friendlyMap = [
+                        [/^Backend:\s*Anda sudah memiliki akses ke produk ini\.?/i, 'Produk ini sudah ada di akunmu. Langsung masuk Dashboard, yuk.'],
+                        [/Gagal membuat\/melanjutkan order:.*Anda sudah memiliki akses ke produk ini\.?/i, 'Produk ini sudah kamu punya. Coba buka Dashboard untuk akses modulnya.'],
+                        [/^Anda sudah memiliki akses ke produk ini\.?/i, 'Produk ini sudah kamu punya. Buka Dashboard untuk lanjut.'],
+                        [/^Gagal masuk ke akun\.?/i, 'Belum berhasil masuk. Cek email dan password, lalu coba lagi ya.'],
+                        [/^Gagal mendaftar\.?/i, 'Pendaftarannya belum berhasil. Coba cek datanya lalu ulangi lagi, ya.'],
+                        [/^Anda telah keluar\.?/i, 'Sip, kamu sudah keluar. Sampai ketemu lagi 👋'],
+                        [/^Kebijakan Privasi:/i, 'Tenang, data kamu kami kelola dengan aman dan seperlunya.'],
+                        [/^Syarat & Ketentuan:/i, 'Syaratnya simpel: gunakan layanan dengan wajar dan sesuai ketentuan Studihome.'],
+                        [/^Konfirmasi pembayaran tersimpan/i, 'Mantap! Konfirmasi sudah masuk. Admin akan cek pembayaranmu.'],
+                        [/^Pembayaran order ini sudah dikonfirmasi/i, 'Pembayarannya sudah tercatat. Tinggal tunggu pengecekan Admin.'],
+                        [/^Produk GRATIS berhasil/i, 'Nice! Produk gratis sudah masuk ke akunmu.'],
+                        [/^Status pengguna berhasil/i, 'Status akun sudah diperbarui.'],
+                        [/^Produk berhasil disimpan/i, 'Produk berhasil disimpan. Beres!'],
+                        [/^Produk telah dihapus/i, 'Produk sudah dinonaktifkan dari katalog.'],
+                        [/^Modul berhasil disimpan/i, 'Modul berhasil disimpan. Mantap!'],
+                        [/^Modul dihapus/i, 'Modul berhasil dihapus.'],
+                        [/^Tampilan Hero berhasil/i, 'Tampilan utama berhasil diperbarui.'],
+                        [/^Tautan Marquee AI berhasil/i, 'Daftar AI berhasil diperbarui.'],
+                        [/^Testimoni berhasil disimpan/i, 'Testimoni berhasil disimpan.'],
+                        [/^Testimoni dihapus/i, 'Testimoni berhasil dihapus.'],
+                        [/^Harga QRIS & Master Data tersimpan/i, 'Pengaturan QRIS sudah tersimpan.'],
+                        [/^Gagal memverifikasi order:/i, 'Belum bisa membuka akses. Pastikan member sudah melakukan konfirmasi pembayaran.'],
+                        [/^Gagal menolak order:/i, 'Order belum bisa ditolak karena status pembayarannya belum siap ditinjau.'],
+                        [/^Order hanya dapat diverifikasi/i, 'Order ini belum masuk tahap review. Tunggu konfirmasi pembayaran dari member dulu.'],
+                        [/^Order hanya dapat ditolak/i, 'Order ini belum siap ditolak. Tunggu konfirmasi pembayaran dari member dulu.'],
+                        [/^Gagal membuat\/melanjutkan order:/i, 'Order belum berhasil dilanjutkan. Coba lagi sebentar, ya.'],
+                        [/^Konfirmasi pembayaran gagal:/i, 'Konfirmasi belum berhasil dikirim. Coba lagi sebentar.'],
+                        [/^Gagal menyimpan QRIS:/i, 'QRIS belum berhasil disimpan. Coba cek file dan pengaturannya.'],
+                        [/^Backend:/i, raw.replace(/^Backend:\s*/i, '')],
+                    ];
+                    let friendly = raw;
+                    for (const [pattern, replacement] of friendlyMap) {
+                        if (pattern.test(raw)) {
+                            friendly = typeof replacement === 'function' ? replacement(raw) : replacement;
+                            break;
+                        }
+                    }
+
+                    const title = type === 'success' ? 'Berhasil' : type === 'error' ? 'Ups, ada sedikit kendala' : 'Info';
+                    const icon = type === 'success' ? 'fa-circle-check' : type === 'error' ? 'fa-triangle-exclamation' : 'fa-comment-dots';
+                    const colorClass = type === 'success' ? 'text-emerald-600' : type === 'error' ? 'text-rose-600' : 'text-[#151c75]';
                     const el = document.createElement('div');
-                    el.className = `card-3d px-4 py-3 text-xs sm:text-sm font-bold text-slate-800 flex items-center gap-3 shadow-lg border-l-4 transition-all duration-300 pointer-events-auto bg-white ${
-                        type === 'success' ? 'border-emerald-500' : type === 'error' ? 'border-red-500' : 'border-[#151c75]'
-                    }`;
+                    el.className = 'toast-bubble pointer-events-auto';
                     el.innerHTML = `
-                        <i class="fa-solid ${type === 'success' ? 'fa-circle-check text-emerald-500' : type === 'error' ? 'fa-triangle-exclamation text-red-500' : 'fa-circle-info text-[#151c75]'} text-base"></i>
-                        <span>${App.utils.escapeHtml(msg)}</span>
-                    `;
+                        <div class="flex items-start gap-3">
+                            <div class="w-9 h-9 rounded-2xl bg-blue-50 border border-blue-100 flex items-center justify-center shrink-0 shadow-inner">
+                                <i class="fa-solid ${icon} ${colorClass}"></i>
+                            </div>
+                            <div class="min-w-0 flex-1">
+                                <div class="text-[10px] font-black uppercase tracking-wider ${colorClass}">${title}</div>
+                                <div class="mt-0.5 text-xs sm:text-sm font-bold text-slate-700 leading-relaxed">${App.utils.escapeHtml(friendly)}</div>
+                            </div>
+                            <button type="button" class="toast-close w-7 h-7 rounded-full bg-blue-100/80 text-[#151c75] hover:bg-blue-200 flex items-center justify-center" aria-label="Tutup notifikasi"><i class="fa-solid fa-xmark text-[11px]"></i></button>
+                        </div>`;
+                    el.querySelector('.toast-close')?.addEventListener('click', () => { el.classList.add('toast-hide'); setTimeout(() => el.remove(), 220); });
                     cont.appendChild(el);
-                    setTimeout(() => {
-                        el.style.opacity = '0';
-                        setTimeout(() => el.remove(), 300);
-                    }, 3500);
+                    setTimeout(() => { if (el.isConnected) { el.classList.add('toast-hide'); setTimeout(() => el.remove(), 220); } }, 4200);
                 },
 
                 updateApiStatus: (status) => {
@@ -1639,6 +1740,37 @@
                     } catch (e) {}
                 },
 
+                renderModuleMedia: (url, title) => {
+                    const value = String(url || '').trim();
+                    if (!value) return '';
+                    let parsed;
+                    try { parsed = new URL(value, window.location.origin); } catch (e) { parsed = null; }
+                    const safe = App.utils.safeUrl(value, '#');
+                    const lower = value.toLowerCase();
+                    const isImage = /\.(png|jpe?g|gif|webp|svg)(?:$|[?#])/i.test(lower);
+
+                    if (isImage) {
+                        return `<div class="module-media-frame aspect-video w-full rounded-xl overflow-hidden card-3d bg-slate-50 flex items-center justify-center"><img src="${safe}" alt="${App.utils.escapeHtml(title || 'Visual modul')}" class="w-full h-full object-contain" loading="lazy" referrerpolicy="no-referrer"></div>`;
+                    }
+
+                    const ytMatch = value.match(/(?:youtube\.com\/(?:watch\?v=|shorts\/|live\/)|youtu\.be\/)([A-Za-z0-9_-]{6,})/i);
+                    if (ytMatch) {
+                        const embed = `https://www.youtube.com/embed/${ytMatch[1]}`;
+                        return `<div class="module-media-frame aspect-video w-full rounded-xl overflow-hidden card-3d"><iframe class="w-full h-full" src="${embed}" title="${App.utils.escapeHtml(title || 'Video Tutorial')}" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen referrerpolicy="strict-origin-when-cross-origin"></iframe></div>`;
+                    }
+
+                    if (parsed && /(^|\.)drive\.google\.com$/i.test(parsed.hostname)) {
+                        const match = value.match(/[-\w]{25,}/);
+                        const fileId = match ? match[0] : '';
+                        if (fileId) {
+                            const preview = `https://drive.google.com/file/d/${fileId}/preview`;
+                            return `<div class="module-media-frame aspect-video w-full rounded-xl overflow-hidden card-3d"><iframe class="w-full h-full" src="${preview}" title="${App.utils.escapeHtml(title || 'Materi Google Drive')}" frameborder="0" allow="autoplay" allowfullscreen></iframe></div>`;
+                        }
+                    }
+
+                    return `<a href="${safe}" target="_blank" rel="noopener noreferrer" class="module-media-frame card-3d p-5 rounded-2xl flex items-center gap-3 text-[#151c75] font-bold text-sm hover:bg-blue-50 transition-all"><span class="w-10 h-10 rounded-xl bg-blue-50 flex items-center justify-center"><i class="fa-solid fa-arrow-up-right-from-square"></i></span><span>Buka media / resource</span></a>`;
+                },
+
                 openModulePlayer: async (productId) => {
                     App.ui.toggleModal('module-modal', true);
                     const container = document.getElementById('module-modal-content');
@@ -1669,11 +1801,7 @@
                                     <div class="card-3d-inset p-4 sm:p-5 rounded-2xl space-y-3.5">
                                         <h3 class="font-bold text-sm text-[#151c75]">${App.utils.escapeHtml(m.title)}</h3>
                                         
-                                        ${m.yt_url ? `
-                                            <div class="aspect-video w-full rounded-xl overflow-hidden card-3d">
-                                                <iframe class="w-full h-full" src="${App.utils.safeUrl(m.yt_url)}" title="Video Tutorial" frameborder="0" allowfullscreen referrerpolicy="strict-origin-when-cross-origin"></iframe>
-                                            </div>
-                                        ` : ''}
+                                        ${m.yt_url ? App.dashboard.renderModuleMedia(m.yt_url, m.title) : ''}
 
                                         <div class="card-3d p-4 rounded-xl text-xs sm:text-sm text-slate-700 whitespace-pre-line leading-relaxed bg-white">
                                             ${App.utils.escapeHtml(m.markdown || '')}
@@ -2238,8 +2366,8 @@
                                 <input type="text" id="m-title" required value="${App.utils.escapeHtml(m.title)}" placeholder="Judul Modul" class="w-full card-3d-inset px-3 py-2 rounded-xl text-xs">
                             </div>
                             <div>
-                                <label class="block text-[10px] font-bold text-slate-600 mb-1">URL Embed YouTube</label>
-                                <input type="url" id="m-yt" value="${App.utils.escapeHtml(m.yt_url)}" placeholder="https://www.youtube.com/embed/..." class="w-full card-3d-inset px-3 py-2 rounded-xl text-xs">
+                                <label class="block text-[10px] font-bold text-slate-600 mb-1">URL Video / Visual</label>
+                                <input type="url" id="m-yt" value="${App.utils.escapeHtml(m.yt_url)}" placeholder="https://youtube.com/watch?v=... / Drive / gambar" class="w-full card-3d-inset px-3 py-2 rounded-xl text-xs">
                             </div>
                             <div>
                                 <label class="block text-[10px] font-bold text-slate-600 mb-1">Isi Modul (Markdown / Teks)</label>
