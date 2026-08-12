@@ -4,11 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Studihome - Platform Pembelajaran Digital & Otomasi AI</title>
-    <!-- Static SVG Retina Blue Favicon (100% Size) -->
-<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'>
-    <style>.star { fill: %231b5df0; font-size: 100px; text-anchor: middle; dominant-baseline: central; font-family: sans-serif; font-weight: bold; }</style>
-    <text x='50' y='50' class='star'>✦</text></svg>">
-
+    
     <!-- SEO & Open Graph Meta Tags -->
     <meta name="description" content="Platform Produk Digital & Otomasi AI #1 Indonesia. Tingkatkan efisiensi kerja hingga 10x lipat dengan modul & template AI interaktif.">
     <meta property="og:title" content="Studihome - Platform Pembelajaran Digital & Otomasi AI">
@@ -1240,7 +1236,7 @@
                     if (!App.state.user) return 'NONE';
                     const owned = (App.state.memberData?.verifiedProducts || []).some(p => p.id === productId);
                     if (owned) return 'OWNED';
-                    const pending = (App.state.memberData?.userOrders || []).some(o => o.productId === productId && (o.status === 'PENDING_PAYMENT' || o.paymentStatus === 'PENDING'));
+                    const pending = (App.state.memberData?.userOrders || []).some(o => o.productId === productId && (o.status === 'PENDING_PAYMENT' || o.status === 'PAYMENT_REVIEW' || o.paymentStatus === 'UNPAID' || o.paymentStatus === 'REVIEWING'));
                     return pending ? 'PENDING' : 'NONE';
                 },
 
@@ -1295,11 +1291,16 @@
                                     </span>
                                 </div>
                                 ${status === 'OWNED' ? `
-                                    <button onclick="App.ui.toggleModal('product-detail-modal', false); App.dashboard.openModulePlayer('${p.id}');" class="bg-emerald-600 hover:bg-emerald-700 text-white px-5 py-2.5 sm:py-3 rounded-2xl text-xs sm:text-sm font-extrabold shadow-md flex items-center gap-2">
-                                        <i class="fa-solid fa-play text-xs"></i>
-                                        <span>Akses Modul</span>
+                                    <button onclick="App.ui.toggleModal('product-detail-modal', false); App.router.navigate('dashboard');" class="bg-emerald-600 hover:bg-emerald-700 text-white px-5 py-2.5 sm:py-3 rounded-2xl text-xs sm:text-sm font-extrabold shadow-md flex items-center gap-2">
+                                        <i class="fa-solid fa-graduation-cap text-xs"></i>
+                                        <span>Akses</span>
                                     </button>
-                                ` : p.isFree ? `
+                                ` : status === 'PENDING' ? `
+                                <button onclick="App.ui.toggleModal('product-detail-modal', false); App.router.navigate('dashboard');" class="bg-amber-100 hover:bg-amber-200 text-amber-800 px-5 py-2.5 sm:py-3 rounded-2xl text-xs sm:text-sm font-extrabold shadow-md flex items-center gap-2">
+                                    <i class="fa-solid fa-clock text-xs"></i>
+                                    <span>Menunggu Verifikasi</span>
+                                </button>
+                            ` : p.isFree ? `
                                     <button onclick="App.ui.toggleModal('product-detail-modal', false); App.shop.claimFreeProduct('${p.id}');" class="bg-emerald-500 hover:bg-emerald-600 text-white px-5 py-2.5 sm:py-3 rounded-2xl text-xs sm:text-sm font-extrabold shadow-md flex items-center gap-2">
                                         <span>Akses GRATIS</span>
                                         <i class="fa-solid fa-arrow-right"></i>
@@ -1331,6 +1332,12 @@
                         actionBtnHTML = `
                             <button onclick="App.dashboard.openModulePlayer('${p.id}')" class="bg-emerald-600 hover:bg-emerald-700 text-white px-3.5 py-2 rounded-xl text-xs font-extrabold flex items-center gap-1.5 shadow-2xs">
                                 <i class="fa-solid fa-play text-[10px]"></i> Akses
+                            </button>
+                        `;
+                    } else if (status === 'PENDING') {
+                        actionBtnHTML = `
+                            <button onclick="App.router.navigate('dashboard')" class="bg-amber-100 hover:bg-amber-200 text-amber-800 px-3.5 py-2 rounded-xl text-xs font-extrabold flex items-center gap-1.5 shadow-2xs">
+                                <i class="fa-solid fa-clock text-[10px]"></i> Menunggu
                             </button>
                         `;
                     } else if (p.isFree) {
@@ -2393,9 +2400,26 @@
                         App.dashboard.openModulePlayer(productId);
                         return;
                     } else if (status === 'PENDING') {
-                        App.ui.toast('Anda sudah memiliki pesanan pending untuk produk ini. Silakan tunggu verifikasi admin.', 'info');
-                        App.router.navigate('dashboard');
-                        return;
+                        const existing = (App.state.memberData?.userOrders || []).find(
+                            o => o.productId === productId && o.status === 'PENDING_PAYMENT'
+                        );
+                        if (existing) {
+                            App.state.checkout.product = product;
+                            App.state.checkout.orderId = existing.id;
+                            App.state.checkout.step = 2;
+                            App.shop.renderCheckout();
+                            App.ui.toggleModal('checkout-modal', true);
+                            return;
+                        }
+
+                        const inReview = (App.state.memberData?.userOrders || []).find(
+                            o => o.productId === productId && o.status === 'PAYMENT_REVIEW'
+                        );
+                        if (inReview) {
+                            App.ui.toast('Pembayaran Anda sudah dikonfirmasi dan sedang menunggu verifikasi Admin.', 'info');
+                            App.router.navigate('dashboard');
+                            return;
+                        }
                     }
 
                     if (product.isFree || product.price === 0) {
@@ -2497,22 +2521,69 @@
                     const btn = document.getElementById('btn-create-order');
                     const name = document.getElementById('co-name')?.value?.trim();
                     const phone = document.getElementById('co-phone')?.value?.trim();
-                    if (!name || !phone) return;
+                    const productId = App.state.checkout.product?.id;
+
+                    if (!name || !phone || !productId) return;
+
                     btn.disabled = true;
                     btn.innerHTML = '<i class="fa-solid fa-spinner animate-spin"></i> Memproses...';
+
                     try {
+                        const currentUserId = App.state.user?.id;
+                        let existing = null;
+
+                        if (currentUserId) {
+                            const { data: existingOrders, error: existingErr } = await withTimeout(
+                                supabaseClient
+                                    .from('orders')
+                                    .select('id,product_id,status,payment_status,total_amount,unit_price,created_at')
+                                    .eq('user_id', currentUserId)
+                                    .eq('product_id', productId)
+                                    .in('status', ['PENDING_PAYMENT', 'PAYMENT_REVIEW'])
+                                    .order('created_at', { ascending: false })
+                                    .limit(1),
+                                10000,
+                                'Pengecekan order sebelumnya terlalu lama.'
+                            );
+
+                            if (existingErr) throw existingErr;
+                            existing = existingOrders?.[0] || null;
+                        }
+
+                        if (existing) {
+                            if (existing.status === 'PAYMENT_REVIEW') {
+                                App.state.memberData = await App.api.post('GET_MEMBER_DASHBOARD');
+                                App.ui.toggleModal('checkout-modal', false);
+                                App.ui.toast('Pembayaran order ini sudah dikonfirmasi dan sedang menunggu verifikasi Admin.', 'info');
+                                App.router.navigate('dashboard');
+                                return;
+                            }
+
+                            App.state.checkout.orderId = existing.id;
+                            App.state.checkout.step = 2;
+                            App.state.memberData = await App.api.post('GET_MEMBER_DASHBOARD');
+                            App.shop.renderCheckout();
+                            return;
+                        }
+
                         const res = await App.api.post('CREATE_ORDER', {
-                            productId: App.state.checkout.product.id,
+                            productId,
                             name,
                             phone
                         });
-                        App.state.checkout.orderId = res.orderId;
-                        if (!App.state.checkout.orderId) throw new Error('Order ID tidak diterima dari Supabase.');
+
+                        App.state.checkout.orderId = res?.orderId;
+                        if (!App.state.checkout.orderId) {
+                            throw new Error('Order ID tidak diterima dari Supabase.');
+                        }
+
                         App.state.checkout.step = 2;
+                        App.state.memberData = await App.api.post('GET_MEMBER_DASHBOARD');
                         App.shop.renderCheckout();
                     } catch (err) {
                         btn.disabled = false;
-                        btn.innerHTML = 'Coba Lagi';
+                        btn.innerHTML = 'Coba Lagi <i class="fa-solid fa-arrow-right ml-1"></i>';
+                        App.ui.toast('Gagal membuat/melanjutkan order: ' + (err?.message || 'Terjadi kesalahan.'), 'error');
                     }
                 },
 
@@ -2525,18 +2596,32 @@
                 submitPaymentConfirmation: async () => {
                     const checkbox = document.getElementById('confirm-payment-checkbox');
                     const btn = document.getElementById('btn-confirm-payment');
+                    const orderId = App.state.checkout.orderId;
+
                     if (!checkbox?.checked) {
                         App.ui.toast('Centang konfirmasi pembayaran terlebih dahulu.', 'error');
                         return;
                     }
+                    if (!orderId) {
+                        App.ui.toast('ID Order tidak ditemukan. Silakan ulangi checkout.', 'error');
+                        return;
+                    }
+
                     btn.disabled = true;
                     btn.innerHTML = '<i class="fa-solid fa-spinner animate-spin"></i> Mengonfirmasi...';
+
                     try {
-                        await App.api.post('SUBMIT_PAYMENT', { orderId: App.state.checkout.orderId });
+                        const result = await App.api.post('SUBMIT_PAYMENT', { orderId });
+                        if (!result?.success) {
+                            throw new Error('Konfirmasi pembayaran tidak berhasil diproses.');
+                        }
+
+                        App.state.memberData = await App.api.post('GET_MEMBER_DASHBOARD');
                         App.shop.openWhatsAppConfirmation(App.state.checkout.waUrl);
                     } catch (err) {
                         btn.disabled = false;
-                        btn.innerHTML = 'Konfirmasi Pembayaran & Hubungi Admin';
+                        btn.innerHTML = '<i class="fa-solid fa-check"></i> Konfirmasi Pembayaran & Hubungi Admin';
+                        App.ui.toast('Konfirmasi pembayaran gagal: ' + (err?.message || 'Terjadi kesalahan.'), 'error');
                     }
                 },
 
