@@ -350,6 +350,74 @@
             to { transform: rotate(360deg); }
         }
 
+
+        /* Studio AI Creator profile — additive only */
+        .creator-profile-hero { position: relative; overflow: hidden; background: linear-gradient(135deg,#151c75 0%,#3f48bf 58%,#5363d6 100%); }
+        .creator-profile-hero::after { content:""; position:absolute; width:340px; height:340px; right:-110px; top:-120px; border-radius:50%; border:1px solid rgba(255,255,255,.18); box-shadow:0 0 0 38px rgba(255,255,255,.04),0 0 0 76px rgba(255,255,255,.03); pointer-events:none; }
+        .creator-trust-chip { backdrop-filter: blur(12px); background: rgba(255,255,255,.11); border:1px solid rgba(255,255,255,.18); }
+        .creator-service-card, .creator-portfolio-card { transition: transform .2s ease, box-shadow .2s ease, border-color .2s ease; }
+        .creator-service-card:hover, .creator-portfolio-card:hover { transform:translateY(-2px); box-shadow:0 14px 30px rgba(21,28,117,.10); border-color:#c7d8ff; }
+        @media (max-width: 640px) { .creator-profile-hero::after { width:220px; height:220px; right:-100px; top:-80px; } }
+        /* Studio AI public experience — additive only */
+        .studio-ai-hero {
+            position: relative;
+            overflow: hidden;
+            background:
+                radial-gradient(circle at 82% 20%, rgba(96,165,250,.22), transparent 34%),
+                radial-gradient(circle at 18% 80%, rgba(250,204,21,.12), transparent 28%),
+                linear-gradient(135deg,#11175f 0%,#151c75 48%,#3f48bf 100%);
+        }
+        .studio-ai-hero::before {
+            content: '';
+            position: absolute;
+            inset: -30%;
+            background:
+                radial-gradient(circle at 20% 30%, rgba(255,255,255,.06) 0 1px, transparent 2px),
+                radial-gradient(circle at 70% 60%, rgba(255,255,255,.05) 0 1px, transparent 2px);
+            background-size: 34px 34px, 48px 48px;
+            animation: studioAiDrift 26s linear infinite;
+            pointer-events: none;
+        }
+        @keyframes studioAiDrift { from { transform: translate3d(0,0,0) rotate(0deg); } to { transform: translate3d(24px,-18px,0) rotate(3deg); } }
+        .studio-ai-orb {
+            position: absolute;
+            width: 180px;
+            height: 180px;
+            right: -34px;
+            bottom: -34px;
+            border-radius: 9999px;
+            background: radial-gradient(circle at 35% 30%, rgba(255,255,255,.92), rgba(147,197,253,.26) 26%, rgba(59,130,246,.12) 55%, transparent 72%);
+            box-shadow: 0 0 0 1px rgba(191,219,254,.18), 0 0 40px rgba(96,165,250,.22), inset 0 0 40px rgba(255,255,255,.08);
+            animation: studioAiOrb 8s ease-in-out infinite;
+            pointer-events: none;
+        }
+        .studio-ai-orb::before,
+        .studio-ai-orb::after {
+            content: '';
+            position: absolute;
+            inset: 14px;
+            border: 1px solid rgba(191,219,254,.26);
+            border-radius: 9999px;
+        }
+        .studio-ai-orb::before { animation: studioAiSpin 14s linear infinite; border-left-color: rgba(250,204,21,.8); }
+        .studio-ai-orb::after { inset: 32px; animation: studioAiSpinReverse 11s linear infinite; border-right-color: rgba(255,255,255,.65); }
+        @keyframes studioAiOrb { 0%,100% { transform: translate3d(0,0,0) scale(1); } 50% { transform: translate3d(-6px,-8px,0) scale(1.025); } }
+        @keyframes studioAiSpin { to { transform: rotate(360deg); } }
+        @keyframes studioAiSpinReverse { to { transform: rotate(-360deg); } }
+        .studio-ai-node { animation: studioAiPulse 2.6s ease-in-out infinite; }
+        .studio-ai-node:nth-child(2) { animation-delay: .5s; }
+        .studio-ai-node:nth-child(3) { animation-delay: 1s; }
+        @keyframes studioAiPulse { 0%,100% { opacity:.45; transform: scale(1); } 50% { opacity:1; transform: scale(1.25); } }
+        .studio-ai-search::placeholder { color: rgba(71,85,105,.58); }
+        .studio-ai-card { transition: transform .22s ease, box-shadow .22s ease, border-color .22s ease; }
+        .studio-ai-card:hover { transform: translateY(-3px); box-shadow: 0 18px 34px rgba(21,28,117,.12); border-color: #c7d8ff; }
+        .studio-ai-chip.active { background: linear-gradient(135deg,#151c75,#3f48bf); color:#fff; box-shadow: 0 4px 12px rgba(21,28,117,.2); }
+        @media (max-width: 767px) {
+            .studio-ai-orb { width: 132px; height: 132px; right: -20px; bottom: -20px; opacity: .9; }
+            .studio-ai-hero { min-height: 520px; }
+        }
+
+
         /* Custom Scrollbar */
         ::-webkit-scrollbar {
             width: 6px;
@@ -858,7 +926,15 @@ const App = {
                     App.ui.showBackendError(e);
                 }
 
+                const initialPath = window.location.pathname.toLowerCase().replace(/\/$/, '') || '/';
+                if (!window.location.hash && initialPath !== '/') {
+                    const knownPaths = ['/', '/products', '/dashboard', '/admin'];
+                    const isCreatorPath = /^\/[a-z0-9][a-z0-9-]{2,39}(?:\/portfolio\/[a-z0-9][a-z0-9- -]{0,120})?$/i.test(initialPath) && !knownPaths.includes(initialPath);
+                    if (initialPath === '/studio-ai') window.location.hash = 'studio-ai';
+                    else if (isCreatorPath) App.router.routePath(initialPath);
+                }
                 window.addEventListener('hashchange', App.router.handleHash);
+                window.addEventListener('popstate', App.router.handleHash);
                 App.router.handleHash();
             },
 
@@ -1070,7 +1146,8 @@ const App = {
 
                     let items = [
                         { key: 'home', label: 'Teras', icon: 'fa-house' },
-                        { key: 'products', label: 'Produk', icon: 'fa-box-open' }
+                        { key: 'products', label: 'Produk', icon: 'fa-box-open' },
+                        { key: 'studio-ai', label: 'Studio AI', icon: 'fa-wand-magic-sparkles' }
                     ];
 
                     if (user) {
@@ -1135,10 +1212,45 @@ const App = {
 
             router: {
                 navigate: (tab) => {
+                    if (tab === 'studio-ai') {
+                        window.history.pushState({}, '', '/studio-ai');
+                        window.location.hash = 'studio-ai';
+                        return;
+                    }
                     window.location.hash = tab;
                 },
 
+                goCreator: (username, portfolioSlug = '') => {
+                    const safeUsername = String(username || '').trim().toLowerCase();
+                    const safeSlug = String(portfolioSlug || '').trim().toLowerCase();
+                    const path = safeSlug ? `/${safeUsername}/portfolio/${safeSlug}` : `/${safeUsername}`;
+                    window.history.pushState({}, '', path);
+                    window.location.hash = 'creator-path';
+                },
+
+                routePath: (path) => {
+                    const clean = String(path || '/').replace(/\/{2,}/g, '/').replace(/\/$/, '') || '/';
+                    const parts = clean.split('/').filter(Boolean);
+                    App.state.routePath = clean;
+                    if (!parts.length) { App.state.routeType = 'home'; return; }
+                    if (parts[0] === 'studio-ai') { App.state.routeType = 'studio-ai'; return; }
+                    if (parts.length === 1) { App.state.routeType = 'creator'; App.state.creatorUsername = parts[0].toLowerCase(); App.state.creatorPortfolioSlug = ''; return; }
+                    if (parts.length >= 3 && parts[1] === 'portfolio') { App.state.routeType = 'creator'; App.state.creatorUsername = parts[0].toLowerCase(); App.state.creatorPortfolioSlug = parts.slice(2).join('-').toLowerCase(); return; }
+                    App.state.routeType = 'home';
+                },
+
+                handlePath: () => {
+                    const path = window.location.pathname.toLowerCase().replace(/\/$/, '') || '/';
+                    if (path === '/studio-ai' || window.location.hash === '#creator-path' || (!window.location.hash && path !== '/')) {
+                        App.router.routePath(path);
+                    }
+                    if (App.state.routeType === 'creator') { App.ui.renderNavigation(); App.creator.render(App.state.creatorUsername, App.state.creatorPortfolioSlug); return true; }
+                    if (App.state.routeType === 'studio-ai') { App.ui.renderNavigation(); App.studioAI.render(); return true; }
+                    return false;
+                },
+
                 handleHash: () => {
+                    if (App.router.handlePath()) return;
                     const hash = window.location.hash.replace('#', '') || 'home';
                     App.state.activeTab = hash;
 
@@ -1253,6 +1365,76 @@ const App = {
                             const { error } = await supabaseClient.auth.signOut();
                             if (error) throw error;
                             data = { success: true };
+                        } else if (action === 'GET_STUDIO_AI') {
+                            const [catRes, creatorRes, serviceRes, likeRes] = await withTimeout(
+                                Promise.all([
+                                    supabaseClient.from('ai_categories').select('id,slug,name,description,icon').eq('is_active', true).order('name', { ascending: true }),
+                                    supabaseClient.from('creator_profiles').select('id,user_id,username,display_name,bio,avatar_url,cover_url,whatsapp,location,is_published,is_verified').eq('is_published', true).order('updated_at', { ascending: false }),
+                                    supabaseClient.from('creator_services').select('id,creator_id,category_id,title,description,price_from,price_to,delivery_days').eq('is_active', true).order('created_at', { ascending: false }),
+                                    supabaseClient.from('creator_likes').select('creator_id')
+                                ]),
+                                10000,
+                                'Data Studio AI terlalu lama dimuat.'
+                            );
+                            for (const r of [catRes, creatorRes, serviceRes, likeRes]) if (r.error) throw r.error;
+                            const likeCounts = {};
+                            (likeRes.data || []).forEach(x => { likeCounts[x.creator_id] = (likeCounts[x.creator_id] || 0) + 1; });
+                            const servicesByCreator = {};
+                            (serviceRes.data || []).forEach(svc => {
+                                (servicesByCreator[svc.creator_id] ||= []).push(svc);
+                            });
+                            data = {
+                                categories: catRes.data || [],
+                                creators: (creatorRes.data || []).map(c => ({
+                                    ...c,
+                                    likes: Number(likeCounts[c.id] || 0),
+                                    services: servicesByCreator[c.id] || []
+                                }))
+                            };
+                        } else if (action === 'GET_CREATOR_PROFILE') {
+                            const username = String(payload.username || '').trim().toLowerCase();
+                            if (!username) throw new Error('Username Creator tidak ditemukan.');
+                            const { data: creator, error: cErr } = await supabaseClient
+                                .from('creator_profiles')
+                                .select('id,user_id,username,display_name,bio,avatar_url,cover_url,whatsapp,location,is_published,is_verified,created_at,updated_at')
+                                .eq('username', username)
+                                .maybeSingle();
+                            if (cErr) throw cErr;
+                            if (!creator || !creator.is_published) throw new Error('Halaman Creator belum tersedia.');
+                            const [catRes, svcRes, pfRes, likeRes] = await Promise.all([
+                                supabaseClient.from('creator_category_members').select('category_id,is_primary,ai_categories(id,slug,name,description,icon)').eq('creator_id', creator.id),
+                                supabaseClient.from('creator_services').select('id,creator_id,category_id,title,description,price_from,price_to,delivery_days,is_active').eq('creator_id', creator.id).eq('is_active', true).order('created_at', { ascending: false }),
+                                supabaseClient.from('creator_portfolios').select('id,creator_id,service_id,title,description,media_type,media_url,sort_order,is_active,created_at').eq('creator_id', creator.id).eq('is_active', true).order('sort_order', { ascending: true }).order('created_at', { ascending: false }),
+                                supabaseClient.from('creator_likes').select('id').eq('creator_id', creator.id)
+                            ]);
+                            for (const r of [catRes, svcRes, pfRes, likeRes]) if (r.error) throw r.error;
+                            let liked = false;
+                            if (App.state.user?.id) {
+                                const { data: ownLike, error: ownLikeErr } = await supabaseClient.from('creator_likes').select('id').eq('creator_id', creator.id).eq('user_id', App.state.user.id).maybeSingle();
+                                if (ownLikeErr) throw ownLikeErr;
+                                liked = !!ownLike;
+                            }
+                            data = {
+                                creator,
+                                categories: (catRes.data || []).map(x => ({ ...(x.ai_categories || {}), isPrimary: !!x.is_primary })),
+                                services: svcRes.data || [],
+                                portfolios: pfRes.data || [],
+                                likes: (likeRes.data || []).length,
+                                liked
+                            };
+                        } else if (action === 'TOGGLE_CREATOR_LIKE') {
+                            if (!App.state.user?.id) throw new Error('Masuk dulu ya untuk memberi Like.');
+                            const creatorId = payload.creatorId;
+                            const liked = !!payload.liked;
+                            if (liked) {
+                                const { error } = await supabaseClient.from('creator_likes').delete().eq('creator_id', creatorId).eq('user_id', App.state.user.id);
+                                if (error) throw error;
+                            } else {
+                                const { error } = await supabaseClient.from('creator_likes').insert({ creator_id: creatorId, user_id: App.state.user.id });
+                                if (error) throw error;
+                            }
+                            data = { liked: !liked };
+
                         } else if (action === 'GET_MEMBER_DASHBOARD') {
                             const user = await App.api._profile();
                             if (!user) throw new Error('Sesi login tidak ditemukan.');
@@ -1751,6 +1933,292 @@ const App = {
 
                     App.home.renderTestimonialsOnly();
                     App.home.startTestimonialCycle();
+                }
+            },
+
+            studioAI: {
+                _searchTimer: null,
+                _query: '',
+                _category: '',
+                render: async () => {
+                    const main = document.getElementById('main-content');
+                    main.innerHTML = `
+                        <section class="studio-ai-hero card-3d rounded-3xl p-5 sm:p-8 md:p-10 mb-7 text-white shadow-2xl">
+                            <div class="relative z-10 max-w-4xl">
+                                <div class="inline-flex items-center gap-2 px-3 py-1.5 rounded-2xl bg-white/10 border border-white/15 text-[10px] sm:text-xs font-extrabold tracking-wide text-amber-300 backdrop-blur-md">
+                                    <span class="text-[#FACC15] text-sm animate-spin-slow">✦</span> STUDIO AI
+                                </div>
+                                <h1 class="text-2xl sm:text-4xl md:text-5xl font-black leading-tight tracking-tight mt-4 max-w-3xl">Temukan orang yang bisa bikin AI bekerja untukmu.</h1>
+                                <p class="text-xs sm:text-sm md:text-base text-blue-100 leading-relaxed mt-3 max-w-2xl">Cari jasa, Creator, Agency, training, automation, konten, dan solusi AI yang paling pas buat kebutuhanmu.</p>
+                                <div class="mt-6 max-w-3xl">
+                                    <div class="bg-white rounded-2xl p-1.5 sm:p-2 shadow-xl flex items-center gap-2">
+                                        <div class="w-9 h-9 rounded-xl bg-blue-50 text-[#151c75] flex items-center justify-center shrink-0"><i class="fa-solid fa-magnifying-glass"></i></div>
+                                        <input id="studio-ai-search-input" type="search" class="studio-ai-search w-full bg-transparent outline-none text-xs sm:text-sm text-slate-800 font-semibold" placeholder="Contoh: buat video iklan, otomasi WhatsApp, AI untuk guru..." autocomplete="off">
+                                        <button type="button" onclick="App.studioAI.applySearch()" class="btn-brand-amber px-3.5 py-2.5 rounded-xl text-[11px] sm:text-xs font-extrabold shrink-0">Cari</button>
+                                    </div>
+                                </div>
+                                <div class="mt-4 flex flex-wrap gap-2" id="studio-ai-category-chips"></div>
+                            </div>
+                            <div class="studio-ai-orb" aria-hidden="true"></div>
+                            <div class="absolute right-8 top-10 hidden md:block opacity-80" aria-hidden="true">
+                                <div class="relative w-40 h-40">
+                                    <div class="absolute inset-0 rounded-full border border-blue-200/20"></div>
+                                    <div class="absolute inset-5 rounded-full border border-blue-200/25 animate-spin-slow"></div>
+                                    <div class="absolute inset-[52px] rounded-full bg-blue-200/15 border border-blue-100/20 shadow-[0_0_40px_rgba(147,197,253,.22)]"></div>
+                                    <span class="studio-ai-node absolute top-2 left-1/2 w-2.5 h-2.5 rounded-full bg-amber-300 shadow-[0_0_14px_rgba(250,204,21,.9)]"></span>
+                                    <span class="studio-ai-node absolute bottom-5 left-3 w-2 h-2 rounded-full bg-sky-300 shadow-[0_0_12px_rgba(125,211,252,.9)]"></span>
+                                    <span class="studio-ai-node absolute bottom-4 right-5 w-2.5 h-2.5 rounded-full bg-white shadow-[0_0_12px_rgba(255,255,255,.9)]"></span>
+                                </div>
+                            </div>
+                        </section>
+
+                        <section class="mb-7">
+                            <div class="flex items-end justify-between gap-3 mb-3">
+                                <div>
+                                    <h2 class="text-lg sm:text-xl font-extrabold text-[#151c75]">Cari berdasarkan kebutuhan</h2>
+                                    <p class="text-xs text-slate-500">Pilih cepat, atau cari dengan bahasa sehari-hari.</p>
+                                </div>
+                            </div>
+                            <div id="studio-ai-category-grid" class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3"></div>
+                        </section>
+
+                        <section>
+                            <div class="flex items-end justify-between gap-3 mb-4">
+                                <div>
+                                    <h2 class="text-lg sm:text-xl font-extrabold text-[#151c75]" id="studio-ai-results-title">Creator yang siap membantu</h2>
+                                    <p class="text-xs text-slate-500">Profil publik, jasa, portfolio, dan tombol WhatsApp.</p>
+                                </div>
+                            </div>
+                            <div id="studio-ai-creator-grid" class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4 sm:gap-6">
+                                <div class="card-3d-inset p-8 rounded-2xl text-center text-xs text-slate-500 md:col-span-2 xl:col-span-3">Memuat Studio AI...</div>
+                            </div>
+                        </section>
+                    `;
+                    try {
+                        const data = await App.api.post('GET_STUDIO_AI');
+                        App.state.studioAI = data;
+                        App.studioAI.renderCategories();
+                        App.studioAI.renderCreators();
+                        const input = document.getElementById('studio-ai-search-input');
+                        if (input) {
+                            input.value = App.studioAI._query;
+                            input.addEventListener('keydown', e => { if (e.key === 'Enter') App.studioAI.applySearch(); });
+                            input.addEventListener('input', e => { App.studioAI._query = e.target.value; App.studioAI.renderCreators(); });
+                        }
+                    } catch (e) {
+                        App.ui.toast('Studio AI belum bisa dimuat. Coba lagi sebentar, ya.', 'error');
+                        const grid = document.getElementById('studio-ai-creator-grid');
+                        if (grid) grid.innerHTML = `<div class="card-3d p-8 rounded-2xl text-center text-xs text-slate-500 md:col-span-2 xl:col-span-3">Studio AI sedang menyiapkan data. Coba muat ulang beberapa saat lagi.</div>`;
+                    }
+                },
+                applySearch: () => {
+                    const input = document.getElementById('studio-ai-search-input');
+                    App.studioAI._query = String(input?.value || '').trim();
+                    App.studioAI.renderCreators();
+                },
+                setCategory: (slug) => {
+                    App.studioAI._category = slug || '';
+                    App.studioAI.renderCategories();
+                    App.studioAI.renderCreators();
+                },
+                renderCategories: () => {
+                    const data = App.state.studioAI || { categories: [] };
+                    const chips = document.getElementById('studio-ai-category-chips');
+                    const grid = document.getElementById('studio-ai-category-grid');
+                    const categories = data.categories || [];
+                    if (chips) chips.innerHTML = categories.slice(0, 8).map(c => `
+                        <button type="button" onclick="App.studioAI.setCategory('${App.utils.escapeHtml(c.slug)}')" class="studio-ai-chip ${App.studioAI._category === c.slug ? 'active' : ''} px-3 py-1.5 rounded-xl bg-white/10 border border-white/20 text-[10px] sm:text-xs font-bold text-white hover:bg-white/15 transition-all">
+                            ${App.utils.escapeHtml(c.name)}
+                        </button>`).join('');
+                    if (grid) grid.innerHTML = categories.map(c => `
+                        <button type="button" onclick="App.studioAI.setCategory('${App.utils.escapeHtml(c.slug)}')" class="studio-ai-card text-left card-3d p-4 rounded-2xl bg-white">
+                            <div class="w-10 h-10 rounded-xl bg-blue-50 text-[#151c75] flex items-center justify-center mb-3"><i class="${App.utils.escapeHtml(c.icon || 'fa-solid fa-sparkles')}"></i></div>
+                            <div class="font-extrabold text-xs sm:text-sm text-[#151c75]">${App.utils.escapeHtml(c.name)}</div>
+                            <div class="text-[10px] text-slate-500 mt-1 line-clamp-2">${App.utils.escapeHtml(c.description || '')}</div>
+                        </button>`).join('');
+                },
+                renderCreators: () => {
+                    const grid = document.getElementById('studio-ai-creator-grid');
+                    if (!grid) return;
+                    const data = App.state.studioAI || { creators: [] };
+                    const q = App.studioAI._query.toLowerCase();
+                    const category = App.studioAI._category;
+                    const creators = (data.creators || []).filter(c => {
+                        const services = c.services || [];
+                        const hay = [c.display_name, c.username, c.bio, c.location, ...services.map(s => `${s.title} ${s.description}`)].join(' ').toLowerCase();
+                        const categoryMatch = !category || services.some(s => s.category_id === (data.categories || []).find(x => x.slug === category)?.id);
+                        return (!q || hay.includes(q)) && categoryMatch;
+                    });
+                    const title = document.getElementById('studio-ai-results-title');
+                    if (title) title.textContent = q || category ? 'Yang paling nyambung buatmu' : 'Creator yang siap membantu';
+                    if (!creators.length) {
+                        grid.innerHTML = `<div class="card-3d p-8 rounded-2xl text-center md:col-span-2 xl:col-span-3"><div class="text-3xl mb-2">✦</div><div class="text-sm font-extrabold text-[#151c75]">Belum ketemu yang pas</div><div class="text-xs text-slate-500 mt-1">Coba kata kunci lain atau pilih kategori yang lebih dekat.</div></div>`;
+                        return;
+                    }
+                    grid.innerHTML = creators.slice(0, 30).map(c => {
+                        const phone = String(c.whatsapp || '').replace(/\D/g,'').replace(/^0/,'62');
+                        const wa = phone ? `https://wa.me/${phone}?text=${encodeURIComponent(`Halo ${c.display_name || 'Creator'}, saya menemukan profilmu di Studihome dan ingin bertanya tentang layananmu.`)}` : '';
+                        const service = (c.services || [])[0];
+                        const initials = String(c.display_name || c.username || 'C').trim().charAt(0).toUpperCase();
+                        return `
+                            <article class="studio-ai-card card-3d rounded-3xl overflow-hidden bg-white">
+                                <div class="h-32 bg-gradient-to-br from-[#151c75] to-[#3f48bf] relative overflow-hidden">
+                                    ${c.cover_url ? `<img src="${App.utils.safeUrl(c.cover_url)}" alt="" class="w-full h-full object-cover opacity-60">` : ''}
+                                    <div class="absolute inset-0 bg-gradient-to-t from-[#151c75]/85 to-transparent"></div>
+                                    <div class="absolute left-4 bottom-3 flex items-end gap-3">
+                                        <div class="w-12 h-12 rounded-2xl bg-white text-[#151c75] flex items-center justify-center font-black text-base shadow-lg border border-blue-100 overflow-hidden">
+                                            ${c.avatar_url ? `<img src="${App.utils.safeUrl(c.avatar_url)}" alt="${App.utils.escapeHtml(c.display_name)}" class="w-full h-full object-cover">` : initials}
+                                        </div>
+                                        <div class="pb-0.5">
+                                            <div class="text-white text-sm font-extrabold leading-tight">${App.utils.escapeHtml(c.display_name || c.username)}</div>
+                                            <div class="text-blue-100 text-[10px] mt-0.5">@${App.utils.escapeHtml(c.username)}</div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="p-4 sm:p-5">
+                                    <div class="flex items-center justify-between gap-3">
+                                        <div class="flex flex-wrap gap-1.5">
+                                            ${(c.services || []).slice(0, 2).map(s => `<span class="px-2 py-0.5 rounded-lg bg-blue-50 text-[#151c75] text-[9px] font-extrabold">${App.utils.escapeHtml(s.title)}</span>`).join('')}
+                                        </div>
+                                        <div class="text-[10px] text-slate-500 whitespace-nowrap">❤️ ${c.likes || 0}</div>
+                                    </div>
+                                    <p class="text-xs text-slate-600 leading-relaxed mt-3 line-clamp-3">${App.utils.escapeHtml(c.bio || 'Creator Studio AI di Studihome.')}</p>
+                                    <div class="flex items-center justify-between mt-4 pt-3 border-t border-slate-100 gap-2">
+                                        <div class="text-[10px] font-bold text-slate-500">${App.utils.escapeHtml(c.location || 'Indonesia')}</div>
+                                        <div class="flex items-center gap-1.5">
+                                            <a href="#${App.utils.escapeHtml(c.username)}" class="px-3 py-1.5 rounded-xl text-[10px] font-extrabold text-[#151c75] bg-blue-50 hover:bg-blue-100">Profil</a>
+                                            ${wa ? `<a href="${wa}" target="_blank" rel="noopener noreferrer" class="px-3 py-1.5 rounded-xl text-[10px] font-extrabold text-white bg-emerald-600 hover:bg-emerald-700"><i class="fa-brands fa-whatsapp mr-1"></i> WhatsApp</a>` : ''}
+                                        </div>
+                                    </div>
+                                    ${service ? `<div class="mt-3 text-[10px] font-bold text-amber-600">Mulai Rp ${Number(service.price_from || 0).toLocaleString('id-ID')}</div>` : ''}
+                                </div>
+                            </article>`;
+                    }).join('');
+                }
+            },
+
+
+            creator: {
+                _slugify: (value) => String(value || '').toLowerCase().trim().normalize('NFKD').replace(/[\u0300-\u036f]/g, '').replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '').slice(0, 120),
+                _mediaHTML: (mediaType, url, title) => {
+                    const value = String(url || '').trim();
+                    if (!value) return '';
+                    const safe = App.utils.safeUrl(value, '#');
+                    const lower = value.toLowerCase();
+                    if (mediaType === 'youtube' || /(?:youtube\.com|youtu\.be)/i.test(value)) {
+                        const m = value.match(/(?:youtube\.com\/(?:watch\?v=|shorts\/|live\/)|youtu\.be\/)([A-Za-z0-9_-]{6,})/i);
+                        if (m) return `<div class="aspect-video rounded-2xl overflow-hidden bg-black"><iframe src="https://www.youtube.com/embed/${m[1]}" title="${App.utils.escapeHtml(title || 'Portfolio')}" class="w-full h-full" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen></iframe></div>`;
+                    }
+                    if (mediaType === 'drive' || /(^|\.)drive\.google\.com$/i.test((()=>{ try{return new URL(value).hostname}catch{return ''} })())) {
+                        const m = value.match(/[-\w]{25,}/); if (m) return `<div class="aspect-video rounded-2xl overflow-hidden bg-slate-900"><iframe src="https://drive.google.com/file/d/${m[0]}/preview" title="${App.utils.escapeHtml(title || 'Portfolio')}" class="w-full h-full" frameborder="0" allow="autoplay; fullscreen; picture-in-picture" allowfullscreen></iframe></div>`;
+                    }
+                    if (mediaType === 'video' || /\.(mp4|webm|ogg)(?:$|[?#])/i.test(lower)) return `<div class="aspect-video rounded-2xl overflow-hidden bg-black"><video class="w-full h-full object-contain" controls playsinline preload="metadata"><source src="${safe}"></video></div>`;
+                    if (mediaType === 'image' || /\.(png|jpe?g|gif|webp|svg)(?:$|[?#])/i.test(lower)) return `<div class="aspect-[4/3] rounded-2xl overflow-hidden bg-slate-50"><img src="${safe}" alt="${App.utils.escapeHtml(title || 'Portfolio')}" class="w-full h-full object-cover" loading="lazy" referrerpolicy="no-referrer"></div>`;
+                    return `<a href="${safe}" target="_blank" rel="noopener noreferrer" class="block rounded-2xl bg-blue-50 p-4 text-xs font-bold text-[#151c75]">Buka portfolio ↗</a>`;
+                },
+                render: async (username, portfolioSlug = '') => {
+                    const main = document.getElementById('main-content');
+                    main.innerHTML = `<div class="card-3d-inset p-10 rounded-3xl text-center text-xs text-slate-500">Membuka halaman Creator...</div>`;
+                    try {
+                        const data = await App.api.post('GET_CREATOR_PROFILE', { username });
+                        App.state.creatorProfile = data;
+                        const c = data.creator;
+                        const primaryCategory = data.categories.find(x => x.isPrimary) || data.categories[0];
+                        const phone = String(c.whatsapp || '').replace(/\D/g,'').replace(/^0/,'62');
+                        const defaultWa = phone ? `https://wa.me/${phone}?text=${encodeURIComponent(`Halo ${c.display_name || 'Creator'}, saya menemukan profilmu di Studihome dan tertarik dengan layananmu.`)}` : '';
+                        const initials = String(c.display_name || c.username || 'C').trim().charAt(0).toUpperCase();
+                        const targetPortfolio = portfolioSlug ? (data.portfolios || []).find(p => App.creator._slugify(p.title) === String(portfolioSlug).toLowerCase()) : null;
+                        if (portfolioSlug && !targetPortfolio) {
+                            main.innerHTML = `<div class="card-3d p-8 rounded-3xl text-center max-w-xl mx-auto"><div class="text-4xl mb-3">✦</div><h2 class="text-base font-extrabold text-[#151c75]">Portfolio belum ditemukan</h2><p class="text-xs text-slate-500 mt-1">Mungkin tautannya sudah berubah. Profil Creator masih bisa kamu lihat.</p><button onclick="App.router.goCreator('${App.utils.escapeHtml(c.username)}')" class="btn-brand-gradient px-4 py-2.5 rounded-xl text-xs font-bold mt-4">Kembali ke Profil</button></div>`;
+                            return;
+                        }
+                        const categories = data.categories || [];
+                        const services = data.services || [];
+                        const portfolios = data.portfolios || [];
+                        const profileUrl = `${window.location.origin}/${c.username}`;
+                        document.title = `${c.display_name || c.username} | Studio AI Studihome`;
+                        main.innerHTML = `
+                            <section class="creator-profile-hero card-3d rounded-3xl text-white p-5 sm:p-7 md:p-9 mb-7 shadow-2xl">
+                                ${c.cover_url ? `<img src="${App.utils.safeUrl(c.cover_url)}" alt="" class="absolute inset-0 w-full h-full object-cover opacity-25">` : ''}
+                                <div class="absolute inset-0 bg-gradient-to-br from-[#151c75]/95 via-[#151c75]/88 to-[#3f48bf]/85"></div>
+                                <div class="relative z-10 grid lg:grid-cols-[1fr_auto] gap-6 items-end">
+                                    <div>
+                                        <div class="flex flex-wrap items-center gap-2 mb-4">
+                                            <span class="creator-trust-chip px-2.5 py-1 rounded-xl text-[10px] font-extrabold">@${App.utils.escapeHtml(c.username)}</span>
+                                            ${c.is_verified ? `<span class="creator-trust-chip px-2.5 py-1 rounded-xl text-[10px] font-extrabold text-amber-200"><i class="fa-solid fa-circle-check mr-1"></i> Verified Creator</span>` : ''}
+                                        </div>
+                                        <div class="flex items-center gap-4">
+                                            <div class="w-20 h-20 sm:w-24 sm:h-24 rounded-3xl bg-white text-[#151c75] flex items-center justify-center font-black text-2xl overflow-hidden shadow-2xl border-2 border-white/50 shrink-0">
+                                                ${c.avatar_url ? `<img src="${App.utils.safeUrl(c.avatar_url)}" alt="${App.utils.escapeHtml(c.display_name)}" class="w-full h-full object-cover">` : initials}
+                                            </div>
+                                            <div>
+                                                <h1 class="text-2xl sm:text-3xl md:text-4xl font-black leading-tight">${App.utils.escapeHtml(c.display_name || c.username)}</h1>
+                                                <p class="text-blue-100 text-xs sm:text-sm mt-1">${App.utils.escapeHtml(primaryCategory?.name || 'Creator Studio AI')} ${c.location ? '• ' + App.utils.escapeHtml(c.location) : ''}</p>
+                                            </div>
+                                        </div>
+                                        <p class="text-xs sm:text-sm text-blue-50/95 max-w-2xl leading-relaxed mt-5">${App.utils.escapeHtml(c.bio || 'Creator Studio AI di Studihome.')}</p>
+                                        <div class="flex flex-wrap gap-2 mt-4">
+                                            ${categories.slice(0,6).map(x => `<span class="creator-trust-chip px-2.5 py-1 rounded-xl text-[9px] font-bold">${App.utils.escapeHtml(x.name)}</span>`).join('')}
+                                        </div>
+                                    </div>
+                                    <div class="w-full lg:w-auto">
+                                        <div class="grid grid-cols-3 gap-2 mb-3">
+                                            <div class="creator-trust-chip rounded-2xl px-3 py-2.5 text-center"><div class="text-lg font-black">❤️ ${data.likes || 0}</div><div class="text-[9px] text-blue-100">Disukai</div></div>
+                                            <div class="creator-trust-chip rounded-2xl px-3 py-2.5 text-center"><div class="text-lg font-black">${services.length}</div><div class="text-[9px] text-blue-100">Jasa</div></div>
+                                            <div class="creator-trust-chip rounded-2xl px-3 py-2.5 text-center"><div class="text-lg font-black">${portfolios.length}</div><div class="text-[9px] text-blue-100">Portfolio</div></div>
+                                        </div>
+                                        <div class="flex flex-col sm:flex-row lg:flex-col gap-2">
+                                            ${defaultWa ? `<a href="${defaultWa}" target="_blank" rel="noopener noreferrer" class="w-full lg:min-w-48 btn-brand-amber text-slate-900 px-4 py-2.5 rounded-xl text-xs font-extrabold text-center"><i class="fa-brands fa-whatsapp mr-1"></i> WhatsApp</a>` : ''}
+                                            <button type="button" onclick="App.creator.toggleLike('${c.id}', ${data.liked ? 'true' : 'false'})" class="w-full lg:min-w-48 px-4 py-2.5 rounded-xl text-xs font-extrabold border border-white/25 bg-white/10 hover:bg-white/15 backdrop-blur-md text-white">
+                                                ${data.liked ? '❤️ Sudah Disukai' : '♡ Suka Profil'}
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </section>
+                            ${targetPortfolio ? `
+                                <section class="mb-7">
+                                    <button onclick="App.router.goCreator('${App.utils.escapeHtml(c.username)}')" class="text-xs font-bold text-[#151c75] mb-3 hover:underline">← Kembali ke profil</button>
+                                    <div class="card-3d p-4 sm:p-6 rounded-3xl bg-white">
+                                        <div class="flex items-start justify-between gap-3 mb-4"><div><div class="text-[10px] uppercase tracking-wider font-extrabold text-amber-600">PORTFOLIO</div><h2 class="text-lg sm:text-xl font-black text-[#151c75] mt-1">${App.utils.escapeHtml(targetPortfolio.title)}</h2></div></div>
+                                        ${App.creator._mediaHTML(targetPortfolio.media_type, targetPortfolio.media_url, targetPortfolio.title)}
+                                        ${targetPortfolio.description ? `<p class="text-xs sm:text-sm text-slate-600 leading-relaxed mt-4">${App.utils.escapeHtml(targetPortfolio.description)}</p>` : ''}
+                                    </div>
+                                </section>
+                            ` : ''}
+                            <section class="mb-7">
+                                <div class="flex items-end justify-between gap-3 mb-4"><div><h2 class="text-lg sm:text-xl font-extrabold text-[#151c75]">Jasa ${App.utils.escapeHtml(c.display_name || 'Creator')}</h2><p class="text-xs text-slate-500">Pilih layanan yang paling cocok dengan kebutuhanmu.</p></div></div>
+                                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                    ${services.length ? services.map(s => `<article class="creator-service-card card-3d p-4 sm:p-5 rounded-2xl bg-white border border-slate-200/80"><div class="flex items-start justify-between gap-3"><div><h3 class="font-extrabold text-sm text-[#151c75]">${App.utils.escapeHtml(s.title)}</h3><p class="text-xs text-slate-600 leading-relaxed mt-1.5">${App.utils.escapeHtml(s.description || '')}</p></div><span class="text-[10px] font-black text-amber-600 whitespace-nowrap">Rp ${Number(s.price_from || 0).toLocaleString('id-ID')}${Number(s.price_to || 0) > Number(s.price_from || 0) ? '+' : ''}</span></div><div class="flex items-center justify-between mt-4 pt-3 border-t border-slate-100"><span class="text-[10px] text-slate-500">Estimasi ${Number(s.delivery_days || 1)} hari</span>${defaultWa ? `<a href="${defaultWa}" target="_blank" rel="noopener noreferrer" class="px-3 py-1.5 rounded-xl bg-emerald-50 text-emerald-700 text-[10px] font-extrabold">Tanya via WhatsApp</a>` : ''}</div></article>`).join('') : `<div class="card-3d-inset p-6 rounded-2xl text-xs text-slate-500 md:col-span-2">Belum ada jasa yang ditampilkan.</div>`}
+                                </div>
+                            </section>
+                            <section>
+                                <div class="flex items-end justify-between gap-3 mb-4"><div><h2 class="text-lg sm:text-xl font-extrabold text-[#151c75]">Portfolio</h2><p class="text-xs text-slate-500">Lihat contoh karya dan solusi yang pernah dibuat.</p></div></div>
+                                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                                    ${portfolios.length ? portfolios.map(p => `<article class="creator-portfolio-card card-3d rounded-2xl overflow-hidden bg-white border border-slate-200/80 cursor-pointer" onclick="App.router.goCreator('${App.utils.escapeHtml(c.username)}','${App.creator._slugify(p.title)}')"><div class="relative">${App.creator._mediaHTML(p.media_type,p.media_url,p.title)}<div class="absolute left-3 top-3 px-2 py-1 rounded-lg bg-black/55 text-white text-[9px] font-bold">${App.utils.escapeHtml(p.media_type || 'media')}</div></div><div class="p-3.5"><h3 class="text-xs font-extrabold text-[#151c75]">${App.utils.escapeHtml(p.title)}</h3><p class="text-[10px] text-slate-500 line-clamp-2 mt-1">${App.utils.escapeHtml(p.description || '')}</p></div></article>`).join('') : `<div class="card-3d-inset p-6 rounded-2xl text-xs text-slate-500 sm:col-span-2 lg:col-span-3">Portfolio belum tersedia.</div>`}
+                                </div>
+                            </section>
+                        `;
+                        window.scrollTo({ top: 0, behavior: 'smooth' });
+                    } catch (e) {
+                        document.title = 'Studihome - Studio AI';
+                        main.innerHTML = `<div class="card-3d p-8 rounded-3xl text-center max-w-lg mx-auto"><div class="text-4xl mb-3">✦</div><h2 class="text-base font-extrabold text-[#151c75]">Halaman Creator belum siap</h2><p class="text-xs text-slate-500 mt-1">${App.utils.escapeHtml(e?.message || 'Profil ini belum tersedia.')}</p><button onclick="App.router.navigate('studio-ai')" class="btn-brand-gradient px-4 py-2.5 rounded-xl text-xs font-bold mt-4">Kembali ke Studio AI</button></div>`;
+                    }
+                },
+                toggleLike: async (creatorId, currentLiked) => {
+                    try {
+                        if (!App.state.user) {
+                            App.state.routeAfterLogin = window.location.pathname;
+                            App.ui.toast('Masuk dulu ya, biar kamu bisa menyukai Creator ini. ❤️', 'info');
+                            App.ui.toggleModal('auth-modal', true);
+                            return;
+                        }
+                        await App.api.post('TOGGLE_CREATOR_LIKE', { creatorId, liked: currentLiked });
+                        App.ui.toast(currentLiked ? 'Like kamu sudah dilepas.' : 'Mantap! Creator ini masuk daftar yang kamu suka. ❤️', 'success');
+                        await App.creator.render(App.state.creatorUsername, App.state.creatorPortfolioSlug);
+                    } catch (e) {
+                        App.ui.toast(e?.message || 'Like belum berhasil diproses.', 'error');
+                    }
                 }
             },
 
@@ -3195,7 +3663,7 @@ const App = {
                         container.innerHTML = `
                             <div class="text-center space-y-3.5">
                                 <h3 class="text-base sm:text-lg font-bold text-[#151c75]">Bayarnya Pake QRIS Ya..</h3>
-                                <p class="text-xs text-slate-500">Pakai BRImo, BCA, BNI, Mandiri, GoPay, OVO, DANA, ShopeePay atau m-banking bisa kok!</p>
+                                <p class="text-xs text-slate-500">Mau pakai BRImo, BCA, BNI, Mandiri, GoPay, OVO, DANA, ShopeePay atau m-banking lainnya. Bisa kok!</p>
                                 <div class="card-3d p-3.5 rounded-2xl inline-block mx-auto bg-white border border-slate-200">
                                     <img src="${App.utils.safeUrl(qris.qrisUrl)}" alt="QRIS ${App.utils.escapeHtml(p.title)}" class="w-44 h-44 sm:w-48 sm:h-48 mx-auto rounded-xl object-contain" loading="eager" referrerpolicy="no-referrer">
                                 </div>
@@ -3209,12 +3677,13 @@ const App = {
                                 </div>
                                 <label class="flex items-start gap-2 text-left bg-amber-50 border border-amber-200 rounded-xl p-3 cursor-pointer">
                                     <input id="confirm-payment-checkbox" type="checkbox" onchange="App.shop.updatePaymentConfirmButton()" class="mt-0.5 shrink-0">
-                                    <span class="text-xs text-slate-700 leading-relaxed"><strong>Lakukan Pembayaran, lalu Centang ya..</strong></span>
+                                    <span class="text-xs text-slate-700 leading-relaxed"><strong>Lakukan Pembayaran lalu Centang ya</strong></span>
                                 </label>
                                 <button id="btn-confirm-payment" disabled onclick="App.shop.submitPaymentConfirmation()" class="w-full py-3 rounded-xl text-xs sm:text-sm font-extrabold text-white bg-emerald-600 disabled:bg-slate-300 disabled:cursor-not-allowed hover:bg-emerald-700 flex items-center justify-center gap-2 shadow-md transition-all">
                                     <i class="fa-solid fa-check"></i> KONFIRMASI PEMBAYARAN
                                 </button>
-                                <p class="text-[10px] text-slate-500">Kalo ada kendala pembayaran, hubungi Admin ya..</p>
+                                <p class="text-[10px] text-slate-500">Jika ada kendala pembayaran, hubungi Admin ya..</p>
+                                <button onclick="App.ui.toggleModal('checkout-modal', false)" class="text-xs font-bold text-slate-500 hover:text-slate-800">Tutup</button>
                             </div>`;
                         App.state.checkout.waUrl = waUrl;
                     }
