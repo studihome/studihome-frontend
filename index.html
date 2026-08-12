@@ -297,10 +297,15 @@
             }
         }
 
-        /* Server status hover tooltip */
-        .server-status-tooltip {
-            position: relative;
+        /* Server status indicator: small colored dot only */
+        #api-status-badge {
+            flex: 0 0 auto;
+            box-shadow: none !important;
+            border: 0 !important;
+            background: transparent !important;
         }
+
+        /* Server status hover tooltip */
         .server-status-tooltip::after {
             content: attr(data-tooltip);
             position: absolute;
@@ -368,11 +373,9 @@
                     <span id="live-clock" class="font-bold text-slate-700">00:00:00</span>
                 </div>
 
-                <!-- Server Connection Status Badge -->
-                <div id="api-status-badge" class="hidden sm:flex items-center justify-center w-9 h-9 rounded-xl bg-white/95 border border-blue-100 shadow-2xs cursor-help server-status-tooltip" data-tooltip="Status koneksi Studihome" aria-label="Status koneksi Studihome">
-                    <i id="api-status-icon" class="fa-regular fa-clock text-sky-500 text-sm" aria-hidden="true"></i>
-                </div>
-                
+                <!-- Server Connection Indicator: dot only -->
+                <span id="api-status-badge" class="hidden sm:inline-block w-2.5 h-2.5 rounded-full bg-blue-500 cursor-help" title="Status koneksi Studihome" aria-label="Status koneksi Studihome"></span>
+
                 <!-- Auth Action Area --><!-- Auth Action Area -->
                 <div id="top-auth-area">
                     <!-- Injected dynamically -->
@@ -403,7 +406,7 @@
             <div class="flex items-center gap-2 text-center sm:text-left">
                 <span class="font-extrabold text-white text-sm">Studihome</span>
                 <span class="text-[#FACC15] font-black">✦</span>
-                <span class="text-blue-100">&copy; 2026. All Rights Reserved.</span>
+                <span class="text-blue-100">2026 &copy; All Rights Reserved.</span>
             </div>
             <div class="flex items-center gap-4 sm:gap-6">
                 <a href="#privacy" onclick="App.ui.toast('Tenang, data kamu kami kelola dengan aman dan seperlunya.', 'info')" class="text-blue-100 hover:text-white transition-colors">Privasi</a>
@@ -560,50 +563,7 @@
                 throw new Error('SUPABASE_URL tidak valid.');
             }
             supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
-                realtime: {
-                setup: async () => {
-                    if (!supabaseClient || !App.state.user) return;
-                    if (App.state.realtimeChannel) {
-                        try { await supabaseClient.removeChannel(App.state.realtimeChannel); } catch (_) {}
-                        App.state.realtimeChannel = null;
-                    }
-                    const userId = App.state.user.id;
-                    const isAdmin = String(App.state.user.role || '').toLowerCase() === 'admin';
-                    const channel = supabaseClient.channel(`studihome-live-${userId}`);
-                    const refresh = () => {
-                        clearTimeout(App.state.realtimeRefreshTimer);
-                        App.state.realtimeRefreshTimer = setTimeout(async () => {
-                            try {
-                                if (isAdmin) {
-                                    if (App.state.activeTab === 'admin') await App.admin.renderSubTab();
-                                } else {
-                                    App.state.memberData = await App.api.post('GET_MEMBER_DASHBOARD');
-                                    if (App.state.activeTab === 'dashboard') await App.dashboard.render();
-                                    else if (App.state.activeTab === 'products') App.products.render();
-                                }
-                            } catch (_) {}
-                        }, 250);
-                    };
-                    if (isAdmin) {
-                        channel.on('postgres_changes', { event: '*', schema: 'public', table: 'orders' }, refresh);
-                        channel.on('postgres_changes', { event: '*', schema: 'public', table: 'entitlements' }, refresh);
-                    } else {
-                        channel.on('postgres_changes', { event: '*', schema: 'public', table: 'orders', filter: `user_id=eq.${userId}` }, refresh);
-                        channel.on('postgres_changes', { event: '*', schema: 'public', table: 'entitlements', filter: `user_id=eq.${userId}` }, refresh);
-                    }
-                    channel.subscribe();
-                    App.state.realtimeChannel = channel;
-                },
-                cleanup: async () => {
-                    clearTimeout(App.state.realtimeRefreshTimer);
-                    if (App.state.realtimeChannel) {
-                        try { await supabaseClient.removeChannel(App.state.realtimeChannel); } catch (_) {}
-                        App.state.realtimeChannel = null;
-                    }
-                }
-            },
-
-            auth: {
+                auth: {
                     persistSession: true,
                     autoRefreshToken: true,
                     detectSessionInUrl: true
@@ -642,6 +602,53 @@ function indonesianNoticeMessage(message) {
         .replace(/^Error:\s*/i, '')
         .replace(/^Failed:\s*/i, '') || 'Ada sedikit kendala. Coba lagi, ya.';
 }
+
+        async function setupRealtime() {
+            if (!supabaseClient || !App.state.user) return;
+
+            if (App.state.realtimeChannel) {
+                try { await supabaseClient.removeChannel(App.state.realtimeChannel); } catch (_) {}
+                App.state.realtimeChannel = null;
+            }
+
+            const userId = App.state.user.id;
+            const isAdmin = String(App.state.user.role || '').toLowerCase() === 'admin';
+            const channel = supabaseClient.channel(`studihome-live-${userId}`);
+
+            const refresh = () => {
+                clearTimeout(App.state.realtimeRefreshTimer);
+                App.state.realtimeRefreshTimer = setTimeout(async () => {
+                    try {
+                        if (isAdmin) {
+                            if (App.state.activeTab === 'admin') await App.admin.renderSubTab();
+                        } else {
+                            App.state.memberData = await App.api.post('GET_MEMBER_DASHBOARD');
+                            if (App.state.activeTab === 'dashboard') await App.dashboard.render();
+                            else if (App.state.activeTab === 'products') App.products.render();
+                        }
+                    } catch (_) {}
+                }, 250);
+            };
+
+            if (isAdmin) {
+                channel.on('postgres_changes', { event: '*', schema: 'public', table: 'orders' }, refresh);
+                channel.on('postgres_changes', { event: '*', schema: 'public', table: 'entitlements' }, refresh);
+            } else {
+                channel.on('postgres_changes', { event: '*', schema: 'public', table: 'orders', filter: `user_id=eq.${userId}` }, refresh);
+                channel.on('postgres_changes', { event: '*', schema: 'public', table: 'entitlements', filter: `user_id=eq.${userId}` }, refresh);
+            }
+
+            await channel.subscribe();
+            App.state.realtimeChannel = channel;
+        }
+
+        async function cleanupRealtime() {
+            clearTimeout(App.state.realtimeRefreshTimer);
+            if (App.state.realtimeChannel) {
+                try { await supabaseClient.removeChannel(App.state.realtimeChannel); } catch (_) {}
+                App.state.realtimeChannel = null;
+            }
+        }
 
 const App = {
             state: {
@@ -682,7 +689,6 @@ const App = {
                 }
             },
 
-            // Isolated Storage Wrapper Guarding Against Sandbox Security Errors
             storage: {
                 get: (key) => {
                     try {
@@ -749,7 +755,7 @@ const App = {
 
                     supabaseClient.auth.onAuthStateChange(async (_event, sessionNow) => {
                         if (!sessionNow?.user) {
-                            await App.realtime.cleanup();
+                            await cleanupRealtime();
                             App.state.user = null;
                             App.state.memberData = null;
                             App.ui.renderTopAuth();
@@ -764,16 +770,16 @@ const App = {
                                 App.state.user = profile;
                             }
                             App.ui.renderTopAuth();
-                            await App.realtime.setup();
+                            await setupRealtime();
                         } catch (e) {
                             App.state.user = null;
                             App.state.memberData = null;
-                            await App.realtime.cleanup();
+                            await cleanupRealtime();
                             App.ui.renderTopAuth();
                         }
                     });
 
-                    if (App.state.user) await App.realtime.setup();
+                    if (App.state.user) await setupRealtime();
                     App.ui.updateApiStatus('online');
                 } catch (e) {
                     console.error('[Studihome bootstrap]', e);
@@ -861,31 +867,26 @@ const App = {
                 },
 
                 updateApiStatus: (status) => {
-                    const badge = document.getElementById('api-status-badge');
-                    const icon = document.getElementById('api-status-icon');
-                    if (!badge || !icon) return;
+                    const dot = document.getElementById('api-status-badge');
+                    if (!dot) return;
 
-                    const tooltip = status === 'online'
+                    dot.title = status === 'online'
                         ? 'Terhubung — Supabase aktif'
                         : status === 'connecting'
                             ? 'Sedang menghubungkan ke Supabase'
                             : status === 'error'
                                 ? 'Koneksi ke Supabase bermasalah'
                                 : 'Status koneksi Studihome';
-                    badge.title = tooltip;
-                    badge.dataset.tooltip = tooltip;
 
+                    dot.className = 'hidden sm:inline-block w-2.5 h-2.5 rounded-full cursor-help';
                     if (status === 'online') {
-                        icon.className = 'fa-regular fa-clock text-emerald-500 text-sm';
-                        icon.classList.remove('animate-pulse','animate-spin');
+                        dot.classList.add('bg-emerald-500');
                     } else if (status === 'connecting') {
-                        icon.className = 'fa-regular fa-clock text-sky-500 text-sm animate-pulse';
+                        dot.classList.add('bg-sky-500', 'animate-pulse');
                     } else if (status === 'error') {
-                        icon.className = 'fa-regular fa-clock text-red-500 text-sm';
-                        icon.classList.remove('animate-pulse','animate-spin');
+                        dot.classList.add('bg-red-500');
                     } else {
-                        icon.className = 'fa-regular fa-clock text-blue-500 text-sm';
-                        icon.classList.remove('animate-pulse','animate-spin');
+                        dot.classList.add('bg-blue-500');
                     }
                 },
 
@@ -1360,7 +1361,7 @@ const App = {
                 },
 
                 logout: async () => {
-                    await App.realtime.cleanup();
+                    await cleanupRealtime();
                     try { await App.api.post('AUTH_LOGOUT'); } catch (e) {}
                     App.state.user = null;
                     App.state.memberData = null;
