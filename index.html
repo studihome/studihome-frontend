@@ -583,6 +583,7 @@
                 try {
                     initSupabase();
                     App.api._requireConfig();
+                    await App.auth.handleEmailVerificationFromUrl();
 
                     const sessionResult = await withTimeout(
                         supabaseClient.auth.getSession(),
@@ -725,11 +726,11 @@
                         text.className = 'text-emerald-700 uppercase';
                     } else if (status === 'connecting') {
                         dot.className = 'w-2 h-2 rounded-full bg-sky-500 animate-ping';
-                        text.textContent = 'Connecting...';
+                        text.textContent = 'Menghubungkan...';
                         text.className = 'text-sky-700 uppercase';
                     } else if (status === 'error') {
                         dot.className = 'w-2 h-2 rounded-full bg-red-500';
-                        text.textContent = 'Server Error';
+                        text.textContent = 'Server Bermasalah';
                         text.className = 'text-red-600 uppercase';
                     } else {
                         dot.className = 'w-2 h-2 rounded-full bg-blue-500';
@@ -865,7 +866,7 @@
                     const { data: { user }, error: authErr } = await supabaseClient.auth.getUser();
                     if (authErr) throw authErr;
                     if (!user) return null;
-                    const { data, error } = await supabaseClient.from('profiles').select('id,name,phone,role,status,created_at,updated_at,email').eq('id', user.id).single();
+                    const { data, error } = await supabaseClient.from('profiles').select('id,name,phone,role,status,created_at,updated_at,email,email_verified').eq('id', user.id).single();
                     if (error) throw error;
                     return { ...data, email: data.email || user.email || '', registeredAt: data.created_at };
                 },
@@ -926,16 +927,31 @@
                             data = { user: profile };
                         } else if (action === 'AUTH_REGISTER') {
                             const { data: auth, error } = await supabaseClient.auth.signUp({
-                                email: payload.email, password: payload.password,
-                                options: { data: { name: payload.name, phone: payload.phone } }
+                                email: payload.email,
+                                password: payload.password,
+                                options: {
+                                    data: { name: payload.name, phone: payload.phone },
+                                    emailRedirectTo: 'https://studihome.id/'
+                                }
                             });
                             if (error) throw error;
-                            if (!auth.session) {
-                                data = { requiresEmailConfirmation: true, user: auth.user };
-                            } else {
-                                data = { user: await App.api._profile() };
+                            if (!auth.user) throw new Error('Akun belum berhasil dibuat.');
+
+                            let verificationSent = false;
+                            if (auth.session) {
+                                try {
+                                    const { error: sendError } = await supabaseClient.functions.invoke('send-email-verification', { body: {} });
+                                    verificationSent = !sendError;
+                                } catch (_) {}
+                                await supabaseClient.auth.signOut().catch(() => {});
                             }
-                        } else if (action === 'AUTH_LOGOUT') {
+
+                            data = {
+                                requiresEmailConfirmation: false,
+                                verificationSent,
+                                user: auth.user
+                            };
+} else if (action === 'AUTH_LOGOUT') {
                             const { error } = await supabaseClient.auth.signOut();
                             if (error) throw error;
                             data = { success: true };
@@ -1123,33 +1139,24 @@
                     const password = document.getElementById('reg-password').value;
 
                     if (!phone || phone.trim() === '') {
-                        App.ui.toast('WhatsApp wajib diisi!', 'error');
+                        App.ui.toast('Nomor WhatsApp wajib diisi, ya.', 'error');
                         return;
                     }
 
                     try {
                         const res = await App.api.post('AUTH_REGISTER', { name, email, phone, password });
-                        if (res.requiresEmailConfirmation) {
-                            App.ui.toggleModal('auth-modal', false);
-                            App.ui.toast('Akun dibuat. Silakan cek email untuk konfirmasi sebelum masuk.', 'success');
-                            return;
-                        }
-                        const userData = res.user || res;
-                        App.state.user = userData;
-                        App.state.memberData = await App.api.post('GET_MEMBER_DASHBOARD');
-                        App.ui.renderTopAuth();
-                        App.ui.toggleModal('auth-modal', false);
-                        App.ui.toast('Akun berhasil dibuat!', 'success');
 
-                        if (App.state.pendingCheckoutProductId) {
-                            const pId = App.state.pendingCheckoutProductId;
-                            App.state.pendingCheckoutProductId = null;
-                            App.shop.startCheckout(pId);
+                        App.auth.toggleAuthMode('login');
+                        const loginEmail = document.getElementById('login-email');
+                        if (loginEmail) loginEmail.value = email;
+
+                        if (res.verificationSent) {
+                            App.ui.toast('Akunmu sudah siap. Email verifikasi sudah dikirim. Sekarang masuk untuk lanjut.', 'success');
                         } else {
-                            App.router.navigate('dashboard');
+                            App.ui.toast('Akunmu sudah siap. Sekarang masuk untuk lanjut, ya.', 'success');
                         }
                     } catch (err) {
-                        App.ui.toast(err.message || "Gagal mendaftar.", "error");
+                        App.ui.toast(err.message || 'Pendaftaran belum berhasil. Coba cek datanya lalu ulangi lagi, ya.', 'error');
                     }
                 },
 
@@ -1608,9 +1615,15 @@
                                     <h3 class="font-bold text-[#151c75] text-base sm:text-lg">${App.utils.escapeHtml(App.state.user.name)}</h3>
                                     <p class="text-xs text-slate-500">${App.utils.escapeHtml(App.state.user.email)} | WA: ${App.utils.escapeHtml(App.state.user.phone || '-')}</p>
                                     <div class="flex items-center gap-2 mt-1.5 flex-wrap">
-                                        <span class="px-2.5 py-0.5 rounded-lg text-[10px] font-extrabold bg-blue-50 text-[#151c75] border border-blue-200">
-                                            Member Terverifikasi
-                                        </span>
+                                        ${App.state.user.email_verified ? `
+                                            <span class="px-2.5 py-0.5 rounded-lg text-[10px] font-extrabold bg-emerald-50 text-emerald-700 border border-emerald-200">
+                                                Member Terverifikasi
+                                            </span>
+                                        ` : `
+                                            <span class="px-2.5 py-0.5 rounded-lg text-[10px] font-extrabold bg-amber-50 text-amber-700 border border-amber-200">
+                                                Belum Verifikasi Email
+                                            </span>
+                                        `}
                                         <span class="px-2 py-0.5 rounded-lg text-[10px] font-mono font-bold bg-slate-100 text-slate-600">
                                             ID: ${App.state.user.token || 'u-882103'}
                                         </span>
@@ -1622,6 +1635,23 @@
                                 <span class="font-bold text-slate-800">${App.state.user.registeredAt || '2026-08-10'}</span>
                             </div>
                         </div>
+
+                        ${!App.state.user.email_verified ? `
+                            <div class="card-3d-inset p-4 sm:p-5 rounded-2xl mb-6 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 bg-white">
+                                <div class="flex items-start gap-3">
+                                    <div class="w-10 h-10 rounded-2xl bg-amber-50 border border-amber-200 flex items-center justify-center shrink-0">
+                                        <i class="fa-solid fa-envelope text-amber-600"></i>
+                                    </div>
+                                    <div>
+                                        <div class="text-xs font-extrabold text-[#151c75]">Email belum diverifikasi</div>
+                                        <div class="text-[11px] sm:text-xs text-slate-600 mt-0.5 leading-relaxed">Cek kotak masuk atau folder spam. Setelah diverifikasi, status akunmu akan berubah menjadi Member Terverifikasi.</div>
+                                    </div>
+                                </div>
+                                <button onclick="App.auth.sendVerificationEmail()" class="btn-brand-gradient px-3.5 py-2 rounded-xl text-[11px] font-bold flex items-center gap-1.5 shrink-0">
+                                    <i class="fa-solid fa-paper-plane text-[#FACC15]"></i> Kirim Email Verifikasi
+                                </button>
+                            </div>
+                        ` : ''}
 
                         <div>
                             <h2 class="text-base sm:text-lg font-bold text-[#151c75] mb-4">Modul & Produk Saya</h2>
@@ -2377,14 +2407,26 @@
                                 <label class="block text-[10px] font-bold text-slate-600 mb-1">URL Download File Asset</label>
                                 <input type="url" id="m-dl" value="${App.utils.escapeHtml(m.download_url)}" placeholder="https://..." class="w-full card-3d-inset px-3 py-2 rounded-xl text-xs">
                             </div>
-                            <div class="grid grid-cols-2 gap-2">
-                                <div>
-                                    <label class="block text-[10px] font-bold text-slate-600 mb-1">Label Link Kustom 1</label>
-                                    <input type="text" id="m-link-label" value="${App.utils.escapeHtml(m.links?.[0]?.label || '')}" placeholder="Label Link (mis. Sheet)" class="w-full card-3d-inset px-3 py-2 rounded-xl text-xs">
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-2">
+                                <div class="grid grid-cols-2 gap-2">
+                                    <div>
+                                        <label class="block text-[10px] font-bold text-slate-600 mb-1">Nama Label Link Kustom 1</label>
+                                        <input type="text" id="m-link-label-1" value="${App.utils.escapeHtml(m.links?.[0]?.label || '')}" placeholder="Contoh: Template" class="w-full card-3d-inset px-3 py-2 rounded-xl text-xs">
+                                    </div>
+                                    <div>
+                                        <label class="block text-[10px] font-bold text-slate-600 mb-1">URL Link Kustom 1</label>
+                                        <input type="url" id="m-link-url-1" value="${App.utils.escapeHtml(m.links?.[0]?.url || '')}" placeholder="https://..." class="w-full card-3d-inset px-3 py-2 rounded-xl text-xs">
+                                    </div>
                                 </div>
-                                <div>
-                                    <label class="block text-[10px] font-bold text-slate-600 mb-1">URL Link Kustom 1</label>
-                                    <input type="url" id="m-link-url" value="${App.utils.escapeHtml(m.links?.[0]?.url || '')}" placeholder="https://..." class="w-full card-3d-inset px-3 py-2 rounded-xl text-xs">
+                                <div class="grid grid-cols-2 gap-2">
+                                    <div>
+                                        <label class="block text-[10px] font-bold text-slate-600 mb-1">Nama Label Link Kustom 2</label>
+                                        <input type="text" id="m-link-label-2" value="${App.utils.escapeHtml(m.links?.[1]?.label || '')}" placeholder="Contoh: Materi" class="w-full card-3d-inset px-3 py-2 rounded-xl text-xs">
+                                    </div>
+                                    <div>
+                                        <label class="block text-[10px] font-bold text-slate-600 mb-1">URL Link Kustom 2</label>
+                                        <input type="url" id="m-link-url-2" value="${App.utils.escapeHtml(m.links?.[1]?.url || '')}" placeholder="https://..." class="w-full card-3d-inset px-3 py-2 rounded-xl text-xs">
+                                    </div>
                                 </div>
                             </div>
                             <div class="flex items-center gap-2 pt-2">
@@ -2397,9 +2439,13 @@
 
                 saveModule: async (e, productId, editModuleId = '') => {
                     e.preventDefault();
-                    const linkLabel = document.getElementById('m-link-label').value;
-                    const linkUrl = document.getElementById('m-link-url').value;
-                    const links = (linkLabel && linkUrl) ? [{ label: linkLabel, url: linkUrl }] : [];
+                    const linkLabel1 = document.getElementById('m-link-label-1')?.value.trim() || '';
+                    const linkUrl1 = document.getElementById('m-link-url-1')?.value.trim() || '';
+                    const linkLabel2 = document.getElementById('m-link-label-2')?.value.trim() || '';
+                    const linkUrl2 = document.getElementById('m-link-url-2')?.value.trim() || '';
+                    const links = [];
+                    if (linkLabel1 && linkUrl1) links.push({ label: linkLabel1, url: linkUrl1 });
+                    if (linkLabel2 && linkUrl2) links.push({ label: linkLabel2, url: linkUrl2 });
 
                     const moduleData = {
                         id: editModuleId || undefined,
