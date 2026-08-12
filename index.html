@@ -274,6 +274,58 @@
             .module-media-frame { min-height: 42vh; }
         }
 
+        /* Floating notice: dynamic width + testimonial-style tail */
+        .toast-bubble {
+            position: relative;
+            width: fit-content;
+            max-width: min(34rem, calc(100vw - 1.5rem));
+        }
+        .toast-bubble::after {
+            content: "";
+            position: absolute;
+            left: 22px;
+            bottom: -9px;
+            width: 0;
+            height: 0;
+            border-top: 12px solid #ffffff;
+            border-right: 12px solid transparent;
+            filter: drop-shadow(2px 3px 2px rgba(15,23,42,.10));
+        }
+        @media (max-width: 640px) {
+            .toast-bubble {
+                max-width: calc(100vw - 1.5rem);
+            }
+        }
+
+        /* Server status hover tooltip */
+        .server-status-tooltip {
+            position: relative;
+        }
+        .server-status-tooltip::after {
+            content: attr(data-tooltip);
+            position: absolute;
+            right: 0;
+            top: calc(100% + 8px);
+            background: rgba(15,23,42,.95);
+            color: #fff;
+            font-size: 10px;
+            font-weight: 700;
+            white-space: nowrap;
+            padding: 6px 9px;
+            border-radius: 9px;
+            box-shadow: 0 8px 20px rgba(15,23,42,.16);
+            opacity: 0;
+            pointer-events: none;
+            transform: translateY(-3px);
+            transition: opacity .18s ease, transform .18s ease;
+            z-index: 100;
+        }
+        .server-status-tooltip:hover::after,
+        .server-status-tooltip:focus-visible::after {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
         /* Custom Scrollbar */
         ::-webkit-scrollbar {
             width: 6px;
@@ -317,7 +369,7 @@
                 </div>
 
                 <!-- Server Connection Status Badge -->
-                <div id="api-status-badge" class="hidden sm:flex items-center justify-center w-9 h-9 rounded-xl bg-white/95 border border-blue-100 shadow-2xs cursor-help" title="Status koneksi Studihome ke Supabase" aria-label="Status koneksi Studihome ke Supabase">
+                <div id="api-status-badge" class="hidden sm:flex items-center justify-center w-9 h-9 rounded-xl bg-white/95 border border-blue-100 shadow-2xs cursor-help server-status-tooltip" data-tooltip="Status koneksi Studihome" aria-label="Status koneksi Studihome">
                     <i id="api-status-icon" class="fa-regular fa-clock text-sky-500 text-sm" aria-hidden="true"></i>
                 </div>
                 
@@ -613,8 +665,16 @@ const App = {
                 demo: {
                     hero: {},
                     aiLinks: [],
-                    testimonials: [],
-                    products: [],
+                    testimonials: [
+                        { id: 'demo-t1', name: 'Dr. Raka Prasetyo', role: 'Dosen Perguruan Tinggi', text: 'Template dan alur kerja AI Studihome membantu saya menyiapkan bahan ajar dan materi kuliah jauh lebih rapi dan cepat.' },
+                        { id: 'demo-t2', name: 'Novi Lestari', role: 'Guru SD', text: 'Saya paling suka karena prompt-nya praktis. Tinggal sesuaikan kebutuhan kelas, lalu langsung bisa dipakai.' },
+                        { id: 'demo-t3', name: 'Ayu Maharani', role: 'Pemilik UMKM', text: 'Ide konten, pencatatan dan workflow usaha jadi lebih terarah. Cocok buat yang ingin mulai pakai AI tanpa ribet.' }
+                    ],
+                    products: [
+                        { id: 'demo-p10', title: 'AI Dosen & Akademik Pro', desc: 'Paket prompt dan template AI untuk bahan ajar, riset, administrasi, dan aktivitas akademik.', price: 169000, priceOriginal: 299000, isFree: false, imgUrl: 'https://images.unsplash.com/photo-1523240795612-9a054b0db644?auto=format&fit=crop&w=600&q=80', features: 'Prompt Bahan Ajar & RPS\nTemplate Riset & Ringkasan Jurnal\nAdministrasi Akademik\nGenerator Materi Presentasi', category: 'Guru & Pendidikan', badge: 'BARU' },
+                        { id: 'demo-p11', title: 'AI Guru Produktif Pack', desc: 'Koleksi workflow dan prompt untuk perangkat ajar, asesmen, konten kelas, dan administrasi guru.', price: 119000, priceOriginal: 219000, isFree: false, imgUrl: 'https://images.unsplash.com/photo-1509062522246-3755977927d7?auto=format&fit=crop&w=600&q=80', features: 'Prompt Modul Ajar\nBank Soal & Asesmen\nKonten Kelas\nChecklist Administrasi', category: 'Guru & Pendidikan', badge: 'POPULER' },
+                        { id: 'demo-p12', title: 'AI UMKM Sales & Content Kit', desc: 'Paket praktis untuk konten jualan, follow-up pelanggan, promosi, dan otomasi kerja UMKM.', price: 109000, priceOriginal: 199000, isFree: false, imgUrl: 'https://images.unsplash.com/photo-1556761175-b413da4baf72?auto=format&fit=crop&w=600&q=80', features: 'Prompt Konten Jualan\nFollow-up Pelanggan\nCalendar Konten\nWorkflow Promosi', category: 'Digital Marketing', badge: 'REKOMENDASI' },
+                    ],
                     orders: [],
                     users: [],
                     modules: {},
@@ -805,13 +865,15 @@ const App = {
                     const icon = document.getElementById('api-status-icon');
                     if (!badge || !icon) return;
 
-                    badge.title = status === 'online'
+                    const tooltip = status === 'online'
                         ? 'Terhubung — Supabase aktif'
                         : status === 'connecting'
                             ? 'Sedang menghubungkan ke Supabase'
                             : status === 'error'
                                 ? 'Koneksi ke Supabase bermasalah'
                                 : 'Status koneksi Studihome';
+                    badge.title = tooltip;
+                    badge.dataset.tooltip = tooltip;
 
                     if (status === 'online') {
                         icon.className = 'fa-regular fa-clock text-emerald-500 text-sm';
@@ -1401,8 +1463,8 @@ const App = {
                                     <span class="text-[10px] font-semibold text-amber-600 block">${App.utils.escapeHtml(t.role)}</span>
                                 </div>
                             </div>
-                            <span class="text-[9px] sm:text-[10px] text-emerald-600 font-extrabold bg-emerald-50 px-2 py-0.5 rounded-lg border border-emerald-100 flex items-center gap-1">
-                                <i class="fa-solid fa-circle-check"></i> Verified
+                            <span class="text-[9px] sm:text-[10px] ${/draft/i.test(String(t.role || '')) ? 'text-slate-600 bg-slate-100 border-slate-200' : 'text-emerald-600 bg-emerald-50 border-emerald-100'} font-extrabold px-2 py-0.5 rounded-lg border flex items-center gap-1">
+                                <i class="fa-solid ${/draft/i.test(String(t.role || '')) ? 'fa-circle-info' : 'fa-circle-check'}"></i> ${/draft/i.test(String(t.role || '')) ? 'Contoh' : 'Verified'}
                             </span>
                         </div>
                     `;
