@@ -4,12 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Studihome - Platform Pembelajaran Digital & Otomasi AI</title>
-     <meta name="google-site-verification" content="p1hKfmYu1aRIYgy_JUzcCrax8bZ_js5aASJkD5cxSSY" />
-    <!-- Static SVG Retina Blue Favicon (100% Size) -->
-<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'>
-    <style>.star { fill: %231b5df0; font-size: 100px; text-anchor: middle; dominant-baseline: central; font-family: sans-serif; font-weight: bold; }</style>
-    <text x='50' y='50' class='star'>✦</text></svg>">
-
+    
     <!-- SEO & Open Graph Meta Tags -->
     <meta name="description" content="Platform Produk Digital & Otomasi AI #1 Indonesia. Tingkatkan efisiensi kerja hingga 10x lipat dengan modul & template AI interaktif.">
     <meta property="og:title" content="Studihome - Platform Pembelajaran Digital & Otomasi AI">
@@ -374,16 +369,36 @@
         </div>
     </div>
 
+    <!-- Supabase client + public project configuration -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="./supabase-config.js"></script>
     <script>
-        // SUPABASE CONFIGURATION — isi dua nilai ini dari Supabase > Project Settings > API
-        const SUPABASE_URL = window.STUDIHOME_SUPABASE_URL;
-        const SUPABASE_ANON_KEY = window.STUDIHOME_SUPABASE_ANON_KEY;
+        // Supabase configuration is loaded from supabase-config.js.
+        // Only the public/publishable key belongs in the frontend.
+        const SUPABASE_URL = window.STUDIHOME_SUPABASE_URL || '';
+        const SUPABASE_ANON_KEY = window.STUDIHOME_SUPABASE_ANON_KEY || '';
 
-        const supabaseClient = window.supabase.createClient(
-    SUPABASE_URL,
-    SUPABASE_ANON_KEY
-);;
+        let supabaseClient = null;
+
+        function initSupabase() {
+            if (!window.supabase || typeof window.supabase.createClient !== 'function') {
+                throw new Error('Library Supabase belum berhasil dimuat.');
+            }
+            if (!SUPABASE_URL || !SUPABASE_ANON_KEY) {
+                throw new Error('Konfigurasi Supabase belum tersedia. Pastikan supabase-config.js ada di repository.');
+            }
+            if (!/^https:\/\//i.test(SUPABASE_URL)) {
+                throw new Error('SUPABASE_URL tidak valid.');
+            }
+            supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
+                auth: {
+                    persistSession: true,
+                    autoRefreshToken: true,
+                    detectSessionInUrl: true
+                }
+            });
+            return supabaseClient;
+        }
 
         // Supabase configuration is defined above. Google Apps Script is not used.
 
@@ -521,7 +536,9 @@
                 setInterval(App.utils.updateClock, 1000);
                 App.utils.updateClock();
                 try {
+                    initSupabase();
                     App.api._requireConfig();
+                    App.ui.updateApiStatus('connecting');
                     const { data: { session } } = await supabaseClient.auth.getSession();
                     if (session?.user) {
                         try {
