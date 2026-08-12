@@ -16,6 +16,16 @@
     <meta name="language" content="id-ID">
     <meta name="theme-color" content="#151c75">
     <meta name="format-detection" content="telephone=no">
+    <meta name="googlebot" content="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1">
+    <meta name="keywords" content="Studihome, produk digital Indonesia, modul pembelajaran, prompt AI, template AI, otomasi AI, tools AI, administrasi guru, KOSP AI, digital marketing, UMKM, automation AI">
+    <meta name="referrer" content="strict-origin-when-cross-origin">
+    <meta name="application-name" content="Studihome">
+    <meta name="apple-mobile-web-app-title" content="Studihome">
+    <meta name="googlebot" content="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1">
+    <meta name="keywords" content="produk digital, modul pembelajaran, prompt AI, template AI, otomasi AI, tools AI, materi guru, administrasi guru, KOSP AI, digital marketing, UMKM, Studihome">
+    <meta name="referrer" content="strict-origin-when-cross-origin">
+    <meta property="og:type" content="website">
+    <meta property="og:see_also" content="https://studihome.id/">
     <link rel="canonical" href="https://studihome.id/">
 
     <!-- Open Graph -->
@@ -23,13 +33,14 @@
     <meta property="og:site_name" content="Studihome">
     <meta property="og:title" content="Studihome | Produk Digital, Modul Pembelajaran & Otomasi AI">
     <meta property="og:description" content="Produk digital, modul pembelajaran, prompt AI, template, dan otomasi praktis untuk meningkatkan produktivitas dan efisiensi kerja.">
-    <meta property="og:type" content="website">
+    
     <meta property="og:url" content="https://studihome.id/">
 
     <!-- Twitter / X -->
     <meta name="twitter:card" content="summary">
     <meta name="twitter:title" content="Studihome | Produk Digital & Otomasi AI">
     <meta name="twitter:description" content="Produk digital, modul, prompt AI, template, dan otomasi praktis untuk Indonesia.">
+    <meta name="twitter:url" content="https://studihome.id/">
 
     <!-- Structured data: organization + website -->
     <script type="application/ld+json" id="studihome-schema">
@@ -1389,7 +1400,7 @@
                     let actionBtnHTML = '';
                     if (status === 'OWNED') {
                         actionBtnHTML = `
-                            <button onclick="App.dashboard.openModulePlayer('${p.id}')" class="bg-emerald-600 hover:bg-emerald-700 text-white px-3.5 py-2 rounded-xl text-xs font-extrabold flex items-center gap-1.5 shadow-2xs">
+                            <button onclick="App.router.navigate('dashboard')" class="bg-emerald-600 hover:bg-emerald-700 text-white px-3.5 py-2 rounded-xl text-xs font-extrabold flex items-center gap-1.5 shadow-2xs">
                                 <i class="fa-solid fa-play text-[10px]"></i> Akses
                             </button>
                         `;
@@ -1425,8 +1436,8 @@
                                     </span>
                                 </div>
 
-                                <h3 onclick="App.products.openDetailModal('${p.id}')" class="font-extrabold text-sm sm:text-base text-[#151c75] mb-1.5 leading-snug cursor-pointer hover:text-[#3f48bf] transition-colors">
-                                    ${App.utils.escapeHtml(p.title)}
+                                <h3 class="font-extrabold text-sm sm:text-base text-[#151c75] mb-1.5 leading-snug">
+                                    <a href="?product=${encodeURIComponent(p.id)}" onclick="event.preventDefault(); App.products.openDetailModal('${p.id}')" class="hover:text-[#3f48bf] transition-colors">${App.utils.escapeHtml(p.title)}</a>
                                 </h3>
 
                                 <p class="text-xs text-slate-600 mb-3.5 line-clamp-2 leading-relaxed">${App.utils.escapeHtml(p.desc)}</p>
@@ -1460,9 +1471,9 @@
                                     
                                     <div class="flex items-center gap-1.5">
                                         <!-- Clean Info Icon without border -->
-                                        <button onclick="App.products.openDetailModal('${p.id}')" aria-label="Detail Produk" title="Detail Produk" class="text-[#151c75] hover:text-[#3f48bf] p-1.5 transition-colors shrink-0">
+                                        <a href="?product=${encodeURIComponent(p.id)}" onclick="event.preventDefault(); App.products.openDetailModal('${p.id}')" aria-label="Detail Produk" title="Detail Produk" class="text-[#151c75] hover:text-[#3f48bf] p-1.5 transition-colors shrink-0">
                                             <i class="fa-solid fa-circle-info text-lg"></i>
-                                        </button>
+                                        </a>
                                         ${actionBtnHTML}
                                     </div>
                                 </div>
@@ -1600,9 +1611,9 @@
                                     ? 'MENUNGGU VERIFIKASI ADMIN'
                                     : 'DITOLAK';
                             const description = isPending
-                                ? 'Silakan lanjutkan pembayaran melalui QRIS. Setelah pembayaran, tekan tombol konfirmasi agar Admin dapat melakukan verifikasi.'
+                                ? 'Proses Verifikasi lebih cepat dengan melakukan Konfirmasi.'
                                 : isReview
-                                    ? 'Konfirmasi pembayaran sudah diterima. Order sedang diperiksa Admin. Modul tetap terkunci sampai pembayaran disetujui.'
+                                    ? 'Proses Verifikasi lebih cepat dengan melakukan Konfirmasi. Order sedang diperiksa Admin.'
                                     : 'Transaksi ini ditolak oleh Admin. Silakan hubungi Bantuan jika ada kendala.';
 
                             html += `
@@ -1790,17 +1801,21 @@
                                                         <td class="py-3 px-2 font-bold text-[#151c75]">Rp ${Number(o.price).toLocaleString('id-ID')}</td>
                                                         <td class="py-3 px-2">
                                                             <span class="px-2 py-0.5 rounded-md text-[10px] font-extrabold ${
-                                                                o.status === 'VERIFIED' ? 'bg-emerald-100 text-emerald-800' : o.status === 'REJECTED' ? 'bg-red-100 text-red-800' : 'bg-amber-100 text-amber-800'
-                                                            }">${o.status === 'VERIFIED' ? 'TERBUKA' : o.status === 'REJECTED' ? 'TERKUNCI' : 'MENUNGGU'}</span>
+                                                                o.status === 'VERIFIED' ? 'bg-emerald-100 text-emerald-800' : o.status === 'REJECTED' ? 'bg-red-100 text-red-800' : o.status === 'PAYMENT_REVIEW' ? 'bg-blue-100 text-blue-800' : 'bg-amber-100 text-amber-800'
+                                                            }">${o.status === 'VERIFIED' ? 'TERBUKA' : o.status === 'REJECTED' ? 'DITOLAK' : o.status === 'PAYMENT_REVIEW' ? 'VERIFIKASI' : 'MENUNGGU'}</span>
                                                         </td>
                                                         <td class="py-3 px-2">
                                                             <div class="flex gap-1.5 flex-wrap">
-                                                                <button ${o.status !== 'PAYMENT_REVIEW' ? 'disabled title="Menunggu konfirmasi pembayaran member"' : ''} onclick="App.admin.verifyOrder('${o.id}')" class="px-2.5 py-1 rounded-lg text-[10px] font-bold text-emerald-700 bg-emerald-50 border border-emerald-200 ${o.status !== 'PAYMENT_REVIEW' ? 'opacity-50 cursor-not-allowed' : 'hover:bg-emerald-100'} flex items-center gap-1">
-                                                                    <i class="fa-solid fa-lock-open"></i> Buka Akses
-                                                                </button>
-                                                                <button ${o.status !== 'PAYMENT_REVIEW' ? 'disabled title="Tunggu sampai member mengonfirmasi pembayaran"' : ''} onclick="App.admin.rejectOrder('${o.id}')" class="px-2.5 py-1 rounded-lg text-[10px] font-bold text-red-700 bg-red-50 border border-red-200 ${o.status !== 'PAYMENT_REVIEW' ? 'opacity-50 cursor-not-allowed' : 'hover:bg-red-100'} flex items-center gap-1">
-                                                                    <i class="fa-solid fa-xmark"></i> Tolak
-                                                                </button>
+                                                                ${o.status === 'PAYMENT_REVIEW' ? `
+                                                                    <button onclick="App.admin.verifyOrder('${o.id}')" class="px-2.5 py-1 rounded-lg text-[10px] font-bold text-emerald-700 bg-emerald-50 border border-emerald-200 hover:bg-emerald-100 flex items-center gap-1">
+                                                                        <i class="fa-solid fa-lock-open"></i> Buka Akses
+                                                                    </button>
+                                                                    <button onclick="App.admin.rejectOrder('${o.id}')" class="px-2.5 py-1 rounded-lg text-[10px] font-bold text-red-700 bg-red-50 border border-red-200 hover:bg-red-100 flex items-center gap-1">
+                                                                        <i class="fa-solid fa-xmark"></i> Tolak
+                                                                    </button>
+                                                                ` : `
+                                                                    <span class="text-[10px] font-bold text-slate-500 bg-slate-50 border border-slate-200 px-2.5 py-1 rounded-lg">Member belum Konfirmasi</span>
+                                                                `}
                                                             </div>
                                                         </td>
                                                     </tr>
@@ -2062,7 +2077,7 @@
                 verifyOrder: async (orderId) => {
                     const order = (App.state.demo.orders || []).find(o => o.id === orderId);
                     if (order && order.status !== 'PAYMENT_REVIEW') {
-                        App.ui.toast('Order belum dapat dibuka. Tunggu member melakukan konfirmasi pembayaran.', 'info');
+                        App.ui.toast('Order belum dapat dibuka. Member harus melakukan Konfirmasi terlebih dahulu.', 'info');
                         return;
                     }
                     if (!confirm('Buka akses produk untuk order ini?')) return;
@@ -2078,16 +2093,16 @@
                 rejectOrder: async (orderId) => {
                     const order = (App.state.demo.orders || []).find(o => o.id === orderId);
                     if (order && order.status !== 'PAYMENT_REVIEW') {
-                        App.ui.toast('Order belum dapat ditolak. Tunggu member melakukan konfirmasi pembayaran.', 'info');
+                        App.ui.toast('Order belum dapat ditolak. Member harus melakukan Konfirmasi terlebih dahulu.', 'info');
                         return;
                     }
-                    if (!confirm('Tolak order ini? Akses produk tidak akan diberikan.')) return;
+                    if (!confirm('Tolak order ini? Produk tidak akan dibuka.')) return;
                     try {
                         await App.api.post('ADMIN_REJECT_ORDER', { orderId });
                         App.ui.toast(`Order ${orderId} ditolak.`, 'info');
                         App.admin.render();
                     } catch (e) {
-                        App.ui.toast('Gagal menolak order: ' + e.message, 'error');
+                        App.ui.toast('Tolak order gagal: ' + e.message, 'error');
                     }
                 },
 
@@ -2732,7 +2747,7 @@
                 openWhatsAppConfirmation: (waUrl) => {
                     if (waUrl) window.open(waUrl, '_blank', 'noopener,noreferrer');
                     App.ui.toggleModal('checkout-modal', false);
-                    App.ui.toast('Konfirmasi pembayaran tersimpan. Order menunggu verifikasi Admin.', 'success');
+                    App.ui.toast('Konfirmasi pembayaran tersimpan. Proses Verifikasi sedang berlangsung.', 'success');
                     App.router.navigate('dashboard');
                 }
             },
@@ -2758,6 +2773,13 @@
                             'url': 'https://studihome.id/?product=' + encodeURIComponent(p.id)
                         }))
                     };
+                    const collectionPage = {
+                        '@type': 'CollectionPage',
+                        'name': 'Produk Digital Studihome',
+                        'url': 'https://studihome.id/#products',
+                        'inLanguage': 'id-ID',
+                        'mainEntity': itemList
+                    };
                     const productGraph = safeProducts.slice(0, 20).map(p => ({
                         '@type': 'Product',
                         'name': p.title,
@@ -2773,7 +2795,7 @@
                     }));
                     const payload = {
                         '@context': 'https://schema.org',
-                        '@graph': [itemList, ...productGraph].map(x => {
+                        '@graph': [collectionPage, itemList, ...productGraph].map(x => {
                             if (x && x.image === undefined) delete x.image;
                             return x;
                         })
