@@ -1087,6 +1087,55 @@
             },
 
             auth: {
+                handleEmailVerificationFromUrl: async () => {
+                    const params = new URLSearchParams(window.location.search);
+                    const token = params.get('verify_email');
+                    if (!token) return false;
+
+                    try {
+                        App.ui.updateApiStatus('connecting');
+                        const { data, error } = await supabaseClient.rpc('consume_email_verification_token', { p_token: token });
+                        if (error) throw error;
+
+                        const url = new URL(window.location.href);
+                        url.searchParams.delete('verify_email');
+                        window.history.replaceState({}, document.title, url.pathname + url.search + url.hash);
+
+                        App.ui.updateApiStatus('online');
+                        App.ui.toast('Emailmu sudah terverifikasi. Mantap, akunmu sekarang Member Terverifikasi! ✨', 'success');
+                        return !!data?.verified;
+                    } catch (error) {
+                        App.ui.updateApiStatus('error');
+                        App.ui.toast('Tautan verifikasi sudah tidak berlaku atau sudah digunakan. Coba kirim email verifikasi baru dari Dashboard, ya.', 'error');
+                        return false;
+                    }
+                },
+
+                sendVerificationEmail: async () => {
+                    try {
+                        App.ui.updateApiStatus('connecting');
+                        const { data, error } = await supabaseClient.functions.invoke('send-email-verification', { body: {} });
+                        if (error) throw error;
+                        if (!data?.success && !data?.alreadyVerified) {
+                            throw new Error(data?.message || 'Email verifikasi belum berhasil dikirim.');
+                        }
+
+                        if (data?.alreadyVerified) {
+                            App.ui.toast('Emailmu sudah terverifikasi. Semuanya aman ✅', 'success');
+                        } else {
+                            App.ui.toast('Email verifikasi sudah dikirim. Cek inbox atau folder spam, ya. 📩', 'success');
+                        }
+
+                        App.ui.updateApiStatus('online');
+                        return data;
+                    } catch (error) {
+                        App.ui.updateApiStatus('error');
+                        const message = error?.message || 'Email verifikasi belum berhasil dikirim.';
+                        App.ui.toast(message, 'error');
+                        throw error;
+                    }
+                },
+
                 toggleAuthMode: (mode) => {
                     const lForm = document.getElementById('login-form');
                     const rForm = document.getElementById('register-form');
