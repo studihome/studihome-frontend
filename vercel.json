@@ -1,6 +1,47 @@
 {
+  "$schema": "https://openapi.vercel.sh/vercel.json",
   "cleanUrls": true,
   "trailingSlash": false,
+
+  "rewrites": [
+    {
+      "source": "/studio-ai",
+      "destination": "/index"
+    },
+    {
+      "source": "/ai-video",
+      "destination": "/index"
+    },
+    {
+      "source": "/ai-automation",
+      "destination": "/index"
+    },
+    {
+      "source": "/ai-content",
+      "destination": "/index"
+    },
+    {
+      "source": "/ai-untuk-guru",
+      "destination": "/index"
+    },
+    {
+      "source": "/ai-untuk-umkm",
+      "destination": "/index"
+    },
+    {
+      "source": "/creator-studio",
+      "destination": "/index"
+    },
+    {
+      "source": "/:username/portfolio/:slug*",
+      "destination": "/index"
+    },
+    {
+      "source": "/:username",
+      "destination": "/index"
+    }
+  ],
+
   "headers": [
     {
       "source": "/(.*)",
@@ -34,41 +75,3 @@
     }
   ]
 }
-
-{
-  "cleanUrls": true,
-  "trailingSlash": false,
-  "headers": [
-    {
-      "source": "/(.*)",
-      "headers": [
-        {
-          "key": "X-Content-Type-Options",
-          "value": "nosniff"
-        },
-        {
-          "key": "X-Frame-Options",
-          "value": "DENY"
-        },
-        {
-          "key": "X-XSS-Protection",
-          "value": "1; mode=block"
-        },
-        {
-          "key": "Referrer-Policy",
-          "value": "strict-origin-when-cross-origin"
-        }
-      ]
-    },
-    {
-      "source": "/index.html",
-      "headers": [
-        {
-          "key": "Cache-Control",
-          "value": "public, max-age=0, must-revalidate"
-        }
-      ]
-    }
-  ]
-}
-
