@@ -279,21 +279,86 @@
             width: fit-content;
             max-width: min(34rem, calc(100vw - 1.5rem));
         }
+        /* Step 17 — premium floating notice: no hard square tail */
         .toast-bubble::after {
-            content: "";
-            position: absolute;
-            left: 22px;
-            bottom: -9px;
-            width: 0;
-            height: 0;
-            border-top: 12px solid #ffffff;
-            border-right: 12px solid transparent;
-            filter: drop-shadow(2px 3px 2px rgba(15,23,42,.10));
+            content: none !important;
+            display: none !important;
+        }
+        .toast-bubble {
+            border-radius: 1.35rem;
+            box-shadow: 0 24px 60px rgba(21,28,117,.17), 0 10px 24px rgba(15,23,42,.08);
         }
         @media (max-width: 640px) {
             .toast-bubble {
                 max-width: calc(100vw - 1.5rem);
             }
+        }
+
+        /* Step 16 — premium floating speech-bubble notices */
+        .toast-bubble {
+            width: fit-content;
+            max-width: min(36rem, calc(100vw - 1.25rem));
+            padding: .78rem .88rem .78rem .8rem;
+            border-radius: 1.25rem 1.25rem 1.25rem .55rem;
+            background: linear-gradient(180deg, rgba(255,255,255,.985), rgba(248,251,255,.975));
+            border: 1px solid rgba(199,216,255,.9);
+            box-shadow: 0 22px 55px rgba(21,28,117,.16), 0 10px 24px rgba(15,23,42,.10), inset 0 1px 0 rgba(255,255,255,.95);
+            backdrop-filter: blur(14px) saturate(1.05);
+            -webkit-backdrop-filter: blur(14px) saturate(1.05);
+            transform: translate3d(-10px,8px,0) scale(.975);
+            opacity: 0;
+            animation: toastBubbleIn16 .28s cubic-bezier(.22,.9,.3,1) forwards;
+            overflow: visible;
+        }
+        .toast-bubble::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 14px;
+            width: 3px;
+            height: calc(100% - 28px);
+            border-radius: 999px;
+            background: linear-gradient(180deg,#3f48bf,#151c75);
+            box-shadow: 0 0 12px rgba(63,72,191,.22);
+        }
+        .toast-bubble::after {
+            content: '';
+            position: absolute;
+            left: 20px;
+            bottom: -9px;
+            width: 18px;
+            height: 18px;
+            background: #f8fbff;
+            border-right: 1px solid rgba(199,216,255,.9);
+            border-bottom: 1px solid rgba(199,216,255,.9);
+            transform: rotate(45deg);
+            box-shadow: 6px 8px 10px rgba(15,23,42,.06);
+        }
+        .toast-bubble[data-type="success"]::before { background: linear-gradient(180deg,#10b981,#059669); }
+        .toast-bubble[data-type="error"]::before { background: linear-gradient(180deg,#fb7185,#e11d48); }
+        .toast-bubble[data-type="info"]::before { background: linear-gradient(180deg,#60a5fa,#3f48bf); }
+        .toast-bubble.toast-hide { animation: toastBubbleOut16 .22s ease-in forwards; }
+        @keyframes toastBubbleIn16 { to { opacity:1; transform:translate3d(0,0,0) scale(1); } }
+        @keyframes toastBubbleOut16 { to { opacity:0; transform:translate3d(-4px,5px,0) scale(.985); } }
+        .toast-bubble-close {
+            background: rgba(191,219,254,.65);
+            color: #151c75;
+            border: 1px solid rgba(147,197,253,.55);
+            transition: .18s ease;
+        }
+        .toast-bubble-close:hover { background: rgba(147,197,253,.9); transform: translateY(-1px); }
+        .toast-bubble-icon {
+            width: 2.5rem; height: 2.5rem; border-radius: 1rem; flex: 0 0 auto;
+            display:flex; align-items:center; justify-content:center;
+            background: linear-gradient(135deg,#eef5ff,#ffffff);
+            border: 1px solid #d8e6ff;
+            box-shadow: inset 0 1px 2px rgba(255,255,255,.95), 0 6px 14px rgba(21,28,117,.08);
+        }
+        .toast-bubble-kicker { font-size:9px; font-weight:900; letter-spacing:.12em; text-transform:uppercase; }
+        .toast-bubble-message { font-size:.75rem; line-height:1.55; font-weight:750; color:#334155; }
+        @media (min-width: 640px) { .toast-bubble-message { font-size:.82rem; } }
+        @media (prefers-reduced-motion: reduce) {
+            .toast-bubble { animation:none !important; transform:none; opacity:1; }
         }
 
         /* Server status hover tooltip */
@@ -350,6 +415,12 @@
             to { transform: rotate(360deg); }
         }
 
+
+        /* Step 23 — Creator Trust Controls */
+        .creator-trust-adjustment{border:1px solid #dbe7ff;background:linear-gradient(180deg,#fff 0%,#f8fbff 100%);box-shadow:0 8px 24px rgba(21,28,117,.07)}
+        .creator-trust-adjustment input,.creator-trust-adjustment textarea,.creator-trust-adjustment select{outline:none;transition:box-shadow .18s ease,border-color .18s ease}
+        .creator-trust-adjustment input:focus,.creator-trust-adjustment textarea:focus,.creator-trust-adjustment select:focus{border-color:#93c5fd;box-shadow:0 0 0 3px rgba(96,165,250,.18)}
+        .admin-trust-card .trust-meta{min-height:1.6rem}
 
         /* Studio AI Creator profile — additive only */
         .creator-profile-hero { position: relative; overflow: hidden; background: linear-gradient(135deg,#151c75 0%,#3f48bf 58%,#5363d6 100%); }
@@ -428,6 +499,87 @@
         }
 
 
+
+        /* Step 19 — unified room UX, scoped to new/additive areas only */
+        .studio-ai-hero, .creator-profile-hero, .room-workspace {
+            scroll-margin-top: 5.5rem;
+        }
+        .studio-ai-chip, .studio-ai-card a, .creator-service-card button, .creator-portfolio-card a, .room-workspace button {
+            min-height: 40px;
+        }
+        .studio-ai-chip {
+            touch-action: manipulation;
+            -webkit-user-select: none;
+            user-select: none;
+        }
+        .studio-ai-card, .creator-service-card, .creator-portfolio-card {
+            content-visibility: auto;
+            contain-intrinsic-size: 260px;
+        }
+        .studio-ai-card:focus-within, .creator-service-card:focus-within, .creator-portfolio-card:focus-within {
+            border-color: #bfdbfe;
+            box-shadow: 0 16px 34px rgba(21,28,117,.11);
+        }
+        .room-workspace input:focus-visible,
+        .room-workspace textarea:focus-visible,
+        .room-workspace select:focus-visible {
+            outline: 3px solid rgba(96,165,250,.28);
+            outline-offset: 2px;
+            border-color: #93c5fd !important;
+        }
+        @media (max-width: 767px) {
+            .studio-ai-chip { min-height: 44px; }
+            .studio-ai-card a, .room-workspace button { min-height: 44px; }
+        }
+        @media (prefers-reduced-motion: reduce) {
+            .studio-ai-card, .creator-service-card, .creator-portfolio-card {
+                content-visibility: visible;
+            }
+        }
+
+
+        /* Studio AI data readiness — additive only */
+        .studio-ai-empty {
+            background: radial-gradient(circle at 15% 10%, rgba(96,165,250,.12), transparent 30%), #fff;
+            border: 1px solid #dbe8ff;
+        }
+        .studio-ai-empty-icon {
+            width: 3.25rem; height: 3.25rem;
+            border-radius: 1.25rem;
+            display:flex; align-items:center; justify-content:center;
+            background: linear-gradient(135deg,#eff6ff,#ffffff);
+            border:1px solid #dbeafe;
+            box-shadow: 0 12px 26px rgba(21,28,117,.08);
+            color:#151c75;
+        }
+        .studio-ai-stat {
+            min-width: 5.75rem;
+            background: #f8fbff;
+            border: 1px solid #e5efff;
+            border-radius: 1rem;
+            padding: .65rem .8rem;
+            text-align:center;
+        }
+        .studio-ai-category-count {
+            color:#64748b;
+            font-size:10px;
+            font-weight:700;
+            margin-top:.2rem;
+        }
+
+        /* Step 21 creator moderation — additive only */
+        .creator-review-badge{display:inline-flex;align-items:center;gap:.4rem;padding:.35rem .65rem;border-radius:999px;font-size:10px;font-weight:800;border:1px solid #dbeafe;background:#eff6ff;color:#151c75}
+        .creator-review-panel{background:linear-gradient(135deg,#f8fbff,#fff);border:1px solid #dbeafe}
+        .creator-review-action{min-height:40px}
+        .admin-creator-card{transition:transform .18s ease,box-shadow .18s ease}
+        .admin-creator-card:hover{transform:translateY(-1px);box-shadow:0 10px 24px rgba(21,28,117,.08)}
+
+        /* Step 22 — Admin Creator trust controls, additive only */
+        .admin-trust-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:.7rem}
+        @media(max-width:767px){.admin-trust-grid{grid-template-columns:1fr}}
+        .admin-trust-card{background:#fff;border:1px solid #dfe7f5;border-radius:1.1rem;padding:.8rem;box-shadow:0 8px 22px rgba(21,28,117,.06)}
+        .admin-trust-card .metric{font-weight:900;color:#151c75}
+        .admin-trust-badge{display:inline-flex;align-items:center;gap:.35rem;padding:.28rem .52rem;border-radius:.65rem;font-size:10px;font-weight:800;background:#eff6ff;color:#151c75;border:1px solid #dbeafe}
         /* Custom Scrollbar */
         ::-webkit-scrollbar {
             width: 6px;
@@ -502,7 +654,7 @@
     </nav>
 
     <!-- TOAST NOTIFICATION CONTAINER -->
-    <div id="toast-container" class="fixed top-[4.75rem] sm:top-[4.9rem] left-3 sm:left-5 z-[80] flex flex-col items-start gap-3 pointer-events-none max-w-md w-[calc(100%-1.5rem)] sm:w-[34rem] px-0"></div>
+    <div id="toast-container" class="fixed top-[4.75rem] sm:top-[4.9rem] left-3 sm:left-5 z-[80] flex flex-col items-start gap-3 pointer-events-none max-w-lg w-[calc(100%-1.5rem)] sm:w-[36rem] px-0"></div>
 
     <!-- GLOBAL SEARCH MODAL -->
     <div id="search-modal" class="fixed inset-0 z-[90] hidden bg-slate-900/60 backdrop-blur-sm items-center justify-center p-4">
@@ -938,11 +1090,12 @@ const App = {
 
                 const initialPath = window.location.pathname.toLowerCase().replace(/\/$/, '') || '/';
                 if (!window.location.hash && initialPath !== '/') {
-                    const knownPaths = ['/', '/products', '/dashboard', '/admin', '/studio-ai', '/creator-studio'];
+                    const knownPaths = ['/', '/products', '/kamar', '/dashboard', '/admin', '/studio-ai', '/ruang-kerja', '/creator-studio'];
                     const isCategoryPath = /^(\/ai-|\/kursus-ai|\/jasa-ai|\/ai-untuk-)/i.test(initialPath);
                     const isCreatorPath = /^\/[a-z0-9][a-z0-9-]{2,39}(?:\/portfolio\/[a-z0-9][a-z0-9-]{0,120})?$/i.test(initialPath) && !knownPaths.includes(initialPath) && !isCategoryPath;
                     if (initialPath === '/studio-ai') { App.router.routePath('/studio-ai'); }
-                    else if (initialPath === '/creator-studio') { App.router.routePath('/creator-studio'); }
+                    else if (initialPath === '/ruang-kerja' || initialPath === '/creator-studio') { window.history.replaceState({}, '', '/ruang-kerja'); App.router.routePath('/ruang-kerja'); }
+                    else if (initialPath === '/dashboard') { window.history.replaceState({}, '', '/kamar'); App.router.routePath('/kamar'); }
                     else if (isCategoryPath) { App.router.routePath(initialPath); }
                     else if (isCreatorPath) { App.router.routePath(initialPath); }
                 }
@@ -1019,7 +1172,7 @@ const App = {
                     const friendlyMap = [
                         [/^Backend:\s*Anda sudah memiliki akses ke produk ini\.?/i, 'Produk ini sudah ada di akunmu 🎉 Langsung buka Dashboard, yuk.'],
                         [/Gagal membuat\/melanjutkan order:.*Anda sudah memiliki akses ke produk ini\.?/i, 'Produk ini sudah kamu punya. Coba buka Dashboard untuk akses modulnya.'],
-                        [/^Anda sudah memiliki akses ke produk ini\.?/i, 'Produk ini sudah kamu punya. Buka Dashboard untuk lanjut.'],
+                        [/^Anda sudah memiliki akses ke produk ini\.?/i, 'Produk ini sudah kamu punya. Buka Kamar untuk lanjut.'],
                         [/^Gagal masuk ke akun\.?/i, 'Belum berhasil masuk. Cek email dan password, lalu coba lagi ya.'],
                         [/^Gagal mendaftar\.?/i, 'Pendaftarannya belum berhasil. Coba cek datanya lalu ulangi lagi, ya.'],
                         [/^Anda telah keluar\.?/i, 'Sip, kamu sudah keluar. Sampai ketemu lagi 👋'],
@@ -1062,25 +1215,59 @@ const App = {
                         }
                     }
 
-                    const title = type === 'success' ? 'Berhasil' : type === 'error' ? 'Ups, ada sedikit kendala' : 'Info';
-                    const icon = type === 'success' ? 'fa-circle-check' : type === 'error' ? 'fa-triangle-exclamation' : 'fa-comment-dots';
+                    const title = type === 'success' ? 'Beres! ✨' : type === 'error' ? 'Ups, bentar ya 😅' : 'Info kecil 💡';
+                    const icon = type === 'success' ? 'fa-circle-check' : type === 'error' ? 'fa-triangle-exclamation' : 'fa-sparkles';
                     const colorClass = type === 'success' ? 'text-emerald-600' : type === 'error' ? 'text-rose-600' : 'text-[#151c75]';
                     const el = document.createElement('div');
                     el.className = 'toast-bubble pointer-events-auto';
+                    el.dataset.type = type;
+                    el.setAttribute('role', type === 'error' ? 'alert' : 'status');
                     el.innerHTML = `
-                        <div class="flex items-start gap-3">
-                            <div class="w-9 h-9 rounded-2xl bg-blue-50 border border-blue-100 flex items-center justify-center shrink-0 shadow-inner">
-                                <i class="fa-solid ${icon} ${colorClass}"></i>
+                        <div class="relative flex items-start gap-3 pl-1">
+                            <div class="toast-bubble-icon">
+                                <i class="fa-solid ${icon} ${colorClass} text-base"></i>
                             </div>
-                            <div class="min-w-0 flex-1">
-                                <div class="text-[10px] font-black uppercase tracking-wider ${colorClass}">${title}</div>
-                                <div class="mt-0.5 text-xs sm:text-sm font-bold text-slate-700 leading-relaxed">${App.utils.escapeHtml(friendly)}</div>
+                            <div class="min-w-0 flex-1 pr-1">
+                                <div class="toast-bubble-kicker ${colorClass}">${title}</div>
+                                <div class="mt-1 toast-bubble-message">${App.utils.escapeHtml(friendly)}</div>
                             </div>
-                            <button type="button" class="toast-close w-7 h-7 rounded-full bg-blue-100/80 text-[#151c75] hover:bg-blue-200 flex items-center justify-center" aria-label="Tutup notifikasi"><i class="fa-solid fa-xmark text-[11px]"></i></button>
+                            <button type="button" class="toast-bubble-close w-7 h-7 rounded-full flex items-center justify-center shrink-0" aria-label="Tutup notifikasi"><i class="fa-solid fa-xmark text-[10px]"></i></button>
                         </div>`;
-                    el.querySelector('.toast-close')?.addEventListener('click', () => { el.classList.add('toast-hide'); setTimeout(() => el.remove(), 220); });
+                    el.querySelector('.toast-bubble-close')?.addEventListener('click', () => {
+                        el.classList.add('toast-hide');
+                        setTimeout(() => el.remove(), 220);
+                    });
+
+                    // Hindari notifikasi identik menumpuk saat satu aksi memicu
+                    // beberapa callback secara berdekatan.
+                    const noticeKey = `${type}:${friendly}`;
+                    document.querySelectorAll('#toast-container .toast-bubble').forEach(existing => {
+                        if (existing.dataset.noticeKey === noticeKey) {
+                            existing.classList.add('toast-hide');
+                            setTimeout(() => existing.remove(), 180);
+                        }
+                    });
+                    el.dataset.noticeKey = noticeKey;
+
+                    // Jaga agar area notice tetap ringkas bila beberapa event terjadi
+                    // beruntun; notifikasi terbaru tetap terlihat paling atas.
+                    const existingBubbles = Array.from(cont.querySelectorAll('.toast-bubble'));
+                    existingBubbles.slice(0, Math.max(0, existingBubbles.length - 3)).forEach(existing => {
+                        existing.classList.add('toast-hide');
+                        setTimeout(() => existing.remove(), 180);
+                    });
+
                     cont.appendChild(el);
-                    setTimeout(() => { if (el.isConnected) { el.classList.add('toast-hide'); setTimeout(() => el.remove(), 220); } }, 4200);
+
+                    // Durasi menyesuaikan panjang isi. Error diberi waktu baca lebih lama.
+                    const baseDuration = Math.max(3200, Math.min(7000, 2500 + (friendly.length * 22)));
+                    const duration = type === 'error' ? Math.max(baseDuration, 5200) : baseDuration;
+                    setTimeout(() => {
+                        if (el.isConnected) {
+                            el.classList.add('toast-hide');
+                            setTimeout(() => el.remove(), 220);
+                        }
+                    }, duration);
                 },
 
                 updateApiStatus: (status) => {
@@ -1202,7 +1389,7 @@ const App = {
                     const mNav = document.getElementById('mobile-nav-links');
                     
                     const user = App.state.user;
-                    const hash = App.state.routeType === 'studio-ai' ? 'studio-ai' : (App.state.routeType === 'creator' || App.state.routeType === 'creator-studio' ? 'studio-ai' : (App.state.activeTab || 'home'));
+                    const hash = App.state.routeType === 'studio-ai' ? 'studio-ai' : (App.state.routeType === 'creator' || App.state.routeType === 'ruang-kerja' ? 'studio-ai' : (App.state.activeTab || 'home'));
 
                     let items = [
                         { key: 'home', label: 'Teras', icon: 'fa-house' },
@@ -1214,7 +1401,7 @@ const App = {
                         if (user.role === 'admin') {
                             items.push({ key: 'admin', label: 'Admin', icon: 'fa-user-shield' });
                         } else {
-                            items.push({ key: 'dashboard', label: 'Dashboard', icon: 'fa-graduation-cap' });
+                            items.push({ key: 'dashboard', label: 'Kamar', icon: 'fa-graduation-cap' });
                         }
                     }
 
@@ -1275,9 +1462,9 @@ const App = {
                     const routes = {
                         home: '/',
                         products: '/products',
-                        dashboard: '/dashboard',
+                        dashboard: '/kamar',
                         admin: '/admin',
-                        'creator-studio': '/creator-studio',
+                        'ruang-kerja': '/ruang-kerja',
                         'studio-ai': '/studio-ai'
                     };
 
@@ -1319,7 +1506,7 @@ const App = {
                         case 'admin':
                             App.admin.render();
                             break;
-                        case 'creator-studio':
+                        case 'ruang-kerja':
                             App.creatorStudio.render();
                             break;
                         case 'studio-ai':
@@ -1351,9 +1538,9 @@ const App = {
                     App.state.routePath = clean;
                     if (!parts.length) { App.state.routeType = 'home'; return; }
                     if (parts[0] === 'studio-ai') { App.state.routeType = 'studio-ai'; App.state.studioAICategory = ''; return; }
-                    if (parts[0] === 'creator-studio') { App.state.routeType = 'creator-studio'; return; }
+                    if (parts[0] === 'ruang-kerja' || parts[0] === 'creator-studio') { App.state.routeType = 'ruang-kerja'; return; }
                     if (parts[0] === 'products') { App.state.routeType = 'products'; return; }
-                    if (parts[0] === 'dashboard') { App.state.routeType = 'dashboard'; return; }
+                    if (parts[0] === 'dashboard' || parts[0] === 'kamar') { App.state.routeType = 'dashboard'; return; }
                     if (parts[0] === 'admin') { App.state.routeType = 'admin'; return; }
                     if (/^(ai-|kursus-ai|jasa-ai|ai-untuk-)/i.test(parts[0])) { App.state.routeType = 'studio-ai'; App.state.studioAICategory = parts[0].toLowerCase(); return; }
                     if (parts.length === 1) { App.state.routeType = 'creator'; App.state.creatorUsername = parts[0].toLowerCase(); App.state.creatorPortfolioSlug = ''; return; }
@@ -1365,9 +1552,9 @@ const App = {
                     const legacyRoutes = {
                         home: '/',
                         products: '/products',
-                        dashboard: '/dashboard',
+                        dashboard: '/kamar',
                         admin: '/admin',
-                        'creator-studio': '/creator-studio',
+                        'ruang-kerja': '/ruang-kerja',
                         'studio-ai': '/studio-ai'
                     };
 
@@ -1399,7 +1586,7 @@ const App = {
                             App.ui.renderNavigation();
                             App.studioAI.render(App.state.studioAICategory || '');
                             return true;
-                        case 'creator-studio':
+                        case 'ruang-kerja':
                             App.ui.renderNavigation();
                             App.creatorStudio.render();
                             return true;
@@ -1426,9 +1613,9 @@ const App = {
                     const routeMap = {
                         home: '/',
                         products: '/products',
-                        dashboard: '/dashboard',
+                        dashboard: '/kamar',
                         admin: '/admin',
-                        'creator-studio': '/creator-studio',
+                        'ruang-kerja': '/ruang-kerja',
                         'studio-ai': '/studio-ai'
                     };
 
@@ -1475,9 +1662,9 @@ const App = {
                     const legacyRoutes = {
                         home: '/',
                         products: '/products',
-                        dashboard: '/dashboard',
+                        dashboard: '/kamar',
                         admin: '/admin',
-                        'creator-studio': '/creator-studio',
+                        'ruang-kerja': '/ruang-kerja',
                         'studio-ai': '/studio-ai'
                     };
 
@@ -1505,9 +1692,9 @@ const App = {
                                 path: '/products'
                             });
                             App.products.render();
-                        } else if (rawHash === 'dashboard') App.dashboard.render();
+                        } else if (rawHash === 'dashboard') { window.history.replaceState({}, '', '/kamar'); App.router.routePath('/kamar'); }
                         else if (rawHash === 'admin') App.admin.render();
-                        else if (rawHash === 'creator-studio') App.creatorStudio.render();
+                        else if (rawHash === 'ruang-kerja') App.creatorStudio.render();
                         else if (rawHash === 'studio-ai') App.studioAI.render();
                         window.scrollTo({ top: 0, behavior: 'smooth' });
                         return;
@@ -1642,31 +1829,126 @@ const App = {
                             const { error } = await supabaseClient.auth.signOut();
                             if (error) throw error;
                             data = { success: true };
+                        } else if (action === 'SUBMIT_CREATOR_REVIEW') {
+                            if (!App.state.user) throw new Error('Masuk dulu ya.');
+                            const { data: result, error } = await supabaseClient.rpc('submit_creator_for_review');
+                            if (error) throw error;
+                            data = result || { success: true };
+                        } else if (action === 'GET_CREATOR_MODERATION_QUEUE') {
+                            if (!App.state.user || String(App.state.user.role).toLowerCase() !== 'admin') throw new Error('Akses Admin diperlukan.');
+                            const { data: creators, error } = await supabaseClient
+                                .from('creator_profiles')
+                                .select('id,username,display_name,bio,avatar_url,location,is_published,is_verified,review_status,review_note,review_requested_at,reviewed_at')
+                                .in('review_status', ['PENDING','REJECTED'])
+                                .order('review_requested_at', { ascending: false })
+                                .limit(100);
+                            if (error) throw error;
+                            data = { creators: creators || [] };
+                        } else if (action === 'GET_CREATOR_TRUST_ADMIN') {
+                            if (!App.state.user || String(App.state.user.role).toLowerCase() !== 'admin') throw new Error('Akses Admin diperlukan.');
+                            const { data: creators, error } = await supabaseClient
+                                .from('creator_profiles')
+                                .select('id,username,display_name,is_published,is_verified,review_status,updated_at')
+                                .order('updated_at', { ascending: false }).limit(200);
+                            if (error) throw error;
+                            const [likesRes, likeAdjRes, ratingsRes, extRatingsRes, servicesRes, portfoliosRes] = await Promise.all([
+                                supabaseClient.from('creator_likes').select('creator_id'),
+                                supabaseClient.from('creator_like_adjustments').select('creator_id,delta_count'),
+                                supabaseClient.from('creator_ratings').select('creator_id,rating,is_visible'),
+                                supabaseClient.from('creator_external_ratings').select('creator_id,rating,is_visible'),
+                                supabaseClient.from('creator_services').select('creator_id').eq('is_active', true),
+                                supabaseClient.from('creator_portfolios').select('creator_id').eq('is_active', true)
+                            ]);
+                            for (const r of [likesRes, likeAdjRes, ratingsRes, extRatingsRes, servicesRes, portfoliosRes]) if (r.error) throw r.error;
+                            const likes = {}, likeAdjustments = {}, services = {}, portfolios = {}, ratings = {};
+                            (likesRes.data || []).forEach(x => likes[x.creator_id] = (likes[x.creator_id] || 0) + 1);
+                            (likeAdjRes.data || []).forEach(x => likeAdjustments[x.creator_id] = (likeAdjustments[x.creator_id] || 0) + Math.max(0, Number(x.delta_count || 0)));
+                            (servicesRes.data || []).forEach(x => services[x.creator_id] = (services[x.creator_id] || 0) + 1);
+                            (portfoliosRes.data || []).forEach(x => portfolios[x.creator_id] = (portfolios[x.creator_id] || 0) + 1);
+                            [...(ratingsRes.data || []), ...(extRatingsRes.data || [])].forEach(x => { if (x.is_visible !== false) { ratings[x.creator_id] ||= []; ratings[x.creator_id].push(Number(x.rating)); } });
+                            data = { creators: (creators || []).map(c => ({ ...c, likesOrganic: likes[c.id] || 0, likesAdjustment: likeAdjustments[c.id] || 0, likes: (likes[c.id] || 0) + (likeAdjustments[c.id] || 0), services: services[c.id] || 0, portfolios: portfolios[c.id] || 0, ratingCount: (ratings[c.id] || []).length, ratingAvg: (ratings[c.id] || []).length ? ((ratings[c.id].reduce((a,b)=>a+b,0) / ratings[c.id].length).toFixed(1)) : null })) };
+                        } else if (action === 'ADMIN_SET_CREATOR_VERIFIED') {
+                            if (!App.state.user || String(App.state.user.role).toLowerCase() !== 'admin') throw new Error('Akses Admin diperlukan.');
+                            const { data: result, error } = await supabaseClient.rpc('admin_set_creator_verified', { p_creator_id: payload.creatorId, p_verified: !!payload.verified });
+                            if (error) throw error;
+                            data = result || {success:true};
+                        } else if (action === 'ADMIN_ADD_CREATOR_LIKE_ADJUSTMENT') { if (!App.state.user || String(App.state.user.role).toLowerCase() !== 'admin') throw new Error('Akses Admin diperlukan.'); const {data: result,error}=await supabaseClient.rpc('admin_add_creator_like_adjustment',{p_creator_id:payload.creatorId,p_delta_count:Number(payload.delta),p_reason:String(payload.reason||'')}); if(error)throw error; data=result||{success:true}; } else if (action === 'ADMIN_ADD_CREATOR_EXTERNAL_RATING') { if (!App.state.user || String(App.state.user.role).toLowerCase() !== 'admin') throw new Error('Akses Admin diperlukan.'); const {data: result,error}=await supabaseClient.rpc('admin_add_creator_external_rating',{p_creator_id:payload.creatorId,p_reviewer_name:String(payload.reviewerName||''),p_rating:Number(payload.rating),p_review:String(payload.review||''),p_source_label:String(payload.sourceLabel||'')}); if(error)throw error; data=result||{success:true}; } else if (action === 'ADMIN_MODERATE_CREATOR_LIKES') {
+                            if (!App.state.user || String(App.state.user.role).toLowerCase() !== 'admin') throw new Error('Akses Admin diperlukan.');
+                            const { error } = await supabaseClient.rpc('admin_delete_creator_like', { p_like_id: payload.likeId });
+                            if (error) throw error;
+                            data = {success:true};
+                        } else if (action === 'ADMIN_MODERATE_CREATOR_PORTFOLIO') {
+                            if (!App.state.user || String(App.state.user.role).toLowerCase() !== 'admin') throw new Error('Akses Admin diperlukan.');
+                            const { data: result, error } = await supabaseClient.rpc('admin_set_creator_portfolio_active', { p_portfolio_id: payload.portfolioId, p_active: !!payload.active });
+                            if (error) throw error;
+                            data = result || {success:true};
+                        } else if (action === 'GET_CREATOR_RATINGS_ADMIN') {
+                            if (!App.state.user || String(App.state.user.role).toLowerCase() !== 'admin') throw new Error('Akses Admin diperlukan.');
+                            const { data: ratings, error } = await supabaseClient.from('creator_ratings').select('id,creator_id,user_id,rating,review,is_visible,created_at,creator_profiles(username,display_name)').order('created_at',{ascending:false}).limit(300);
+                            if (error) throw error; data = {ratings: ratings || []};
+                        } else if (action === 'ADMIN_MODERATE_CREATOR_RATING') {
+                            if (!App.state.user || String(App.state.user.role).toLowerCase() !== 'admin') throw new Error('Akses Admin diperlukan.');
+                            const { data: result, error } = await supabaseClient.rpc('admin_set_creator_rating_visibility', { p_rating_id: payload.ratingId, p_visible: !!payload.visible });
+                            if (error) throw error; data = result || {success:true};
+                        } else if (action === 'ADMIN_REVIEW_CREATOR') {
+                            if (!App.state.user || String(App.state.user.role).toLowerCase() !== 'admin') throw new Error('Akses Admin diperlukan.');
+                            const decision = String(payload.decision || '').toUpperCase();
+                            if (!['APPROVED','REJECTED'].includes(decision)) throw new Error('Keputusan review tidak valid.');
+                            const { data: result, error } = await supabaseClient.rpc('admin_review_creator', {
+                                p_creator_id: payload.creatorId,
+                                p_decision: decision,
+                                p_note: String(payload.note || '').slice(0,500)
+                            });
+                            if (error) throw error;
+                            data = result || { success: true };
                         } else if (action === 'GET_STUDIO_AI') {
-                            const [catRes, creatorRes, serviceRes, likeRes] = await withTimeout(
+                            const [catRes, creatorRes, serviceRes, likeRes, memberRes, trustRes] = await withTimeout(
                                 Promise.all([
                                     supabaseClient.from('ai_categories').select('id,slug,name,description,icon').eq('is_active', true).order('name', { ascending: true }),
                                     supabaseClient.from('creator_profiles').select('id,user_id,username,display_name,bio,avatar_url,cover_url,whatsapp,location,is_published,is_verified').eq('is_published', true).order('updated_at', { ascending: false }).limit(100),
                                     supabaseClient.from('creator_services').select('id,creator_id,category_id,title,description,price_from,price_to,delivery_days').eq('is_active', true).order('created_at', { ascending: false }).limit(500),
-                                    supabaseClient.from('creator_likes').select('creator_id')
+                                    supabaseClient.from('creator_likes').select('creator_id'),
+                                    supabaseClient.from('creator_category_members').select('creator_id,category_id,is_primary'),
+                                    supabaseClient.rpc('get_public_creator_trust_summary')
                                 ]),
                                 10000,
                                 'Data Studio AI terlalu lama dimuat.'
                             );
-                            for (const r of [catRes, creatorRes, serviceRes, likeRes]) if (r.error) throw r.error;
+                            for (const r of [catRes, creatorRes, serviceRes, likeRes, memberRes, trustRes]) if (r.error) throw r.error;
                             const likeCounts = {};
+                            const likeAdjustments = {};
+                            const ratingBuckets = {};
                             (likeRes.data || []).forEach(x => { likeCounts[x.creator_id] = (likeCounts[x.creator_id] || 0) + 1; });
+                            (trustRes.data || []).forEach(x => { likeAdjustments[x.creator_id] = Number(x.likes || 0) - Number(likeCounts[x.creator_id] || 0); ratingBuckets[x.creator_id] = Number(x.rating_count || 0) ? Array.from({length:Number(x.rating_count || 0)}, () => Number(x.rating_avg || 0)) : []; });
                             const servicesByCreator = {};
                             (serviceRes.data || []).forEach(svc => {
                                 (servicesByCreator[svc.creator_id] ||= []).push(svc);
                             });
+                            const publishedIds = new Set((creatorRes.data || []).map(c => c.id));
+                            const categoryCounts = {};
+                            (memberRes.data || []).forEach(m => {
+                                if (!publishedIds.has(m.creator_id)) return;
+                                categoryCounts[m.category_id] = (categoryCounts[m.category_id] || 0) + 1;
+                            });
+                            const categories = (catRes.data || []).map(c => ({
+                                ...c,
+                                creatorCount: Number(categoryCounts[c.id] || 0)
+                            }));
+                            const creators = (creatorRes.data || []).map(c => ({
+                                ...c,
+                                likes: Number(likeCounts[c.id] || 0) + Number(likeAdjustments[c.id] || 0),
+                                ratingCount: (ratingBuckets[c.id] || []).length,
+                                ratingAvg: (ratingBuckets[c.id] || []).length ? Number((ratingBuckets[c.id].reduce((a,b)=>a+b,0) / ratingBuckets[c.id].length).toFixed(1)) : null,
+                                services: servicesByCreator[c.id] || []
+                            }));
                             data = {
-                                categories: catRes.data || [],
-                                creators: (creatorRes.data || []).map(c => ({
-                                    ...c,
-                                    likes: Number(likeCounts[c.id] || 0),
-                                    services: servicesByCreator[c.id] || []
-                                }))
+                                categories,
+                                creators,
+                                stats: {
+                                    creatorCount: creators.length,
+                                    serviceCount: serviceRes.data?.filter(s => publishedIds.has(s.creator_id)).length || 0,
+                                    categoryCount: categories.filter(c => Number(c.creatorCount || 0) > 0).length
+                                }
                             };
                         } else if (action === 'GET_CREATOR_PROFILE') {
                             const username = String(payload.username || '').trim().toLowerCase();
@@ -1678,13 +1960,15 @@ const App = {
                                 .maybeSingle();
                             if (cErr) throw cErr;
                             if (!creator || !creator.is_published) throw new Error('Halaman Creator belum tersedia.');
-                            const [catRes, svcRes, pfRes, likeRes] = await Promise.all([
+                            const [catRes, svcRes, pfRes, likeRes, ratingRes, trustRes] = await Promise.all([
                                 supabaseClient.from('creator_category_members').select('category_id,is_primary,ai_categories(id,slug,name,description,icon)').eq('creator_id', creator.id),
                                 supabaseClient.from('creator_services').select('id,creator_id,category_id,title,description,price_from,price_to,delivery_days,is_active').eq('creator_id', creator.id).eq('is_active', true).order('created_at', { ascending: false }),
                                 supabaseClient.from('creator_portfolios').select('id,creator_id,service_id,title,description,media_type,media_url,sort_order,is_active,created_at').eq('creator_id', creator.id).eq('is_active', true).order('sort_order', { ascending: true }).order('created_at', { ascending: false }),
-                                supabaseClient.from('creator_likes').select('id').eq('creator_id', creator.id)
+                                supabaseClient.from('creator_likes').select('id').eq('creator_id', creator.id),
+                                supabaseClient.from('creator_ratings').select('rating').eq('creator_id', creator.id).eq('is_visible', true),
+                                supabaseClient.rpc('get_creator_trust_metrics', { p_creator_id: creator.id })
                             ]);
-                            for (const r of [catRes, svcRes, pfRes, likeRes]) if (r.error) throw r.error;
+                            for (const r of [catRes, svcRes, pfRes, likeRes, ratingRes, trustRes]) if (r.error) throw r.error;
                             let liked = false;
                             if (App.state.user?.id) {
                                 const { data: ownLike, error: ownLikeErr } = await supabaseClient.from('creator_likes').select('id').eq('creator_id', creator.id).eq('user_id', App.state.user.id).maybeSingle();
@@ -1696,8 +1980,11 @@ const App = {
                                 categories: (catRes.data || []).map(x => ({ ...(x.ai_categories || {}), isPrimary: !!x.is_primary })),
                                 services: svcRes.data || [],
                                 portfolios: pfRes.data || [],
-                                likes: (likeRes.data || []).length,
-                                liked
+                                likes: Number((trustRes.data?.[0]?.likes ?? (likeRes.data || []).length)),
+                                liked,
+                                ratingCount: Number((trustRes.data?.[0]?.ratingCount ?? (ratingRes.data || []).length)),
+                                ratingAvg: trustRes.data?.[0]?.ratingAvg == null ? ((ratingRes.data || []).length ? Number(((ratingRes.data || []).reduce((sum,r)=>sum+Number(r.rating||0),0)/(ratingRes.data || []).length).toFixed(1)) : null) : Number(trustRes.data[0].ratingAvg),
+                                activityCount: (svcRes.data || []).length + (pfRes.data || []).length
                             };
                         } else if (action === 'TOGGLE_CREATOR_LIKE') {
                             if (!App.state.user?.id) throw new Error('Masuk dulu ya untuk memberi Like.');
@@ -1802,7 +2089,7 @@ const App = {
                                     supabaseClient.from('orders').select('id,product_id,unit_price,total_amount,status,payment_status,created_at,products(title)').eq('user_id', user.id).order('created_at', { ascending: false })
                                 ]),
                                 10000,
-                                'Dashboard member terlalu lama dimuat.'
+                                'Kamar kamu terlalu lama dimuat.'
                             );
                             if (eRes.error) throw eRes.error;
                             if (oRes.error) throw oRes.error;
@@ -1952,7 +2239,7 @@ const App = {
                         return !!data?.verified;
                     } catch (error) {
                         App.ui.updateApiStatus('error');
-                        App.ui.toast('Tautan verifikasi sudah tidak berlaku atau sudah digunakan. Coba kirim email verifikasi baru dari Dashboard, ya.', 'error');
+                        App.ui.toast('Tautan verifikasi sudah tidak berlaku atau sudah digunakan. Coba kirim email verifikasi baru dari Kamar, ya.', 'error');
                         return false;
                     }
                 },
@@ -2328,6 +2615,7 @@ const App = {
                                     </div>
                                 </div>
                                 <div class="mt-4 flex flex-wrap gap-2" id="studio-ai-category-chips"></div>
+                                <div id="studio-ai-live-stats" class="mt-4 flex flex-wrap gap-2"></div>
                             </div>
                             <div class="studio-ai-orb" aria-hidden="true"></div>
                             <div class="absolute right-8 top-10 hidden md:block opacity-80" aria-hidden="true">
@@ -2357,6 +2645,7 @@ const App = {
                                 <div>
                                     <h2 class="text-lg sm:text-xl font-extrabold text-[#151c75]" id="studio-ai-results-title">Creator yang siap membantu</h2>
                                     <p class="text-xs text-slate-500">Profil publik, jasa, portfolio, dan tombol WhatsApp.</p>
+                                    <div class="mt-2 inline-flex items-center gap-1.5 px-2.5 py-1 rounded-xl bg-blue-50 border border-blue-100 text-[9px] font-bold text-[#151c75]"><i class="fa-solid fa-wand-magic-sparkles text-amber-500"></i> Makin spesifik pencarianmu, makin nyambung hasilnya.</div>
                                 </div>
                             </div>
                             <div id="studio-ai-creator-grid" class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4 sm:gap-6" aria-live="polite">
@@ -2376,6 +2665,15 @@ const App = {
                     try {
                         const data = await App.api.post('GET_STUDIO_AI');
                         App.state.studioAI = data;
+                        const statsBox = document.getElementById('studio-ai-live-stats');
+                        if (statsBox) {
+                            const st = data.stats || { creatorCount: 0, serviceCount: 0, categoryCount: 0 };
+                            statsBox.innerHTML = [
+                                ['Creator', st.creatorCount],
+                                ['Jasa aktif', st.serviceCount],
+                                ['Kategori', st.categoryCount]
+                            ].map(([label, value]) => `<div class="studio-ai-stat"><div class="text-sm font-black text-[#151c75]">${Number(value || 0)}</div><div class="text-[9px] font-bold text-slate-500">${label}</div></div>`).join('');
+                        }
                         if (!categorySlug) App.studioAI._category = '';
                         if (categorySlug) {
                             const exists = (data.categories || []).find(c => String(c.slug || '').toLowerCase() === String(categorySlug).toLowerCase());
@@ -2455,6 +2753,7 @@ const App = {
                             <div class="w-10 h-10 rounded-xl bg-blue-50 text-[#151c75] flex items-center justify-center mb-3"><i class="${App.utils.escapeHtml(c.icon || 'fa-solid fa-sparkles')}"></i></div>
                             <div class="font-extrabold text-xs sm:text-sm text-[#151c75]">${App.utils.escapeHtml(c.name)}</div>
                             <div class="text-[10px] text-slate-500 mt-1 line-clamp-2">${App.utils.escapeHtml(c.description || '')}</div>
+                            <div class="studio-ai-category-count">${Number(c.creatorCount || 0) > 0 ? `${Number(c.creatorCount)} Creator siap dilihat` : 'Segera hadir'}</div>
                         </a>`).join('');
                 },
                 renderCreators: () => {
@@ -2463,16 +2762,56 @@ const App = {
                     const data = App.state.studioAI || { creators: [] };
                     const q = App.studioAI._query.toLowerCase();
                     const category = App.studioAI._category;
-                    const creators = (data.creators || []).filter(c => {
+                    const activeCategory = (data.categories || []).find(x => String(x.slug || '').toLowerCase() === String(category || '').toLowerCase());
+                    const creators = (data.creators || []).map(c => {
                         const services = c.services || [];
-                        const hay = [c.display_name, c.username, c.bio, c.location, ...services.map(s => `${s.title} ${s.description}`)].join(' ').toLowerCase();
-                        const categoryMatch = !category || services.some(s => s.category_id === (data.categories || []).find(x => x.slug === category)?.id);
-                        return (!q || hay.includes(q)) && categoryMatch;
-                    });
+                        const hayParts = [c.display_name, c.username, c.bio, c.location, ...services.map(s => `${s.title} ${s.description}`)];
+                        const hay = hayParts.join(' ').toLowerCase();
+                        const tokens = q.split(/\s+/).filter(Boolean);
+                        let score = 0;
+                        if (activeCategory && services.some(s => s.category_id === activeCategory.id)) score += 40;
+                        if (q) {
+                            for (const token of tokens) {
+                                if (String(c.display_name || '').toLowerCase().includes(token)) score += 24;
+                                if (String(c.username || '').toLowerCase().includes(token)) score += 18;
+                                if (String(c.bio || '').toLowerCase().includes(token)) score += 8;
+                                services.forEach(s => {
+                                    const title = String(s.title || '').toLowerCase();
+                                    const desc = String(s.description || '').toLowerCase();
+                                    if (title.includes(token)) score += 28;
+                                    else if (desc.includes(token)) score += 10;
+                                });
+                            }
+                        }
+                        score += c.is_verified ? 8 : 0;
+                        score += Math.min(12, Number(c.likes || 0) / 10);
+                        score += Math.min(12, Number(c.completed_orders || c.order_count || 0) / 2);
+                        return { c, score, categoryMatch: !activeCategory || services.some(s => s.category_id === activeCategory.id), hay };
+                    }).filter(item => (!q || item.score > 0) && item.categoryMatch)
+                      .sort((a, b) => b.score - a.score || String(a.c.display_name || '').localeCompare(String(b.c.display_name || '')))
+                      .map(item => item.c);
                     const title = document.getElementById('studio-ai-results-title');
                     if (title) title.textContent = q || category ? 'Yang paling nyambung buatmu' : 'Creator yang siap membantu';
                     if (!creators.length) {
-                        grid.innerHTML = `<div class="card-3d p-8 rounded-2xl text-center md:col-span-2 xl:col-span-3"><div class="text-3xl mb-2">✦</div><div class="text-sm font-extrabold text-[#151c75]">Belum ketemu yang pas</div><div class="text-xs text-slate-500 mt-1">Coba kata kunci lain atau pilih kategori yang lebih dekat.</div><button type="button" onclick="App.studioAI.clearFilters()" class="btn-brand-gradient px-4 py-2.5 rounded-xl text-xs font-extrabold mt-4">Tampilkan Semua</button></div>`;
+                        const hasPublishedCreators = Array.isArray(data.creators) && data.creators.length > 0;
+                        if (!hasPublishedCreators) {
+                            grid.innerHTML = `<div class="studio-ai-empty card-3d p-7 sm:p-9 rounded-3xl text-center md:col-span-2 xl:col-span-3">
+                                <div class="studio-ai-empty-icon mx-auto mb-4"><i class="fa-solid fa-wand-magic-sparkles text-xl"></i></div>
+                                <div class="text-sm sm:text-base font-extrabold text-[#151c75]">Studio AI lagi mulai ramai ✨</div>
+                                <div class="text-xs sm:text-sm text-slate-500 mt-2 max-w-md mx-auto leading-relaxed">Belum ada Creator yang tayang di kategori ini. Kamu bisa cek kategori lain dulu, atau jadi Creator kalau sudah punya produk Premium Studihome.</div>
+                                <div class="mt-5 flex flex-wrap justify-center gap-2">
+                                    <button type="button" onclick="App.studioAI.clearFilters()" class="btn-brand-gradient px-4 py-2.5 rounded-xl text-xs font-extrabold">Lihat Semua</button>
+                                    <button type="button" onclick="App.ui.toggleModal('auth-modal', true)" class="px-4 py-2.5 rounded-xl text-xs font-extrabold text-[#151c75] bg-blue-50 border border-blue-200 hover:bg-blue-100 transition-all">Mau Jadi Creator?</button>
+                                </div>
+                            </div>`;
+                        } else {
+                            grid.innerHTML = `<div class="studio-ai-empty card-3d p-7 sm:p-9 rounded-3xl text-center md:col-span-2 xl:col-span-3">
+                                <div class="studio-ai-empty-icon mx-auto mb-4"><i class="fa-solid fa-magnifying-glass text-lg"></i></div>
+                                <div class="text-sm sm:text-base font-extrabold text-[#151c75]">Belum ketemu yang paling nyambung 😄</div>
+                                <div class="text-xs sm:text-sm text-slate-500 mt-2">Coba kata kunci lain atau pilih kategori yang lebih dekat. Kita cari pelan-pelan, ya.</div>
+                                <button type="button" onclick="App.studioAI.clearFilters()" class="btn-brand-gradient px-4 py-2.5 rounded-xl text-xs font-extrabold mt-5">Tampilkan Semua</button>
+                            </div>`;
+                        }
                         return;
                     }
                     grid.innerHTML = creators.slice(0, 30).map(c => {
@@ -2504,7 +2843,7 @@ const App = {
                                         </div>
                                         <div class="text-[10px] text-slate-500 whitespace-nowrap">❤️ ${c.likes || 0}</div>
                                     </div>
-                                    <p class="text-xs text-slate-600 leading-relaxed mt-3 line-clamp-3">${App.utils.escapeHtml(c.bio || 'Creator Studio AI di Studihome.')}</p>
+                                    <p class="text-xs text-slate-600 leading-relaxed mt-3 line-clamp-3">${App.utils.escapeHtml(c.bio || 'Ruang Kerja AI di Studihome.')}</p>
                                     <div class="flex items-center justify-between mt-4 pt-3 border-t border-slate-100 gap-2">
                                         <div class="text-[10px] font-bold text-slate-500">${App.utils.escapeHtml(c.location || 'Indonesia')}</div>
                                         <div class="flex items-center gap-1.5">
@@ -2596,19 +2935,27 @@ const App = {
                                             </div>
                                             <div>
                                                 <h1 class="text-2xl sm:text-3xl md:text-4xl font-black leading-tight">${App.utils.escapeHtml(c.display_name || c.username)}</h1>
-                                                <p class="text-blue-100 text-xs sm:text-sm mt-1">${App.utils.escapeHtml(primaryCategory?.name || 'Creator Studio AI')} ${c.location ? '• ' + App.utils.escapeHtml(c.location) : ''}</p>
+                                                <p class="text-blue-100 text-xs sm:text-sm mt-1">${App.utils.escapeHtml(primaryCategory?.name || 'Ruang Kerja AI')} ${c.location ? '• ' + App.utils.escapeHtml(c.location) : ''}</p>
                                             </div>
                                         </div>
-                                        <p class="text-xs sm:text-sm text-blue-50/95 max-w-2xl leading-relaxed mt-5">${App.utils.escapeHtml(c.bio || 'Creator Studio AI di Studihome.')}</p>
+                                        <p class="text-xs sm:text-sm text-blue-50/95 max-w-2xl leading-relaxed mt-5">${App.utils.escapeHtml(c.bio || 'Ruang Kerja AI di Studihome.')}</p>
                                         <div class="flex flex-wrap gap-2 mt-4">
                                             ${categories.slice(0,6).map(x => `<span class="creator-trust-chip px-2.5 py-1 rounded-xl text-[9px] font-bold">${App.utils.escapeHtml(x.name)}</span>`).join('')}
+                                        </div>
+                                        <div class="creator-quick-actions">
+                                            ${defaultWa ? `<a href="${defaultWa}" target="_blank" rel="noopener noreferrer" class="creator-quick-action btn-brand-amber text-slate-900"><i class="fa-brands fa-whatsapp"></i> Ngobrol via WhatsApp</a>` : ''}
+                                            <button type="button" class="creator-quick-action creator-share-btn" onclick="App.creator.shareProfile('${App.utils.escapeHtml(c.username)}')"><i class="fa-solid fa-share-nodes"></i> Bagikan Profil</button>
                                         </div>
                                     </div>
                                     <div class="w-full lg:w-auto">
                                         <div class="grid grid-cols-3 gap-2 mb-3">
                                             <div class="creator-trust-chip rounded-2xl px-3 py-2.5 text-center"><div class="text-lg font-black">❤️ ${data.likes || 0}</div><div class="text-[9px] text-blue-100">Disukai</div></div>
-                                            <div class="creator-trust-chip rounded-2xl px-3 py-2.5 text-center"><div class="text-lg font-black">${services.length}</div><div class="text-[9px] text-blue-100">Jasa</div></div>
-                                            <div class="creator-trust-chip rounded-2xl px-3 py-2.5 text-center"><div class="text-lg font-black">${portfolios.length}</div><div class="text-[9px] text-blue-100">Portfolio</div></div>
+                                            <div class="creator-trust-chip rounded-2xl px-3 py-2.5 text-center"><div class="text-lg font-black">⭐ ${data.ratingAvg ? `${data.ratingAvg}/5` : '—'}</div><div class="text-[9px] text-blue-100">Rating</div></div>
+                                            <div class="creator-trust-chip rounded-2xl px-3 py-2.5 text-center"><div class="text-lg font-black">🛒 ${data.activityCount || 0}</div><div class="text-[9px] text-blue-100">Aktivitas</div></div>
+                                        </div>
+                                        <div class="flex flex-wrap gap-2 mb-3">
+                                            <span class="creator-trust-chip rounded-xl px-2.5 py-1.5 text-[9px] font-bold text-blue-100">📁 ${portfolios.length} Portfolio</span>
+                                            <span class="creator-trust-chip rounded-xl px-2.5 py-1.5 text-[9px] font-bold text-blue-100">${data.ratingCount || 0} penilaian</span>
                                         </div>
                                         <div class="flex flex-col sm:flex-row lg:flex-col gap-2">
                                             ${defaultWa ? `<a href="${defaultWa}" target="_blank" rel="noopener noreferrer" class="w-full lg:min-w-48 btn-brand-amber text-slate-900 px-4 py-2.5 rounded-xl text-xs font-extrabold text-center"><i class="fa-brands fa-whatsapp mr-1"></i> WhatsApp</a>` : ''}
@@ -2617,6 +2964,19 @@ const App = {
                                             </button>
                                         </div>
                                     </div>
+                                </div>
+                            </section>
+                            <section class="creator-contact-strip rounded-3xl p-4 sm:p-5 mb-7">
+                                <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+                                    <div class="flex items-start gap-3 min-w-0">
+                                        <div class="creator-contact-icon shrink-0"><i class="fa-solid fa-link"></i></div>
+                                        <div class="min-w-0">
+                                            <div class="text-[10px] uppercase tracking-wider font-extrabold text-amber-600">Link profil</div>
+                                            <div class="creator-link-copy mt-1 text-sm font-extrabold text-[#151c75] truncate">${App.utils.escapeHtml(profileUrl)}</div>
+                                            <p class="text-[10px] text-slate-500 mt-1">Simpan atau bagikan link ini. Biar orang gampang nemuin kamu lagi. ✨</p>
+                                        </div>
+                                    </div>
+                                    <button type="button" onclick="App.creator.copyProfileLink('${App.utils.escapeHtml(c.username)}')" class="shrink-0 px-4 py-2.5 rounded-xl bg-blue-50 text-[#151c75] border border-blue-200 text-xs font-extrabold hover:bg-blue-100 transition-all">Salin Link</button>
                                 </div>
                             </section>
                             ${targetPortfolio ? `
@@ -2647,6 +3007,27 @@ const App = {
                         document.title = 'Studihome - Studio AI';
                         main.innerHTML = `<div class="card-3d p-8 rounded-3xl text-center max-w-lg mx-auto"><div class="text-4xl mb-3">✦</div><h2 class="text-base font-extrabold text-[#151c75]">Halaman Creator belum siap</h2><p class="text-xs text-slate-500 mt-1">${App.utils.escapeHtml(e?.message || 'Profil ini belum tersedia.')}</p><button onclick="App.router.navigate('studio-ai')" class="btn-brand-gradient px-4 py-2.5 rounded-xl text-xs font-bold mt-4">Kembali ke Studio AI</button></div>`;
                     }
+                },
+                copyProfileLink: async (username) => {
+                    const url = `${window.location.origin}/${String(username).toLowerCase()}`;
+                    try {
+                        await navigator.clipboard.writeText(url);
+                        App.ui.toast('Link profil sudah disalin. Tinggal share ke siapa pun yang kamu mau. ✨', 'success');
+                    } catch (_) {
+                        App.ui.toast(`Link profilmu: ${url}`, 'info');
+                    }
+                },
+                shareProfile: async (username) => {
+                    const url = `${window.location.origin}/${String(username).toLowerCase()}`;
+                    const label = `Profil ${String(username).replace(/-/g,' ')}`;
+                    try {
+                        if (navigator.share) {
+                            await navigator.share({ title: `${label} | Studihome`, text: `Yuk lihat profil ${label} di Studihome.`, url });
+                        } else {
+                            await navigator.clipboard.writeText(url);
+                            App.ui.toast('Link profil sudah disalin. Tinggal kirim ke teman atau pasang di bio kamu. ✨', 'success');
+                        }
+                    } catch (_) {}
                 },
                 toggleLike: async (creatorId, currentLiked) => {
                     try {
@@ -2791,7 +3172,7 @@ const App = {
                         `;
                     } else if (status === 'PENDING') {
                         actionBtnHTML = `
-                            <button onclick="App.router.navigate('dashboard')" class="bg-amber-100 hover:bg-amber-200 text-amber-800 px-3.5 py-2 rounded-xl text-xs font-extrabold flex items-center gap-1.5 shadow-2xs">
+                            <button onclick="App.router.navigate('kamar')" class="bg-amber-100 hover:bg-amber-200 text-amber-800 px-3.5 py-2 rounded-xl text-xs font-extrabold flex items-center gap-1.5 shadow-2xs">
                                 <i class="fa-solid fa-clock text-[10px]"></i> Menunggu
                             </button>
                         `;
@@ -2940,6 +3321,8 @@ const App = {
                             </div>
                         ` : ''}
 
+                        <div id="kamar-creator-entry" class="hidden"></div>
+
                         <div>
                             <h2 class="text-base sm:text-lg font-bold text-[#151c75] mb-4">Modul & Produk Saya</h2>
                             <div id="owned-products-container" class="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6">
@@ -2956,6 +3339,54 @@ const App = {
                         
                         const verifiedProducts = dashData.verifiedProducts || [];
                         const userOrders = dashData.userOrders || [];
+
+                        // Additive-only Creator invitation: does not alter the existing Kamar workflow.
+                        // A Premium entitlement is inferred from an active product that is not free.
+                        // The detailed eligibility check remains server-side via is_creator_eligible().
+                        const creatorEntry = document.getElementById('kamar-creator-entry');
+                        if (creatorEntry) {
+                            const hasPremium = verifiedProducts.some(p => p && p.isFree === false);
+                            if (hasPremium) {
+                                try {
+                                    const { data: creatorProfile, error: creatorProfileError } = await supabaseClient
+                                        .from('creator_profiles')
+                                        .select('id,username,is_published')
+                                        .eq('user_id', App.state.user.id)
+                                        .maybeSingle();
+                                    if (creatorProfileError) throw creatorProfileError;
+                                    creatorEntry.innerHTML = creatorProfile
+                                        ? `
+                                            <div class="card-3d p-4 sm:p-5 rounded-2xl mb-6 bg-white border border-blue-100 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
+                                                <div class="flex items-start gap-3">
+                                                    <div class="w-10 h-10 rounded-2xl bg-blue-50 flex items-center justify-center shrink-0">
+                                                        <i class="fa-solid fa-briefcase text-[#151c75]"></i>
+                                                    </div>
+                                                    <div>
+                                                        <div class="text-xs font-extrabold text-[#151c75]">Ruang kerja kamu siap dipakai ✨</div>
+                                                        <div class="text-[11px] sm:text-xs text-slate-600 mt-0.5 leading-relaxed">Kelola profil, jasa, dan portfolio kamu dari satu tempat.</div>
+                                                    </div>
+                                                </div>
+                                                <button onclick="App.router.navigate('ruang-kerja')" class="btn-brand-gradient px-3.5 py-2 rounded-xl text-[11px] font-bold shrink-0">Buka Ruang Kerja</button>
+                                            </div>`
+                                        : `
+                                            <div class="card-3d p-4 sm:p-5 rounded-2xl mb-6 bg-white border border-blue-100 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
+                                                <div class="flex items-start gap-3">
+                                                    <div class="w-10 h-10 rounded-2xl bg-blue-50 flex items-center justify-center shrink-0">
+                                                        <i class="fa-solid fa-wand-magic-sparkles text-[#151c75]"></i>
+                                                    </div>
+                                                    <div>
+                                                        <div class="text-xs font-extrabold text-[#151c75]">Punya skill yang mau dibagikan? ✨</div>
+                                                        <div class="text-[11px] sm:text-xs text-slate-600 mt-0.5 leading-relaxed">Kamu sudah punya Premium. Yuk, bikin halaman gratis untuk jasa dan portfolio kamu.</div>
+                                                    </div>
+                                                </div>
+                                                <button onclick="App.router.navigate('ruang-kerja')" class="btn-brand-gradient px-3.5 py-2 rounded-xl text-[11px] font-bold shrink-0">Mulai di Ruang Kerja</button>
+                                            </div>`;
+                                    creatorEntry.classList.remove('hidden');
+                                } catch (_) {
+                                    // Silent fail: the existing Kamar must remain unaffected if this optional panel cannot load.
+                                }
+                            }
+                        }
 
                         if (verifiedProducts.length === 0 && userOrders.length === 0) {
                             container.innerHTML = `
@@ -3163,12 +3594,44 @@ const App = {
                     }
                     this.renderEditor();
                 },
+                profileScore() {
+                    const d = this.data || {};
+                    const p = d.profile || {};
+                    const checks = [
+                        { key: 'display', ok: !!String(p.display_name || '').trim(), label: 'Nama sudah ada' },
+                        { key: 'username', ok: !!String(p.username || '').trim(), label: 'Link sudah siap' },
+                        { key: 'bio', ok: String(p.bio || '').trim().length >= 20, label: 'Bio sudah cukup jelas' },
+                        { key: 'wa', ok: !!String(p.whatsapp || '').trim(), label: 'WhatsApp sudah terisi' },
+                        { key: 'category', ok: (d.memberships || []).some(x => x.is_primary), label: 'Kategori utama dipilih' },
+                        { key: 'service', ok: (d.services || []).some(x => x.is_active), label: 'Minimal 1 jasa aktif' },
+                        { key: 'portfolio', ok: (d.portfolios || []).some(x => x.is_active), label: 'Minimal 1 portfolio' }
+                    ];
+                    const done = checks.filter(x => x.ok).length;
+                    return { checks, done, total: checks.length, percent: Math.round((done / checks.length) * 100) };
+                },
                 renderEditor() {
                     const main = document.getElementById('main-content'); const d=this.data||{}; const p=d.profile||{};
                     const selected=new Set((d.memberships||[]).map(x=>x.category_id)); const primary=(d.memberships||[]).find(x=>x.is_primary)?.category_id||'';
-                    main.innerHTML=`<div class="max-w-5xl mx-auto space-y-5">
-                        <div class="flex flex-col sm:flex-row justify-between gap-3"><div><div class="text-[10px] font-black text-amber-600 uppercase tracking-wider">STUDIO CREATOR</div><h1 class="text-xl sm:text-2xl font-black text-[#151c75]">Bangun halamanmu</h1><p class="text-xs text-slate-500 mt-1">Satu link untuk profil, jasa, portfolio, dan kontakmu.</p></div><button onclick="App.router.navigate('dashboard')" class="px-3.5 py-2 rounded-xl text-xs font-bold bg-slate-100">Kembali</button></div>
-                        <section class="card-3d p-5 sm:p-6 rounded-3xl bg-white"><div class="flex justify-between mb-4"><h2 class="font-extrabold text-[#151c75]">Profil</h2><span class="text-[10px] font-bold ${p.is_published?'text-emerald-600':'text-amber-600'}">${p.is_published?'Sudah Publik':'Draft'}</span></div><div class="grid md:grid-cols-2 gap-3">
+                    const score=this.profileScore();
+                    const canPublishLocal = score.percent === 100;
+                    const publicUrl = p.username ? `${window.location.origin}/${encodeURIComponent(p.username)}` : '';
+                    main.innerHTML=`<div class="room-workspace max-w-5xl mx-auto space-y-5">
+                        <div class="flex flex-col sm:flex-row justify-between gap-3"><div><div class="text-[10px] font-black text-amber-600 uppercase tracking-wider">RUANG KERJA</div><h1 class="text-xl sm:text-2xl font-black text-[#151c75]">Bangun halamanmu</h1><p class="text-xs text-slate-500 mt-1">Satu link untuk profil, jasa, portfolio, dan kontakmu.</p></div><button onclick="App.router.navigate('kamar')" class="px-3.5 py-2 rounded-xl text-xs font-bold bg-slate-100">Kembali ke Kamar</button></div>
+${(() => { const rs=String(p.review_status||'DRAFT').toUpperCase(); const map={DRAFT:['Draft','Profilmu masih kamu rapikan. Santai, lanjutkan dulu.','fa-pen'],PENDING:['Sedang dicek','Profilmu sudah masuk antrean review Admin.','fa-hourglass-half'],APPROVED:['Sudah disetujui','Mantap! Profilmu sudah boleh tampil di Studio AI.','fa-circle-check'],REJECTED:['Perlu dirapikan','Ada catatan dari Admin. Rapikan lalu kirim lagi, ya.','fa-wand-magic-sparkles']}; const x=map[rs]||map.DRAFT; return `<div class="creator-review-panel card-3d p-4 sm:p-5 rounded-2xl flex items-start gap-3 mb-5"><span class="creator-review-badge"><i class="fa-solid ${x[2]}"></i>${x[0]}</span><div class="text-[11px] sm:text-xs text-slate-600 leading-relaxed">${x[1]}${rs==='REJECTED'&&p.review_note?`<div class="mt-1 font-semibold text-slate-700">Catatan: ${App.utils.escapeHtml(p.review_note)}</div>`:''}</div></div>`; })()}
+
+                        <section class="card-3d p-4 sm:p-5 rounded-3xl bg-white border border-blue-100">
+                            <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
+                                <div class="flex-1">
+                                    <div class="flex items-center justify-between gap-3 mb-2"><div class="text-xs font-extrabold text-[#151c75]">${p.is_published?'Halamanmu sudah tayang 🎉':(String(p.review_status||'DRAFT').toUpperCase()==='PENDING'?'Lagi dicek Admin 🔎':(String(p.review_status||'DRAFT').toUpperCase()==='REJECTED'?'Ada catatan, yuk rapikan ✨':'Siap kirim untuk dicek ✨'))}</div><span class="text-[10px] font-black ${score.percent===100?'text-emerald-600':'text-amber-600'}">${score.percent}%</span></div>
+                                    <div class="h-2 rounded-full bg-slate-100 overflow-hidden"><div class="h-full rounded-full ${score.percent===100?'bg-emerald-500':'bg-gradient-to-r from-[#151c75] to-[#3f48bf]'}" style="width:${score.percent}%"></div></div>
+                                    <div class="mt-3 grid sm:grid-cols-2 gap-x-4 gap-y-1.5">${score.checks.map(c=>`<div class="flex items-center gap-2 text-[10px] ${c.ok?'text-emerald-700':'text-slate-500'}"><i class="fa-solid ${c.ok?'fa-circle-check':'fa-circle'}"></i><span>${c.label}</span></div>`).join('')}</div>
+                                </div>
+                                <div class="w-full lg:w-auto">
+                                    ${publicUrl ? `<div class="text-[10px] font-bold text-slate-500 mb-1">Link halamanmu</div><div class="flex gap-2"><input readonly value="${App.utils.escapeHtml(publicUrl)}" class="w-full lg:w-72 card-3d-inset px-3 py-2.5 rounded-xl text-[11px] text-slate-600 outline-none"><button onclick="navigator.clipboard?.writeText('${App.utils.escapeHtml(publicUrl)}').then(()=>App.ui.toast('Link-nya sudah disalin. Tinggal dibagikan 😎','success'))" class="px-3 py-2.5 rounded-xl text-[11px] font-bold bg-slate-100 text-[#151c75]" aria-label="Salin link halaman"><i class="fa-regular fa-copy"></i></button></div>` : `<div class="text-[11px] text-slate-500">Isi username dulu, nanti link halamanmu muncul di sini.</div>`}
+                                </div>
+                            </div>
+                        </section>
+                        <section class="card-3d p-5 sm:p-6 rounded-3xl bg-white"><div class="flex justify-between mb-4"><h2 class="font-extrabold text-[#151c75]">Profil</h2><span class="text-[10px] font-bold ${p.is_published?'text-emerald-600':'text-amber-600'}">${p.is_published?'Sudah Publik':(String(p.review_status||'DRAFT').toUpperCase()==='PENDING'?'Sedang Dicek':(String(p.review_status||'DRAFT').toUpperCase()==='REJECTED'?'Perlu Dirapikan':'Draft'))}</span></div><div class="grid md:grid-cols-2 gap-3">
                         <div><label class="block text-xs font-bold mb-1">Username</label><div class="flex items-center gap-1.5"><span class="text-xs text-slate-500">studihome.id/</span><input id="creator-username" value="${App.utils.escapeHtml(p.username||'')}" ${p.is_published?'disabled':''} placeholder="nama-kamu" class="w-full card-3d-inset px-3 py-2.5 rounded-xl text-xs outline-none"></div></div>
                         <div><label class="block text-xs font-bold mb-1">Nama tampilan</label><input id="creator-display" value="${App.utils.escapeHtml(p.display_name||App.state.user.name||'')}" class="w-full card-3d-inset px-3 py-2.5 rounded-xl text-xs outline-none"></div>
                         <div class="md:col-span-2"><label class="block text-xs font-bold mb-1">Bio</label><textarea id="creator-bio" rows="3" class="w-full card-3d-inset px-3 py-2.5 rounded-xl text-xs outline-none">${App.utils.escapeHtml(p.bio||'')}</textarea></div>
@@ -3179,7 +3642,7 @@ const App = {
                         <section class="card-3d p-5 sm:p-6 rounded-3xl bg-white"><h2 class="font-extrabold text-[#151c75] mb-1">Kategori</h2><p class="text-[10px] text-slate-500 mb-3">Pilih kategori yang paling sesuai dan satu kategori utama.</p><div class="grid sm:grid-cols-2 gap-2">${(d.categories||[]).map(c=>`<label class="flex items-center gap-2 p-3 rounded-xl border border-slate-200"><input type="checkbox" data-creator-cat="${c.id}" ${selected.has(c.id)?'checked':''}><span class="flex-1 text-xs font-bold text-[#151c75]">${App.utils.escapeHtml(c.name)}</span><span class="text-[10px] text-slate-500 flex items-center gap-1">Utama <input type="radio" name="creator-primary" value="${c.id}" ${primary===c.id?'checked':''}></span></label>`).join('')}</div><button onclick="App.creatorStudio.saveCategories()" class="btn-brand-gradient mt-4 px-4 py-2.5 rounded-xl text-xs font-bold">Simpan Kategori</button></section>
                         <section class="card-3d p-5 sm:p-6 rounded-3xl bg-white"><div class="flex justify-between items-center mb-3"><h2 class="font-extrabold text-[#151c75]">Jasa</h2><button onclick="App.creatorStudio.addServiceForm()" class="btn-brand-gradient px-3 py-2 rounded-xl text-[10px] font-bold">+ Jasa</button></div><div id="creator-services-list">${this.serviceList()}</div></section>
                         <section class="card-3d p-5 sm:p-6 rounded-3xl bg-white"><div class="flex justify-between items-center mb-3"><h2 class="font-extrabold text-[#151c75]">Portfolio</h2><button onclick="App.creatorStudio.addPortfolioForm()" class="btn-brand-gradient px-3 py-2 rounded-xl text-[10px] font-bold">+ Portfolio</button></div><div id="creator-portfolio-list">${this.portfolioList()}</div></section>
-                        <section class="card-3d p-5 sm:p-6 rounded-3xl bg-white border border-blue-100 flex flex-col sm:flex-row justify-between gap-3 items-start sm:items-center"><div><div class="text-xs font-extrabold text-[#151c75]">Siap tampil?</div><div class="text-[10px] text-slate-500 mt-1">Profil, kategori utama, dan minimal satu jasa harus siap.</div></div><div class="flex gap-2"><button onclick="App.creatorStudio.publish()" class="btn-brand-gradient px-4 py-2.5 rounded-xl text-xs font-bold">${p.is_published?'Perbarui':'Publish Halaman'}</button>${p.is_published?`<button onclick="App.creatorStudio.unpublish()" class="px-4 py-2.5 rounded-xl text-xs font-bold bg-slate-100">Sembunyikan</button>`:''}</div></section></div>`;
+                        <section class="card-3d p-5 sm:p-6 rounded-3xl bg-white border border-blue-100 flex flex-col sm:flex-row justify-between gap-3 items-start sm:items-center"><div><div class="text-xs font-extrabold text-[#151c75]">${p.is_published?'Halamanmu sudah tayang':'Siap dikenalin ke orang?'} </div><div class="text-[10px] text-slate-500 mt-1">${p.is_published?'Kamu bisa update isinya kapan saja.':'Lengkapi semua bagian di atas dulu. Setelah itu tinggal publish.'}</div></div><div class="flex gap-2 flex-wrap"><button onclick="App.creatorStudio.publish()" ${((!canPublishLocal && !p.is_published) || String(p.review_status||'DRAFT').toUpperCase()==='PENDING')?'disabled':''} class="btn-brand-gradient px-4 py-2.5 rounded-xl text-xs font-bold ${(!canPublishLocal && !p.is_published)?'opacity-50 cursor-not-allowed':''}">${p.is_published?'Simpan & Tayang Lagi':(String(p.review_status||'DRAFT').toUpperCase()==='PENDING'?'Sedang Dicek':(String(p.review_status||'DRAFT').toUpperCase()==='REJECTED'?'Kirim Lagi':'Kirim untuk Dicek'))}</button>${p.is_published?`<button onclick="App.creatorStudio.unpublish()" class="px-4 py-2.5 rounded-xl text-xs font-bold bg-slate-100">Sembunyikan</button>`:''}</div></section></div>`;
                 },
                 serviceList(){ const rows=this.data?.services||[]; return rows.length?rows.map(s=>`<div class="flex items-center gap-2 p-3 border border-slate-200 rounded-xl mb-2"><div class="flex-1"><div class="text-xs font-extrabold text-[#151c75]">${App.utils.escapeHtml(s.title)}</div><div class="text-[10px] text-slate-500 mt-0.5">Mulai Rp ${Number(s.price_from||0).toLocaleString('id-ID')} · ${Number(s.delivery_days||1)} hari</div></div><button onclick="App.creatorStudio.editService('${s.id}')" class="px-2.5 py-1.5 rounded-lg text-[10px] font-bold bg-slate-100">Edit</button><button onclick="App.creatorStudio.deleteService('${s.id}')" class="px-2.5 py-1.5 rounded-lg text-[10px] font-bold bg-red-50 text-red-600">Hapus</button></div>`).join(''):`<div class="p-5 text-center text-xs text-slate-500 card-3d-inset rounded-xl">Belum ada jasa. Tambahkan yang pertama, ya.</div>`; },
                 portfolioList(){ const rows=this.data?.portfolios||[]; return rows.length?rows.map(p=>`<div class="flex items-center gap-2 p-3 border border-slate-200 rounded-xl mb-2"><div class="flex-1"><div class="text-xs font-extrabold text-[#151c75]">${App.utils.escapeHtml(p.title)}</div><div class="text-[10px] text-slate-500 mt-0.5">${App.utils.escapeHtml(p.media_type)}</div></div><button onclick="App.creatorStudio.editPortfolio('${p.id}')" class="px-2.5 py-1.5 rounded-lg text-[10px] font-bold bg-slate-100">Edit</button><button onclick="App.creatorStudio.deletePortfolio('${p.id}')" class="px-2.5 py-1.5 rounded-lg text-[10px] font-bold bg-red-50 text-red-600">Hapus</button></div>`).join(''):`<div class="p-5 text-center text-xs text-slate-500 card-3d-inset rounded-xl">Belum ada portfolio. Tambahkan karya terbaikmu.</div>`; },
@@ -3190,13 +3653,13 @@ const App = {
                 addServiceForm(){const box=document.getElementById('creator-services-list');if(box)box.innerHTML=this.serviceForm()+this.serviceList();},
                 editService(id){const box=document.getElementById('creator-services-list');if(box)box.innerHTML=this.serviceForm(id)+this.serviceList();},
                 async saveService(id=''){try{await App.api.post('CREATOR_SAVE_SERVICE',{id,categoryId:document.getElementById('cs-cat').value||null,title:document.getElementById('cs-title').value,description:document.getElementById('cs-desc').value,priceFrom:document.getElementById('cs-from').value,priceTo:document.getElementById('cs-to').value,deliveryDays:document.getElementById('cs-days').value,isActive:true});App.ui.toast('Jasa berhasil disimpan.','success');await this.reload();}catch(e){App.ui.toast(e.message||'Jasa belum bisa disimpan.','error');}},
-                async deleteService(id){if(!confirm('Hapus jasa ini?'))return;try{await App.api.post('CREATOR_DELETE_SERVICE',{id});App.ui.toast('Jasa dihapus.','info');await this.reload();}catch(e){App.ui.toast(e.message||'Jasa belum bisa dihapus.','error');}},
+                async deleteService(id){if(!confirm('Jasa ini mau dihapus?'))return;try{await App.api.post('CREATOR_DELETE_SERVICE',{id});App.ui.toast('Jasa dihapus.','info');await this.reload();}catch(e){App.ui.toast(e.message||'Jasa belum bisa dihapus.','error');}},
                 portfolioForm(id=''){const p=(this.data?.portfolios||[]).find(x=>x.id===id)||{};const services=this.data?.services||[];return `<div class="card-3d-inset p-4 rounded-xl mb-3"><input id="cp-title" value="${App.utils.escapeHtml(p.title||'')}" placeholder="Judul portfolio" class="w-full card-3d-inset px-3 py-2.5 rounded-xl text-xs outline-none"><textarea id="cp-desc" rows="2" placeholder="Deskripsi singkat" class="w-full card-3d-inset px-3 py-2.5 rounded-xl text-xs outline-none mt-2">${App.utils.escapeHtml(p.description||'')}</textarea><div class="grid sm:grid-cols-2 gap-2 mt-2"><select id="cp-service" class="w-full card-3d-inset px-3 py-2.5 rounded-xl text-xs outline-none"><option value="">Jasa terkait (opsional)</option>${services.map(s=>`<option value="${s.id}" ${p.service_id===s.id?'selected':''}>${App.utils.escapeHtml(s.title)}</option>`).join('')}</select><select id="cp-type" class="w-full card-3d-inset px-3 py-2.5 rounded-xl text-xs outline-none"><option value="image" ${p.media_type==='image'?'selected':''}>Gambar</option><option value="youtube" ${p.media_type==='youtube'?'selected':''}>YouTube</option><option value="drive" ${p.media_type==='drive'?'selected':''}>Google Drive</option><option value="video" ${p.media_type==='video'?'selected':''}>Video file</option><option value="link" ${p.media_type==='link'?'selected':''}>Link</option></select></div><input id="cp-url" value="${App.utils.escapeHtml(p.media_url||'')}" placeholder="URL media" class="w-full card-3d-inset px-3 py-2.5 rounded-xl text-xs outline-none mt-2"><div class="flex gap-2 mt-2"><button onclick="App.creatorStudio.savePortfolio('${id}')" class="btn-brand-gradient px-3.5 py-2 rounded-xl text-xs font-bold">Simpan</button><button onclick="App.creatorStudio.reload()" class="px-3.5 py-2 rounded-xl text-xs font-bold bg-slate-100">Batal</button></div></div>`;},
                 addPortfolioForm(){const box=document.getElementById('creator-portfolio-list');if(box)box.innerHTML=this.portfolioForm()+this.portfolioList();},
                 editPortfolio(id){const box=document.getElementById('creator-portfolio-list');if(box)box.innerHTML=this.portfolioForm(id)+this.portfolioList();},
                 async savePortfolio(id=''){try{await App.api.post('CREATOR_SAVE_PORTFOLIO',{id,serviceId:document.getElementById('cp-service').value||null,title:document.getElementById('cp-title').value,description:document.getElementById('cp-desc').value,mediaType:document.getElementById('cp-type').value,mediaUrl:document.getElementById('cp-url').value,sortOrder:0,isActive:true});App.ui.toast('Portfolio berhasil disimpan.','success');await this.reload();}catch(e){App.ui.toast(e.message||'Portfolio belum bisa disimpan.','error');}},
-                async deletePortfolio(id){if(!confirm('Hapus portfolio ini?'))return;try{await App.api.post('CREATOR_DELETE_PORTFOLIO',{id});App.ui.toast('Portfolio dihapus.','info');await this.reload();}catch(e){App.ui.toast(e.message||'Portfolio belum bisa dihapus.','error');}},
-                async publish(){try{await App.api.post('CREATOR_PUBLISH');App.ui.toast('Halaman Creator sudah dipublikasikan. Keren!','success');await this.reload();}catch(e){App.ui.toast(e.message||'Halaman belum siap dipublikasikan.','error');}},
+                async deletePortfolio(id){if(!confirm('Portfolio ini mau dihapus?'))return;try{await App.api.post('CREATOR_DELETE_PORTFOLIO',{id});App.ui.toast('Portfolio dihapus.','info');await this.reload();}catch(e){App.ui.toast(e.message||'Portfolio belum bisa dihapus.','error');}},
+                async publish(){try{await App.api.post('SUBMIT_CREATOR_REVIEW');App.ui.toast('Sip! Profilmu sudah dikirim ke Admin untuk dicek. Kalau sudah oke, langsung tayang. ✨','success');await this.reload();}catch(e){App.ui.toast(e.message||'Belum bisa dikirim untuk review. Coba cek lagi, ya.','error');}},
                 async unpublish(){try{await App.api.post('CREATOR_UNPUBLISH');App.ui.toast('Halaman Creator disembunyikan.','info');await this.reload();}catch(e){App.ui.toast(e.message||'Belum bisa menyembunyikan halaman.','error');}}
             },
 
@@ -3240,6 +3703,10 @@ const App = {
                             <button onclick="App.admin.switchTab('users')" class="px-3.5 py-2 rounded-xl transition-all ${activeTab === 'users' ? 'btn-brand-gradient shadow-xs' : 'text-slate-700 hover:text-[#151c75]'}">
                                 <i class="fa-solid fa-users mr-1"></i> Pengguna
                             </button>
+                            <button onclick="App.admin.switchTab('creators')" class="px-3.5 py-2 rounded-xl transition-all ${activeTab === 'creators' ? 'btn-brand-gradient shadow-xs' : 'text-slate-700 hover:text-[#151c75]'}">
+                                <i class="fa-solid fa-wand-magic-sparkles mr-1"></i> Creator
+                            </button>
+
                         </div>
 
                         <div id="admin-content-area" class="card-3d p-4 sm:p-6 rounded-3xl bg-white">
@@ -3250,6 +3717,50 @@ const App = {
                     App.admin.renderSubTab();
                 },
 
+                loadCreatorTrustControls: async (targetArea = null) => {
+                    const box=document.getElementById('creator-trust-admin-area') || targetArea; if(!box) return;
+                    if (!box.id) box.id = 'creator-trust-admin-area';
+                    try {
+                        const data=await App.api.post('GET_CREATOR_TRUST_ADMIN');
+                        const rows=data.creators||[];
+                        box.innerHTML = rows.length ? rows.map(c => {
+                            const activity = Number(c.services||0)+Number(c.portfolios||0);
+                            return `<div class="card-3d p-4 rounded-2xl bg-white">
+                                <div class="flex flex-col lg:flex-row lg:items-start lg:justify-between gap-4">
+                                    <div class="min-w-0 flex-1">
+                                        <div class="flex items-center gap-2 flex-wrap"><h4 class="text-sm font-extrabold text-[#151c75] truncate">${App.utils.escapeHtml(c.display_name||c.username)}</h4><span class="admin-trust-badge">@${App.utils.escapeHtml(c.username)}</span><span class="admin-trust-badge">${App.utils.escapeHtml(c.review_status||'DRAFT')}</span></div>
+                                        <p class="text-[10px] text-slate-500 mt-2">Like dan rating punya sumber organik. Tambahan Admin dicatat sebagai kurasi supaya tetap rapi dan bisa dicek kapan pun.</p>
+                                        <div class="admin-trust-grid mt-3">
+                                            <div class="admin-trust-card"><div class="text-[10px] text-slate-400">✓ Verified</div><div class="metric mt-1">${c.is_verified?'Ya':'Belum'}</div><button onclick="App.admin.setCreatorVerified('${c.id}',${!c.is_verified})" class="mt-2 text-[10px] font-bold px-2.5 py-1.5 rounded-lg ${c.is_verified?'bg-red-50 text-red-700':'bg-emerald-50 text-emerald-700'}">${c.is_verified?'Cabut':'Verifikasi'}</button></div>
+                                            <div class="admin-trust-card"><div class="text-[10px] text-slate-400">❤️ Disukai</div><div class="metric mt-1">${Number(c.likes||0)}</div><div class="trust-meta text-[9px] text-slate-400 mt-1">Organik ${Number(c.likesOrganic||0)} · Kurasi +${Number(c.likesAdjustment||0)}</div><div class="flex flex-wrap gap-1.5 mt-2"><button onclick="App.admin.openCreatorLikeAdjust('${c.id}')" class="text-[10px] font-bold px-2.5 py-1.5 rounded-lg bg-blue-50 text-[#151c75]">Kelola & Tambah</button><button onclick="App.admin.openCreatorLikes('${c.id}')" class="text-[10px] font-bold px-2.5 py-1.5 rounded-lg bg-slate-100 text-slate-700">Lihat Like</button></div></div>
+                                            <div class="admin-trust-card"><div class="text-[10px] text-slate-400">⭐ Rating</div><div class="metric mt-1">${c.ratingAvg ? `${c.ratingAvg}/5` : 'Belum ada'}</div><div class="trust-meta text-[9px] text-slate-400 mt-1">${Number(c.ratingCount||0)} penilaian</div><div class="flex flex-wrap gap-1.5 mt-2"><button onclick="App.admin.openCreatorRatingAdd('${c.id}')" class="text-[10px] font-bold px-2.5 py-1.5 rounded-lg bg-blue-50 text-[#151c75]">Kelola & Tambah</button><button onclick="App.admin.openCreatorRatings('${c.id}')" class="text-[10px] font-bold px-2.5 py-1.5 rounded-lg bg-slate-100 text-slate-700">Lihat Rating</button></div></div>
+                                            <div class="admin-trust-card"><div class="text-[10px] text-slate-400">🛒 Aktivitas</div><div class="metric mt-1">${activity}</div><div class="text-[10px] text-slate-400 mt-1">jasa + portfolio aktif</div></div>
+                                            <div class="admin-trust-card"><div class="text-[10px] text-slate-400">📁 Portfolio</div><div class="metric mt-1">${Number(c.portfolios||0)}</div><button onclick="App.admin.openCreatorPortfolios('${c.id}')" class="mt-2 text-[10px] font-bold px-2.5 py-1.5 rounded-lg bg-slate-100 text-slate-700">Kelola Portfolio</button></div>
+                                        </div>
+                                    </div>
+                                    <a href="/${encodeURIComponent(c.username)}" target="_blank" rel="noopener noreferrer" class="btn-brand-gradient px-3 py-2 rounded-xl text-xs font-extrabold whitespace-nowrap">Lihat Profil</a>
+                                </div>
+                            </div>`;
+                        }).join('') : `<div class="card-3d-inset p-6 rounded-2xl text-xs text-slate-500 text-center">Belum ada Creator untuk dikelola. Nanti yang sudah masuk akan muncul di sini. ✨</div>`;
+                    } catch(e) { box.innerHTML=`<div class="card-3d p-5 rounded-2xl bg-white text-xs text-red-600">${App.utils.escapeHtml(e.message||'Data Creator belum bisa dimuat.')}</div>`; }
+                },
+                loadCreatorTrustControlsInline: async (area) => {
+                    if (!area) return;
+                    let box=document.getElementById('creator-trust-admin-area');
+                    if (!box) { box=document.createElement('div'); box.id='creator-trust-admin-area'; box.className='mt-6 pt-5 border-t border-slate-100'; area.appendChild(box); }
+                    await App.admin.loadCreatorTrustControls(box);
+                },
+                setCreatorVerified: async (id, value) => { try { await App.api.post('ADMIN_SET_CREATOR_VERIFIED',{creatorId:id,verified:value}); App.ui.toast(value?'Creator sudah diverifikasi. Mantap! ✅':'Status Verified sudah dicabut.','success'); await App.admin.loadCreatorTrustControls(); } catch(e){ App.ui.toast(e.message||'Status Verified belum bisa diubah.','error'); } },
+                openCreatorLikeAdjust: async (id) => { const box=document.getElementById('creator-trust-admin-area'); if(!box)return; box.innerHTML=`<div class="creator-trust-adjustment card-3d p-4 rounded-2xl bg-white"><div class="flex items-center justify-between gap-3 mb-4"><div><h4 class="text-sm font-extrabold text-[#151c75]">Tambah jumlah Like ❤️</h4><p class="text-[10px] text-slate-500 mt-1">Penyesuaian kurasi Admin. Like organik tetap utuh.</p></div><button onclick="App.admin.renderSubTab()" class="text-xs font-bold text-slate-600">Kembali</button></div><div class="grid sm:grid-cols-2 gap-3"><div><label class="block text-[10px] font-bold text-slate-700 mb-1">Jumlah tambahan</label><input id="trust-like-delta" type="number" min="1" max="100000" value="1" class="w-full card-3d-inset px-3 py-2.5 rounded-xl text-xs"></div><div><label class="block text-[10px] font-bold text-slate-700 mb-1">Alasan singkat</label><input id="trust-like-reason" type="text" maxlength="200" placeholder="Mis. migrasi data lama" class="w-full card-3d-inset px-3 py-2.5 rounded-xl text-xs"></div></div><div class="flex gap-2 mt-4"><button onclick="App.admin.addCreatorLikeAdjustment('${id}')" class="btn-brand-gradient px-4 py-2.5 rounded-xl text-xs font-extrabold">Tambah Like</button><button onclick="App.admin.openCreatorLikes('${id}')" class="px-4 py-2.5 rounded-xl text-xs font-bold bg-slate-100">Lihat Like</button></div></div>`; },
+                addCreatorLikeAdjustment: async (id) => { try{const delta=Math.floor(Number(document.getElementById('trust-like-delta')?.value||0));const reason=String(document.getElementById('trust-like-reason')?.value||'').trim();if(!Number.isInteger(delta)||delta<1||delta>100000)throw new Error('Jumlah tambahan Like harus 1 sampai 100.000.');if(!reason)throw new Error('Tulis alasan singkat dulu, ya.');await App.api.post('ADMIN_ADD_CREATOR_LIKE_ADJUSTMENT',{creatorId:id,delta,reason});App.ui.toast('Jumlah Like berhasil ditambah. Catatannya tersimpan juga. ✅','success');await App.admin.loadCreatorTrustControls();}catch(e){App.ui.toast(e.message||'Jumlah Like belum bisa ditambah.','error');} },
+                openCreatorRatingAdd: async (id) => { const box=document.getElementById('creator-trust-admin-area'); if(!box)return; box.innerHTML=`<div class="creator-trust-adjustment card-3d p-4 rounded-2xl bg-white"><div class="flex items-center justify-between gap-3 mb-4"><div><h4 class="text-sm font-extrabold text-[#151c75]">Tambah Rating ⭐</h4><p class="text-[10px] text-slate-500 mt-1">Gunakan untuk ulasan nyata dari luar Studihome. Sumbernya wajib dicatat.</p></div><button onclick="App.admin.renderSubTab()" class="text-xs font-bold text-slate-600">Kembali</button></div><div class="grid sm:grid-cols-2 gap-3"><div><label class="block text-[10px] font-bold text-slate-700 mb-1">Nama pemberi ulasan</label><input id="ext-rating-name" type="text" maxlength="120" placeholder="Nama klien" class="w-full card-3d-inset px-3 py-2.5 rounded-xl text-xs"></div><div><label class="block text-[10px] font-bold text-slate-700 mb-1">Nilai</label><select id="ext-rating-value" class="w-full card-3d-inset px-3 py-2.5 rounded-xl text-xs"><option value="5">5 — Mantap banget</option><option value="4">4 — Bagus</option><option value="3">3 — Cukup</option><option value="2">2 — Perlu perbaikan</option><option value="1">1 — Kurang</option></select></div><div class="sm:col-span-2"><label class="block text-[10px] font-bold text-slate-700 mb-1">Sumber</label><input id="ext-rating-source" type="text" maxlength="160" placeholder="Mis. Google Business, WhatsApp, formulir offline" class="w-full card-3d-inset px-3 py-2.5 rounded-xl text-xs"></div><div class="sm:col-span-2"><label class="block text-[10px] font-bold text-slate-700 mb-1">Ulasan</label><textarea id="ext-rating-review" rows="3" maxlength="800" placeholder="Tulis ulasan yang benar-benar diterima Creator." class="w-full card-3d-inset px-3 py-2.5 rounded-xl text-xs"></textarea></div></div><div class="flex gap-2 mt-4"><button onclick="App.admin.addCreatorExternalRating('${id}')" class="btn-brand-gradient px-4 py-2.5 rounded-xl text-xs font-extrabold">Simpan Rating</button><button onclick="App.admin.openCreatorRatings('${id}')" class="px-4 py-2.5 rounded-xl text-xs font-bold bg-slate-100">Lihat Rating</button></div></div>`; },
+                addCreatorExternalRating: async (id) => { try{const reviewerName=String(document.getElementById('ext-rating-name')?.value||'').trim();const sourceLabel=String(document.getElementById('ext-rating-source')?.value||'').trim();const review=String(document.getElementById('ext-rating-review')?.value||'').trim();const rating=Number(document.getElementById('ext-rating-value')?.value||0);if(!reviewerName)throw new Error('Nama pemberi ulasan wajib diisi.');if(!sourceLabel)throw new Error('Sumber ulasan wajib diisi.');if(!Number.isInteger(rating)||rating<1||rating>5)throw new Error('Nilai rating harus 1 sampai 5.');await App.api.post('ADMIN_ADD_CREATOR_EXTERNAL_RATING',{creatorId:id,reviewerName,sourceLabel,review,rating});App.ui.toast('Rating berhasil ditambahkan. Sumbernya sudah dicatat. ✅','success');await App.admin.loadCreatorTrustControls();}catch(e){App.ui.toast(e.message||'Rating belum bisa ditambahkan.','error');} },
+                openCreatorLikes: async (id) => { try { const {data,error}=await supabaseClient.from('creator_likes').select('id,user_id,created_at').eq('creator_id',id).order('created_at',{ascending:false}).limit(50); if(error)throw error; const html=(data||[]).map(x=>`<div class="flex items-center justify-between gap-2 p-2.5 border border-slate-200 rounded-xl"><div><div class="text-[10px] font-bold text-slate-700">${App.utils.escapeHtml(x.user_id)}</div><div class="text-[9px] text-slate-400">${new Date(x.created_at).toLocaleString('id-ID')}</div></div><button onclick="App.admin.deleteCreatorLike('${x.id}','${id}')" class="text-[10px] font-bold text-red-700 bg-red-50 px-2.5 py-1.5 rounded-lg">Hapus</button></div>`).join('') || '<div class="text-xs text-slate-500">Belum ada Like.</div>'; const box=document.getElementById('creator-trust-admin-area'); if(box)box.innerHTML=`<div class="card-3d p-4 rounded-2xl bg-white"><div class="flex items-center justify-between mb-3"><h4 class="text-sm font-extrabold text-[#151c75]">Moderasi Like</h4><button onclick="App.admin.renderSubTab()" class="text-xs font-bold text-[#151c75]">Kembali</button></div><div class="space-y-2">${html}</div></div>`; }catch(e){App.ui.toast(e.message||'Like belum bisa dimuat.','error');}},
+                deleteCreatorLike: async (likeId, creatorId) => { try{await App.api.post('ADMIN_MODERATE_CREATOR_LIKES',{likeId});App.ui.toast('Like yang dipilih sudah dihapus.','info');await App.admin.openCreatorLikes(creatorId);}catch(e){App.ui.toast(e.message||'Like belum bisa dihapus.','error');}},
+                openCreatorRatings: async (id) => { try{const {data,error}=await supabaseClient.from('creator_ratings').select('id,user_id,rating,review,is_visible,created_at').eq('creator_id',id).order('created_at',{ascending:false}).limit(50);if(error)throw error;const html=(data||[]).map(r=>`<div class="p-3 border border-slate-200 rounded-xl"><div class="flex items-center justify-between gap-2"><div class="text-[10px] font-extrabold text-[#151c75]">⭐ ${Number(r.rating)}/5</div><button onclick="App.admin.toggleCreatorRating('${r.id}',${r.is_visible?'false':'true'},'${id}')" class="text-[10px] font-bold px-2.5 py-1.5 rounded-lg ${r.is_visible?'bg-red-50 text-red-700':'bg-emerald-50 text-emerald-700'}">${r.is_visible?'Sembunyikan':'Tampilkan'}</button></div><div class="text-[9px] text-slate-400 mt-1">${new Date(r.created_at).toLocaleString('id-ID')}</div>${r.review?`<p class="text-[10px] text-slate-600 mt-2 leading-relaxed">${App.utils.escapeHtml(r.review)}</p>`:''}</div>`).join('')||'<div class="text-xs text-slate-500">Belum ada rating.</div>';const box=document.getElementById('creator-trust-admin-area');if(box)box.innerHTML=`<div class="card-3d p-4 rounded-2xl bg-white"><div class="flex items-center justify-between mb-3"><h4 class="text-sm font-extrabold text-[#151c75]">Moderasi Rating</h4><button onclick="App.admin.renderSubTab()" class="text-xs font-bold text-[#151c75]">Kembali</button></div><div class="space-y-2">${html}</div></div>`;}catch(e){App.ui.toast(e.message||'Rating belum bisa dimuat.','error');}},
+                toggleCreatorRating: async (id, visible, creatorId) => { try{await App.api.post('ADMIN_MODERATE_CREATOR_RATING',{ratingId:id,visible});App.ui.toast(visible?'Rating ditampilkan.':'Rating disembunyikan.','success');await App.admin.openCreatorRatings(creatorId);}catch(e){App.ui.toast(e.message||'Rating belum bisa diubah.','error');}},
+                openCreatorPortfolios: async (id) => { try { const {data,error}=await supabaseClient.from('creator_portfolios').select('id,title,media_type,is_active,created_at').eq('creator_id',id).order('created_at',{ascending:false}); if(error)throw error; const html=(data||[]).map(p=>`<div class="flex items-center justify-between gap-2 p-2.5 border border-slate-200 rounded-xl"><div class="min-w-0"><div class="text-[10px] font-bold text-[#151c75] truncate">${App.utils.escapeHtml(p.title)}</div><div class="text-[9px] text-slate-400">${App.utils.escapeHtml(p.media_type||'media')} · ${p.is_active?'Tayang':'Disembunyikan'}</div></div><button onclick="App.admin.toggleCreatorPortfolio('${p.id}',${p.is_active?'false':'true'},'${id}')" class="text-[10px] font-bold ${p.is_active?'text-red-700 bg-red-50':'text-emerald-700 bg-emerald-50'} px-2.5 py-1.5 rounded-lg">${p.is_active?'Sembunyikan':'Tampilkan'}</button></div>`).join('') || '<div class="text-xs text-slate-500">Belum ada portfolio.</div>'; const box=document.getElementById('creator-trust-admin-area');if(box)box.innerHTML=`<div class="card-3d p-4 rounded-2xl bg-white"><div class="flex items-center justify-between mb-3"><h4 class="text-sm font-extrabold text-[#151c75]">Moderasi Portfolio</h4><button onclick="App.admin.renderSubTab()" class="text-xs font-bold text-[#151c75]">Kembali</button></div><div class="space-y-2">${html}</div></div>`;}catch(e){App.ui.toast(e.message||'Portfolio belum bisa dimuat.','error');}},
+                toggleCreatorPortfolio: async (id, active, creatorId) => { try{await App.api.post('ADMIN_MODERATE_CREATOR_PORTFOLIO',{portfolioId:id,active});App.ui.toast(active?'Portfolio ditampilkan.':'Portfolio disembunyikan.','success');await App.admin.openCreatorPortfolios(creatorId);}catch(e){App.ui.toast(e.message||'Portfolio belum bisa diubah.','error');}},
                 switchTab: (tab) => {
                     App.state.adminTab = tab;
                     App.admin.render();
@@ -3526,6 +4037,17 @@ const App = {
                                     </div>
                                 </div>
                             `;
+                        } else if (tab === 'creators') {
+                            const { creators = [] } = await App.api.post('GET_CREATOR_MODERATION_QUEUE');
+                            area.innerHTML = `<div>
+                                <div class="flex items-center justify-between gap-3 mb-4 flex-wrap">
+                                    <div><h3 class="font-bold text-sm text-[#151c75]">Review Creator</h3><p class="text-[11px] text-slate-500 mt-0.5">Cek profil dulu, biar yang tampil di Studio AI tetap rapi dan terpercaya.</p></div>
+                                    <span class="creator-review-badge"><i class="fa-solid fa-shield-heart"></i>${creators.length} perlu dicek</span>
+                                </div>
+                                ${creators.length ? creators.map(c=>`<div class="admin-creator-card border border-slate-200 rounded-2xl p-4 mb-3"><div class="flex flex-col lg:flex-row justify-between gap-3"><div class="min-w-0"><div class="flex items-center gap-2"><div class="text-sm font-extrabold text-[#151c75] truncate">${App.utils.escapeHtml(c.display_name||c.username)}</div><span class="creator-review-badge">${App.utils.escapeHtml(c.review_status||'PENDING')}</span></div><div class="text-[10px] text-slate-500 mt-1">studihome.id/${App.utils.escapeHtml(c.username)}${c.review_requested_at?` · dikirim ${new Date(c.review_requested_at).toLocaleString('id-ID')}`:''}</div><div class="text-xs text-slate-600 mt-2 leading-relaxed">${App.utils.escapeHtml((c.bio||'Belum ada bio.').slice(0,240))}</div>${c.review_note?`<div class="text-[10px] text-red-600 mt-2">Catatan: ${App.utils.escapeHtml(c.review_note)}</div>`:''}</div><div class="flex gap-2 shrink-0"><button onclick="App.admin.reviewCreator('${c.id}','APPROVED')" class="btn-brand-gradient creator-review-action px-3.5 py-2 rounded-xl text-[11px] font-bold"><i class="fa-solid fa-circle-check mr-1"></i> Setujui & Tayang</button><button onclick="App.admin.reviewCreator('${c.id}','REJECTED')" class="creator-review-action px-3.5 py-2 rounded-xl text-[11px] font-bold bg-red-50 text-red-700 border border-red-200"><i class="fa-solid fa-rotate-left mr-1"></i> Perlu Dirapikan</button></div></div></div>`).join(''):`<div class="card-3d-inset p-8 rounded-2xl text-center text-xs text-slate-500"><i class="fa-solid fa-shield-heart text-2xl text-[#151c75] mb-2"></i><div>Belum ada Creator yang perlu dicek. Aman, belum ada PR baru. 😄</div></div>`}
+                            </div>`;
+                            // Trust controls stay inside the existing Creator admin area.
+                            setTimeout(() => App.admin.loadCreatorTrustControlsInline(area), 0);
                         } else if (tab === 'users') {
                             area.innerHTML = `
                                 <div>
@@ -3901,6 +4423,14 @@ const App = {
                     App.ui.toggleModal('ai-link-modal', true);
                 },
 
+                reviewCreator: async (creatorId, decision) => {
+                    try {
+                        const note = decision === 'REJECTED' ? (window.prompt('Catatan singkat untuk Creator:', '') || '') : '';
+                        await App.api.post('ADMIN_REVIEW_CREATOR', { creatorId, decision, note });
+                        App.ui.toast(decision === 'APPROVED' ? 'Sip, Creator disetujui dan langsung tayang. ✨' : 'Oke, profilnya dikembalikan dulu untuk dirapikan.', decision === 'APPROVED' ? 'success' : 'info');
+                        await App.admin.renderSubTab();
+                    } catch(e) { App.ui.toast(e.message || 'Review Creator belum berhasil. Coba lagi, ya.', 'error'); }
+                },
                 saveAiLinkFromModal: async (e) => {
                     e.preventDefault();
                     const index = parseInt(document.getElementById('ai-link-index').value, 10);
@@ -4033,7 +4563,7 @@ const App = {
 
                     try {
                         await App.api.post('CLAIM_FREE_PRODUCT', { productId });
-                        App.ui.toast('Produk GRATIS berhasil ditambahkan ke Dashboard Anda!', 'success');
+                        App.ui.toast('Produk GRATIS berhasil ditambahkan ke Kamar kamu!', 'success');
                         App.router.navigate('dashboard');
                     } catch (e) {
                         App.ui.toast('Gagal menambahkan produk gratis.', 'error');
