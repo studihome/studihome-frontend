@@ -13,7 +13,45 @@
     <link rel="canonical" href="https://studihome.id/">
 
     <!-- Static SVG Retina Blue Favicon (100% Size) -->
-    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><style>.star { fill: %231b5df0; font-size: 100px; text-anchor: middle; dominant-baseline: central; font-family: sans-serif; font-weight: bold; }</style><text x='50' y='50' class='star'>✦</text></svg>">
+    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><style>.star { fill: %231b5df0; font-size: 100px; text-anchor: middle; dominant-baseline: central; font-family: sans-serif; font-weight: bold; }
+        /* Step 26 — Creator Launch Kit (additive only) */
+        .creator-launch-card{background:linear-gradient(135deg,#f8fbff 0%,#ffffff 55%,#eef5ff 100%);border:1px solid #dbe7ff;box-shadow:0 12px 32px rgba(21,28,117,.08)}
+        .creator-launch-action{min-height:44px;transition:transform .18s ease,box-shadow .18s ease,background .18s ease}
+        .creator-launch-action:hover{transform:translateY(-1px);box-shadow:0 10px 22px rgba(21,28,117,.10)}
+        .creator-share-preview{background:#151c75;color:#fff;border-radius:1.25rem;padding:1rem;box-shadow:0 14px 28px rgba(21,28,117,.16)}
+        @media (prefers-reduced-motion: reduce){.creator-launch-action{transition:none!important}.creator-launch-action:hover{transform:none!important}}
+
+    
+        /* Step 43 — SMART Auto-Discovery Summary */
+        .studio-smart-understanding {
+            border:1px solid rgba(191,219,254,.9);
+            background:linear-gradient(135deg,#f8fbff 0%,#eef5ff 100%);
+            box-shadow:0 10px 24px rgba(21,28,117,.07);
+        }
+        .studio-smart-understanding .smart-summary-icon {
+            box-shadow:0 8px 18px rgba(21,28,117,.12);
+        }
+        .studio-smart-summary-chip {
+            background:#fff; border:1px solid #dbe8ff; color:#151c75;
+        }
+        .studio-smart-summary-btn {
+            min-height:40px; transition:transform .18s ease, box-shadow .18s ease;
+        }
+        .studio-smart-summary-btn:hover { transform:translateY(-1px); box-shadow:0 8px 16px rgba(21,28,117,.10); }
+        @media (prefers-reduced-motion: reduce){ .studio-smart-summary-btn{transition:none}.studio-smart-summary-btn:hover{transform:none} }
+
+        /* Step 28 — SMART Match presentation */
+        .studio-smart-match-meter { height: 5px; border-radius: 999px; background: #eaf0ff; overflow: hidden; }
+        .studio-smart-match-meter > span { display:block; height:100%; border-radius:inherit; background: linear-gradient(90deg,#151c75,#3f48bf,#FACC15); transition: width .45s ease; }
+        .studio-smart-explain { border:1px solid #dbe7ff; background:linear-gradient(180deg,#f8fbff 0%,#f1f6ff 100%); }
+        .studio-smart-explain[hidden] { display:none; }
+        .studio-smart-factor { display:flex; align-items:center; justify-content:space-between; gap:.75rem; padding:.45rem .55rem; border-radius:.75rem; background:#fff; border:1px solid #e5edff; }
+        .studio-smart-factor-bar { height:4px; border-radius:999px; background:#e8eefc; overflow:hidden; flex:1; min-width:70px; }
+        .studio-smart-factor-bar > span { display:block; height:100%; border-radius:inherit; background:linear-gradient(90deg,#151c75,#3f48bf); }
+        .studio-smart-badge { font-size:8px; font-weight:900; letter-spacing:.08em; text-transform:uppercase; color:#64748b; }
+        .studio-smart-result { border-color: #dbe7ff; }
+        @media (prefers-reduced-motion: reduce) { .studio-smart-match-meter > span { transition:none; } }
+</style><text x='50' y='50' class='star'>✦</text></svg>">
 
     <!-- Robots & Search Directives (GEO & SEO Ready) -->
     <meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1">
@@ -429,6 +467,55 @@
         .creator-service-card, .creator-portfolio-card { transition: transform .2s ease, box-shadow .2s ease, border-color .2s ease; }
         .creator-service-card:hover, .creator-portfolio-card:hover { transform:translateY(-2px); box-shadow:0 14px 30px rgba(21,28,117,.10); border-color:#c7d8ff; }
         @media (max-width: 640px) { .creator-profile-hero::after { width:220px; height:220px; right:-100px; top:-80px; } }
+        /* Step 27 — Smart Discovery (additive only) */
+        .studio-smart-brief-btn {
+            background: rgba(255,255,255,.10);
+            border: 1px solid rgba(255,255,255,.20);
+            color: #fff;
+            backdrop-filter: blur(10px);
+            transition: all .2s ease;
+        }
+        .studio-smart-brief-btn:hover { background: rgba(255,255,255,.16); transform: translateY(-1px); }
+        .studio-smart-result { animation: studioSmartIn .24s ease-out both; }
+        @keyframes studioSmartIn { from { opacity:0; transform:translateY(8px); } to { opacity:1; transform:translateY(0); } }
+        .studio-smart-reason { background: #f5f8ff; border: 1px solid #dbe7ff; }
+        .studio-smart-modal-card { box-shadow: 0 28px 80px rgba(15,23,42,.20); }
+        @media (prefers-reduced-motion: reduce) { .studio-smart-result, .studio-smart-brief-btn { animation:none !important; transition:none !important; } }
+
+        /* Step 39 — SMART Feedback Loop: session-only, transparent correction */
+        .studio-smart-feedback{margin-top:.75rem;padding:.65rem .75rem;border:1px solid #e5edff;border-radius:1rem;background:linear-gradient(180deg,#ffffff 0%,#f8fbff 100%);}
+        .studio-smart-feedback-title{font-size:9px;font-weight:900;letter-spacing:.02em;color:#475569;}
+        .studio-smart-feedback-btn{display:inline-flex;align-items:center;gap:.3rem;padding:.42rem .6rem;border-radius:.8rem;border:1px solid #dbe7ff;background:#fff;color:#151c75;font-size:9px;font-weight:800;transition:all .16s ease;}
+        .studio-smart-feedback-btn:hover{transform:translateY(-1px);box-shadow:0 7px 16px rgba(21,28,117,.08);background:#eef4ff;}
+        .studio-smart-feedback-btn.active{border-color:#93c5fd;background:#eff6ff;}
+        .studio-smart-feedback-followup{margin-top:.5rem;padding:.55rem;border-radius:.85rem;background:#fff7ed;border:1px solid #fed7aa;}
+        @media (prefers-reduced-motion: reduce){.studio-smart-feedback-btn{transition:none!important;transform:none!important;}}
+        /* Step 37 — SMART Confidence & Missing Information */
+        .studio-smart-confidence { display:inline-flex; align-items:center; gap:.35rem; padding:.28rem .55rem; border-radius:999px; font-size:8px; font-weight:900; border:1px solid #dbe7ff; background:#f8fbff; color:#475569; }
+        .studio-smart-confidence.high { background:#ecfdf5; border-color:#bbf7d0; color:#047857; }
+        .studio-smart-confidence.medium { background:#fffbeb; border-color:#fde68a; color:#a16207; }
+        .studio-smart-confidence.low { background:#fff7ed; border-color:#fed7aa; color:#c2410c; }
+        .studio-smart-ask { border:1px solid #dbe7ff; background:linear-gradient(135deg,#f8fbff 0%,#ffffff 100%); }
+        .studio-smart-ask-btn { border:1px solid #c7d8ff; background:#fff; color:#151c75; transition:all .18s ease; }
+        .studio-smart-ask-btn:hover { transform:translateY(-1px); box-shadow:0 8px 18px rgba(21,28,117,.08); background:#eef4ff; }
+        @media (prefers-reduced-motion: reduce){ .studio-smart-ask-btn{transition:none!important;transform:none!important;} }
+        /* Step 35 — SMART Brief & Shortlist: additive only */
+.studio-smart-shortlist-bar{background:linear-gradient(135deg,#f8fbff 0%,#eef4ff 100%);border:1px solid #dbe7ff;}
+.studio-smart-shortlist-chip{display:inline-flex;align-items:center;gap:.35rem;padding:.38rem .62rem;border-radius:999px;background:#fff;border:1px solid #dbe7ff;color:#151c75;font-size:9px;font-weight:800;transition:all .18s ease;}
+.studio-smart-shortlist-chip:hover,.studio-smart-shortlist-chip.active{transform:translateY(-1px);box-shadow:0 8px 18px rgba(21,28,117,.08);background:#eef4ff;border-color:#b9ccff;}
+.studio-smart-brief-card{border:1px solid #dbe7ff;background:#fff;box-shadow:0 14px 30px rgba(21,28,117,.08);}
+.studio-smart-brief-pre{white-space:pre-wrap;word-break:break-word;background:#f8fbff;border:1px solid #e5edff;border-radius:1rem;padding:.85rem;font-size:10px;line-height:1.65;color:#475569;}
+.studio-smart-compare-row{display:grid;grid-template-columns:minmax(0,1.3fr) repeat(3,minmax(0,1fr));gap:.5rem;align-items:stretch;}
+@media (max-width: 767px){.studio-smart-compare-row{grid-template-columns:1fr;}.studio-smart-shortlist-bar{position:sticky;bottom:.5rem;z-index:8;box-shadow:0 14px 30px rgba(21,28,117,.14);}}
+@media (prefers-reduced-motion: reduce){.studio-smart-shortlist-chip{transition:none!important;transform:none!important;}}
+/* Step 34 — SMART Solution Path: additive only */
+        .studio-smart-free-badge { display:inline-flex; align-items:center; gap:.4rem; padding:.35rem .65rem; border-radius:999px; background:rgba(255,255,255,.12); border:1px solid rgba(255,255,255,.18); color:#fff; font-size:9px; font-weight:900; letter-spacing:.04em; }
+        .studio-smart-path { border:1px solid #dbe7ff; background:linear-gradient(180deg,#ffffff 0%,#f8fbff 100%); }
+        .studio-smart-path-card { transition:transform .2s ease, box-shadow .2s ease, border-color .2s ease; }
+        .studio-smart-path-card:hover { transform:translateY(-2px); box-shadow:0 14px 28px rgba(21,28,117,.10); border-color:#c7d8ff; }
+        .studio-smart-path-icon { box-shadow:0 8px 18px rgba(21,28,117,.12); }
+        @media (prefers-reduced-motion: reduce) { .studio-smart-path-card { transition:none !important; } }
+
         /* Studio AI public experience — additive only */
         .studio-ai-hero {
             position: relative;
@@ -483,10 +570,36 @@
         .studio-ai-card { transition: transform .22s ease, box-shadow .22s ease, border-color .22s ease; }
         .studio-ai-card:hover { transform: translateY(-3px); box-shadow: 0 18px 34px rgba(21,28,117,.12); border-color: #c7d8ff; }
         .studio-ai-chip.active { background: linear-gradient(135deg,#151c75,#3f48bf); color:#fff; box-shadow: 0 4px 12px rgba(21,28,117,.2); }
+        .studio-smart-goal-chip { box-shadow: 0 4px 10px rgba(234,179,8,.10); }
         @media (max-width: 767px) {
             .studio-ai-orb { width: 132px; height: 132px; right: -20px; bottom: -20px; opacity: .9; }
             .studio-ai-hero { min-height: 520px; }
         }
+        /* Step 31 — SMART intent refinement chips */
+        .studio-smart-refine-chip { transition: transform .18s ease, background-color .18s ease, box-shadow .18s ease; }
+        .studio-smart-refine-chip:hover { transform: translateY(-1px); box-shadow: 0 6px 14px rgba(21,28,117,.08); }
+        .studio-smart-refine-chip:focus-visible { outline: 3px solid rgba(250,204,21,.9); outline-offset: 2px; }
+        #studio-smart-context { transition: opacity .2s ease, transform .2s ease; }
+        @media (prefers-reduced-motion: reduce) { .studio-smart-refine-chip { transition:none !important; } }
+
+        /* SMART Next Best Action — additive only */
+        .smart-next-action {
+            border: 1px solid rgba(191,219,254,.9);
+            background: linear-gradient(135deg, rgba(239,246,255,.98), rgba(255,255,255,.98));
+            box-shadow: 0 14px 30px rgba(21,28,117,.08);
+        }
+        .smart-next-action-badge {
+            display:inline-flex; align-items:center; gap:.35rem; padding:.25rem .5rem; border-radius:999px;
+            font-size:9px; font-weight:900; text-transform:uppercase; letter-spacing:.06em;
+            background:#eef2ff; color:#151c75; border:1px solid #dbe4ff;
+        }
+        .smart-next-action-btn { transition: transform .18s ease, box-shadow .18s ease, background .18s ease; }
+        .smart-next-action-btn:hover { transform: translateY(-1px); box-shadow:0 8px 18px rgba(21,28,117,.12); }
+        .smart-next-action-btn:focus-visible { outline:3px solid rgba(250,204,21,.9); outline-offset:2px; }
+        @media (prefers-reduced-motion: reduce) { .smart-next-action-btn { transition:none !important; } }
+
+        /* Step 46 — SMART Multi-Intent */
+        .studio-smart-multi-chip{display:inline-flex;align-items:center;gap:.3rem;padding:.28rem .48rem;border-radius:999px;background:#fff;border:1px solid #dbe7ff;color:#475569;font-size:8px;font-weight:800;}
         /* Studio AI QA/UX hardening — additive only */
         .studio-ai-search-wrap { transition: box-shadow .2s ease, transform .2s ease, border-color .2s ease; }
         .studio-ai-search-wrap:focus-within { box-shadow: 0 0 0 3px rgba(96,165,250,.22), 0 16px 34px rgba(21,28,117,.14); transform: translateY(-1px); }
@@ -580,6 +693,26 @@
         .admin-trust-card{background:#fff;border:1px solid #dfe7f5;border-radius:1.1rem;padding:.8rem;box-shadow:0 8px 22px rgba(21,28,117,.06)}
         .admin-trust-card .metric{font-weight:900;color:#151c75}
         .admin-trust-badge{display:inline-flex;align-items:center;gap:.35rem;padding:.28rem .52rem;border-radius:.65rem;font-size:10px;font-weight:800;background:#eff6ff;color:#151c75;border:1px solid #dbeafe}
+
+        /* Step 25 — Creator Growth & Conversion Engine (additive only) */
+        .creator-intent-panel{background:linear-gradient(180deg,#ffffff 0%,#f8fbff 100%);border:1px solid #dbe7ff;box-shadow:0 16px 34px rgba(21,28,117,.08)}
+        .creator-intent-chip{border:1px solid #dbe7ff;background:#fff;color:#151c75;transition:all .18s ease;min-height:38px}
+        .creator-intent-chip:hover,.creator-intent-chip:focus-visible{transform:translateY(-1px);border-color:#93c5fd;background:#eff6ff;box-shadow:0 8px 18px rgba(21,28,117,.08);outline:none}
+        .creator-intent-input{border:1px solid #dbe7ff;background:#fff;transition:box-shadow .18s ease,border-color .18s ease}
+        .creator-intent-input:focus{border-color:#93c5fd;box-shadow:0 0 0 3px rgba(96,165,250,.18);outline:none}
+        .creator-proof-line{display:flex;align-items:center;gap:.4rem;flex-wrap:wrap}
+        .creator-proof-sep{opacity:.35}
+        .creator-featured-service{position:relative;overflow:hidden;border:1px solid #dbe7ff;background:linear-gradient(135deg,#fff,#f5f8ff)}
+        .creator-featured-service::before{content:'';position:absolute;inset:0;background:radial-gradient(circle at 100% 0,rgba(250,204,21,.12),transparent 32%);pointer-events:none}
+        @media (prefers-reduced-motion: reduce){.creator-intent-chip{transition:none!important;transform:none!important}}
+
+        /* Step 41 — conversational SMART refinement */
+        .studio-smart-conversation-hint { background: linear-gradient(135deg, rgba(239,246,255,.92), rgba(255,255,255,.96)); border:1px solid #dbeafe; }
+        .studio-smart-conversation-chip { transition: transform .16s ease, box-shadow .16s ease, background .16s ease; }
+        .studio-smart-conversation-chip:hover { transform: translateY(-1px); box-shadow: 0 6px 14px rgba(21,28,117,.08); }
+        .studio-smart-conversation-chip:focus-visible { outline: 3px solid rgba(250,204,21,.85); outline-offset: 2px; }
+        @media (prefers-reduced-motion: reduce) { .studio-smart-conversation-chip { transition:none !important; } }
+
         /* Custom Scrollbar */
         ::-webkit-scrollbar {
             width: 6px;
@@ -595,7 +728,25 @@
         ::-webkit-scrollbar-thumb:hover {
             background: #151c75;
         }
-    </style>
+    
+        /* SMART Decision Flow — additive only */
+        .smart-decision-card { background: linear-gradient(135deg, rgba(235,243,255,.96), rgba(255,255,255,.98)); border: 1px solid #dbe7ff; box-shadow: 0 14px 32px rgba(21,28,117,.09); }
+        .smart-decision-badge { background: linear-gradient(135deg,#151c75,#3f48bf); color:#fff; box-shadow:0 5px 14px rgba(21,28,117,.18); }
+        .smart-choice { border:1px solid #dbe7ff; transition:transform .2s ease, box-shadow .2s ease, border-color .2s ease; }
+        .smart-choice:hover { transform:translateY(-2px); border-color:#bfd2ff; box-shadow:0 12px 26px rgba(21,28,117,.09); }
+        .smart-choice.best { border-color:#f4d35e; box-shadow:0 12px 28px rgba(234,179,8,.12); }
+        @media (max-width: 640px) { .smart-decision-card { padding: .9rem !important; } }
+        @media (prefers-reduced-motion: reduce) { .smart-choice { transition:none !important; } }
+</style>
+
+<style id="smart-zero-form-step42">
+.smart-zero-form { display:flex; gap:.5rem; align-items:flex-end; }
+.smart-zero-form textarea { min-height:52px; max-height:140px; resize:vertical; }
+.smart-zero-result { animation: smartZeroIn .28s ease-out both; }
+@keyframes smartZeroIn { from{opacity:0;transform:translateY(8px)} to{opacity:1;transform:none} }
+@media (prefers-reduced-motion: reduce){.smart-zero-result{animation:none!important}}
+</style>
+
 </head>
 <body class="min-h-full flex flex-col antialiased selection:bg-amber-400 selection:text-slate-900 text-slate-800">
 
@@ -674,6 +825,50 @@
             <div class="mt-4 flex items-center justify-between gap-2">
                 <button type="button" onclick="App.search.closeModal()" class="px-4 py-2.5 rounded-xl text-xs font-bold text-slate-600 bg-slate-100 hover:bg-slate-200 transition-all">Nanti dulu</button>
                 <button type="button" onclick="App.search.submitFromModal(document.getElementById('global-search-modal-input').value)" class="btn-brand-gradient px-4 py-2.5 rounded-xl text-xs font-extrabold">Cari Sekarang <i class="fa-solid fa-arrow-right ml-1 text-[#FACC15]"></i></button>
+            </div>
+        </div>
+    </div>
+
+    <!-- STUDIO AI SMART DISCOVERY MODAL -->
+    <div id="studio-smart-brief-modal" class="fixed inset-0 z-[91] hidden bg-slate-900/60 backdrop-blur-sm items-center justify-center p-4">
+        <div class="studio-smart-modal-card card-3d w-full max-w-2xl rounded-3xl bg-white p-5 sm:p-6 relative">
+            <button type="button" onclick="App.studioAI.closeSmartBrief()" aria-label="Tutup pencarian kebutuhan" class="modal-close-btn absolute top-4 right-4 w-8 h-8 rounded-full flex items-center justify-center font-extrabold shadow-md">
+                <i class="fa-solid fa-xmark"></i>
+            </button>
+            <div class="pr-10">
+                <div class="flex flex-wrap items-center gap-2">
+                    <div class="inline-flex items-center gap-2 text-[10px] font-black uppercase tracking-wider text-amber-600"><i class="fa-solid fa-wand-magic-sparkles"></i> Smart Discovery</div>
+                    <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-emerald-50 border border-emerald-200 text-[9px] font-extrabold text-emerald-700"><i class="fa-solid fa-gift"></i> Gratis</span>
+                </div>
+                <h3 class="mt-1 text-xl sm:text-2xl font-black text-[#151c75]">Ceritakan kebutuhanmu 😊</h3>
+                <p class="mt-1 text-xs sm:text-sm text-slate-500 leading-relaxed">Nggak perlu pakai istilah ribet. Cerita aja pakai bahasa sehari-hari. Studio AI akan mencocokkan kebutuhanmu dengan Creator yang paling nyambung.</p>
+            </div>
+            <div class="mt-4 rounded-2xl border border-blue-100 bg-blue-50/70 p-4">
+                <textarea id="studio-smart-brief-input" rows="5" class="w-full rounded-xl bg-white border border-blue-100 px-3.5 py-3 text-xs sm:text-sm text-slate-700 outline-none focus:ring-2 focus:ring-[#151c75] resize-none" placeholder="Contoh: video iklan untuk UMKM. Atau cukup ketik: video iklan 😄"></textarea>
+                <div id="studio-smart-context" class="hidden mt-3"></div>
+                <div class="studio-smart-conversation-hint rounded-2xl p-3 mt-3">
+                    <div class="flex items-start gap-2.5">
+                        <div class="w-8 h-8 rounded-xl bg-white border border-blue-100 text-[#151c75] flex items-center justify-center shrink-0 shadow-2xs"><i class="fa-solid fa-message"></i></div>
+                        <div class="min-w-0 flex-1">
+                            <div class="text-[10px] font-extrabold text-[#151c75]">Ngobrol aja biasa 😄</div>
+                            <div class="text-[9px] leading-relaxed text-slate-500 mt-0.5">Setelah hasil keluar, kamu cukup bilang “yang lebih murah”, “khusus TikTok”, atau “yang bisa selesai 3 hari”. SMART bakal nyambungin dengan konteks sebelumnya.</div>
+                        </div>
+                    </div>
+                    <div class="mt-2 flex flex-wrap gap-2">
+                        <button type="button" class="studio-smart-conversation-chip px-2.5 py-1.5 rounded-full text-[9px] font-extrabold text-[#151c75] bg-white border border-blue-100" onclick="App.studioAI._applyConversationalRefinement('yang lebih murah')">yang lebih murah</button>
+                        <button type="button" class="studio-smart-conversation-chip px-2.5 py-1.5 rounded-full text-[9px] font-extrabold text-[#151c75] bg-white border border-blue-100" onclick="App.studioAI._applyConversationalRefinement('khusus TikTok')">khusus TikTok</button>
+                        <button type="button" class="studio-smart-conversation-chip px-2.5 py-1.5 rounded-full text-[9px] font-extrabold text-[#151c75] bg-white border border-blue-100" onclick="App.studioAI._applyConversationalRefinement('yang bisa selesai 3 hari')">selesai 3 hari</button>
+                    </div>
+                </div>
+                <div class="mt-3 grid grid-cols-1 sm:grid-cols-2 gap-2">
+                    <input id="studio-smart-brief-budget" type="text" inputmode="numeric" class="w-full rounded-xl bg-white border border-blue-100 px-3 py-2.5 text-xs text-slate-700 outline-none focus:ring-2 focus:ring-[#151c75]" placeholder="Budget kira-kira (opsional)">
+                    <input id="studio-smart-brief-deadline" type="text" class="w-full rounded-xl bg-white border border-blue-100 px-3 py-2.5 text-xs text-slate-700 outline-none focus:ring-2 focus:ring-[#151c75]" placeholder="Target selesai (opsional)">
+                </div>
+            </div>
+            <div id="studio-smart-shortlist" class="hidden"></div><div id="studio-smart-understanding" class="mt-4"></div><div id="studio-smart-brief-results" class="mt-4"></div>
+            <div class="mt-4 flex flex-wrap justify-end gap-2">
+                <button type="button" onclick="App.studioAI.closeSmartBrief()" class="px-4 py-2.5 rounded-xl text-xs font-bold text-slate-600 bg-slate-100 hover:bg-slate-200">Nanti dulu</button>
+                <button type="button" onclick="App.studioAI.runSmartDiscovery()" class="btn-brand-gradient px-4 py-2.5 rounded-xl text-xs font-extrabold">Cari yang Paling Nyambung <i class="fa-solid fa-arrow-right ml-1 text-[#FACC15]"></i></button>
             </div>
         </div>
     </div>
@@ -1012,6 +1207,7 @@ const App = {
             },
 
             init: async () => {
+                App.studioAI._loadSmartContext();
                 setInterval(App.utils.updateClock, 1000);
                 App.utils.updateClock();
                 App.ui.updateApiStatus('connecting');
@@ -1934,12 +2130,23 @@ const App = {
                                 ...c,
                                 creatorCount: Number(categoryCounts[c.id] || 0)
                             }));
+                            const portfolioRes = await supabaseClient.from('creator_portfolios').select('creator_id').eq('is_active', true).limit(1000);
+                            if (portfolioRes.error) throw portfolioRes.error;
+                            const portfolioCounts = {};
+                            (portfolioRes.data || []).forEach(x => portfolioCounts[x.creator_id] = (portfolioCounts[x.creator_id] || 0) + 1);
+                            const categoryNamesByCreator = {};
+                            (memberRes.data || []).forEach(m => {
+                                const cat = (catRes.data || []).find(x => x.id === m.category_id);
+                                if (cat) (categoryNamesByCreator[m.creator_id] ||= []).push(cat.name);
+                            });
                             const creators = (creatorRes.data || []).map(c => ({
                                 ...c,
                                 likes: Number(likeCounts[c.id] || 0) + Number(likeAdjustments[c.id] || 0),
                                 ratingCount: (ratingBuckets[c.id] || []).length,
                                 ratingAvg: (ratingBuckets[c.id] || []).length ? Number((ratingBuckets[c.id].reduce((a,b)=>a+b,0) / ratingBuckets[c.id].length).toFixed(1)) : null,
-                                services: servicesByCreator[c.id] || []
+                                services: servicesByCreator[c.id] || [],
+                                portfolio_count: Number(portfolioCounts[c.id] || 0),
+                                category_names: categoryNamesByCreator[c.id] || []
                             }));
                             data = {
                                 categories,
@@ -2614,6 +2821,12 @@ const App = {
                                         <button type="button" aria-label="Cari di Studio AI" onclick="App.studioAI.applySearch()" class="btn-brand-amber px-3.5 py-2.5 rounded-xl text-[11px] sm:text-xs font-extrabold shrink-0">Cari</button>
                                     </div>
                                 </div>
+                                <div class="mt-3 flex flex-wrap items-center gap-2">
+                                    <button type="button" onclick="App.studioAI.openSmartBrief()" class="studio-smart-brief-btn inline-flex items-center gap-2 px-3.5 py-2 rounded-xl text-[10px] sm:text-xs font-extrabold">
+                                        <i class="fa-solid fa-sparkles text-amber-300"></i> Ceritakan kebutuhanmu
+                                    </button>
+                                    <span class="text-[10px] sm:text-xs text-blue-100/80">Cerita aja. SMART yang bantu nyariin yang paling nyambung.</span>
+                                </div>
                                 <div class="mt-4 flex flex-wrap gap-2" id="studio-ai-category-chips"></div>
                                 <div id="studio-ai-live-stats" class="mt-4 flex flex-wrap gap-2"></div>
                             </div>
@@ -2731,11 +2944,913 @@ const App = {
                     App.studioAI.render(clean);
                     window.scrollTo({ top: 0, behavior: 'smooth' });
                 },
+                /* Step 38 — SMART Learning Loop: session-only, privacy-first interaction signals */
+                _smartLearningKey: 'studihome-smart-learning-v1',
+                _smartLearning: null,
+                _loadSmartLearning: () => {
+                    try {
+                        const raw = sessionStorage.getItem(App.studioAI._smartLearningKey);
+                        App.studioAI._smartLearning = raw ? JSON.parse(raw) : { creators: {}, totalSignals: 0 };
+                    } catch (_) {
+                        App.studioAI._smartLearning = { creators: {}, totalSignals: 0 };
+                    }
+                    return App.studioAI._smartLearning;
+                },
+                _saveSmartLearning: () => {
+                    const state = App.studioAI._smartLearning || { creators: {}, totalSignals: 0 };
+                    try { sessionStorage.setItem(App.studioAI._smartLearningKey, JSON.stringify(state)); } catch (_) {}
+                },
+                _signalCreator: (username, signal) => {
+                    const key = String(username || '').trim().toLowerCase();
+                    if (!key) return;
+                    const state = App.studioAI._smartLearning || App.studioAI._loadSmartLearning();
+                    const creator = state.creators[key] || { profile: 0, shortlist: 0, whatsapp: 0 };
+                    if (!(signal in creator)) return;
+                    creator[signal] = Math.min(6, Number(creator[signal] || 0) + 1);
+                    state.creators[key] = creator;
+                    state.totalSignals = Math.min(120, Number(state.totalSignals || 0) + 1);
+                    App.studioAI._smartLearning = state;
+                    App.studioAI._saveSmartLearning();
+                },
+                _learningBoost: (username) => {
+                    const state = App.studioAI._smartLearning || App.studioAI._loadSmartLearning();
+                    const c = state.creators?.[String(username || '').trim().toLowerCase()];
+                    if (!c) return 0;
+                    /* Small, capped session boost. Interactions refine ordering but never override relevance. */
+                    return Math.min(3.5,
+                        Number(c.whatsapp || 0) * 0.75 +
+                        Number(c.profile || 0) * 0.45 +
+                        Number(c.shortlist || 0) * 0.30
+                    );
+                },
+                _resetSmartLearning: () => {
+                    App.studioAI._smartLearning = { creators: {}, totalSignals: 0 };
+                    try { sessionStorage.removeItem(App.studioAI._smartLearningKey); } catch (_) {}
+                },
+                /* Step 39 — SMART Feedback Loop: session-only, privacy-first correction signals */
+                _smartFeedbackKey: 'studihome-smart-feedback-v1',
+                _smartFeedback: null,
+                _loadSmartFeedback: () => {
+                    try {
+                        const raw = sessionStorage.getItem(App.studioAI._smartFeedbackKey);
+                        App.studioAI._smartFeedback = raw ? JSON.parse(raw) : { creators: {} };
+                    } catch (_) {
+                        App.studioAI._smartFeedback = { creators: {} };
+                    }
+                    return App.studioAI._smartFeedback;
+                },
+                _saveSmartFeedback: () => {
+                    try { sessionStorage.setItem(App.studioAI._smartFeedbackKey, JSON.stringify(App.studioAI._smartFeedback || { creators: {} })); } catch (_) {}
+                },
+                _recordSmartFeedback: (username, verdict, reason = '') => {
+                    const key = String(username || '').trim().toLowerCase();
+                    if (!key || !['good','okay','bad'].includes(verdict)) return;
+                    const state = App.studioAI._smartFeedback || App.studioAI._loadSmartFeedback();
+                    const current = state.creators[key] || { good: 0, okay: 0, bad: 0, reasons: {} };
+                    current[verdict] = Math.min(6, Number(current[verdict] || 0) + 1);
+                    if (reason) current.reasons[reason] = Math.min(3, Number(current.reasons[reason] || 0) + 1);
+                    state.creators[key] = current;
+                    App.studioAI._smartFeedback = state;
+                    App.studioAI._saveSmartFeedback();
+                },
+                _feedbackAdjustment: (username) => {
+                    const state = App.studioAI._smartFeedback || App.studioAI._loadSmartFeedback();
+                    const c = state.creators?.[String(username || '').trim().toLowerCase()];
+                    if (!c) return 0;
+                    const positive = Number(c.good || 0) * 1.2;
+                    const neutral = Number(c.okay || 0) * 0.25;
+                    const negative = Number(c.bad || 0) * 1.5;
+                    return Math.max(-4, Math.min(3, positive + neutral - negative));
+                },
+                _resetSmartFeedback: () => {
+                    App.studioAI._smartFeedback = { creators: {} };
+                    try { sessionStorage.removeItem(App.studioAI._smartFeedbackKey); } catch (_) {}
+                },
+                _handleSmartFeedback: (username, verdict, resultIndex) => {
+                    App.studioAI._recordSmartFeedback(username, verdict);
+                    const label = verdict === 'good' ? 'Sip! SMART nangkep pola yang kamu suka. 😄' : verdict === 'okay' ? 'Oke, berarti masih lumayan. SMART catat dulu.' : 'Siap, SMART koreksi arahnya. 👍';
+                    App.ui.toast(label, verdict === 'bad' ? 'info' : 'success');
+                    const box = document.getElementById(`studio-smart-feedback-followup-${resultIndex}`);
+                    if (!box) return;
+                    if (verdict === 'bad') {
+                        box.hidden = false;
+                        box.innerHTML = `<div class="text-[9px] font-black text-amber-800">Yang kurang pas di mana?</div><div class="mt-2 flex flex-wrap gap-2">${['Jasanya','Budget','Jenis hasil','Kurang paham kebutuhanku'].map(r=>`<button type="button" class="studio-smart-feedback-btn" onclick="App.studioAI._recordSmartFeedback('${App.utils.escapeHtml(username)}','bad','${App.utils.escapeHtml(r)}');App.ui.toast('Oke, catatan itu dipakai buat memperbaiki hasil berikutnya. 😄','info');this.disabled=true;this.classList.add('active')">${App.utils.escapeHtml(r)}</button>`).join('')}</div>`;
+                    } else {
+                        box.hidden = true;
+                    }
+                },
+                _renderSmartFeedback: (username, resultIndex) => {
+                    const state = App.studioAI._smartFeedback || App.studioAI._loadSmartFeedback();
+                    const c = state.creators?.[String(username || '').trim().toLowerCase()];
+                    const verdict = c ? (Number(c.good||0) > Number(c.bad||0) && Number(c.good||0) >= 1 ? 'good' : Number(c.bad||0) >= 1 ? 'bad' : Number(c.okay||0) >= 1 ? 'okay' : '') : '';
+                    return `<div class="studio-smart-feedback"><div class="studio-smart-feedback-title">Hasilnya cocok buat kamu?</div><div class="mt-2 flex flex-wrap gap-2">${[['good','👍 Pas banget'],['okay','😐 Lumayan'],['bad','👎 Belum pas']].map(([v,t])=>`<button type="button" class="studio-smart-feedback-btn ${verdict===v?'active':''}" onclick="App.studioAI._handleSmartFeedback('${App.utils.escapeHtml(username)}','${v}',${resultIndex})">${t}</button>`).join('')}</div><div id="studio-smart-feedback-followup-${resultIndex}" class="studio-smart-feedback-followup" hidden></div></div>`;
+                },
+                _smartContextKey: 'studihome-smart-context-v1',
+                _smartContext: null,
+                _smartShortlist: [],
+                _loadSmartContext: () => {
+                    try {
+                        const raw = sessionStorage.getItem(App.studioAI._smartContextKey);
+                        App.studioAI._smartContext = raw ? JSON.parse(raw) : { query: '', budget: '', deadline: '', label: '' };
+                    } catch (_) {
+                        App.studioAI._smartContext = { query: '', budget: '', deadline: '', label: '' };
+                    }
+                    return App.studioAI._smartContext;
+                },
+                _saveSmartContext: (ctx) => {
+                    const safe = { query: String(ctx?.query || '').trim(), budget: String(ctx?.budget || '').trim(), deadline: String(ctx?.deadline || '').trim(), label: String(ctx?.label || '').trim() };
+                    App.studioAI._smartContext = safe;
+                    try { sessionStorage.setItem(App.studioAI._smartContextKey, JSON.stringify(safe)); } catch (_) {}
+                    App.studioAI._renderSmartContext();
+                    return safe;
+                },
+                _clearSmartContext: () => {
+                    App.studioAI._smartContext = { query: '', budget: '', deadline: '', label: '' };
+                    try { sessionStorage.removeItem(App.studioAI._smartContextKey); } catch (_) {}
+                    App.studioAI._resetSmartLearning();
+                    App.studioAI._resetSmartFeedback();
+                    ['studio-smart-brief-input','studio-smart-brief-budget','studio-smart-brief-deadline'].forEach(id => { const el=document.getElementById(id); if(el) el.value=''; });
+                    App.studioAI._renderSmartContext();
+                    const resultBox = document.getElementById('studio-smart-brief-results');
+                    if (resultBox) resultBox.innerHTML = '';
+                    App.studioAI.clearSmartShortlist();
+                },
+                _getEffectiveSmartQuery: (current) => {
+                    const ctx = App.studioAI._smartContext || App.studioAI._loadSmartContext();
+                    const now = String(current || '').trim();
+                    if (!ctx.query) return now;
+                    if (!now || now === ctx.query) return ctx.query;
+                    if (now.startsWith(ctx.query)) return now;
+                    return `${ctx.query} ${now}`.trim();
+                },
+                _renderSmartContext: () => {
+                    const box = document.getElementById('studio-smart-context');
+                    if (!box) return;
+                    const ctx = App.studioAI._smartContext || App.studioAI._loadSmartContext();
+                    const bits = [ctx.query, ctx.budget ? `Budget ${ctx.budget}` : '', ctx.deadline ? `Target ${ctx.deadline}` : ''].filter(Boolean);
+                    if (!bits.length) { box.innerHTML=''; box.classList.add('hidden'); return; }
+                    box.classList.remove('hidden');
+                    box.innerHTML = `<div class="flex items-start justify-between gap-3 rounded-2xl bg-blue-50/80 border border-blue-100 px-3 py-2.5"><div class="min-w-0"><div class="text-[9px] font-black uppercase tracking-wide text-[#151c75]">Konteks aktif</div><div class="mt-0.5 text-[10px] leading-relaxed font-semibold text-slate-600 break-words">${App.utils.escapeHtml(bits.join(' · '))}</div><div class="mt-1 text-[9px] text-slate-400">SMART mengingat konteks ini selama sesi ini.</div></div><button type="button" onclick="App.studioAI._clearSmartContext()" class="shrink-0 text-[9px] font-extrabold text-[#151c75] hover:underline">Mulai baru</button></div>`;
+                },
+                _toggleSmartShortlist: (username) => {
+                    const key = String(username || '').trim().toLowerCase();
+                    if (!key) return;
+                    const idx = App.studioAI._smartShortlist.findIndex(x => String(x).toLowerCase() === key);
+                    if (idx >= 0) App.studioAI._smartShortlist.splice(idx, 1);
+                    else if (App.studioAI._smartShortlist.length < 3) { App.studioAI._smartShortlist.push(key); App.studioAI._signalCreator(key, 'shortlist'); }
+                    else App.ui.toast('Pilih maksimal 3 Creator dulu, biar gampang dibandingin 😄', 'info');
+                    App.studioAI._renderSmartShortlist();
+                    App.studioAI._refreshSmartResultButtons();
+                },
+                _renderSmartShortlist: () => {
+                    const box = document.getElementById('studio-smart-shortlist');
+                    if (!box) return;
+                    const data = App.state.studioAI || { creators: [] };
+                    const selected = App.studioAI._smartShortlist || [];
+                    if (!selected.length) { box.innerHTML=''; box.classList.add('hidden'); return; }
+                    const creators = selected.map(u => (data.creators||[]).find(c => String(c.username||'').toLowerCase() === u)).filter(Boolean);
+                    if (!creators.length) { box.innerHTML=''; box.classList.add('hidden'); return; }
+                    box.classList.remove('hidden');
+                    box.innerHTML = `<div class="studio-smart-shortlist-bar rounded-2xl p-3 mt-3"><div class="flex items-center justify-between gap-2"><div><div class="text-[9px] font-black uppercase tracking-wide text-amber-600">SMART Shortlist</div><div class="text-xs font-extrabold text-[#151c75]">Mau bandingin dulu? Pilih sampai 3 Creator.</div></div><div class="flex items-center gap-2"><button type="button" onclick="App.studioAI.openSmartShortlistCompare()" class="px-3 py-2 rounded-xl btn-brand-gradient text-[9px] font-extrabold">Bandingin</button><button type="button" onclick="App.studioAI.clearSmartShortlist()" class="px-2.5 py-2 rounded-xl bg-white border border-blue-100 text-[9px] font-extrabold text-slate-500">Reset</button></div></div><div class="mt-2 flex flex-wrap gap-2">${creators.map(c=>`<span class="studio-smart-shortlist-chip"><i class="fa-solid fa-check text-emerald-500"></i>${App.utils.escapeHtml(c.display_name||c.username)}</span>`).join('')}</div></div>`;
+                },
+                _refreshSmartResultButtons: () => {
+                    (App.studioAI._smartShortlist || []).forEach(u => {
+                        const el=document.querySelector(`[data-smart-shortlist="${CSS.escape(u)}"]`);
+                        if (el) el.classList.toggle('active', true);
+                    });
+                    document.querySelectorAll('[data-smart-shortlist]').forEach(el => {
+                        const u=String(el.getAttribute('data-smart-shortlist')||'').toLowerCase();
+                        el.classList.toggle('active', (App.studioAI._smartShortlist||[]).includes(u));
+                    });
+                },
+                clearSmartShortlist: () => {
+                    App.studioAI._smartShortlist = [];
+                    App.studioAI._renderSmartShortlist();
+                    App.studioAI._refreshSmartResultButtons();
+                },
+                _smartBriefData: () => {
+                    const ctx=App.studioAI._smartContext || App.studioAI._loadSmartContext();
+                    const data=App.state.studioAI || { creators: [] };
+                    const selected=(App.studioAI._smartShortlist||[]).map(u => (data.creators||[]).find(c => String(c.username||'').toLowerCase()===u)).filter(Boolean);
+                    return {ctx,selected};
+                },
+                _buildSmartBrief: () => {
+                    const {ctx,selected}=App.studioAI._smartBriefData();
+                    const intent=ctx.label ? `Tujuan/intent: ${ctx.label}` : '';
+                    const lines=['Brief Kebutuhan via Studihome','',`Kebutuhan: ${ctx.query||'-'}`,ctx.budget?`Budget: ${ctx.budget}`:'',ctx.deadline?`Target selesai: ${ctx.deadline}`:'',intent].filter(Boolean);
+                    if (selected.length) {
+                        lines.push('', 'Creator pilihan:');
+                        selected.forEach((c,i)=>lines.push(`${i+1}. ${c.display_name||c.username} — studihome.id/${c.username}`));
+                    }
+                    lines.push('', 'Halo, saya menemukan profilmu di Studihome. Saya sedang mencari bantuan untuk kebutuhan di atas. Boleh diskusi detail dan estimasi?');
+                    return lines.join('\\n');
+                },
+                _copySmartBrief: async () => {
+                    const text=App.studioAI._buildSmartBrief();
+                    try { await navigator.clipboard.writeText(text); App.ui.toast('Brief-nya sudah dicopy. Tinggal kirim ke Creator 😄','success'); }
+                    catch (_) { App.ui.toast('Brief sudah siap. Copy manual dari kotak ini ya.','info'); }
+                },
+                _shareSmartBrief: async () => {
+                    const text=App.studioAI._buildSmartBrief();
+                    if (navigator.share) { try { await navigator.share({title:'Brief Kebutuhan Studihome',text}); return; } catch (_) {} }
+                    await App.studioAI._copySmartBrief();
+                },
+                openSmartShortlistCompare: () => {
+                    const {ctx,selected}=App.studioAI._smartBriefData();
+                    if (!selected.length) return;
+                    const scored = selected.map(c => {
+                        const score = Number(c.matchScore ?? c.score ?? 0);
+                        const budgetFit = c.budgetFit ?? 'unknown';
+                        const deadlineFit = c.deadlineFit ?? 'unknown';
+                        return { c, score, budgetFit, deadlineFit };
+                    }).sort((a,b)=>b.score-a.score);
+                    const best = scored[0];
+                    const rows=scored.map((item,i)=>{ const c=item.c; const fitReason = item.budgetFit==='good' ? 'Budgetmu cukup nyambung.' : (item.deadlineFit==='good' ? 'Target waktunya cukup pas.' : 'Profil dan jasanya paling relevan.'); return `<div class="smart-choice ${i===0?'best':''} rounded-2xl bg-white p-3">${i===0?'<div class="inline-flex items-center gap-1 px-2 py-1 rounded-lg smart-decision-badge text-[8px] font-black mb-2">SMART PILIHAN UTAMA</div>':''}<div class="flex items-start justify-between gap-2"><div><div class="text-xs font-extrabold text-[#151c75]">${i+1}. ${App.utils.escapeHtml(c.display_name||c.username)}</div><div class="text-[9px] text-slate-500 mt-1">@${App.utils.escapeHtml(c.username)}</div></div><div class="text-right"><div class="text-sm font-black text-[#151c75]">${Math.round(item.score)}%</div><div class="text-[8px] font-bold text-slate-400">cocok</div></div></div><div class="mt-2 text-[9px] text-slate-600">${App.utils.escapeHtml((c.services||[])[0]?.title||'Layanan AI')}</div><div class="mt-1 text-[9px] font-semibold text-slate-500">${c.services?.length||0} jasa · ${c.portfolio_count||0} portfolio · ❤️ ${c.likes||0}</div><div class="mt-2 text-[9px] leading-relaxed text-slate-600">${App.utils.escapeHtml(fitReason)}</div><div class="mt-3 flex gap-2"><button type="button" onclick="App.router.goCreator('${App.utils.escapeHtml(c.username)}');App.studioAI.closeSmartShortlistCompare()" class="flex-1 px-3 py-2 rounded-xl bg-blue-50 text-[#151c75] text-[9px] font-extrabold">Lihat Profil</button>${App.creator._waUrl(c.whatsapp,c.display_name||'Creator','')?`<a href="${App.creator._waUrl(c.whatsapp,c.display_name||'Creator','')}" target="_blank" rel="noopener noreferrer" class="flex-1 px-3 py-2 rounded-xl bg-emerald-600 text-white text-center text-[9px] font-extrabold">WhatsApp</a>`:''}</div></div>`; }).join('');
+                    const modal=document.getElementById('studio-smart-compare-modal');
+                    if (!modal) return;
+                    const content=document.getElementById('studio-smart-compare-content');
+                    const bestDecisionText = best && best.c?.confidence < .68 ? `SMART belum cukup yakin. ${best.c?.missingInfo?.length ? `Tambah ${best.c.missingInfo.join(' atau ')} kalau mau hasil yang lebih presisi.` : 'Cek 2–3 profil ini dulu sebelum memilih.'}` : (best?.budgetFit==='good' && best?.deadlineFit==='good') ? 'Kebutuhan, budget, dan target waktumu paling pas dengan profil ini.' : (best?.budgetFit==='good' ? 'Kebutuhan dan budgetmu paling pas dengan layanan ini.' : 'Kebutuhan dan profil jasanya paling nyambung dengan yang kamu ceritakan.');
+                    const decision = best ? `<div class="smart-decision-card rounded-2xl p-3 mb-4"><div class="flex items-start gap-3"><div class="w-9 h-9 shrink-0 rounded-xl smart-decision-badge flex items-center justify-center"><i class="fa-solid fa-wand-magic-sparkles text-sm"></i></div><div class="min-w-0"><div class="text-[9px] font-black uppercase tracking-wide text-amber-600">SMART rekomendasi</div><div class="mt-1 text-sm font-extrabold text-[#151c75]">${best.c?.confidence < .68 ? 'Belum cukup yakin buat bilang ini yang paling pas.' : `Mulai dari ${App.utils.escapeHtml(best.c.display_name||best.c.username)} — ${Math.round(best.score)}% paling nyambung.`}</div><div class="mt-1 text-[9px] leading-relaxed text-slate-600">${App.utils.escapeHtml(bestDecisionText)}</div></div></div></div>` : '';
+                    if(content) content.innerHTML=decision+`<div class="text-[9px] font-black uppercase tracking-wide text-amber-600">SMART Shortlist</div><h3 class="mt-1 text-lg font-extrabold text-[#151c75]">Bandingin dulu, biar mantap 😄</h3><p class="text-[10px] text-slate-500 mt-1">${App.utils.escapeHtml(ctx.query||'Kebutuhanmu')}</p><div class="mt-4 grid grid-cols-1 md:grid-cols-3 gap-3">${rows}</div><div class="mt-4 studio-smart-brief-card rounded-2xl p-3"><div class="text-[9px] font-black uppercase tracking-wide text-[#151c75]">Brief siap kirim</div><div id="studio-smart-brief-preview" class="studio-smart-brief-pre mt-2"></div><div class="mt-3 flex flex-wrap justify-end gap-2"><button type="button" onclick="App.studioAI._copySmartBrief()" class="px-3 py-2 rounded-xl bg-blue-50 text-[#151c75] text-[9px] font-extrabold">Copy Brief</button><button type="button" onclick="App.studioAI._shareSmartBrief()" class="px-3 py-2 rounded-xl btn-brand-gradient text-[9px] font-extrabold">Bagikan Brief</button></div></div>`;
+                    const pre=document.getElementById('studio-smart-brief-preview'); if(pre) pre.textContent=App.studioAI._buildSmartBrief();
+                    modal.classList.remove('hidden'); modal.classList.add('flex');
+                },
+                closeSmartShortlistCompare: () => { const modal=document.getElementById('studio-smart-compare-modal'); if(!modal)return; modal.classList.add('hidden'); modal.classList.remove('flex'); },
+                openSmartBrief: () => {
+                    const modal = document.getElementById('studio-smart-brief-modal');
+                    if (!modal) return;
+                    const ctx = App.studioAI._loadSmartContext();
+                    const input = document.getElementById('studio-smart-brief-input');
+                    const budget = document.getElementById('studio-smart-brief-budget');
+                    const deadline = document.getElementById('studio-smart-brief-deadline');
+                    if (input && ctx.query && !input.value.trim()) input.value = ctx.query;
+                    if (budget && ctx.budget && !budget.value.trim()) budget.value = ctx.budget;
+                    if (deadline && ctx.deadline && !deadline.value.trim()) deadline.value = ctx.deadline;
+                    App.studioAI._renderSmartContext();
+                    modal.classList.remove('hidden');
+                    modal.classList.add('flex');
+                    setTimeout(() => document.getElementById('studio-smart-brief-input')?.focus(), 40);
+                },
+                closeSmartBrief: () => {
+                    const modal = document.getElementById('studio-smart-brief-modal');
+                    if (!modal) return;
+                    modal.classList.add('hidden');
+                    modal.classList.remove('flex');
+                },
+                _smartTokens: (text) => {
+                    const cleaned = String(text || '').toLowerCase()
+                        .replace(/[^a-z0-9\u00c0-\u024f\s-]/gi, ' ')
+                        .replace(/\s+/g, ' ').trim();
+                    const stop = new Set(['saya','aku','ingin','mau','butuh','butuhnya','untuk','yang','dan','atau','dengan','agar','buat','bikin','punya','tolong','bisa','juga','kami','kita','ini','itu','lebih','dari','ke','di','pada','sebuah','sebagai','sampai','minggu','hari','sekitar']);
+                    const raw = cleaned.split(' ').filter(t => t.length >= 3 && !stop.has(t));
+                    const synonymGroups = [
+                        ['video','reels','reel','tiktok','shorts','konten-video','video-produk','video-promosi'],
+                        ['konten','content','copywriting','caption','sosmed','socialmedia','instagram'],
+                        ['otomasi','automation','otomatisasi','workflow','n8n','integrasi','integrations'],
+                        ['website','web','landingpage','landing','webapp','aplikasi'],
+                        ['desain','design','grafis','branding','visual','poster','presentasi'],
+                        ['marketing','pemasaran','promosi','iklan','advertising','ads','jualan','sales'],
+                        ['guru','dosen','sekolah','pendidikan','education','pembelajaran','lesson','modul','asesmen','akademik'],
+                        ['umkm','bisnis','usaha','toko','brand','perusahaan','commerce'],
+                        ['chatbot','chat','customer-service','cs','assistant','bot'],
+                        ['agent','agents','ai-agent','agen'],
+                        ['konsultasi','consulting','konsultan','strategi','audit'],
+                        ['pelatihan','training','kursus','course','workshop','mentoring','belajar']
+                    ];
+                    const expanded = new Set(raw);
+                    synonymGroups.forEach(group => {
+                        if (raw.some(t => group.includes(t))) group.forEach(t => expanded.add(t));
+                    });
+                    return { raw, expanded: [...expanded], groups: synonymGroups.filter(g => raw.some(t => g.includes(t))) };
+                },
+                _inferIntent: (query) => {
+                    const p = App.studioAI._parseSmartQuery(query);
+                    const groups = p.groups || [];
+                    const labels = [];
+                    if (groups.some(g => g.includes('video'))) labels.push('Konten Video');
+                    if (groups.some(g => g.includes('marketing'))) labels.push('Promosi / Marketing');
+                    if (groups.some(g => g.includes('umkm'))) labels.push('Bisnis / UMKM');
+                    if (groups.some(g => g.includes('otomasi'))) labels.push('Automation');
+                    if (groups.some(g => g.includes('guru'))) labels.push('Pendidikan');
+                    if (groups.some(g => g.includes('website'))) labels.push('Website');
+                    if (groups.some(g => g.includes('pelatihan'))) labels.push('Belajar / Training');
+                    const refine = [];
+                    if (labels.some(x => x.includes('Video'))) refine.push('untuk UMKM','TikTok','video produk');
+                    else if (labels.some(x => x.includes('Marketing'))) refine.push('untuk UMKM','TikTok','Instagram');
+                    else if (labels.some(x => x.includes('Automation'))) refine.push('WhatsApp','n8n','workflow bisnis');
+                    else if (labels.some(x => x.includes('Pendidikan'))) refine.push('guru SD','dosen','modul ajar');
+                    return {
+                        label: labels.length ? labels.slice(0,2).join(' + ') : (p.raw.length <= 3 ? 'Intent awal' : ''),
+                        refine: [...new Set(refine)].slice(0,3)
+                    };
+                },
+                _inferGoal: (query) => {
+                    const q = String(query || '').toLowerCase();
+                    const goals = [];
+                    if (/(jual|sales|jualan|omzet|penjualan|laku|rame|ramai|promosi|iklan|leads|pelanggan|customer)/.test(q)) goals.push({ id:'sales', label:'Naikin penjualan', text:'Mencari Creator yang bisa bantu promosi, konten, atau pemasaran.' });
+                    if (/(hemat waktu|lebih cepat|efisiensi|otomatis|otomasi|automation|workflow|repot|manual)/.test(q)) goals.push({ id:'efficiency', label:'Hemat waktu', text:'Mencari solusi yang mengurangi pekerjaan berulang dan manual.' });
+                    if (/(belajar|kursus|training|pelatihan|ngerti|paham|skill|ajari)/.test(q)) goals.push({ id:'learning', label:'Belajar & jago AI', text:'Mencari Creator yang bisa mengajar atau membimbing sampai paham.' });
+                    if (/(branding|brand|desain|visual|identitas|logo)/.test(q)) goals.push({ id:'branding', label:'Bangun brand', text:'Mencari bantuan untuk membuat brand terlihat lebih kuat dan konsisten.' });
+                    if (/(website|landing page|landingpage|webapp|aplikasi|toko online)/.test(q)) goals.push({ id:'digital', label:'Punya aset digital', text:'Mencari Creator untuk membangun website atau aset digital yang siap dipakai.' });
+                    if (/(video|reels|tiktok|shorts|konten)/.test(q) && !goals.some(g=>g.id==='sales')) goals.push({ id:'content', label:'Bikin konten', text:'Mencari Creator untuk membuat konten yang siap dipakai dan dipromosikan.' });
+                    return goals.slice(0,2);
+                },
+                _isConversationalRefinement: (text) => {
+                    const q = String(text || '').trim().toLowerCase();
+                    return /^(yang\s+)?lebih\s+(murah|cepat)|^(khusus|pakai|untuk)\s+(tiktok|instagram|reels|youtube)|^(yang\s+)?bisa\s+selesai\s+\d+\s*(hari|minggu)|^(budget|target\s+waktu)\s*[:=]/i.test(q);
+                },
+                _applyConversationalRefinement: (text) => {
+                    const refinement = String(text || '').trim();
+                    const input = document.getElementById('studio-smart-brief-input');
+                    if (!input || !refinement) return;
+                    const ctx = App.studioAI._smartContext || App.studioAI._loadSmartContext();
+                    const current = String(input.value || '').trim();
+                    const effectiveBase = current || ctx.query || '';
+                    const next = effectiveBase ? `${effectiveBase} ${refinement}`.trim() : refinement;
+                    input.value = next;
+                    const lower = refinement.toLowerCase();
+                    if (/selesai\s+\d+\s*(hari|minggu)/.test(lower)) {
+                        const m = lower.match(/selesai\s+(\d+\s*(?:hari|minggu))/);
+                        if (m) document.getElementById('studio-smart-brief-deadline').value = m[1];
+                    }
+                    if (/^budget\s*[:=]/i.test(refinement)) document.getElementById('studio-smart-brief-budget').value = refinement.replace(/^budget\s*[:=]/i,'').trim();
+                    if (/^target\s+waktu\s*[:=]/i.test(refinement)) document.getElementById('studio-smart-brief-deadline').value = refinement.replace(/^target\s+waktu\s*[:=]/i,'').trim();
+                    App.studioAI.runSmartDiscovery();
+                },
+                _appendSmartRefinement: (text) => {
+                    App.studioAI._applyConversationalRefinement(text);
+                },
+                _parseSmartBudget: (text) => {
+                    const raw = String(text || '').toLowerCase().trim();
+                    if (!raw) return { value: 0, min: 0, max: 0, label: '' };
+                    const normalized = raw.replace(/rp\.?/g, '').replace(/\s+/g, '');
+                    const nums = [...normalized.matchAll(/(\d{1,3}(?:[.,]\d{3})*|\d+)/g)].map(m => Number(m[1].replace(/[.,]/g,'')));
+                    if (!nums.length) return { value: 0, min: 0, max: 0, label: raw };
+                    let value = Math.max(...nums);
+                    if (/jt|juta/.test(raw)) value *= 1000000;
+                    else if (/rb|ribu/.test(raw)) value *= 1000;
+                    else if (value < 1000 && nums.length === 1) value *= 1000;
+                    const range = raw.includes('-') || raw.includes('sampai') || raw.includes('–');
+                    if (range && nums.length >= 2) {
+                        let a = nums[0], b = nums[1];
+                        if (/jt|juta/.test(raw)) { a*=1000000; b*=1000000; } else if (/rb|ribu/.test(raw) || (a < 1000 && b < 1000)) { a*=1000; b*=1000; }
+                        return { value: b, min: Math.min(a,b), max: Math.max(a,b), label: raw };
+                    }
+                    return { value, min: 0, max: value, label: raw };
+                },
+                _parseSmartDeadlineDays: (text) => {
+                    const raw = String(text || '').toLowerCase().trim();
+                    if (!raw) return 0;
+                    const week = raw.match(/(\d+(?:[.,]\d+)?)\s*(minggu|weeks?)/);
+                    if (week) return Math.max(1, Math.round(Number(week[1].replace(',','.')) * 7));
+                    const day = raw.match(/(\d+)\s*(hari|days?)/);
+                    if (day) return Math.max(1, Number(day[1]));
+                    if (/besok|tomorrow/.test(raw)) return 1;
+                    if (/lusa/.test(raw)) return 2;
+                    return 0;
+                },
+                _smartScoreCreator: (creator, query) => {
+                    const parsed = App.studioAI._parseSmartQuery(query);
+                    const rawTokens = parsed.raw;
+                    const groups = parsed.groups;
+                    const services = creator.services || [];
+                    const categoryText = (creator.category_names || []).join(' ').toLowerCase();
+                    const profileText = [creator.display_name, creator.username, creator.bio, creator.location, categoryText].join(' ').toLowerCase();
+                    const serviceRows = services.map(s => ({
+                        title: String(s.title || '').toLowerCase(),
+                        desc: String(s.description || '').toLowerCase(),
+                        raw: s
+                    }));
+
+                    const fieldScores = { keyword:0, category:0, service:0, profile:0, proof:0, trust:0, budget:0, deadline:0 };
+                    const reasons = [];
+                    const matched = new Set();
+                    const matchedTerms = [];
+
+                    const tokenHit = (token, hay) => {
+                        if (!token) return false;
+                        if (hay.includes(token)) return true;
+                        const aliases = App.studioAI._smartAliasMap?.[token] || [];
+                        return aliases.some(alias => hay.includes(alias));
+                    };
+
+                    rawTokens.forEach(token => {
+                        if (tokenHit(token, profileText)) {
+                            fieldScores.profile += 1;
+                            fieldScores.keyword += 1;
+                            matched.add(token);
+                            matchedTerms.push(token);
+                        }
+                        serviceRows.forEach(s => {
+                            if (tokenHit(token, s.title)) {
+                                fieldScores.service += 2;
+                                fieldScores.keyword += 2;
+                                matched.add(token);
+                                matchedTerms.push(token);
+                            } else if (tokenHit(token, s.desc)) {
+                                fieldScores.service += 1;
+                                fieldScores.keyword += 1;
+                                matched.add(token);
+                                matchedTerms.push(token);
+                            }
+                        });
+                    });
+
+                    groups.forEach(group => {
+                        const hit = group.some(token => tokenHit(token, profileText) || serviceRows.some(s => tokenHit(token, `${s.title} ${s.desc}`)));
+                        if (hit) {
+                            fieldScores.category += 1;
+                            matched.add(group[0]);
+                        }
+                    });
+
+                    const uniqueMatched = [...new Set(matchedTerms)];
+                    const coverage = rawTokens.length ? Math.min(1, matched.size / rawTokens.length) : 0;
+                    const keywordFit = Math.min(1, coverage * 0.75 + Math.min(1, fieldScores.keyword / Math.max(4, rawTokens.length * 1.6)) * 0.25);
+                    const categoryFit = Math.min(1, fieldScores.category / Math.max(1, groups.length));
+                    const serviceFit = Math.min(1, fieldScores.service / Math.max(2.5, rawTokens.length * 1.25));
+                    const profileFit = Math.min(1, fieldScores.profile / Math.max(2.5, rawTokens.length * 0.7));
+                    const proofFit = Math.min(1, Number(creator.portfolio_count || 0) / 6);
+                    const trustFit = Math.min(1,
+                        (creator.is_verified ? 0.45 : 0) +
+                        Math.min(0.3, Number(creator.ratingAvg || 0) / 5 * 0.3) +
+                        Math.min(0.25, Number(creator.ratingCount || 0) / 10 * 0.05 + Number(creator.likes || 0) / 200 * 0.20)
+                    );
+
+                    const budgetInfo = App.studioAI._parseSmartBudget(document.getElementById('studio-smart-brief-budget')?.value || '');
+                    const budget = budgetInfo.value;
+                    const deadlineDays = App.studioAI._parseSmartDeadlineDays(document.getElementById('studio-smart-brief-deadline')?.value || '');
+                    let budgetBonus = 0;
+                    let budgetNear = 0;
+                    if (budget > 0) {
+                        const candidates = services.map(s => ({ from:Number(s.price_from||0), to:Number(s.price_to||0) })).filter(x=>x.from>0);
+                        if (candidates.some(x => budget >= x.from && (!x.to || budget <= x.to))) budgetBonus = 1;
+                        else if (candidates.some(x => Math.abs((x.from-budget)/Math.max(1,budget)) <= .25 || (x.to && Math.abs((x.to-budget)/Math.max(1,budget)) <= .25))) budgetNear = 1;
+                    }
+
+                    const deadlineFit = deadlineDays > 0 ? Math.max(0, Math.min(1, (() => {
+                        const ds = services.map(s=>Number(s.delivery_days||0)).filter(n=>n>0);
+                        if (!ds.length) return 0;
+                        const best = Math.min(...ds);
+                        if (best <= deadlineDays) return 1;
+                        const gap = best - deadlineDays;
+                        return Math.max(0, 1 - gap / Math.max(2, deadlineDays));
+                    })())) : 0;
+                    fieldScores.budget = budgetBonus ? 1 : (budgetNear ? .55 : 0);
+                    fieldScores.deadline = deadlineFit;
+
+                    const dimensions = {
+                        keyword: Math.round(keywordFit * 100),
+                        category: Math.round(categoryFit * 100),
+                        service: Math.round(serviceFit * 100),
+                        proof: Math.round(proofFit * 100),
+                        trust: Math.round(trustFit * 100),
+                        budget: budget > 0 ? Math.round(fieldScores.budget * 100) : null,
+                        deadline: deadlineDays > 0 ? Math.round(deadlineFit * 100) : null
+                    };
+
+                    // Calibrated: need meaningful semantic overlap before allowing high confidence.
+                    const contextBudgetWeight = budget > 0 ? 0.07 : 0;
+                    const contextDeadlineWeight = deadlineDays > 0 ? 0.07 : 0;
+                    const dynamicBaseWeight = 1 - contextBudgetWeight - contextDeadlineWeight;
+                    const base =
+                        keywordFit * (0.34 * dynamicBaseWeight) +
+                        categoryFit * (0.18 * dynamicBaseWeight) +
+                        serviceFit * (0.25 * dynamicBaseWeight) +
+                        profileFit * (0.10 * dynamicBaseWeight) +
+                        proofFit * (0.05 * dynamicBaseWeight) +
+                        trustFit * (0.08 * dynamicBaseWeight) +
+                        (budget > 0 ? fieldScores.budget * contextBudgetWeight : 0) +
+                        (deadlineDays > 0 ? deadlineFit * contextDeadlineWeight : 0);
+
+                    const semanticFloor = Math.min(1, keywordFit * 0.65 + serviceFit * 0.35);
+                    const calibrated = Math.min(0.985, base * 0.82 + semanticFloor * 0.18);
+
+                    // Confidence is deliberately separate from the match score.
+                    // A good-looking percentage must not imply certainty when the user's
+                    // brief is too thin or the Creator profile has weak evidence.
+                    const contextCoverage = [
+                        rawTokens.length > 0,
+                        groups.length > 0,
+                        budget > 0,
+                        deadlineDays > 0
+                    ].filter(Boolean).length / 4;
+                    const evidenceCoverage = Math.min(1,
+                        (keywordFit * 0.35) +
+                        (serviceFit * 0.35) +
+                        (profileFit * 0.15) +
+                        (proofFit * 0.10) +
+                        (trustFit * 0.05)
+                    );
+                    const confidence = Math.max(0, Math.min(1,
+                        calibrated * 0.65 +
+                        evidenceCoverage * 0.25 +
+                        contextCoverage * 0.10
+                    ));
+                    const confidenceLabel = confidence >= .82 ? 'Tinggi' : confidence >= .68 ? 'Cukup' : 'Perlu info';
+                    const missingInfo = [];
+                    if (budget <= 0) missingInfo.push('budget');
+                    if (deadlineDays <= 0) missingInfo.push('target waktu');
+                    if (rawTokens.length <= 2) missingInfo.push('konteks kebutuhan');
+                    if (proofFit < .20) missingInfo.push('portfolio');
+                    const matchScore = Math.max(45, Math.min(98, Math.round(45 + calibrated * 53)));
+                    const confidenceAdjustedScore = Math.max(45, Math.min(matchScore, Math.round(matchScore * (0.82 + confidence * 0.18))));
+                    const percentage = confidence < .52 ? Math.min(confidenceAdjustedScore, 68) : confidenceAdjustedScore;
+
+                    if (serviceFit >= .65) {
+                        const bestService = serviceRows.sort((a,b) => {
+                            const sa = rawTokens.reduce((n,t) => n + (tokenHit(t,a.title) ? 2 : tokenHit(t,a.desc) ? 1 : 0),0);
+                            const sb = rawTokens.reduce((n,t) => n + (tokenHit(t,b.title) ? 2 : tokenHit(t,b.desc) ? 1 : 0),0);
+                            return sb-sa;
+                        })[0];
+                        if (bestService?.raw?.title) reasons.push(`Jasanya paling dekat dengan kebutuhanmu: ${bestService.raw.title}.`);
+                    }
+                    if (!reasons.length && categoryFit >= .65) reasons.push(`Kategori layanan Creator ini nyambung dengan kebutuhan yang kamu ceritakan.`);
+                    if (!reasons.length && budget > 0 && budgetBonus) reasons.push(`Ada layanan yang masuk kisaran budgetmu, jadi lebih realistis untuk mulai ngobrol.`);
+                    if (!reasons.length && budget > 0 && budgetNear) reasons.push(`Harganya cukup dekat dengan budgetmu, jadi masih layak dibicarakan langsung lewat WhatsApp.`);
+                    if (!reasons.length && deadlineDays > 0 && deadlineFit >= .9) reasons.push(`Estimasi pengerjaannya paling pas dengan target waktumu.`);
+                    if (!reasons.length && creator.is_verified && proofFit >= .4) reasons.push(`Creator ini sudah terverifikasi dan punya portfolio yang relevan untuk kamu cek.`);
+                    if (!reasons.length && profileFit >= .5) reasons.push(`Profil Creator ini cukup dekat dengan topik dan tujuan yang kamu ceritakan.`);
+                    if (!reasons.length) reasons.push(`Profil dan layanannya punya kecocokan paling kuat dari data yang tersedia saat ini.`);
+
+                    return {
+                        percentage,
+                        reason: reasons[0],
+                        confidence,
+                        confidenceLabel,
+                        missingInfo: missingInfo.slice(0,2),
+                        coverage,
+                        categoryMatch: fieldScores.category,
+                        serviceMatch: fieldScores.service,
+                        dimensions,
+                        matchedTerms: uniqueMatched.slice(0,6)
+                    };
+                },
+                _smartAliasMap: {
+                    'video':['reels','tiktok','shorts','editing'],
+                    'reels':['video','tiktok','shorts'],
+                    'tiktok':['video','reels','shorts'],
+                    'otomasi':['automation','workflow','n8n','integrasi'],
+                    'automation':['otomasi','workflow','n8n','integrasi'],
+                    'guru':['pendidikan','pembelajaran','modul','asesmen'],
+                    'pendidikan':['guru','pembelajaran','sekolah','dosen'],
+                    'umkm':['bisnis','usaha','jualan','marketing','konten'],
+                    'konten':['content','copywriting','video','social media'],
+                    'website':['webapp','landing page','web','situs'],
+                    'marketing':['pemasaran','promosi','konten','sales'],
+                    'caption':['copywriting','konten','social media'],
+                    'design':['desain','branding','visual'],
+                    'desain':['design','branding','visual'],
+                    'ai':['artificial intelligence','otomasi','automation','prompt','agent']
+                },
+                /* Step 46 — SMART Multi-Intent */
+                _inferMultiIntent: (query) => {
+                    const q = String(query || '').toLowerCase().replace(/\s+/g, ' ').trim();
+                    const defs = [
+                        { id:'video', label:'Video & Konten Promosi', patterns:/\b(video|reels|tiktok|shorts|video iklan|video produk)\b/, seed:'video iklan' },
+                        { id:'marketing', label:'Marketing & Penjualan', patterns:/\b(marketing|pemasaran|promosi|iklan|ads|jualan|sales|penjualan|omzet|pelanggan)\b/, seed:'marketing promosi' },
+                        { id:'automation', label:'Otomasi & AI Workflow', patterns:/\b(otomasi|automation|workflow|n8n|chatbot|whatsapp|follow[- ]?up|agent|otomatis)\b/, seed:'ai automation' },
+                        { id:'website', label:'Website & Webapp', patterns:/\b(website|webapp|landing page|landingpage|aplikasi|toko online|situs)\b/, seed:'website bisnis' },
+                        { id:'design', label:'Desain & Branding', patterns:/\b(desain|design|branding|logo|visual|poster|presentasi)\b/, seed:'desain branding' },
+                        { id:'education', label:'AI untuk Pendidikan', patterns:/\b(guru|dosen|pendidikan|pembelajaran|lesson|modul|asesmen|kursus|training|workshop|mentor)\b/, seed:'ai pendidikan' },
+                        { id:'ai', label:'Solusi AI', patterns:/\b(ai|artificial intelligence|prompt|agentic)\b/, seed:'solusi ai' }
+                    ];
+                    const hits = defs.filter(d => d.patterns.test(q));
+                    const concrete = hits.filter(h => h.id !== 'ai');
+                    const intents = concrete.length ? concrete : hits;
+                    return { multi: intents.length >= 2, intents: intents.slice(0,4), confidence: intents.length >= 2 ? Math.min(.94,.62+intents.length*.08) : (intents.length ? .86 : .45) };
+                },
+                _multiIntentSummary: (multi) => {
+                    if (!multi?.multi) return '';
+                    const labels = multi.intents.map(x=>x.label).join(' + ');
+                    return `<div class="mt-3 rounded-2xl border border-blue-100 bg-white/90 px-3 py-2.5 shadow-2xs"><div class="flex items-start gap-2.5"><div class="w-8 h-8 rounded-xl bg-amber-50 text-amber-600 border border-amber-100 flex items-center justify-center shrink-0"><i class="fa-solid fa-layer-group"></i></div><div class="min-w-0"><div class="text-[9px] font-black uppercase tracking-wide text-amber-600">SMART menangkap beberapa kebutuhan</div><div class="text-[10px] font-extrabold text-[#151c75] mt-0.5">${App.utils.escapeHtml(labels)}</div><div class="text-[9px] leading-relaxed text-slate-500 mt-0.5">SMART akan mencari Creator yang paling mampu menangani kebutuhanmu sekaligus, lalu menyiapkan alternatif spesialis kalau perlu.</div></div></div></div>`;
+                },
+                _inferSolutionPaths: (query, goals, intent) => {
+                    const q = String(query || '').toLowerCase();
+                    const paths = [];
+                    const push = (id, label, desc, icon, why, keywords) => paths.push({ id, label, desc, icon, why, keywords });
+                    const has = (re) => re.test(q);
+
+                    if (has(/video|reels|tiktok|shorts|iklan/)) {
+                        push('content-video','Konten & Video','Buat video promosi, reels, TikTok, atau iklan yang siap dipakai.','fa-solid fa-video','Cocok kalau kamu butuh karya visual yang cepat dipakai untuk promosi.',['video','reels','tiktok','iklan']);
+                    }
+                    if (has(/jual|sales|jualan|omzet|penjualan|pelanggan|promosi|iklan|marketing/)) {
+                        push('growth','Promosi & Marketing','Cari Creator untuk konten, campaign, branding, atau strategi pemasaran.','fa-solid fa-chart-line','Cocok kalau tujuan utamamu adalah bikin bisnis lebih dikenal dan penjualan ikut naik.',['marketing','promosi','sales','iklan']);
+                    }
+                    if (has(/otomasi|automation|workflow|n8n|manual|repot|whatsapp|chatbot|agent/)) {
+                        push('automation','Otomasi & AI Workflow','Kurangi kerja berulang dengan automation, chatbot, integrasi, atau AI agent.','fa-solid fa-gears','Cocok kalau kamu ingin kerja lebih cepat dan mengurangi pekerjaan manual.',['otomasi','automation','workflow','n8n']);
+                    }
+                    if (has(/guru|dosen|pendidikan|belajar|kursus|training|modul|asesmen/)) {
+                        push('education','AI untuk Belajar & Pendidikan','Temukan mentor, trainer, lesson, atau solusi AI untuk pembelajaran.','fa-solid fa-graduation-cap','Cocok kalau kamu ingin belajar AI atau langsung menerapkannya di dunia pendidikan.',['guru','dosen','pendidikan','training']);
+                    }
+                    if (has(/website|webapp|landing|aplikasi|toko online/)) {
+                        push('digital-assets','Website & Aset Digital','Cari bantuan untuk website, landing page, webapp, atau aset digital bisnis.','fa-solid fa-globe','Cocok kalau kamu butuh tempat online yang terlihat rapi dan siap dipakai.',['website','webapp','landing']);
+                    }
+                    if (has(/desain|design|branding|logo|visual/)) {
+                        push('creative-design','Desain & Branding','Temukan bantuan untuk visual, branding, presentasi, atau kebutuhan desain.','fa-solid fa-palette','Cocok kalau kamu ingin brand terlihat lebih rapi, konsisten, dan enak dilihat.',['desain','branding','visual']);
+                    }
+                    if (!paths.length) {
+                        const fallback = intent?.label || (goals?.[0]?.label) || 'Solusi AI yang relevan';
+                        push('smart-general','Solusi yang Paling Nyambung','SMART akan mencari Creator berdasarkan kebutuhan, jasa, portfolio, dan trust yang tersedia.','fa-solid fa-wand-magic-sparkles',`Cocok sebagai langkah awal karena kebutuhanmu masih fleksibel: ${fallback}.`,[]);
+                    }
+                    // Max 3 path, remove near-duplicates by id.
+                    return [...new Map(paths.map(p => [p.id,p])).values()].slice(0,3);
+                },
+                _getNextBestAction: (ctx) => {
+                    const { top = [], budgetInfo = {}, deadlineDays = 0, query = '', smartIntent = {}, smartGoals = [] } = ctx || {};
+                    if (!top.length) {
+                        return {
+                            title: 'Mulai dari ceritamu dulu',
+                            body: 'Ceritakan kebutuhanmu meski singkat. SMART bakal bantu pecah jadi jalur solusi yang lebih pas.',
+                            label: 'Mulai cari',
+                            action: 'focus-query',
+                            icon: 'fa-solid fa-wand-magic-sparkles'
+                        };
+                    }
+                    const best = top[0];
+                    const missing = Array.isArray(best.missingInfo) ? best.missingInfo : [];
+                    if (best.confidence < .68 && missing.length) {
+                        const first = missing[0];
+                        return {
+                            title: 'Biar hasilnya makin pas',
+                            body: `SMART masih punya ruang buat belajar. Tambahkan ${first} dulu, itu info yang paling membantu untuk mempersempit pilihan.`,
+                            label: `Isi ${first}`,
+                            action: first === 'budget' ? 'focus-budget' : first === 'target waktu' ? 'focus-deadline' : 'focus-query',
+                            icon: 'fa-solid fa-crosshairs'
+                        };
+                    }
+                    if (top.length >= 2 && Number(best.percentage || 0) - Number(top[1].percentage || 0) < 5) {
+                        return {
+                            title: 'Dua pilihanmu masih tipis bedanya',
+                            body: 'SMART melihat beberapa Creator yang sama-sama kuat. Bandingkan 2–3 pilihan dulu biar keputusanmu lebih mantap.',
+                            label: 'Bandingkan',
+                            action: 'compare',
+                            icon: 'fa-solid fa-scale-balanced'
+                        };
+                    }
+                    if (Number(best.percentage || 0) >= 90 && best.confidence >= .82) {
+                        return {
+                            title: 'Ada satu yang kelihatan paling siap ✨',
+                            body: `${best.c.display_name || best.c.username} punya kecocokan tinggi berdasarkan kebutuhan, bukti karya, dan trust yang tersedia. Langkah paling enak: cek profilnya dulu.`,
+                            label: 'Lihat pilihan utama',
+                            action: 'open-best',
+                            icon: 'fa-solid fa-arrow-right'
+                        };
+                    }
+                    if (query && !budgetInfo.value) {
+                        return {
+                            title: 'Mau hasil yang lebih realistis?',
+                            body: 'Tambahkan kisaran budget kalau kamu sudah punya batasannya. SMART bakal menyesuaikan ranking tanpa bikin pencarianmu ribet.',
+                            label: 'Isi budget',
+                            action: 'focus-budget',
+                            icon: 'fa-solid fa-wallet'
+                        };
+                    }
+                    if (query && !deadlineDays) {
+                        return {
+                            title: 'Kalau ada target waktu, sekalian kasih tahu',
+                            body: 'Creator yang selesai paling dekat dengan targetmu bisa naik secara wajar, jadi kamu nggak perlu menyortir manual.',
+                            label: 'Isi target waktu',
+                            action: 'focus-deadline',
+                            icon: 'fa-solid fa-clock'
+                        };
+                    }
+                    return {
+                        title: 'Langkah berikutnya sudah jelas',
+                        body: 'Cek profil pilihan utama, lihat portfolio, lalu chat lewat WhatsApp. SMART sudah bantu menyaring bagian yang paling penting.',
+                        label: 'Lihat pilihan utama',
+                        action: 'open-best',
+                        icon: 'fa-solid fa-sparkles'
+                    };
+                },
+
+                _buildSmartUnderstanding: (query, smartIntent, smartGoals, budgetInput = '', deadlineInput = '') => {
+                    const q = String(query || '').trim();
+                    const intent = String(smartIntent?.label || '').trim();
+                    const goals = Array.isArray(smartGoals) ? smartGoals : [];
+                    const parts = [];
+                    if (intent) parts.push(intent);
+                    if (budgetInput) parts.push(`budget ${budgetInput}`);
+                    if (deadlineInput) parts.push(`target ${deadlineInput}`);
+                    let headline = 'Aku nangkepnya begini 👇';
+                    let summary = '';
+                    if (goals.length) {
+                        summary = goals.length === 1
+                            ? `Kamu lagi cari ${goals[0].text.replace(/^Mencari Creator yang /i,'').replace(/\.$/,'')}.`
+                            : `Kamu lagi fokus ke ${goals.map(g=>g.label.toLowerCase()).join(' + ')}.`;
+                    } else if (intent) {
+                        summary = `Kamu lagi cari bantuan seputar ${intent.toLowerCase()}.`;
+                    } else {
+                        summary = `Kamu lagi cari solusi yang nyambung dengan “${q}”.`;
+                    }
+                    if (parts.length > 1) summary += ` ${parts.slice(1).map(x=>x ? `Preferensi yang kebaca: ${x}.` : '').filter(Boolean).join(' ')}`;
+                    return { headline, summary, chips: parts.slice(0,3) };
+                },
+                _renderSmartUnderstanding: (query, smartIntent, smartGoals, budgetInput = '', deadlineInput = '') => {
+                    const box = document.getElementById('studio-smart-understanding');
+                    if (!box) return;
+                    const u = App.studioAI._buildSmartUnderstanding(query, smartIntent, smartGoals, budgetInput, deadlineInput);
+                    const chips = u.chips.map(x => `<span class="studio-smart-summary-chip inline-flex items-center px-2.5 py-1.5 rounded-full text-[9px] font-extrabold">${App.utils.escapeHtml(x)}</span>`).join('');
+                    box.innerHTML = `<div class="studio-smart-understanding rounded-2xl p-3.5 sm:p-4"><div class="flex items-start gap-3"><div class="smart-summary-icon w-9 h-9 rounded-xl bg-white text-[#151c75] border border-blue-100 flex items-center justify-center shrink-0"><i class="fa-solid fa-wand-magic-sparkles"></i></div><div class="min-w-0 flex-1"><div class="text-[9px] font-black uppercase tracking-wider text-amber-600">SMART Check</div><div class="text-sm sm:text-[15px] font-black text-[#151c75] mt-0.5">${u.headline}</div><div class="text-[10px] sm:text-xs leading-relaxed text-slate-600 mt-1">${App.utils.escapeHtml(u.summary)}</div>${chips ? `<div class="mt-2 flex flex-wrap gap-2">${chips}</div>` : ''}<div class="mt-3 flex flex-wrap gap-2"><button type="button" class="studio-smart-summary-btn btn-brand-gradient px-3.5 py-2 rounded-xl text-[9px] font-extrabold" onclick="App.studioAI.confirmSmartUnderstanding()">Betul, lanjut ✨</button><button type="button" class="studio-smart-summary-btn px-3.5 py-2 rounded-xl bg-white border border-blue-200 text-[#151c75] text-[9px] font-extrabold" onclick="App.studioAI.correctSmartUnderstanding()">Bukan itu 😅</button></div></div></div></div>`;
+                },
+                confirmSmartUnderstanding: () => {
+                    const box=document.getElementById('studio-smart-understanding');
+                    if (box) box.setAttribute('data-confirmed','true');
+                    App.ui.toast('Sip, SMART lanjut dari pemahaman ini. 😄','success');
+                },
+                correctSmartUnderstanding: () => {
+                    const input=document.getElementById('studio-smart-brief-input');
+                    const box=document.getElementById('studio-smart-understanding');
+                    if (!box) return;
+                    box.innerHTML = `<div class="studio-smart-understanding rounded-2xl p-3.5 sm:p-4"><div class="flex items-start gap-3"><div class="w-9 h-9 rounded-xl bg-white text-[#151c75] border border-blue-100 flex items-center justify-center shrink-0"><i class="fa-solid fa-rotate"></i></div><div class="min-w-0 flex-1"><div class="text-sm font-black text-[#151c75]">Oke, kita belokkan arahnya 😄</div><div class="text-[10px] leading-relaxed text-slate-500 mt-1">Tulis koreksi dengan bahasa biasa. SMART bakal mempertahankan konteks yang masih nyambung dan mengganti bagian yang keliru.</div><div class="mt-3 flex items-center gap-2 card-3d-inset rounded-xl px-3 py-2"><i class="fa-solid fa-comment-dots text-[#151c75]"></i><input id="studio-smart-correction-input" class="w-full bg-transparent outline-none text-xs font-semibold" placeholder="Contoh: sebenarnya saya butuh website untuk toko saya..." onkeydown="if(event.key==='Enter') App.studioAI.applySmartCorrectionFromInput(this.value)"></div><div class="mt-3 flex flex-wrap gap-2"><button type="button" class="studio-smart-summary-btn btn-brand-gradient px-3.5 py-2 rounded-xl text-[9px] font-extrabold" onclick="App.studioAI.applySmartCorrectionFromInput(document.getElementById('studio-smart-correction-input')?.value||'')">Perbaiki & Cari Lagi ✨</button><button type="button" class="studio-smart-summary-btn px-3.5 py-2 rounded-xl bg-white border border-blue-200 text-[#151c75] text-[9px] font-extrabold" onclick="App.studioAI.confirmSmartUnderstanding()">Pakai yang tadi</button></div></div></div></div>`;
+                    const correction=document.getElementById('studio-smart-correction-input');
+                    correction?.focus();
+                },
+                applySmartCorrectionFromInput: (correctionText='') => {
+                    const correction = String(correctionText || '').trim();
+                    if (!correction) {
+                        App.ui.toast('Tulis sedikit koreksinya dulu ya 😄','info');
+                        document.getElementById('studio-smart-correction-input')?.focus();
+                        return;
+                    }
+                    App.studioAI.applySmartCorrection(correction);
+                },
+                applySmartCorrection: (correctionText='') => {
+                    const correction = String(correctionText || '').trim();
+                    const ctx = App.studioAI._smartContext || App.studioAI._loadSmartContext();
+                    const previous = String(ctx.query || '').trim();
+                    const nextQuery = previous ? App.studioAI._smartReconcileCorrection(previous, correction) : correction;
+                    const input = document.getElementById('studio-smart-brief-input');
+                    if (input) input.value = nextQuery;
+                    const summaryBox = document.getElementById('studio-smart-understanding');
+                    if (summaryBox) summaryBox.setAttribute('data-confirmed','false');
+                    App.ui.toast('Sip, SMART sudah belokkan arahnya. Cari lagi, ya. 😄','success');
+                    App.studioAI.runSmartDiscovery();
+                },
+                _smartReconcileCorrection: (previous, correction) => {
+                    const prev = String(previous || '').trim();
+                    const corr = String(correction || '').trim();
+                    const lower = corr.toLowerCase();
+                    const removePatterns = [
+                        /video/gi,
+                        /reels?/gi,
+                        /tiktok/gi,
+                        /konten/gi,
+                        /iklan/gi,
+                        /promosi/gi,
+                        /marketing/gi,
+                        /automation/gi,
+                        /otomasi/gi,
+                        /website/gi,
+                        /webapp/gi,
+                        /guru/gi,
+                        /pendidikan/gi
+                    ];
+                    let base = prev;
+                    if (/sebenarnya|maksudku|bukan|tapi/i.test(lower)) {
+                        removePatterns.forEach(rx => { if (rx.test(corr)) base = base.replace(rx, ''); rx.lastIndex = 0; });
+                        base = base.replace(/\s{2,}/g,' ').trim();
+                    }
+                    const cleanCorrection = corr.replace(/^sebenarnya\s*/i,'').replace(/^bukan\s*.*?(?:tapi|melainkan|yang\s+saya\s+butuhkan)/i,'').trim();
+                    return [base, cleanCorrection].filter(Boolean).join(' ').replace(/\s{2,}/g,' ').trim();
+                },
+                runSmartDiscovery: () => {
+                    App.studioAI._loadSmartContext();
+                    App.studioAI._loadSmartLearning();
+                    App.studioAI._loadSmartFeedback();
+                    const currentInput = String(document.getElementById('studio-smart-brief-input')?.value || '').trim();
+                    const ctxBefore = App.studioAI._smartContext || App.studioAI._loadSmartContext();
+                    const query = App.studioAI._getEffectiveSmartQuery(currentInput);
+                    if (query.length < 2) {
+                        App.ui.toast('Tulis dulu kebutuhanmu, meski cuma 1–2 kata 😄', 'info');
+                        return;
+                    }
+                    if (currentInput !== query) { const input = document.getElementById('studio-smart-brief-input'); if (input) input.value = query; }
+                    const smartIntent = App.studioAI._inferIntent(query);
+                    const smartGoals = App.studioAI._inferGoal(query);
+                    const multiIntent = App.studioAI._inferMultiIntent(query);
+                    const data = App.state.studioAI || { creators: [] };
+                    const budgetInput = String(document.getElementById('studio-smart-brief-budget')?.value || '').trim();
+                    const deadlineInput = String(document.getElementById('studio-smart-brief-deadline')?.value || '').trim();
+                    App.studioAI._renderSmartUnderstanding(query, smartIntent, smartGoals, budgetInput, deadlineInput);
+                    const budgetInfo = App.studioAI._parseSmartBudget(budgetInput);
+                    const deadlineDays = App.studioAI._parseSmartDeadlineDays(deadlineInput);
+                    App.studioAI._saveSmartContext({ query, budget: budgetInput, deadline: deadlineInput, label: smartIntent.label || '' });
+                    const ranked = (data.creators || []).map(c => {
+                        let r = App.studioAI._smartScoreCreator(c, query);
+                        let multiCoverage = null;
+                        if (multiIntent.multi) {
+                            const parts = multiIntent.intents.map(intent => App.studioAI._smartScoreCreator(c, intent.seed));
+                            const values = parts.map(x => Number(x.percentage || 0));
+                            const avg = values.reduce((a,b)=>a+b,0) / Math.max(1,values.length);
+                            const min = Math.min(...values);
+                            const coverage = parts.filter(x => Number(x.percentage||0) >= 65).length / Math.max(1,values.length);
+                            const composite = avg*0.55 + min*0.25 + coverage*100*0.20;
+                            multiCoverage = values.map((v,i)=>({ intent:multiIntent.intents[i].label, percentage:Math.round(v) }));
+                            r = { ...r, percentage: Math.round(r.percentage*0.35 + Math.min(98,composite)*0.65), multiCoverage };
+                        }
+                        const serviceMin = Math.min(...(c.services||[]).map(s=>Number(s.price_from||0)).filter(n=>n>0).concat([Infinity]));
+                        const fastest = Math.min(...(c.services||[]).map(s=>Number(s.delivery_days||0)).filter(n=>n>0).concat([Infinity]));
+                        const hardBudgetMismatch = budgetInfo.value > 0 && serviceMin !== Infinity && serviceMin > budgetInfo.max * 1.35;
+                        const hardDeadlineMismatch = deadlineDays > 0 && fastest !== Infinity && fastest > deadlineDays * 1.5;
+                        const penalty = (hardBudgetMismatch ? 6 : 0) + (hardDeadlineMismatch ? 6 : 0);
+                        const learningBoost = App.studioAI._learningBoost(c.username);
+                        const feedbackAdjustment = App.studioAI._feedbackAdjustment(c.username);
+                        const adjusted = { ...r, percentage: Math.max(45,Math.min(98,r.percentage-penalty+learningBoost+feedbackAdjustment)), learningBoost, feedbackAdjustment, multiCoverage };
+                        if (multiIntent.multi) {
+                            const strong = (multiCoverage||[]).filter(x=>x.percentage>=70).length;
+                            adjusted.reason = strong >= multiIntent.intents.length ? `Creator ini punya layanan yang saling nyambung untuk ${multiIntent.intents.map(x=>x.label.toLowerCase()).join(' + ')}.` : `Creator ini cocok untuk sebagian besar kebutuhanmu, dan bisa jadi titik awal untuk merangkai solusinya.`;
+                        }
+                        return { c, ...adjusted, _priorityPenalty: penalty };
+                    }).filter(x => x.percentage >= 46).sort((a,b) => b.percentage-a.percentage || b.confidence-a.confidence || String(a.c.display_name||'').localeCompare(String(b.c.display_name||'')));
+                    const top = ranked.slice(0,3);
+                    App.studioAI._smartLastResults = top;
+                    const resultBox = document.getElementById('studio-smart-brief-results');
+                    if (!resultBox) return;
+                    const activeLearningSignals = Number(App.studioAI._smartLearning?.totalSignals || 0);
+                    if (!top.length) {
+                        resultBox.innerHTML = `<div class="studio-smart-reason rounded-2xl p-4 text-xs text-slate-600 leading-relaxed"><div class="font-extrabold text-[#151c75]">Belum ketemu yang pas 😅</div><div class="mt-1">Coba cerita dengan kata yang lebih spesifik, misalnya jenis konten, target bisnis, atau pekerjaan yang mau dibantu.</div></div>`;
+                        return;
+                    }
+                    const budget = budgetInput;
+                    const deadline = deadlineInput;
+                    const intentLabel = smartIntent.label ? `<div class="mt-2 inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-amber-50 border border-amber-200 text-[9px] font-extrabold text-amber-700"><i class="fa-solid fa-wand-magic-sparkles"></i> ${App.utils.escapeHtml(smartIntent.label)}</div>` : '';
+                    const refineHtml = smartIntent.refine.length ? `<div class="mt-3 flex flex-wrap gap-2 items-center"><span class="text-[9px] font-bold text-slate-400">Biar makin pas:</span>${smartIntent.refine.map(r=>`<button type="button" class="studio-smart-refine-chip px-2.5 py-1.5 rounded-full text-[9px] font-extrabold text-[#151c75] bg-blue-50 border border-blue-100 hover:bg-blue-100" onclick="App.studioAI._appendSmartRefinement('${App.utils.escapeHtml(r)}')">${App.utils.escapeHtml(r)}</button>`).join('')}</div>` : '';
+                    const conversationalHint = ctxBefore?.query && currentInput && currentInput !== ctxBefore.query ? `<div class="mt-2 text-[9px] font-semibold text-emerald-700"><i class="fa-solid fa-link mr-1"></i>SMART nyambungin konteks sebelumnya: <span class="font-black">${App.utils.escapeHtml(ctxBefore.query)}</span></div>` : '';
+                    const learningHint = activeLearningSignals ? `<div class="mt-2 inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-emerald-50 border border-emerald-200 text-[9px] font-extrabold text-emerald-700"><i class="fa-solid fa-wand-magic-sparkles"></i> SMART menyesuaikan hasil dari interaksi sesi ini</div>` : '';
+                    const goalHtml = smartGoals.length ? `<div class="mt-2 flex flex-wrap gap-2"><span class="text-[9px] font-black uppercase tracking-wide text-slate-400">SMART menangkap tujuan:</span>${smartGoals.map(g=>`<span title="${App.utils.escapeHtml(g.text)}" class="studio-smart-goal-chip inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-full bg-amber-50 border border-amber-200 text-[9px] font-extrabold text-amber-700"><i class="fa-solid fa-bullseye"></i>${App.utils.escapeHtml(g.label)}</span>`).join('')}</div>` : '';
+                    const multiIntentHtml = App.studioAI._multiIntentSummary(multiIntent);
+                    const solutionPaths = App.studioAI._inferSolutionPaths(query, smartGoals, smartIntent);
+                    const solutionPathHtml = solutionPaths.length ? `<div class="studio-smart-path rounded-2xl p-3 mt-3"><div class="flex items-center justify-between gap-2 mb-2"><div><div class="text-[9px] font-black uppercase tracking-wide text-amber-600">SMART Path</div><div class="text-xs font-extrabold text-[#151c75]">Kayaknya kamu paling butuh jalur ini 👇</div></div><span class="studio-smart-free-badge bg-emerald-50 text-emerald-700 border border-emerald-200 !text-[8px] !px-2 !py-1"><i class="fa-solid fa-gift"></i> Gratis</span></div><div class="grid grid-cols-1 sm:grid-cols-3 gap-2">${solutionPaths.map((p,i)=>`<article class="studio-smart-path-card rounded-xl border border-blue-100 bg-white p-3"><div class="w-8 h-8 rounded-xl bg-blue-50 text-[#151c75] flex items-center justify-center studio-smart-path-icon"><i class="${p.icon}"></i></div><div class="mt-2 text-[10px] font-extrabold text-[#151c75]">${App.utils.escapeHtml(p.label)}</div><div class="text-[9px] leading-relaxed text-slate-500 mt-1">${App.utils.escapeHtml(p.desc)}</div><div class="text-[9px] font-semibold text-slate-600 mt-2">${App.utils.escapeHtml(p.why)}</div></article>`).join('')}</div></div>` : '';
+                    const nextAction = App.studioAI._getNextBestAction({ top, budgetInfo, deadlineDays, query, smartIntent, smartGoals });
+                    const nextActionHtml = `<div class="smart-next-action rounded-2xl p-3 mt-3"><div class="flex items-start gap-2.5"><div class="w-8 h-8 rounded-xl bg-white text-[#151c75] border border-blue-100 flex items-center justify-center shrink-0 shadow-2xs"><i class="${nextAction.icon}"></i></div><div class="min-w-0 flex-1"><div class="smart-next-action-badge"><i class="fa-solid fa-wand-magic-sparkles"></i> SMART Next</div><div class="text-[11px] sm:text-xs font-extrabold text-[#151c75] mt-1">${App.utils.escapeHtml(nextAction.title)}</div><div class="text-[9px] sm:text-[10px] leading-relaxed text-slate-500 mt-1">${App.utils.escapeHtml(nextAction.body)}</div><button type="button" class="smart-next-action-btn mt-2 px-3 py-2 rounded-xl bg-[#151c75] text-white text-[9px] font-extrabold" onclick="App.studioAI._executeNextBestAction('${nextAction.action}')">${App.utils.escapeHtml(nextAction.label)} <i class="fa-solid fa-arrow-right ml-1 text-[#FACC15]"></i></button></div></div></div>`;
+                    resultBox.innerHTML = `<div class="mb-3 flex items-center justify-between gap-2"><div><div class="text-[10px] font-black uppercase tracking-wider text-amber-600">SMART Recommendation</div><div class="text-sm font-extrabold text-[#151c75]">Ini yang paling nyambung buatmu ✨</div><div class="text-[9px] text-slate-500 mt-0.5">SMART membaca maksud, konteks, tujuan, dan interaksi sesi ini, lalu mencocokkannya dengan kategori, jasa, bukti karya, budget, deadline, dan trust.</div>${intentLabel}${goalHtml}${multiIntentHtml}${solutionPathHtml}${refineHtml}${conversationalHint}${learningHint}</div><div class="flex items-center gap-2"><span class="text-[10px] font-bold text-slate-400">${top.length} Creator</span><button type="button" onclick="App.studioAI.openSmartShortlistCompare()" class="px-2.5 py-1.5 rounded-xl bg-blue-50 text-[#151c75] text-[9px] font-extrabold">Bikin Brief</button></div></div>` + top.map((item, idx) => {
+                        const c = item.c;
+                        const waMessage = `Halo ${c.display_name || 'Creator'}, saya menemukan profilmu di Studihome. Saya butuh: ${query}${budget ? ` Budget sekitar ${budget}.` : ''}${deadline ? ` Target selesai ${deadline}.` : ''}`;
+                        const wa = App.creator._waUrl(c.whatsapp, c.display_name || 'Creator', waMessage);
+                        const service = (c.services || [])[0];
+                        const meter = Math.max(0, Math.min(100, Number(item.percentage || 0)));
+                        return `<article class="studio-smart-result card-3d rounded-2xl p-4 bg-white border border-blue-100">
+                            <div class="flex items-start gap-3">
+                                <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-[#151c75] to-[#3f48bf] text-white flex items-center justify-center font-black shrink-0">${idx+1}</div>
+                                <div class="min-w-0 flex-1"><div class="flex items-center gap-1.5"><div class="font-extrabold text-sm text-[#151c75] truncate">${App.utils.escapeHtml(c.display_name || c.username)}</div>${c.is_verified ? '<i class="fa-solid fa-circle-check text-amber-500 text-[11px]" title="Creator terverifikasi"></i>' : ''}</div><div class="text-[10px] text-slate-500 mt-0.5">@${App.utils.escapeHtml(c.username)}</div></div>
+                                <div class="text-right"><div class="text-[11px] font-black text-amber-600">${meter}% cocok</div><div class="studio-smart-confidence ${item.confidence >= .82 ? 'high' : item.confidence >= .68 ? 'medium' : 'low'} mt-1">SMART ${App.utils.escapeHtml(item.confidenceLabel || 'Cukup')}</div></div>
+                            </div>
+                            <div class="mt-2 studio-smart-match-meter" aria-label="Tingkat kecocokan ${meter}%"><span style="width:${meter}%"></span></div>
+                            <div class="mt-3 rounded-xl bg-blue-50/80 border border-blue-100 px-3 py-2.5"><div class="text-[9px] font-black uppercase tracking-wide text-[#151c75] mb-1">Kenapa direkomendasikan?</div><div class="text-[10px] leading-relaxed font-semibold text-slate-600">${App.utils.escapeHtml(item.reason)}</div></div>
+                            ${item.multiCoverage?.length ? `<div class="mt-2 flex flex-wrap gap-1.5">${item.multiCoverage.map(m=>`<span class="inline-flex items-center gap-1 px-2 py-1 rounded-full bg-white border border-blue-100 text-[8px] font-extrabold text-slate-600"><i class="fa-solid fa-check text-emerald-500"></i>${App.utils.escapeHtml(m.intent)} ${m.percentage}%</span>`).join('')}</div>` : ''}
+                            <button type="button" onclick="App.studioAI.toggleSmartExplain('studio-smart-explain-${idx}')" class="mt-2 text-[10px] font-extrabold text-[#151c75] hover:underline">Lihat alasannya <i class="fa-solid fa-chevron-down ml-1 text-amber-500"></i></button>
+                            <div id="studio-smart-explain-${idx}" class="studio-smart-explain rounded-2xl p-3 mt-2" hidden>
+                                <div class="studio-smart-badge mb-2">Kenapa ${meter}%?</div>
+                                ${[
+                                    ['Kata kunci', item.dimensions.keyword],
+                                    ['Kategori', item.dimensions.category],
+                                    ['Jasa', item.dimensions.service],
+                                    ['Bukti karya', item.dimensions.proof],
+                                    ['Trust', item.dimensions.trust],
+                                    ...(item.dimensions.deadline !== null ? [['Deadline', item.dimensions.deadline]] : [])
+                                ].map(([label,val]) => `<div class="studio-smart-factor mb-1.5"><span class="text-[9px] font-bold text-slate-600 w-20">${label}</span><div class="studio-smart-factor-bar"><span style="width:${Math.max(0,Math.min(100,val))}%"></span></div><span class="text-[9px] font-black text-[#151c75] w-8 text-right">${val}%</span></div>`).join('')}
+                                ${item.dimensions.budget !== null ? `<div class="mt-2 text-[9px] font-semibold text-slate-500">${item.dimensions.budget ? '✓ Budget sesuai' : '• Budget belum cocok dengan layanan yang tersedia'}</div>` : ''}
+                                ${item.matchedTerms?.length ? `<div class="mt-2 text-[9px] font-semibold text-slate-500">Kata yang nyambung: ${App.utils.escapeHtml(item.matchedTerms.join(', '))}</div>` : ''}
+                            </div>
+                            ${service ? `<div class="mt-3 text-[10px] font-bold text-slate-500">Mulai Rp ${Number(service.price_from || 0).toLocaleString('id-ID')} · ${App.utils.escapeHtml(service.title)}</div>` : ''}
+                            ${item.confidence < .68 && item.missingInfo?.length ? `<div class="studio-smart-ask rounded-2xl p-3 mt-3"><div class="text-[9px] font-black uppercase tracking-wide text-amber-600">Biar makin pas ✨</div><div class="text-[10px] font-semibold text-slate-600 mt-1">SMART belum cukup yakin. Tambahkan ${App.utils.escapeHtml(item.missingInfo.join(' atau '))} kalau kamu mau hasil yang lebih presisi.</div><div class="mt-2 flex flex-wrap gap-2">${item.missingInfo.map(info => `<button type="button" class="studio-smart-ask-btn px-2.5 py-1.5 rounded-xl text-[9px] font-extrabold" onclick="App.studioAI._focusSmartField('${info === 'budget' ? 'budget' : info === 'target waktu' ? 'deadline' : 'query'}')">Isi ${App.utils.escapeHtml(info)}</button>`).join('')}</div></div>` : ''}
+                            <div class="mt-3 flex gap-2"><button type="button" onclick="App.studioAI._signalCreator('${App.utils.escapeHtml(c.username)}','profile'); App.router.goCreator('${App.utils.escapeHtml(c.username)}')" class="px-3 py-2 rounded-xl text-[10px] font-extrabold text-[#151c75] bg-blue-50 hover:bg-blue-100">Lihat Profil</button>${wa ? `<a href="${wa}" target="_blank" rel="noopener noreferrer" onclick="App.studioAI._signalCreator('${App.utils.escapeHtml(c.username)}','whatsapp')" class="px-3 py-2 rounded-xl text-[10px] font-extrabold text-white bg-emerald-600 hover:bg-emerald-700">WhatsApp</a>` : ''}</div>
+                            ${App.studioAI._renderSmartFeedback(c.username, idx)}
+                        </article>`;
+                    }).join('');
+                },
+                _executeNextBestAction: (action) => {
+                    if (action === 'compare') { App.studioAI.openSmartShortlistCompare(); return; }
+                    if (action === 'focus-budget') { App.studioAI._focusSmartField('budget'); return; }
+                    if (action === 'focus-deadline') { App.studioAI._focusSmartField('deadline'); return; }
+                    if (action === 'focus-query') { App.studioAI._focusSmartField('query'); return; }
+                    if (action === 'open-best') {
+                        const rows = Array.isArray(App.studioAI._smartLastResults) ? App.studioAI._smartLastResults : [];
+                        const best = rows[0];
+                        if (best?.c?.username) { App.studioAI._signalCreator(best.c.username, 'profile'); App.router.goCreator(best.c.username); }
+                        return;
+                    }
+                },
+                _focusSmartField: (field) => {
+                    const id = field === 'budget' ? 'studio-smart-brief-budget' : field === 'deadline' ? 'studio-smart-brief-deadline' : 'studio-smart-brief-input';
+                    const el = document.getElementById(id);
+                    if (!el) return;
+                    try { el.scrollIntoView({ behavior:'smooth', block:'center' }); } catch (_) {}
+                    setTimeout(() => el.focus(), 120);
+                    App.ui.toast(field === 'budget' ? 'Isi budget kira-kiranya aja. Nggak harus pas banget 😄' : field === 'deadline' ? 'Tulis target selesai, misalnya 7 hari.' : 'Ceritain sedikit konteksnya, misalnya jenis usaha atau platformnya.', 'info');
+                },
+                toggleSmartExplain: (id) => {
+                    const el = document.getElementById(id);
+                    if (!el) return;
+                    el.hidden = !el.hidden;
+                },
                 clearFilters: () => {
                     App.studioAI._query = '';
                     App.studioAI._category = '';
                     const input = document.getElementById('studio-ai-search-input');
                     if (input) input.value = '';
+                    App.studioAI.clearSmartShortlist();
                     App.studioAI.renderCategories();
                     App.studioAI.renderCreators();
                 },
@@ -2861,10 +3976,10 @@ const App = {
 
             creator: {
                 _slugify: (value) => String(value || '').toLowerCase().trim().normalize('NFKD').replace(/[\u0300-\u036f]/g, '').replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '').slice(0, 120),
-                _waUrl: (rawPhone, displayName) => {
+                _waUrl: (rawPhone, displayName, customMessage = '') => {
                     const phone = String(rawPhone || '').replace(/\D/g, '').replace(/^0/, '62');
                     if (!phone || phone.length < 9 || phone.length > 15) return '';
-                    return `https://wa.me/${phone}?text=${encodeURIComponent(`Halo ${displayName || 'Creator'}, saya menemukan profilmu di Studihome dan tertarik dengan layananmu.`)}`;
+                    const message = customMessage || `Halo ${displayName || 'Creator'}, saya menemukan profilmu di Studihome dan tertarik dengan layananmu.`; return `https://wa.me/${phone}?text=${encodeURIComponent(message)}`;
                 },
                 _mediaHTML: (mediaType, url, title) => {
                     const value = String(url || '').trim();
@@ -2882,6 +3997,39 @@ const App = {
                     if (mediaType === 'image' || /\.(png|jpe?g|gif|webp|svg)(?:$|[?#])/i.test(lower)) return `<div class="aspect-[4/3] rounded-2xl overflow-hidden bg-slate-50"><img src="${safe}" alt="${App.utils.escapeHtml(title || 'Portfolio')}" class="w-full h-full object-cover" loading="lazy" referrerpolicy="no-referrer"></div>`;
                     return `<a href="${safe}" target="_blank" rel="noopener noreferrer" class="block rounded-2xl bg-blue-50 p-4 text-xs font-bold text-[#151c75]">Buka portfolio ↗</a>`;
                 },
+                openBrief: (username, displayName, serviceTitle = '', phone = '') => {
+                    window.__creatorBriefPhone = phone;
+                    const existing = document.getElementById('creator-brief-modal');
+                    if (existing) existing.remove();
+                    const modal = document.createElement('div');
+                    modal.id = 'creator-brief-modal';
+                    modal.className = 'fixed inset-0 z-[92] hidden bg-slate-900/60 backdrop-blur-sm items-center justify-center p-4';
+                    modal.innerHTML = `
+                        <div class="card-3d w-full max-w-lg rounded-3xl bg-white p-5 sm:p-6 relative">
+                            <button type="button" class="modal-close-btn absolute top-4 right-4 w-8 h-8 rounded-full flex items-center justify-center font-extrabold" onclick="App.creator.closeBrief()"><i class="fa-solid fa-xmark"></i></button>
+                            <div class="pr-9"><div class="text-[10px] uppercase tracking-wider font-black text-amber-600">Biar ngobrolnya enak 😄</div><h3 class="text-lg sm:text-xl font-black text-[#151c75] mt-1">Ceritakan kebutuhanmu</h3><p class="text-xs sm:text-sm text-slate-500 mt-1 leading-relaxed">Isi singkat saja. Pesannya nanti langsung siap dikirim lewat WhatsApp.</p></div>
+                            <div class="mt-4 space-y-3">
+                                ${serviceTitle ? `<span class="inline-flex px-3 py-1.5 rounded-xl text-[10px] font-extrabold text-[#151c75] bg-blue-50 border border-blue-100">${App.utils.escapeHtml(serviceTitle)}</span>` : ''}
+                                <textarea id="creator-brief-text" rows="4" class="creator-intent-input w-full rounded-2xl px-3.5 py-3 text-xs sm:text-sm" placeholder="Contoh: Saya butuh 5 video promosi untuk UMKM..."></textarea>
+                                <div class="grid grid-cols-2 gap-2"><input id="creator-brief-budget" class="creator-intent-input w-full rounded-2xl px-3.5 py-3 text-xs" placeholder="Budget kira-kira?"><input id="creator-brief-deadline" class="creator-intent-input w-full rounded-2xl px-3.5 py-3 text-xs" placeholder="Target selesai kapan?"></div>
+                                <a id="creator-brief-wa" href="#" target="_blank" rel="noopener noreferrer" class="w-full btn-brand-amber text-slate-900 px-4 py-3 rounded-2xl text-xs font-extrabold text-center block">Lanjut ke WhatsApp <i class="fa-brands fa-whatsapp ml-1"></i></a>
+                            </div>
+                        </div>`;
+                    document.body.appendChild(modal);
+                    modal.classList.remove('hidden'); modal.classList.add('flex');
+                    const update = () => {
+                        const text = document.getElementById('creator-brief-text')?.value.trim() || '';
+                        const budget = document.getElementById('creator-brief-budget')?.value.trim() || '';
+                        const deadline = document.getElementById('creator-brief-deadline')?.value.trim() || '';
+                        const message = `Halo ${displayName || 'Creator'}, saya menemukan profilmu di Studihome.${serviceTitle ? ` Saya tertarik dengan layanan ${serviceTitle}.` : ''} ${text}${budget ? ` Budget saya sekitar ${budget}.` : ''}${deadline ? ` Target selesai ${deadline}.` : ''}`.trim();
+                        const a = document.getElementById('creator-brief-wa');
+                        const phoneNorm = String(phone || '').replace(/\D/g,'').replace(/^0/,'62');
+                        a.href = phoneNorm.length >= 9 ? `https://wa.me/${phoneNorm}?text=${encodeURIComponent(message)}` : '#';
+                    };
+                    modal.querySelectorAll('textarea,input').forEach(el=>el.addEventListener('input',update));
+                    update();
+                },
+                closeBrief: () => { const modal=document.getElementById('creator-brief-modal'); if(modal) modal.remove(); },
                 render: async (username, portfolioSlug = '') => {
                     const main = document.getElementById('main-content');
                     main.innerHTML = `<div class="card-3d-inset p-10 rounded-3xl text-center text-xs text-slate-500">Membuka halaman Creator...</div>`;
@@ -2944,6 +4092,7 @@ const App = {
                                         </div>
                                         <div class="creator-quick-actions">
                                             ${defaultWa ? `<a href="${defaultWa}" target="_blank" rel="noopener noreferrer" class="creator-quick-action btn-brand-amber text-slate-900"><i class="fa-brands fa-whatsapp"></i> Ngobrol via WhatsApp</a>` : ''}
+                                            ${c.whatsapp ? `<button type="button" class="creator-quick-action creator-brief-trigger" onclick="App.creator.openBrief('${App.utils.escapeHtml(c.username)}','${App.utils.escapeHtml(c.display_name || c.username)}','', '${App.utils.escapeHtml(c.whatsapp)}')"><i class="fa-solid fa-wand-magic-sparkles"></i> Ceritakan Kebutuhan</button>` : ''}
                                             <button type="button" class="creator-quick-action creator-share-btn" onclick="App.creator.shareProfile('${App.utils.escapeHtml(c.username)}')"><i class="fa-solid fa-share-nodes"></i> Bagikan Profil</button>
                                         </div>
                                     </div>
@@ -2979,6 +4128,24 @@ const App = {
                                     <button type="button" onclick="App.creator.copyProfileLink('${App.utils.escapeHtml(c.username)}')" class="shrink-0 px-4 py-2.5 rounded-xl bg-blue-50 text-[#151c75] border border-blue-200 text-xs font-extrabold hover:bg-blue-100 transition-all">Salin Link</button>
                                 </div>
                             </section>
+                            ${services.length ? `
+                                <section class="creator-intent-panel rounded-3xl p-4 sm:p-5 mb-7">
+                                    <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
+                                        <div class="min-w-0">
+                                            <div class="text-[10px] uppercase tracking-wider font-black text-amber-600">Butuh bantuan?\</div>
+                                            <h2 class="text-base sm:text-lg font-black text-[#151c75] mt-1">Biar nggak muter-muter, mulai dari yang paling kamu butuhkan.</h2>
+                                            <p class="text-xs text-slate-500 mt-1">Pilih jasa di bawah atau ceritakan kebutuhanmu. Nanti lanjut ngobrol langsung lewat WhatsApp.</p>
+                                            <div class="creator-proof-line mt-3 text-[10px] font-bold text-slate-500"><span>✓ Creator terverifikasi</span><span class="creator-proof-sep">•</span><span>❤️ ${Number(data.likes || 0).toLocaleString('id-ID')} disukai</span><span class="creator-proof-sep">•</span><span>📁 ${portfolios.length} portfolio</span></div>
+                                        </div>
+                                        <div class="shrink-0">
+                                            ${c.whatsapp ? `<button type="button" onclick="App.creator.openBrief('${App.utils.escapeHtml(c.username)}','${App.utils.escapeHtml(c.display_name || c.username)}','${App.utils.escapeHtml(services[0]?.title || '')}','${App.utils.escapeHtml(c.whatsapp)}')" class="btn-brand-gradient px-4 py-3 rounded-2xl text-xs font-extrabold">Mulai Ngobrol <i class="fa-brands fa-whatsapp ml-1 text-[#FACC15]"></i></button>` : ''}
+                                        </div>
+                                    </div>
+                                    <div class="grid grid-cols-1 md:grid-cols-3 gap-3 mt-4">
+                                        ${services.slice(0,3).map((svc,idx)=>`<button type="button" class="creator-intent-chip rounded-2xl px-3 py-3 text-left" onclick="App.creator.openBrief('${App.utils.escapeHtml(c.username)}','${App.utils.escapeHtml(c.display_name || c.username)}','${App.utils.escapeHtml(svc.title)}','${App.utils.escapeHtml(c.whatsapp || '')}')"><span class="block text-[10px] font-black uppercase tracking-wide text-amber-600 mb-1">${idx===0?'Mulai dari sini':'Pilihan'}</span><span class="block text-xs font-extrabold text-[#151c75]">${App.utils.escapeHtml(svc.title)}</span><span class="block text-[10px] text-slate-500 mt-1">Mulai Rp ${Number(svc.price_from||0).toLocaleString('id-ID')}</span></button>`).join('')}
+                                    </div>
+                                </section>
+                            ` : ''}
                             ${targetPortfolio ? `
                                 <section class="mb-7">
                                     <button onclick="App.router.goCreator('${App.utils.escapeHtml(c.username)}')" class="text-xs font-bold text-[#151c75] mb-3 hover:underline">← Kembali ke profil</button>
@@ -3615,9 +4782,30 @@ const App = {
                     const score=this.profileScore();
                     const canPublishLocal = score.percent === 100;
                     const publicUrl = p.username ? `${window.location.origin}/${encodeURIComponent(p.username)}` : '';
+                    const primaryCategory = (d.categories||[]).find(c=>c.id===primary);
+                    const primaryCategoryName = primaryCategory?.name || '';
                     main.innerHTML=`<div class="room-workspace max-w-5xl mx-auto space-y-5">
                         <div class="flex flex-col sm:flex-row justify-between gap-3"><div><div class="text-[10px] font-black text-amber-600 uppercase tracking-wider">RUANG KERJA</div><h1 class="text-xl sm:text-2xl font-black text-[#151c75]">Bangun halamanmu</h1><p class="text-xs text-slate-500 mt-1">Satu link untuk profil, jasa, portfolio, dan kontakmu.</p></div><button onclick="App.router.navigate('kamar')" class="px-3.5 py-2 rounded-xl text-xs font-bold bg-slate-100">Kembali ke Kamar</button></div>
 ${(() => { const rs=String(p.review_status||'DRAFT').toUpperCase(); const map={DRAFT:['Draft','Profilmu masih kamu rapikan. Santai, lanjutkan dulu.','fa-pen'],PENDING:['Sedang dicek','Profilmu sudah masuk antrean review Admin.','fa-hourglass-half'],APPROVED:['Sudah disetujui','Mantap! Profilmu sudah boleh tampil di Studio AI.','fa-circle-check'],REJECTED:['Perlu dirapikan','Ada catatan dari Admin. Rapikan lalu kirim lagi, ya.','fa-wand-magic-sparkles']}; const x=map[rs]||map.DRAFT; return `<div class="creator-review-panel card-3d p-4 sm:p-5 rounded-2xl flex items-start gap-3 mb-5"><span class="creator-review-badge"><i class="fa-solid ${x[2]}"></i>${x[0]}</span><div class="text-[11px] sm:text-xs text-slate-600 leading-relaxed">${x[1]}${rs==='REJECTED'&&p.review_note?`<div class="mt-1 font-semibold text-slate-700">Catatan: ${App.utils.escapeHtml(p.review_note)}</div>`:''}</div></div>`; })()}
+
+                        <section class="creator-launch-card card-3d p-5 sm:p-6 rounded-3xl">
+                            <div class="flex flex-col lg:flex-row lg:items-start justify-between gap-5">
+                                <div class="flex-1">
+                                    <div class="text-[10px] font-black uppercase tracking-wider text-amber-600">LAUNCH KIT ✨</div>
+                                    <h2 class="text-base sm:text-lg font-black text-[#151c75] mt-1">Sudah siap dikenalin?</h2>
+                                    <p class="text-xs sm:text-sm text-slate-600 mt-1 leading-relaxed">Link ini bisa kamu taruh di bio TikTok, Instagram, WhatsApp, atau kartu nama. Sekali jadi, tinggal sebar ke mana-mana.</p>
+                                    <div class="creator-share-preview mt-4">
+                                        <div class="text-[10px] uppercase tracking-wider text-blue-100 font-extrabold">PROFIL STUDIHOME</div>
+                                        <div class="text-sm sm:text-base font-black mt-1">${App.utils.escapeHtml(p.display_name || 'Nama Creator')}</div>
+                                        <div class="text-[11px] text-blue-100 mt-0.5">${App.utils.escapeHtml(publicUrl || 'studihome.id/nama-kamu')}</div>
+                                        <div class="text-[11px] text-blue-100 mt-2">${App.utils.escapeHtml((primaryCategoryName || 'Jasa & solusi AI'))}</div>
+                                    </div>
+                                </div>
+                                <div class="w-full lg:w-[310px] grid grid-cols-2 gap-2">
+                                    ${publicUrl?`<button type="button" onclick="App.creatorStudio.shareProfile('${App.utils.escapeHtml(publicUrl)}')" class="creator-launch-action btn-brand-gradient px-3 py-2.5 rounded-xl text-[11px] font-extrabold flex items-center justify-center gap-2"><i class="fa-solid fa-share-nodes"></i> Bagikan</button><button type="button" onclick="App.creatorStudio.copyPublicLink('${App.utils.escapeHtml(publicUrl)}')" class="creator-launch-action px-3 py-2.5 rounded-xl bg-white text-[#151c75] border border-blue-200 text-[11px] font-extrabold flex items-center justify-center gap-2"><i class="fa-regular fa-copy"></i> Salin Link</button><button type="button" onclick="App.creatorStudio.shareWhatsApp('${App.utils.escapeHtml(publicUrl)}')" class="creator-launch-action px-3 py-2.5 rounded-xl bg-emerald-50 text-emerald-700 border border-emerald-200 text-[11px] font-extrabold flex items-center justify-center gap-2"><i class="fa-brands fa-whatsapp"></i> WhatsApp</button><button type="button" onclick="App.creatorStudio.copyBio('${App.utils.escapeHtml(publicUrl)}')" class="creator-launch-action px-3 py-2.5 rounded-xl bg-slate-100 text-[#151c75] text-[11px] font-extrabold flex items-center justify-center gap-2"><i class="fa-solid fa-wand-magic-sparkles"></i> Copy Bio</button>`:`<button type="button" onclick="App.ui.toast('Isi username dulu ya. Nanti link profilmu langsung muncul di sini ✨','info')" class="creator-launch-action btn-brand-gradient col-span-2 px-3 py-2.5 rounded-xl text-[11px] font-extrabold">Siapkan Link Profil</button>`}
+                                </div>
+                            </div>
+                        </section>
 
                         <section class="card-3d p-4 sm:p-5 rounded-3xl bg-white border border-blue-100">
                             <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
@@ -3659,6 +4847,10 @@ ${(() => { const rs=String(p.review_status||'DRAFT').toUpperCase(); const map={D
                 editPortfolio(id){const box=document.getElementById('creator-portfolio-list');if(box)box.innerHTML=this.portfolioForm(id)+this.portfolioList();},
                 async savePortfolio(id=''){try{await App.api.post('CREATOR_SAVE_PORTFOLIO',{id,serviceId:document.getElementById('cp-service').value||null,title:document.getElementById('cp-title').value,description:document.getElementById('cp-desc').value,mediaType:document.getElementById('cp-type').value,mediaUrl:document.getElementById('cp-url').value,sortOrder:0,isActive:true});App.ui.toast('Portfolio berhasil disimpan.','success');await this.reload();}catch(e){App.ui.toast(e.message||'Portfolio belum bisa disimpan.','error');}},
                 async deletePortfolio(id){if(!confirm('Portfolio ini mau dihapus?'))return;try{await App.api.post('CREATOR_DELETE_PORTFOLIO',{id});App.ui.toast('Portfolio dihapus.','info');await this.reload();}catch(e){App.ui.toast(e.message||'Portfolio belum bisa dihapus.','error');}},
+                async copyPublicLink(url){ try{ await navigator.clipboard.writeText(url); App.ui.toast('Link profilmu sudah disalin. Tinggal tempel di bio 😎','success'); } catch(e){ App.ui.toast('Link belum bisa disalin otomatis. Coba salin manual ya.','info'); } },
+                async shareProfile(url){ const text=`Lihat profil saya di Studihome: ${url}`; try{ if(navigator.share){ await navigator.share({title:'Profil Studihome',text,url}); } else { await navigator.clipboard.writeText(url); App.ui.toast('Link profilmu sudah disalin. Tinggal dibagikan ✨','success'); } } catch(e){ if(e?.name!=='AbortError') App.ui.toast('Belum berhasil membagikan. Link-nya tetap siap kamu salin.','info'); } },
+                shareWhatsApp(url){ const text=`Halo! Ini halaman saya di Studihome ✨\n${url}\nKalau butuh jasa atau solusi AI, boleh mampir ya.`; window.open(`https://wa.me/?text=${encodeURIComponent(text)}`,'_blank','noopener,noreferrer'); },
+                async copyBio(url){ const name=(this.data?.profile?.display_name||'Saya').trim(); const cats=(this.data?.memberships||[]).map(x=>(this.data?.categories||[]).find(c=>c.id===x.category_id)?.name).filter(Boolean).slice(0,3); const bio=`${name} — ${cats.join(' • ')||'Jasa & solusi AI'}\nLihat profil & portfolio saya di ${url}`; try{await navigator.clipboard.writeText(bio);App.ui.toast('Bio siap ditempel ke TikTok atau Instagram ✨','success');}catch(e){App.ui.toast('Bio belum bisa disalin otomatis. Coba lagi ya.','info');}},
                 async publish(){try{await App.api.post('SUBMIT_CREATOR_REVIEW');App.ui.toast('Sip! Profilmu sudah dikirim ke Admin untuk dicek. Kalau sudah oke, langsung tayang. ✨','success');await this.reload();}catch(e){App.ui.toast(e.message||'Belum bisa dikirim untuk review. Coba cek lagi, ya.','error');}},
                 async unpublish(){try{await App.api.post('CREATOR_UNPUBLISH');App.ui.toast('Halaman Creator disembunyikan.','info');await this.reload();}catch(e){App.ui.toast(e.message||'Belum bisa menyembunyikan halaman.','error');}}
             },
