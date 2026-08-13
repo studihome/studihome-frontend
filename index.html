@@ -416,6 +416,16 @@
             .studio-ai-orb { width: 132px; height: 132px; right: -20px; bottom: -20px; opacity: .9; }
             .studio-ai-hero { min-height: 520px; }
         }
+        /* Studio AI QA/UX hardening — additive only */
+        .studio-ai-search-wrap { transition: box-shadow .2s ease, transform .2s ease, border-color .2s ease; }
+        .studio-ai-search-wrap:focus-within { box-shadow: 0 0 0 3px rgba(96,165,250,.22), 0 16px 34px rgba(21,28,117,.14); transform: translateY(-1px); }
+        .studio-ai-chip:focus-visible, .studio-ai-card a:focus-visible, .studio-ai-search:focus-visible { outline: 3px solid rgba(250,204,21,.9); outline-offset: 3px; }
+        .studio-ai-skeleton { position:relative; overflow:hidden; background:linear-gradient(90deg,#eef4ff 25%,#f8fbff 37%,#eef4ff 63%); background-size:400% 100%; animation: studioAiShimmer 1.4s ease infinite; }
+        @keyframes studioAiShimmer { 0%{background-position:100% 0} 100%{background-position:-100% 0} }
+        @media (prefers-reduced-motion: reduce) {
+            .studio-ai-hero::before, .studio-ai-orb, .studio-ai-orb::before, .studio-ai-orb::after, .studio-ai-node, .studio-ai-skeleton { animation:none !important; }
+            .studio-ai-card, .studio-ai-search-wrap { transition:none !important; }
+        }
 
 
         /* Custom Scrollbar */
@@ -2175,7 +2185,7 @@ const App = {
                 _searchTimer: null,
                 _query: '',
                 _category: '',
-                render: async () => {
+                render: async (categorySlug = '') => {
                     const seoCategory = categorySlug ? String(categorySlug).toLowerCase() : '';
                     App.ui.updateSeo({
                         title: seoCategory ? `${seoCategory.replace(/-/g, ' ').replace(/\b\w/g, m => m.toUpperCase())} | Studio AI Studihome` : 'Studio AI Studihome | Jasa, Creator & Solusi AI',
@@ -2199,10 +2209,10 @@ const App = {
                                 <h1 class="text-2xl sm:text-4xl md:text-5xl font-black leading-tight tracking-tight mt-4 max-w-3xl">Temukan orang yang bisa bikin AI bekerja untukmu.</h1>
                                 <p class="text-xs sm:text-sm md:text-base text-blue-100 leading-relaxed mt-3 max-w-2xl">Cari jasa, Creator, Agency, training, automation, konten, dan solusi AI yang paling pas buat kebutuhanmu.</p>
                                 <div class="mt-6 max-w-3xl">
-                                    <div class="bg-white rounded-2xl p-1.5 sm:p-2 shadow-xl flex items-center gap-2">
+                                    <div class="studio-ai-search-wrap bg-white rounded-2xl p-1.5 sm:p-2 shadow-xl flex items-center gap-2 border border-transparent">
                                         <div class="w-9 h-9 rounded-xl bg-blue-50 text-[#151c75] flex items-center justify-center shrink-0"><i class="fa-solid fa-magnifying-glass"></i></div>
-                                        <input id="studio-ai-search-input" type="search" class="studio-ai-search w-full bg-transparent outline-none text-xs sm:text-sm text-slate-800 font-semibold" placeholder="Contoh: buat video iklan, otomasi WhatsApp, AI untuk guru..." autocomplete="off">
-                                        <button type="button" onclick="App.studioAI.applySearch()" class="btn-brand-amber px-3.5 py-2.5 rounded-xl text-[11px] sm:text-xs font-extrabold shrink-0">Cari</button>
+                                        <input id="studio-ai-search-input" type="search" role="searchbox" aria-label="Cari jasa, Creator, atau solusi AI" class="studio-ai-search w-full bg-transparent outline-none text-xs sm:text-sm text-slate-800 font-semibold" placeholder="Contoh: buat video iklan, otomasi WhatsApp, AI untuk guru..." autocomplete="off">
+                                        <button type="button" aria-label="Cari di Studio AI" onclick="App.studioAI.applySearch()" class="btn-brand-amber px-3.5 py-2.5 rounded-xl text-[11px] sm:text-xs font-extrabold shrink-0">Cari</button>
                                     </div>
                                 </div>
                                 <div class="mt-4 flex flex-wrap gap-2" id="studio-ai-category-chips"></div>
@@ -2237,14 +2247,24 @@ const App = {
                                     <p class="text-xs text-slate-500">Profil publik, jasa, portfolio, dan tombol WhatsApp.</p>
                                 </div>
                             </div>
-                            <div id="studio-ai-creator-grid" class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4 sm:gap-6">
-                                <div class="card-3d-inset p-8 rounded-2xl text-center text-xs text-slate-500 md:col-span-2 xl:col-span-3">Memuat Studio AI...</div>
+                            <div id="studio-ai-creator-grid" class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4 sm:gap-6" aria-live="polite">
+                                ${Array.from({length: 3}).map(() => `
+                                    <div class="card-3d rounded-3xl overflow-hidden bg-white" aria-hidden="true">
+                                        <div class="studio-ai-skeleton h-32"></div>
+                                        <div class="p-5">
+                                            <div class="studio-ai-skeleton h-3 rounded-lg w-2/3 mb-3"></div>
+                                            <div class="studio-ai-skeleton h-2.5 rounded-lg w-full mb-2"></div>
+                                            <div class="studio-ai-skeleton h-2.5 rounded-lg w-5/6 mb-4"></div>
+                                            <div class="studio-ai-skeleton h-8 rounded-xl w-full"></div>
+                                        </div>
+                                    </div>`).join('')}
                             </div>
                         </section>
                     `;
                     try {
                         const data = await App.api.post('GET_STUDIO_AI');
                         App.state.studioAI = data;
+                        if (!categorySlug) App.studioAI._category = '';
                         if (categorySlug) {
                             const exists = (data.categories || []).find(c => String(c.slug || '').toLowerCase() === String(categorySlug).toLowerCase());
                             if (exists) {
@@ -2269,7 +2289,11 @@ const App = {
                         if (input) {
                             input.value = App.studioAI._query;
                             input.addEventListener('keydown', e => { if (e.key === 'Enter') App.studioAI.applySearch(); });
-                            input.addEventListener('input', e => { App.studioAI._query = e.target.value; App.studioAI.renderCreators(); });
+                            input.addEventListener('input', e => {
+                                App.studioAI._query = e.target.value;
+                                clearTimeout(App.studioAI._searchTimer);
+                                App.studioAI._searchTimer = setTimeout(() => App.studioAI.renderCreators(), 160);
+                            });
                         }
                     } catch (e) {
                         App.ui.toast('Studio AI belum bisa dimuat. Coba lagi sebentar, ya.', 'error');
@@ -2296,6 +2320,14 @@ const App = {
                     App.ui.renderNavigation();
                     App.studioAI.render(clean);
                     window.scrollTo({ top: 0, behavior: 'smooth' });
+                },
+                clearFilters: () => {
+                    App.studioAI._query = '';
+                    App.studioAI._category = '';
+                    const input = document.getElementById('studio-ai-search-input');
+                    if (input) input.value = '';
+                    App.studioAI.renderCategories();
+                    App.studioAI.renderCreators();
                 },
                 renderCategories: () => {
                     const data = App.state.studioAI || { categories: [] };
@@ -2328,7 +2360,7 @@ const App = {
                     const title = document.getElementById('studio-ai-results-title');
                     if (title) title.textContent = q || category ? 'Yang paling nyambung buatmu' : 'Creator yang siap membantu';
                     if (!creators.length) {
-                        grid.innerHTML = `<div class="card-3d p-8 rounded-2xl text-center md:col-span-2 xl:col-span-3"><div class="text-3xl mb-2">✦</div><div class="text-sm font-extrabold text-[#151c75]">Belum ketemu yang pas</div><div class="text-xs text-slate-500 mt-1">Coba kata kunci lain atau pilih kategori yang lebih dekat.</div></div>`;
+                        grid.innerHTML = `<div class="card-3d p-8 rounded-2xl text-center md:col-span-2 xl:col-span-3"><div class="text-3xl mb-2">✦</div><div class="text-sm font-extrabold text-[#151c75]">Belum ketemu yang pas</div><div class="text-xs text-slate-500 mt-1">Coba kata kunci lain atau pilih kategori yang lebih dekat.</div><button type="button" onclick="App.studioAI.clearFilters()" class="btn-brand-gradient px-4 py-2.5 rounded-xl text-xs font-extrabold mt-4">Tampilkan Semua</button></div>`;
                         return;
                     }
                     grid.innerHTML = creators.slice(0, 30).map(c => {
@@ -2346,7 +2378,10 @@ const App = {
                                         </div>
                                         <div class="pb-0.5">
                                             <div class="text-white text-sm font-extrabold leading-tight">${App.utils.escapeHtml(c.display_name || c.username)}</div>
-                                            <div class="text-blue-100 text-[10px] mt-0.5">@${App.utils.escapeHtml(c.username)}</div>
+                                            <div class="flex items-center gap-1.5 text-blue-100 text-[10px] mt-0.5">
+                                                <span>@${App.utils.escapeHtml(c.username)}</span>
+                                                ${c.is_verified ? '<span class="text-amber-200" title="Creator terverifikasi"><i class="fa-solid fa-circle-check"></i></span>' : ''}
+                                            </div>
                                         </div>
                                     </div>
                                 </div>
