@@ -1362,24 +1362,62 @@ const App = {
                 },
 
                 handlePath: () => {
-                    const path = window.location.pathname.toLowerCase().replace(/\/$/, '') || '/';
-                    if (window.location.hash && path !== '/') {
-                        const legacy = window.location.hash.replace(/^#/, '');
-                        const canonical = { home: '/', products: '/products', dashboard: '/dashboard', admin: '/admin', 'creator-studio': '/creator-studio', 'studio-ai': '/studio-ai' }[legacy];
-                        if (canonical && canonical !== path) {
+                    const legacyRoutes = {
+                        home: '/',
+                        products: '/products',
+                        dashboard: '/dashboard',
+                        admin: '/admin',
+                        'creator-studio': '/creator-studio',
+                        'studio-ai': '/studio-ai'
+                    };
+
+                    let path = window.location.pathname.toLowerCase().replace(/\/{2,}/g, '/').replace(/\/$/, '') || '/';
+                    const rawHash = window.location.hash.replace(/^#/, '').toLowerCase();
+
+                    // Canonicalize legacy menu hashes and IMPORTANTLY refresh `path`
+                    // after replaceState so the old pathname cannot render again.
+                    if (rawHash && legacyRoutes[rawHash]) {
+                        const canonical = legacyRoutes[rawHash];
+                        if (path !== canonical || window.location.hash) {
                             window.history.replaceState({}, '', canonical);
                         }
+                        path = canonical;
                     }
-                    if (path === '/studio-ai' || window.location.hash === '#creator-path' || (!window.location.hash && path !== '/')) {
+
+                    if (path !== '/' || rawHash) {
                         App.router.routePath(path);
+                    } else {
+                        return false;
                     }
-                    if (App.state.routeType === 'creator') { App.ui.renderNavigation(); App.creator.render(App.state.creatorUsername, App.state.creatorPortfolioSlug); return true; }
-                    if (App.state.routeType === 'studio-ai') { App.ui.renderNavigation(); App.studioAI.render(App.state.studioAICategory || ''); return true; }
-                    if (App.state.routeType === 'creator-studio') { App.ui.renderNavigation(); App.creatorStudio.render(); return true; }
-                    if (App.state.routeType === 'products') { App.ui.renderNavigation(); App.products.render(); return true; }
-                    if (App.state.routeType === 'dashboard') { App.ui.renderNavigation(); App.dashboard.render(); return true; }
-                    if (App.state.routeType === 'admin') { App.ui.renderNavigation(); App.admin.render(); return true; }
-                    return false;
+
+                    switch (App.state.routeType) {
+                        case 'creator':
+                            App.ui.renderNavigation();
+                            App.creator.render(App.state.creatorUsername, App.state.creatorPortfolioSlug);
+                            return true;
+                        case 'studio-ai':
+                            App.ui.renderNavigation();
+                            App.studioAI.render(App.state.studioAICategory || '');
+                            return true;
+                        case 'creator-studio':
+                            App.ui.renderNavigation();
+                            App.creatorStudio.render();
+                            return true;
+                        case 'products':
+                            App.ui.renderNavigation();
+                            App.products.render();
+                            return true;
+                        case 'dashboard':
+                            App.ui.renderNavigation();
+                            App.dashboard.render();
+                            return true;
+                        case 'admin':
+                            App.ui.renderNavigation();
+                            App.admin.render();
+                            return true;
+                        default:
+                            return false;
+                    }
                 },
 
                 bindCanonicalLinkGuard: () => {
