@@ -946,6 +946,7 @@ const App = {
                     else if (isCategoryPath) { App.router.routePath(initialPath); }
                     else if (isCreatorPath) { App.router.routePath(initialPath); }
                 }
+                App.router.bindCanonicalLinkGuard();
                 window.addEventListener('hashchange', App.router.handleHash);
                 window.addEventListener('popstate', () => App.router.handlePath() || App.router.handleHash());
                 App.router.handlePath() || App.router.handleHash();
@@ -1284,7 +1285,11 @@ const App = {
                     const canonicalUrl = new URL(targetPath, window.location.origin);
                     canonicalUrl.hash = '';
                     canonicalUrl.search = options.search || '';
-                    window.history.pushState({}, '', canonicalUrl.pathname + canonicalUrl.search);
+                    const nextUrl = canonicalUrl.pathname + canonicalUrl.search;
+                    const currentUrl = window.location.pathname + window.location.search;
+                    if (currentUrl !== nextUrl || window.location.hash) {
+                        window.history.pushState({}, '', nextUrl);
+                    }
 
                     App.state.activeTab = tab;
                     App.state.routePath = canonicalUrl.pathname;
@@ -1377,12 +1382,58 @@ const App = {
                     return false;
                 },
 
+                bindCanonicalLinkGuard: () => {
+                    if (App.router._canonicalLinkGuardBound) return;
+                    App.router._canonicalLinkGuardBound = true;
+                    const routeMap = {
+                        home: '/',
+                        products: '/products',
+                        dashboard: '/dashboard',
+                        admin: '/admin',
+                        'creator-studio': '/creator-studio',
+                        'studio-ai': '/studio-ai'
+                    };
+
+                    const normalizeAnchor = (anchor) => {
+                        if (!anchor || !(anchor instanceof HTMLAnchorElement)) return;
+                        const raw = (anchor.getAttribute('href') || '').trim().replace(/^#/, '').toLowerCase();
+                        if (routeMap[raw]) anchor.setAttribute('href', routeMap[raw]);
+                    };
+
+                    const normalizeAll = (root = document) => {
+                        root.querySelectorAll?.('a[href^="#"]').forEach(normalizeAnchor);
+                    };
+
+                    document.addEventListener('click', (event) => {
+                        const anchor = event.target.closest?.('a[href^="#"]');
+                        if (!anchor) return;
+                        const raw = (anchor.getAttribute('href') || '').replace(/^#/, '').toLowerCase();
+                        if (!routeMap[raw]) return;
+                        event.preventDefault();
+                        event.stopPropagation();
+                        App.router.navigate(raw);
+                    }, true);
+
+                    normalizeAll();
+                    if (window.MutationObserver) {
+                        const observer = new MutationObserver((mutations) => {
+                            for (const mutation of mutations) {
+                                mutation.addedNodes?.forEach(node => {
+                                    if (node.nodeType === 1) {
+                                        if (node.matches?.('a[href^="#"]')) normalizeAnchor(node);
+                                        normalizeAll(node);
+                                    }
+                                });
+                            }
+                        });
+                        if (document.body) observer.observe(document.body, { childList: true, subtree: true });
+                        App.router._canonicalLinkObserver = observer;
+                    }
+                },
+
                 handleHash: () => {
-                    // If a legacy hash is clicked while on a dedicated clean URL
-                    // (/studio-ai, /andi, /creator-studio, etc.), convert it to the
-                    // canonical absolute route instead of keeping /current-path#hash.
                     const currentPath = window.location.pathname || '/';
-                    const rawHash = window.location.hash.replace(/^#/, '');
+                    const rawHash = window.location.hash.replace(/^#/, '').toLowerCase();
                     const legacyRoutes = {
                         home: '/',
                         products: '/products',
@@ -1400,14 +1451,36 @@ const App = {
                         App.state.activeTab = rawHash;
                         App.state.routePath = canonical;
                         App.router.routePath(canonical);
-                        App.router.navigate(rawHash);
+                        App.ui.renderNavigation();
+
+                        if (rawHash === 'home') {
+                            App.ui.updateSeo({
+                                title: 'Studihome - Platform Pembelajaran Digital, Otomasi dan Agentic AI',
+                                description: 'Studihome adalah platform produk digital, modul pembelajaran, serta layanan AI dan otomasi untuk guru, profesional, kreator, bisnis, dan UMKM di Indonesia.',
+                                path: '/'
+                            });
+                            App.home.render();
+                        } else if (rawHash === 'products') {
+                            App.ui.updateSeo({
+                                title: 'Produk Digital & AI | Studihome',
+                                description: 'Temukan produk digital, modul pembelajaran, prompt, dan tools AI praktis dari Studihome.',
+                                path: '/products'
+                            });
+                            App.products.render();
+                        } else if (rawHash === 'dashboard') App.dashboard.render();
+                        else if (rawHash === 'admin') App.admin.render();
+                        else if (rawHash === 'creator-studio') App.creatorStudio.render();
+                        else if (rawHash === 'studio-ai') App.studioAI.render();
+                        window.scrollTo({ top: 0, behavior: 'smooth' });
                         return;
                     }
 
                     if (App.router.handlePath()) return;
                     const hash = rawHash || 'home';
+                    if (window.location.pathname !== '/' && hash === 'home') {
+                        window.history.replaceState({}, '', '/');
+                    }
                     App.state.activeTab = hash;
-
                     App.ui.renderNavigation();
 
                     if (hash === 'home') {
@@ -1417,16 +1490,14 @@ const App = {
                             path: '/'
                         });
                         App.home.render();
-                    }
-                    else if (hash === 'products') {
+                    } else if (hash === 'products') {
                         App.ui.updateSeo({
                             title: 'Produk Digital & AI | Studihome',
                             description: 'Temukan produk digital, modul pembelajaran, prompt, dan tools AI praktis dari Studihome.',
                             path: '/products'
                         });
                         App.products.render();
-                    }
-                    else if (hash === 'dashboard') App.dashboard.render();
+                    } else if (hash === 'dashboard') App.dashboard.render();
                     else if (hash === 'admin') App.admin.render();
                     else App.home.render();
 
