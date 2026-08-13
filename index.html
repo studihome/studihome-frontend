@@ -928,14 +928,17 @@ const App = {
 
                 const initialPath = window.location.pathname.toLowerCase().replace(/\/$/, '') || '/';
                 if (!window.location.hash && initialPath !== '/') {
-                    const knownPaths = ['/', '/products', '/dashboard', '/admin'];
-                    const isCreatorPath = /^\/[a-z0-9][a-z0-9-]{2,39}(?:\/portfolio\/[a-z0-9][a-z0-9- -]{0,120})?$/i.test(initialPath) && !knownPaths.includes(initialPath);
-                    if (initialPath === '/studio-ai') window.location.hash = 'studio-ai';
-                    else if (isCreatorPath) App.router.routePath(initialPath);
+                    const knownPaths = ['/', '/products', '/dashboard', '/admin', '/studio-ai', '/creator-studio'];
+                    const isCategoryPath = /^(\/ai-|\/kursus-ai|\/jasa-ai|\/ai-untuk-)/i.test(initialPath);
+                    const isCreatorPath = /^\/[a-z0-9][a-z0-9-]{2,39}(?:\/portfolio\/[a-z0-9][a-z0-9-]{0,120})?$/i.test(initialPath) && !knownPaths.includes(initialPath) && !isCategoryPath;
+                    if (initialPath === '/studio-ai') { App.router.routePath('/studio-ai'); }
+                    else if (initialPath === '/creator-studio') { App.router.routePath('/creator-studio'); }
+                    else if (isCategoryPath) { App.router.routePath(initialPath); }
+                    else if (isCreatorPath) { App.router.routePath(initialPath); }
                 }
                 window.addEventListener('hashchange', App.router.handleHash);
-                window.addEventListener('popstate', App.router.handleHash);
-                App.router.handleHash();
+                window.addEventListener('popstate', () => App.router.handlePath() || App.router.handleHash());
+                App.router.handlePath() || App.router.handleHash();
             },
 
             search: {
@@ -1137,12 +1140,58 @@ const App = {
                     }
                 },
 
+                updateSeo: (meta = {}) => {
+                    const title = String(meta.title || 'Studihome - Platform Pembelajaran Digital, Otomasi dan Agentic AI');
+                    const description = String(meta.description || 'Studihome adalah platform produk digital, modul pembelajaran, serta layanan AI dan otomasi untuk guru, profesional, kreator, bisnis, dan UMKM di Indonesia.');
+                    const path = String(meta.path || window.location.pathname || '/').replace(/\/{2,}/g, '/');
+                    const canonical = new URL(path === '/' ? '/' : path, 'https://studihome.id').href;
+                    const image = meta.image || 'https://studihome.id/assets/og-image.png';
+
+                    document.title = title;
+                    const ensureMeta = (attr, key, value) => {
+                        let el = document.head.querySelector(`meta[${attr}="${key}"]`);
+                        if (!el) {
+                            el = document.createElement('meta');
+                            el.setAttribute(attr, key);
+                            document.head.appendChild(el);
+                        }
+                        el.setAttribute('content', value);
+                    };
+                    ensureMeta('name', 'title', title);
+                    ensureMeta('name', 'description', description);
+                    ensureMeta('property', 'og:title', title);
+                    ensureMeta('property', 'og:description', description);
+                    ensureMeta('property', 'og:url', canonical);
+                    ensureMeta('property', 'og:image', image);
+                    ensureMeta('name', 'twitter:title', title);
+                    ensureMeta('name', 'twitter:description', description);
+                    ensureMeta('name', 'twitter:url', canonical);
+                    ensureMeta('name', 'twitter:image', image);
+                    let link = document.head.querySelector('link[rel="canonical"]');
+                    if (!link) {
+                        link = document.createElement('link');
+                        link.rel = 'canonical';
+                        document.head.appendChild(link);
+                    }
+                    link.href = canonical;
+
+                    const old = document.getElementById('dynamic-seo-jsonld');
+                    if (old) old.remove();
+                    if (meta.jsonLd) {
+                        const script = document.createElement('script');
+                        script.id = 'dynamic-seo-jsonld';
+                        script.type = 'application/ld+json';
+                        script.textContent = JSON.stringify(meta.jsonLd);
+                        document.head.appendChild(script);
+                    }
+                },
+
                 renderNavigation: () => {
                     const nav = document.getElementById('top-nav-links');
                     const mNav = document.getElementById('mobile-nav-links');
                     
                     const user = App.state.user;
-                    const hash = App.state.activeTab || 'home';
+                    const hash = App.state.routeType === 'studio-ai' ? 'studio-ai' : (App.state.routeType === 'creator' || App.state.routeType === 'creator-studio' ? 'studio-ai' : (App.state.activeTab || 'home'));
 
                     let items = [
                         { key: 'home', label: 'Teras', icon: 'fa-house' },
@@ -1214,7 +1263,16 @@ const App = {
                 navigate: (tab) => {
                     if (tab === 'studio-ai') {
                         window.history.pushState({}, '', '/studio-ai');
-                        window.location.hash = 'studio-ai';
+                        App.state.routeType = 'studio-ai';
+                        App.state.studioAICategory = '';
+                        App.ui.renderNavigation();
+                        App.studioAI.render();
+                        window.scrollTo({ top: 0, behavior: 'smooth' });
+                        return;
+                    }
+                    if (tab === 'creator-studio') {
+                        window.history.pushState({}, '', '/creator-studio');
+                        window.location.hash = 'creator-studio';
                         return;
                     }
                     window.location.hash = tab;
@@ -1225,7 +1283,12 @@ const App = {
                     const safeSlug = String(portfolioSlug || '').trim().toLowerCase();
                     const path = safeSlug ? `/${safeUsername}/portfolio/${safeSlug}` : `/${safeUsername}`;
                     window.history.pushState({}, '', path);
-                    window.location.hash = 'creator-path';
+                    App.state.routeType = 'creator';
+                    App.state.creatorUsername = safeUsername;
+                    App.state.creatorPortfolioSlug = safeSlug;
+                    App.ui.renderNavigation();
+                    App.creator.render(safeUsername, safeSlug);
+                    window.scrollTo({ top: 0, behavior: 'smooth' });
                 },
 
                 routePath: (path) => {
@@ -1233,7 +1296,9 @@ const App = {
                     const parts = clean.split('/').filter(Boolean);
                     App.state.routePath = clean;
                     if (!parts.length) { App.state.routeType = 'home'; return; }
-                    if (parts[0] === 'studio-ai') { App.state.routeType = 'studio-ai'; return; }
+                    if (parts[0] === 'studio-ai') { App.state.routeType = 'studio-ai'; App.state.studioAICategory = ''; return; }
+                    if (parts[0] === 'creator-studio') { App.state.routeType = 'creator-studio'; return; }
+                    if (/^(ai-|kursus-ai|jasa-ai|ai-untuk-)/i.test(parts[0])) { App.state.routeType = 'studio-ai'; App.state.studioAICategory = parts[0].toLowerCase(); return; }
                     if (parts.length === 1) { App.state.routeType = 'creator'; App.state.creatorUsername = parts[0].toLowerCase(); App.state.creatorPortfolioSlug = ''; return; }
                     if (parts.length >= 3 && parts[1] === 'portfolio') { App.state.routeType = 'creator'; App.state.creatorUsername = parts[0].toLowerCase(); App.state.creatorPortfolioSlug = parts.slice(2).join('-').toLowerCase(); return; }
                     App.state.routeType = 'home';
@@ -1245,7 +1310,8 @@ const App = {
                         App.router.routePath(path);
                     }
                     if (App.state.routeType === 'creator') { App.ui.renderNavigation(); App.creator.render(App.state.creatorUsername, App.state.creatorPortfolioSlug); return true; }
-                    if (App.state.routeType === 'studio-ai') { App.ui.renderNavigation(); App.studioAI.render(); return true; }
+                    if (App.state.routeType === 'studio-ai') { App.ui.renderNavigation(); App.studioAI.render(App.state.studioAICategory || ''); return true; }
+                    if (App.state.routeType === 'creator-studio') { App.ui.renderNavigation(); App.creatorStudio.render(); return true; }
                     return false;
                 },
 
@@ -1256,8 +1322,22 @@ const App = {
 
                     App.ui.renderNavigation();
 
-                    if (hash === 'home') App.home.render();
-                    else if (hash === 'products') App.products.render();
+                    if (hash === 'home') {
+                        App.ui.updateSeo({
+                            title: 'Studihome - Platform Pembelajaran Digital, Otomasi dan Agentic AI',
+                            description: 'Studihome adalah platform produk digital, modul pembelajaran, serta layanan AI dan otomasi untuk guru, profesional, kreator, bisnis, dan UMKM di Indonesia.',
+                            path: '/'
+                        });
+                        App.home.render();
+                    }
+                    else if (hash === 'products') {
+                        App.ui.updateSeo({
+                            title: 'Produk Digital & AI | Studihome',
+                            description: 'Temukan produk digital, modul pembelajaran, prompt, dan tools AI praktis dari Studihome.',
+                            path: '/products'
+                        });
+                        App.products.render();
+                    }
                     else if (hash === 'dashboard') App.dashboard.render();
                     else if (hash === 'admin') App.admin.render();
                     else App.home.render();
@@ -1435,6 +1515,86 @@ const App = {
                             }
                             data = { liked: !liked };
 
+                        } else if (action === 'GET_CREATOR_STUDIO') {
+                            const user = await App.api._profile();
+                            if (!user) throw new Error('Sesi login tidak ditemukan.');
+                            const { data: eligible, error: eligibleErr } = await supabaseClient.rpc('is_creator_eligible');
+                            if (eligibleErr) throw eligibleErr;
+                            const [catRes, profRes] = await withTimeout(Promise.all([
+                                supabaseClient.from('ai_categories').select('id,slug,name,description,icon').eq('is_active', true).order('name', { ascending: true }),
+                                supabaseClient.from('creator_profiles').select('*').eq('user_id', user.id).maybeSingle()
+                            ]), 10000, 'Data Creator terlalu lama dimuat.');
+                            if (catRes.error) throw catRes.error;
+                            if (profRes.error) throw profRes.error;
+                            let memberships = [], services = [], portfolios = [];
+                            if (profRes.data) {
+                                const [mRes, sRes, pRes] = await Promise.all([
+                                    supabaseClient.from('creator_category_members').select('category_id,is_primary').eq('creator_id', profRes.data.id),
+                                    supabaseClient.from('creator_services').select('*').eq('creator_id', profRes.data.id).order('created_at', { ascending: false }),
+                                    supabaseClient.from('creator_portfolios').select('*').eq('creator_id', profRes.data.id).order('sort_order', { ascending: true }).order('created_at', { ascending: false })
+                                ]);
+                                for (const r of [mRes, sRes, pRes]) if (r.error) throw r.error;
+                                memberships = mRes.data || [];
+                                services = sRes.data || [];
+                                portfolios = pRes.data || [];
+                            }
+                            data = { eligible: !!eligible, categories: catRes.data || [], profile: profRes.data || null, memberships, services, portfolios };
+                        } else if (action === 'CREATOR_SAVE_PROFILE') {
+                            const user = await App.api._profile();
+                            if (!user) throw new Error('Sesi login tidak ditemukan.');
+                            const { data: eligible, error: eErr } = await supabaseClient.rpc('is_creator_eligible');
+                            if (eErr) throw eErr;
+                            if (!eligible && String(user.role || '').toLowerCase() !== 'admin') throw new Error('Kamu belum punya akses Creator. Miliki minimal satu produk Premium Studihome yang aktif dulu, ya.');
+                            const row = { user_id: user.id, username: payload.username, display_name: payload.displayName, bio: payload.bio || '', avatar_url: payload.avatarUrl || '', cover_url: payload.coverUrl || '', whatsapp: payload.whatsapp || '', location: payload.location || '' };
+                            const res = payload.creatorId
+                                ? await supabaseClient.from('creator_profiles').update(row).eq('id', payload.creatorId).eq('user_id', user.id).select().single()
+                                : await supabaseClient.from('creator_profiles').insert(row).select().single();
+                            if (res.error) throw res.error;
+                            data = { profile: res.data };
+                        } else if (action === 'CREATOR_SAVE_CATEGORIES') {
+                            const user = await App.api._profile(); if (!user) throw new Error('Sesi login tidak ditemukan.');
+                            const { data: profile, error: pErr } = await supabaseClient.from('creator_profiles').select('id').eq('user_id', user.id).single(); if (pErr) throw pErr;
+                            const items = payload.items || [];
+                            if (!items.length) throw new Error('Pilih minimal satu kategori.');
+                            const primaryCount = items.filter(x => x.isPrimary).length;
+                            if (primaryCount !== 1) throw new Error('Pilih tepat satu kategori utama.');
+                            const { error: dErr } = await supabaseClient.from('creator_category_members').delete().eq('creator_id', profile.id); if (dErr) throw dErr;
+                            const { error: iErr } = await supabaseClient.from('creator_category_members').insert(items.map(x => ({ creator_id: profile.id, category_id: x.categoryId, is_primary: !!x.isPrimary }))); if (iErr) throw iErr;
+                            data = { success: true };
+                        } else if (action === 'CREATOR_SAVE_SERVICE') {
+                            const user = await App.api._profile(); if (!user) throw new Error('Sesi login tidak ditemukan.');
+                            const { data: profile, error: pErr } = await supabaseClient.from('creator_profiles').select('id').eq('user_id', user.id).single(); if (pErr) throw pErr;
+                            const row = { creator_id: profile.id, category_id: payload.categoryId || null, title: payload.title, description: payload.description || '', price_from: Number(payload.priceFrom || 0), price_to: Number(payload.priceTo || payload.priceFrom || 0), delivery_days: Math.max(1, Number(payload.deliveryDays || 1)), is_active: payload.isActive !== false };
+                            const res = payload.id
+                                ? await supabaseClient.from('creator_services').update(row).eq('id', payload.id).eq('creator_id', profile.id).select().single()
+                                : await supabaseClient.from('creator_services').insert(row).select().single();
+                            if (res.error) throw res.error; data = { service: res.data };
+                        } else if (action === 'CREATOR_DELETE_SERVICE') {
+                            const user = await App.api._profile(); if (!user) throw new Error('Sesi login tidak ditemukan.');
+                            const { data: profile, error: pErr } = await supabaseClient.from('creator_profiles').select('id').eq('user_id', user.id).single(); if (pErr) throw pErr;
+                            const { error } = await supabaseClient.from('creator_services').delete().eq('id', payload.id).eq('creator_id', profile.id); if (error) throw error; data = { success: true };
+                        } else if (action === 'CREATOR_SAVE_PORTFOLIO') {
+                            const user = await App.api._profile(); if (!user) throw new Error('Sesi login tidak ditemukan.');
+                            const { data: profile, error: pErr } = await supabaseClient.from('creator_profiles').select('id').eq('user_id', user.id).single(); if (pErr) throw pErr;
+                            const row = { creator_id: profile.id, service_id: payload.serviceId || null, title: payload.title, description: payload.description || '', media_type: payload.mediaType || 'image', media_url: payload.mediaUrl, sort_order: Number(payload.sortOrder || 0), is_active: payload.isActive !== false };
+                            const res = payload.id
+                                ? await supabaseClient.from('creator_portfolios').update(row).eq('id', payload.id).eq('creator_id', profile.id).select().single()
+                                : await supabaseClient.from('creator_portfolios').insert(row).select().single();
+                            if (res.error) throw res.error; data = { portfolio: res.data };
+                        } else if (action === 'CREATOR_DELETE_PORTFOLIO') {
+                            const user = await App.api._profile(); if (!user) throw new Error('Sesi login tidak ditemukan.');
+                            const { data: profile, error: pErr } = await supabaseClient.from('creator_profiles').select('id').eq('user_id', user.id).single(); if (pErr) throw pErr;
+                            const { error } = await supabaseClient.from('creator_portfolios').delete().eq('id', payload.id).eq('creator_id', profile.id); if (error) throw error; data = { success: true };
+                        } else if (action === 'CREATOR_PUBLISH') {
+                            const user = await App.api._profile(); if (!user) throw new Error('Sesi login tidak ditemukan.');
+                            const { data: profile, error: pErr } = await supabaseClient.from('creator_profiles').select('id').eq('user_id', user.id).single(); if (pErr) throw pErr;
+                            const { data: ok, error: cErr } = await supabaseClient.rpc('can_publish_creator', { p_creator_id: profile.id }); if (cErr) throw cErr;
+                            if (!ok) throw new Error('Halaman belum siap dipublikasikan. Lengkapi nama, kategori utama, dan minimal satu jasa aktif.');
+                            const { error } = await supabaseClient.from('creator_profiles').update({ is_published: true }).eq('id', profile.id).eq('user_id', user.id); if (error) throw error;
+                            data = { success: true };
+                        } else if (action === 'CREATOR_UNPUBLISH') {
+                            const user = await App.api._profile(); if (!user) throw new Error('Sesi login tidak ditemukan.');
+                            const { error } = await supabaseClient.from('creator_profiles').update({ is_published: false }).eq('user_id', user.id); if (error) throw error; data = { success: true };
                         } else if (action === 'GET_MEMBER_DASHBOARD') {
                             const user = await App.api._profile();
                             if (!user) throw new Error('Sesi login tidak ditemukan.');
@@ -1941,6 +2101,19 @@ const App = {
                 _query: '',
                 _category: '',
                 render: async () => {
+                    const seoCategory = categorySlug ? String(categorySlug).toLowerCase() : '';
+                    App.ui.updateSeo({
+                        title: seoCategory ? `${seoCategory.replace(/-/g, ' ').replace(/\b\w/g, m => m.toUpperCase())} | Studio AI Studihome` : 'Studio AI Studihome | Jasa, Creator & Solusi AI',
+                        description: seoCategory ? `Temukan Creator dan jasa ${seoCategory.replace(/-/g, ' ')} di Studio AI Studihome.` : 'Temukan jasa AI, Creator, Agency, automation, konten, website, training, dan solusi AI di Studio AI Studihome.',
+                        path: seoCategory ? `/${seoCategory}` : '/studio-ai',
+                        jsonLd: {
+                            '@context': 'https://schema.org',
+                            '@type': 'CollectionPage',
+                            'name': 'Studio AI Studihome',
+                            'url': 'https://studihome.id/studio-ai',
+                            'description': 'Discovery jasa, Creator, Agency, training, dan solusi AI di Studihome.'
+                        }
+                    });
                     const main = document.getElementById('main-content');
                     main.innerHTML = `
                         <section class="studio-ai-hero card-3d rounded-3xl p-5 sm:p-8 md:p-10 mb-7 text-white shadow-2xl">
@@ -1997,6 +2170,24 @@ const App = {
                     try {
                         const data = await App.api.post('GET_STUDIO_AI');
                         App.state.studioAI = data;
+                        if (categorySlug) {
+                            const exists = (data.categories || []).find(c => String(c.slug || '').toLowerCase() === String(categorySlug).toLowerCase());
+                            if (exists) {
+                                App.studioAI._category = exists.slug;
+                                App.ui.updateSeo({
+                                    title: `${exists.name} | Studio AI Studihome`,
+                                    description: `Temukan Creator dan jasa ${exists.name} di Studio AI Studihome.`,
+                                    path: `/${exists.slug}`,
+                                    jsonLd: {
+                                        '@context': 'https://schema.org',
+                                        '@type': 'CollectionPage',
+                                        'name': `${exists.name} | Studio AI Studihome`,
+                                        'url': `https://studihome.id/${exists.slug}`,
+                                        'description': `Temukan Creator dan jasa ${exists.name} di Studio AI Studihome.`
+                                    }
+                                });
+                            }
+                        }
                         App.studioAI.renderCategories();
                         App.studioAI.renderCreators();
                         const input = document.getElementById('studio-ai-search-input');
@@ -2021,21 +2212,31 @@ const App = {
                     App.studioAI.renderCategories();
                     App.studioAI.renderCreators();
                 },
+                openCategory: (slug) => {
+                    const clean = String(slug || '').toLowerCase().replace(/[^a-z0-9-]/g, '');
+                    if (!clean) return;
+                    window.history.pushState({}, '', '/' + clean);
+                    App.state.routeType = 'studio-ai';
+                    App.state.studioAICategory = clean;
+                    App.ui.renderNavigation();
+                    App.studioAI.render(clean);
+                    window.scrollTo({ top: 0, behavior: 'smooth' });
+                },
                 renderCategories: () => {
                     const data = App.state.studioAI || { categories: [] };
                     const chips = document.getElementById('studio-ai-category-chips');
                     const grid = document.getElementById('studio-ai-category-grid');
                     const categories = data.categories || [];
                     if (chips) chips.innerHTML = categories.slice(0, 8).map(c => `
-                        <button type="button" onclick="App.studioAI.setCategory('${App.utils.escapeHtml(c.slug)}')" class="studio-ai-chip ${App.studioAI._category === c.slug ? 'active' : ''} px-3 py-1.5 rounded-xl bg-white/10 border border-white/20 text-[10px] sm:text-xs font-bold text-white hover:bg-white/15 transition-all">
+                        <a href="/${App.utils.escapeHtml(c.slug)}" onclick="event.preventDefault(); App.studioAI.openCategory('${App.utils.escapeHtml(c.slug)}')" class="studio-ai-chip ${App.studioAI._category === c.slug ? 'active' : ''} px-3 py-1.5 rounded-xl bg-white/10 border border-white/20 text-[10px] sm:text-xs font-bold text-white hover:bg-white/15 transition-all">
                             ${App.utils.escapeHtml(c.name)}
-                        </button>`).join('');
+                        </a>`).join('');
                     if (grid) grid.innerHTML = categories.map(c => `
-                        <button type="button" onclick="App.studioAI.setCategory('${App.utils.escapeHtml(c.slug)}')" class="studio-ai-card text-left card-3d p-4 rounded-2xl bg-white">
+                        <a href="/${App.utils.escapeHtml(c.slug)}" onclick="event.preventDefault(); App.studioAI.openCategory('${App.utils.escapeHtml(c.slug)}')" class="studio-ai-card text-left card-3d p-4 rounded-2xl bg-white">
                             <div class="w-10 h-10 rounded-xl bg-blue-50 text-[#151c75] flex items-center justify-center mb-3"><i class="${App.utils.escapeHtml(c.icon || 'fa-solid fa-sparkles')}"></i></div>
                             <div class="font-extrabold text-xs sm:text-sm text-[#151c75]">${App.utils.escapeHtml(c.name)}</div>
                             <div class="text-[10px] text-slate-500 mt-1 line-clamp-2">${App.utils.escapeHtml(c.description || '')}</div>
-                        </button>`).join('');
+                        </a>`).join('');
                 },
                 renderCreators: () => {
                     const grid = document.getElementById('studio-ai-creator-grid');
@@ -2086,7 +2287,7 @@ const App = {
                                     <div class="flex items-center justify-between mt-4 pt-3 border-t border-slate-100 gap-2">
                                         <div class="text-[10px] font-bold text-slate-500">${App.utils.escapeHtml(c.location || 'Indonesia')}</div>
                                         <div class="flex items-center gap-1.5">
-                                            <a href="#${App.utils.escapeHtml(c.username)}" class="px-3 py-1.5 rounded-xl text-[10px] font-extrabold text-[#151c75] bg-blue-50 hover:bg-blue-100">Profil</a>
+                                            <a href="/${App.utils.escapeHtml(c.username)}" onclick="event.preventDefault(); App.router.goCreator('${App.utils.escapeHtml(c.username)}')" class="px-3 py-1.5 rounded-xl text-[10px] font-extrabold text-[#151c75] bg-blue-50 hover:bg-blue-100">Profil</a>
                                             ${wa ? `<a href="${wa}" target="_blank" rel="noopener noreferrer" class="px-3 py-1.5 rounded-xl text-[10px] font-extrabold text-white bg-emerald-600 hover:bg-emerald-700"><i class="fa-brands fa-whatsapp mr-1"></i> WhatsApp</a>` : ''}
                                         </div>
                                     </div>
@@ -2124,6 +2325,23 @@ const App = {
                         App.state.creatorProfile = data;
                         const c = data.creator;
                         const primaryCategory = data.categories.find(x => x.isPrimary) || data.categories[0];
+                        const creatorPath = portfolioSlug ? `/${String(c.username).toLowerCase()}/portfolio/${String(portfolioSlug).toLowerCase()}` : `/${String(c.username).toLowerCase()}`;
+                        const creatorTitle = `${c.display_name || c.username} | ${primaryCategory?.name || 'Creator AI'} | Studihome`;
+                        const creatorDescription = String(c.bio || `${c.display_name || c.username} menyediakan jasa dan solusi AI di Studio AI Studihome.`).replace(/\s+/g, ' ').slice(0, 160);
+                        App.ui.updateSeo({
+                            title: creatorTitle,
+                            description: creatorDescription,
+                            path: creatorPath,
+                            image: c.cover_url || c.avatar_url || 'https://studihome.id/assets/og-image.png',
+                            jsonLd: {
+                                '@context': 'https://schema.org',
+                                '@type': 'ProfilePage',
+                                'name': c.display_name || c.username,
+                                'url': `https://studihome.id${creatorPath}`,
+                                'description': creatorDescription,
+                                'mainEntity': { '@type': 'Person', 'name': c.display_name || c.username }
+                            }
+                        });
                         const phone = String(c.whatsapp || '').replace(/\D/g,'').replace(/^0/,'62');
                         const defaultWa = phone ? `https://wa.me/${phone}?text=${encodeURIComponent(`Halo ${c.display_name || 'Creator'}, saya menemukan profilmu di Studihome dan tertarik dengan layananmu.`)}` : '';
                         const initials = String(c.display_name || c.username || 'C').trim().charAt(0).toUpperCase();
@@ -2426,7 +2644,7 @@ const App = {
             },
 
             dashboard: {
-                render: async () => {
+                render: async (categorySlug = '') => {
                     const main = document.getElementById('main-content');
                     if (!App.state.user) {
                         main.innerHTML = `
@@ -2706,6 +2924,55 @@ const App = {
                         container.innerHTML = `<div class="p-8 text-center text-xs text-red-500">Gagal memuat materi modul.</div>`;
                     }
                 }
+            },
+
+            creatorStudio: {
+                data: null,
+                async render() {
+                    const main = document.getElementById('main-content');
+                    if (!App.state.user) { App.ui.toggleModal('auth-modal', true); return; }
+                    try { this.data = await App.api.post('GET_CREATOR_STUDIO'); } catch(e) { App.ui.toast(e.message || 'Studio Creator belum bisa dimuat. Coba lagi, ya.', 'error'); return; }
+                    if (!this.data.eligible) {
+                        main.innerHTML = `<div class="max-w-2xl mx-auto card-3d p-8 rounded-3xl bg-white text-center"><div class="w-16 h-16 mx-auto rounded-2xl bg-blue-50 flex items-center justify-center mb-4"><i class="fa-solid fa-wand-magic-sparkles text-2xl text-[#151c75]"></i></div><h1 class="text-xl font-black text-[#151c75]">Jadi Creator Studihome</h1><p class="text-xs sm:text-sm text-slate-600 mt-2 leading-relaxed">Kamu sudah punya akun, tapi belum memenuhi syarat Creator. Miliki minimal satu produk Premium Studihome yang aktif untuk membuka halaman Creator gratis.</p><button onclick="App.router.navigate('products')" class="btn-brand-gradient mt-5 px-5 py-2.5 rounded-xl text-xs font-bold">Lihat Produk Premium</button></div>`;
+                        return;
+                    }
+                    this.renderEditor();
+                },
+                renderEditor() {
+                    const main = document.getElementById('main-content'); const d=this.data||{}; const p=d.profile||{};
+                    const selected=new Set((d.memberships||[]).map(x=>x.category_id)); const primary=(d.memberships||[]).find(x=>x.is_primary)?.category_id||'';
+                    main.innerHTML=`<div class="max-w-5xl mx-auto space-y-5">
+                        <div class="flex flex-col sm:flex-row justify-between gap-3"><div><div class="text-[10px] font-black text-amber-600 uppercase tracking-wider">STUDIO CREATOR</div><h1 class="text-xl sm:text-2xl font-black text-[#151c75]">Bangun halamanmu</h1><p class="text-xs text-slate-500 mt-1">Satu link untuk profil, jasa, portfolio, dan kontakmu.</p></div><button onclick="App.router.navigate('dashboard')" class="px-3.5 py-2 rounded-xl text-xs font-bold bg-slate-100">Kembali</button></div>
+                        <section class="card-3d p-5 sm:p-6 rounded-3xl bg-white"><div class="flex justify-between mb-4"><h2 class="font-extrabold text-[#151c75]">Profil</h2><span class="text-[10px] font-bold ${p.is_published?'text-emerald-600':'text-amber-600'}">${p.is_published?'Sudah Publik':'Draft'}</span></div><div class="grid md:grid-cols-2 gap-3">
+                        <div><label class="block text-xs font-bold mb-1">Username</label><div class="flex items-center gap-1.5"><span class="text-xs text-slate-500">studihome.id/</span><input id="creator-username" value="${App.utils.escapeHtml(p.username||'')}" ${p.is_published?'disabled':''} placeholder="nama-kamu" class="w-full card-3d-inset px-3 py-2.5 rounded-xl text-xs outline-none"></div></div>
+                        <div><label class="block text-xs font-bold mb-1">Nama tampilan</label><input id="creator-display" value="${App.utils.escapeHtml(p.display_name||App.state.user.name||'')}" class="w-full card-3d-inset px-3 py-2.5 rounded-xl text-xs outline-none"></div>
+                        <div class="md:col-span-2"><label class="block text-xs font-bold mb-1">Bio</label><textarea id="creator-bio" rows="3" class="w-full card-3d-inset px-3 py-2.5 rounded-xl text-xs outline-none">${App.utils.escapeHtml(p.bio||'')}</textarea></div>
+                        <div><label class="block text-xs font-bold mb-1">WhatsApp</label><input id="creator-wa" value="${App.utils.escapeHtml(p.whatsapp||App.state.user.phone||'')}" class="w-full card-3d-inset px-3 py-2.5 rounded-xl text-xs outline-none"></div>
+                        <div><label class="block text-xs font-bold mb-1">Lokasi</label><input id="creator-location" value="${App.utils.escapeHtml(p.location||'')}" class="w-full card-3d-inset px-3 py-2.5 rounded-xl text-xs outline-none"></div>
+                        <div><label class="block text-xs font-bold mb-1">URL Foto Profil</label><input id="creator-avatar" value="${App.utils.escapeHtml(p.avatar_url||'')}" class="w-full card-3d-inset px-3 py-2.5 rounded-xl text-xs outline-none"></div>
+                        <div><label class="block text-xs font-bold mb-1">URL Cover</label><input id="creator-cover" value="${App.utils.escapeHtml(p.cover_url||'')}" class="w-full card-3d-inset px-3 py-2.5 rounded-xl text-xs outline-none"></div></div><button onclick="App.creatorStudio.saveProfile()" class="btn-brand-gradient mt-4 px-4 py-2.5 rounded-xl text-xs font-bold">Simpan Profil</button>${p.username?`<button onclick="App.router.goCreator('${App.utils.escapeHtml(p.username)}')" class="ml-2 px-4 py-2.5 rounded-xl text-xs font-bold bg-slate-100 text-[#151c75]">Lihat Halaman</button>`:''}</section>
+                        <section class="card-3d p-5 sm:p-6 rounded-3xl bg-white"><h2 class="font-extrabold text-[#151c75] mb-1">Kategori</h2><p class="text-[10px] text-slate-500 mb-3">Pilih kategori yang paling sesuai dan satu kategori utama.</p><div class="grid sm:grid-cols-2 gap-2">${(d.categories||[]).map(c=>`<label class="flex items-center gap-2 p-3 rounded-xl border border-slate-200"><input type="checkbox" data-creator-cat="${c.id}" ${selected.has(c.id)?'checked':''}><span class="flex-1 text-xs font-bold text-[#151c75]">${App.utils.escapeHtml(c.name)}</span><span class="text-[10px] text-slate-500 flex items-center gap-1">Utama <input type="radio" name="creator-primary" value="${c.id}" ${primary===c.id?'checked':''}></span></label>`).join('')}</div><button onclick="App.creatorStudio.saveCategories()" class="btn-brand-gradient mt-4 px-4 py-2.5 rounded-xl text-xs font-bold">Simpan Kategori</button></section>
+                        <section class="card-3d p-5 sm:p-6 rounded-3xl bg-white"><div class="flex justify-between items-center mb-3"><h2 class="font-extrabold text-[#151c75]">Jasa</h2><button onclick="App.creatorStudio.addServiceForm()" class="btn-brand-gradient px-3 py-2 rounded-xl text-[10px] font-bold">+ Jasa</button></div><div id="creator-services-list">${this.serviceList()}</div></section>
+                        <section class="card-3d p-5 sm:p-6 rounded-3xl bg-white"><div class="flex justify-between items-center mb-3"><h2 class="font-extrabold text-[#151c75]">Portfolio</h2><button onclick="App.creatorStudio.addPortfolioForm()" class="btn-brand-gradient px-3 py-2 rounded-xl text-[10px] font-bold">+ Portfolio</button></div><div id="creator-portfolio-list">${this.portfolioList()}</div></section>
+                        <section class="card-3d p-5 sm:p-6 rounded-3xl bg-white border border-blue-100 flex flex-col sm:flex-row justify-between gap-3 items-start sm:items-center"><div><div class="text-xs font-extrabold text-[#151c75]">Siap tampil?</div><div class="text-[10px] text-slate-500 mt-1">Profil, kategori utama, dan minimal satu jasa harus siap.</div></div><div class="flex gap-2"><button onclick="App.creatorStudio.publish()" class="btn-brand-gradient px-4 py-2.5 rounded-xl text-xs font-bold">${p.is_published?'Perbarui':'Publish Halaman'}</button>${p.is_published?`<button onclick="App.creatorStudio.unpublish()" class="px-4 py-2.5 rounded-xl text-xs font-bold bg-slate-100">Sembunyikan</button>`:''}</div></section></div>`;
+                },
+                serviceList(){ const rows=this.data?.services||[]; return rows.length?rows.map(s=>`<div class="flex items-center gap-2 p-3 border border-slate-200 rounded-xl mb-2"><div class="flex-1"><div class="text-xs font-extrabold text-[#151c75]">${App.utils.escapeHtml(s.title)}</div><div class="text-[10px] text-slate-500 mt-0.5">Mulai Rp ${Number(s.price_from||0).toLocaleString('id-ID')} · ${Number(s.delivery_days||1)} hari</div></div><button onclick="App.creatorStudio.editService('${s.id}')" class="px-2.5 py-1.5 rounded-lg text-[10px] font-bold bg-slate-100">Edit</button><button onclick="App.creatorStudio.deleteService('${s.id}')" class="px-2.5 py-1.5 rounded-lg text-[10px] font-bold bg-red-50 text-red-600">Hapus</button></div>`).join(''):`<div class="p-5 text-center text-xs text-slate-500 card-3d-inset rounded-xl">Belum ada jasa. Tambahkan yang pertama, ya.</div>`; },
+                portfolioList(){ const rows=this.data?.portfolios||[]; return rows.length?rows.map(p=>`<div class="flex items-center gap-2 p-3 border border-slate-200 rounded-xl mb-2"><div class="flex-1"><div class="text-xs font-extrabold text-[#151c75]">${App.utils.escapeHtml(p.title)}</div><div class="text-[10px] text-slate-500 mt-0.5">${App.utils.escapeHtml(p.media_type)}</div></div><button onclick="App.creatorStudio.editPortfolio('${p.id}')" class="px-2.5 py-1.5 rounded-lg text-[10px] font-bold bg-slate-100">Edit</button><button onclick="App.creatorStudio.deletePortfolio('${p.id}')" class="px-2.5 py-1.5 rounded-lg text-[10px] font-bold bg-red-50 text-red-600">Hapus</button></div>`).join(''):`<div class="p-5 text-center text-xs text-slate-500 card-3d-inset rounded-xl">Belum ada portfolio. Tambahkan karya terbaikmu.</div>`; },
+                async reload(){ this.data=await App.api.post('GET_CREATOR_STUDIO'); this.renderEditor(); },
+                async saveProfile(){ try{await App.api.post('CREATOR_SAVE_PROFILE',{creatorId:this.data.profile?.id,username:document.getElementById('creator-username').value,displayName:document.getElementById('creator-display').value,bio:document.getElementById('creator-bio').value,whatsapp:document.getElementById('creator-wa').value,location:document.getElementById('creator-location').value,avatarUrl:document.getElementById('creator-avatar').value,coverUrl:document.getElementById('creator-cover').value});App.ui.toast('Profil Creator tersimpan. Mantap!','success');await this.reload();}catch(e){App.ui.toast(e.message||'Profil belum bisa disimpan. Coba lagi, ya.','error');} },
+                async saveCategories(){ try{const ids=[...document.querySelectorAll('[data-creator-cat]:checked')].map(x=>x.getAttribute('data-creator-cat'));const primary=document.querySelector('input[name="creator-primary"]:checked')?.value||'';await App.api.post('CREATOR_SAVE_CATEGORIES',{items:ids.map(id=>({categoryId:id,isPrimary:id===primary}))});App.ui.toast('Kategori sudah tersimpan.','success');await this.reload();}catch(e){App.ui.toast(e.message||'Kategori belum bisa disimpan.','error');} },
+                serviceForm(id=''){const s=(this.data?.services||[]).find(x=>x.id===id)||{};const cats=this.data?.categories||[];return `<div class="card-3d-inset p-4 rounded-xl mb-3"><div class="grid sm:grid-cols-2 gap-2"><input id="cs-title" value="${App.utils.escapeHtml(s.title||'')}" placeholder="Nama jasa" class="w-full card-3d-inset px-3 py-2.5 rounded-xl text-xs outline-none"><select id="cs-cat" class="w-full card-3d-inset px-3 py-2.5 rounded-xl text-xs outline-none"><option value="">Kategori</option>${cats.map(c=>`<option value="${c.id}" ${s.category_id===c.id?'selected':''}>${App.utils.escapeHtml(c.name)}</option>`).join('')}</select><input id="cs-from" type="number" min="0" value="${Number(s.price_from||0)}" placeholder="Harga mulai" class="w-full card-3d-inset px-3 py-2.5 rounded-xl text-xs outline-none"><input id="cs-to" type="number" min="0" value="${Number(s.price_to||0)}" placeholder="Harga sampai" class="w-full card-3d-inset px-3 py-2.5 rounded-xl text-xs outline-none"><input id="cs-days" type="number" min="1" value="${Number(s.delivery_days||1)}" placeholder="Estimasi hari" class="w-full card-3d-inset px-3 py-2.5 rounded-xl text-xs outline-none sm:col-span-2"></div><textarea id="cs-desc" rows="3" placeholder="Deskripsi jasa" class="w-full card-3d-inset px-3 py-2.5 rounded-xl text-xs outline-none mt-2">${App.utils.escapeHtml(s.description||'')}</textarea><div class="flex gap-2 mt-2"><button onclick="App.creatorStudio.saveService('${id}')" class="btn-brand-gradient px-3.5 py-2 rounded-xl text-xs font-bold">Simpan</button><button onclick="App.creatorStudio.reload()" class="px-3.5 py-2 rounded-xl text-xs font-bold bg-slate-100">Batal</button></div></div>`;},
+                addServiceForm(){const box=document.getElementById('creator-services-list');if(box)box.innerHTML=this.serviceForm()+this.serviceList();},
+                editService(id){const box=document.getElementById('creator-services-list');if(box)box.innerHTML=this.serviceForm(id)+this.serviceList();},
+                async saveService(id=''){try{await App.api.post('CREATOR_SAVE_SERVICE',{id,categoryId:document.getElementById('cs-cat').value||null,title:document.getElementById('cs-title').value,description:document.getElementById('cs-desc').value,priceFrom:document.getElementById('cs-from').value,priceTo:document.getElementById('cs-to').value,deliveryDays:document.getElementById('cs-days').value,isActive:true});App.ui.toast('Jasa berhasil disimpan.','success');await this.reload();}catch(e){App.ui.toast(e.message||'Jasa belum bisa disimpan.','error');}},
+                async deleteService(id){if(!confirm('Hapus jasa ini?'))return;try{await App.api.post('CREATOR_DELETE_SERVICE',{id});App.ui.toast('Jasa dihapus.','info');await this.reload();}catch(e){App.ui.toast(e.message||'Jasa belum bisa dihapus.','error');}},
+                portfolioForm(id=''){const p=(this.data?.portfolios||[]).find(x=>x.id===id)||{};const services=this.data?.services||[];return `<div class="card-3d-inset p-4 rounded-xl mb-3"><input id="cp-title" value="${App.utils.escapeHtml(p.title||'')}" placeholder="Judul portfolio" class="w-full card-3d-inset px-3 py-2.5 rounded-xl text-xs outline-none"><textarea id="cp-desc" rows="2" placeholder="Deskripsi singkat" class="w-full card-3d-inset px-3 py-2.5 rounded-xl text-xs outline-none mt-2">${App.utils.escapeHtml(p.description||'')}</textarea><div class="grid sm:grid-cols-2 gap-2 mt-2"><select id="cp-service" class="w-full card-3d-inset px-3 py-2.5 rounded-xl text-xs outline-none"><option value="">Jasa terkait (opsional)</option>${services.map(s=>`<option value="${s.id}" ${p.service_id===s.id?'selected':''}>${App.utils.escapeHtml(s.title)}</option>`).join('')}</select><select id="cp-type" class="w-full card-3d-inset px-3 py-2.5 rounded-xl text-xs outline-none"><option value="image" ${p.media_type==='image'?'selected':''}>Gambar</option><option value="youtube" ${p.media_type==='youtube'?'selected':''}>YouTube</option><option value="drive" ${p.media_type==='drive'?'selected':''}>Google Drive</option><option value="video" ${p.media_type==='video'?'selected':''}>Video file</option><option value="link" ${p.media_type==='link'?'selected':''}>Link</option></select></div><input id="cp-url" value="${App.utils.escapeHtml(p.media_url||'')}" placeholder="URL media" class="w-full card-3d-inset px-3 py-2.5 rounded-xl text-xs outline-none mt-2"><div class="flex gap-2 mt-2"><button onclick="App.creatorStudio.savePortfolio('${id}')" class="btn-brand-gradient px-3.5 py-2 rounded-xl text-xs font-bold">Simpan</button><button onclick="App.creatorStudio.reload()" class="px-3.5 py-2 rounded-xl text-xs font-bold bg-slate-100">Batal</button></div></div>`;},
+                addPortfolioForm(){const box=document.getElementById('creator-portfolio-list');if(box)box.innerHTML=this.portfolioForm()+this.portfolioList();},
+                editPortfolio(id){const box=document.getElementById('creator-portfolio-list');if(box)box.innerHTML=this.portfolioForm(id)+this.portfolioList();},
+                async savePortfolio(id=''){try{await App.api.post('CREATOR_SAVE_PORTFOLIO',{id,serviceId:document.getElementById('cp-service').value||null,title:document.getElementById('cp-title').value,description:document.getElementById('cp-desc').value,mediaType:document.getElementById('cp-type').value,mediaUrl:document.getElementById('cp-url').value,sortOrder:0,isActive:true});App.ui.toast('Portfolio berhasil disimpan.','success');await this.reload();}catch(e){App.ui.toast(e.message||'Portfolio belum bisa disimpan.','error');}},
+                async deletePortfolio(id){if(!confirm('Hapus portfolio ini?'))return;try{await App.api.post('CREATOR_DELETE_PORTFOLIO',{id});App.ui.toast('Portfolio dihapus.','info');await this.reload();}catch(e){App.ui.toast(e.message||'Portfolio belum bisa dihapus.','error');}},
+                async publish(){try{await App.api.post('CREATOR_PUBLISH');App.ui.toast('Halaman Creator sudah dipublikasikan. Keren!','success');await this.reload();}catch(e){App.ui.toast(e.message||'Halaman belum siap dipublikasikan.','error');}},
+                async unpublish(){try{await App.api.post('CREATOR_UNPUBLISH');App.ui.toast('Halaman Creator disembunyikan.','info');await this.reload();}catch(e){App.ui.toast(e.message||'Belum bisa menyembunyikan halaman.','error');}}
             },
 
             admin: {
