@@ -1261,21 +1261,60 @@ const App = {
 
             router: {
                 navigate: (tab) => {
-                    if (tab === 'studio-ai') {
-                        window.history.pushState({}, '', '/studio-ai');
-                        App.state.routeType = 'studio-ai';
-                        App.state.studioAICategory = '';
-                        App.ui.renderNavigation();
-                        App.studioAI.render();
-                        window.scrollTo({ top: 0, behavior: 'smooth' });
-                        return;
+                    const routes = {
+                        home: '/',
+                        products: '/products',
+                        dashboard: '/dashboard',
+                        admin: '/admin',
+                        'creator-studio': '/creator-studio',
+                        'studio-ai': '/studio-ai'
+                    };
+
+                    const targetPath = routes[tab] || '/';
+                    // Global navigation must always use canonical root paths,
+                    // even when the current page is /studio-ai or a Creator route.
+                    // This prevents legacy hash navigation such as /studio-ai#products.
+                    window.history.pushState({}, '', targetPath);
+
+                    App.state.activeTab = tab;
+                    App.state.routePath = targetPath;
+                    App.router.routePath(targetPath);
+                    App.ui.renderNavigation();
+
+                    switch (tab) {
+                        case 'home':
+                            App.ui.updateSeo({
+                                title: 'Studihome - Platform Pembelajaran Digital, Otomasi dan Agentic AI',
+                                description: 'Studihome adalah platform produk digital, modul pembelajaran, serta layanan AI dan otomasi untuk guru, profesional, kreator, bisnis, dan UMKM di Indonesia.',
+                                path: '/'
+                            });
+                            App.home.render();
+                            break;
+                        case 'products':
+                            App.ui.updateSeo({
+                                title: 'Produk Digital & AI | Studihome',
+                                description: 'Temukan produk digital, modul pembelajaran, prompt, dan tools AI praktis dari Studihome.',
+                                path: '/products'
+                            });
+                            App.products.render();
+                            break;
+                        case 'dashboard':
+                            App.dashboard.render();
+                            break;
+                        case 'admin':
+                            App.admin.render();
+                            break;
+                        case 'creator-studio':
+                            App.creatorStudio.render();
+                            break;
+                        case 'studio-ai':
+                            App.studioAI.render();
+                            break;
+                        default:
+                            App.home.render();
                     }
-                    if (tab === 'creator-studio') {
-                        window.history.pushState({}, '', '/creator-studio');
-                        window.location.hash = 'creator-studio';
-                        return;
-                    }
-                    window.location.hash = tab;
+
+                    window.scrollTo({ top: 0, behavior: 'smooth' });
                 },
 
                 goCreator: (username, portfolioSlug = '') => {
@@ -1298,6 +1337,9 @@ const App = {
                     if (!parts.length) { App.state.routeType = 'home'; return; }
                     if (parts[0] === 'studio-ai') { App.state.routeType = 'studio-ai'; App.state.studioAICategory = ''; return; }
                     if (parts[0] === 'creator-studio') { App.state.routeType = 'creator-studio'; return; }
+                    if (parts[0] === 'products') { App.state.routeType = 'products'; return; }
+                    if (parts[0] === 'dashboard') { App.state.routeType = 'dashboard'; return; }
+                    if (parts[0] === 'admin') { App.state.routeType = 'admin'; return; }
                     if (/^(ai-|kursus-ai|jasa-ai|ai-untuk-)/i.test(parts[0])) { App.state.routeType = 'studio-ai'; App.state.studioAICategory = parts[0].toLowerCase(); return; }
                     if (parts.length === 1) { App.state.routeType = 'creator'; App.state.creatorUsername = parts[0].toLowerCase(); App.state.creatorPortfolioSlug = ''; return; }
                     if (parts.length >= 3 && parts[1] === 'portfolio') { App.state.routeType = 'creator'; App.state.creatorUsername = parts[0].toLowerCase(); App.state.creatorPortfolioSlug = parts.slice(2).join('-').toLowerCase(); return; }
@@ -1306,18 +1348,51 @@ const App = {
 
                 handlePath: () => {
                     const path = window.location.pathname.toLowerCase().replace(/\/$/, '') || '/';
+                    if (window.location.hash && path !== '/') {
+                        const legacy = window.location.hash.replace(/^#/, '');
+                        const canonical = { home: '/', products: '/products', dashboard: '/dashboard', admin: '/admin', 'creator-studio': '/creator-studio', 'studio-ai': '/studio-ai' }[legacy];
+                        if (canonical && canonical !== path) {
+                            window.history.replaceState({}, '', canonical);
+                        }
+                    }
                     if (path === '/studio-ai' || window.location.hash === '#creator-path' || (!window.location.hash && path !== '/')) {
                         App.router.routePath(path);
                     }
                     if (App.state.routeType === 'creator') { App.ui.renderNavigation(); App.creator.render(App.state.creatorUsername, App.state.creatorPortfolioSlug); return true; }
                     if (App.state.routeType === 'studio-ai') { App.ui.renderNavigation(); App.studioAI.render(App.state.studioAICategory || ''); return true; }
                     if (App.state.routeType === 'creator-studio') { App.ui.renderNavigation(); App.creatorStudio.render(); return true; }
+                    if (App.state.routeType === 'products') { App.ui.renderNavigation(); App.products.render(); return true; }
+                    if (App.state.routeType === 'dashboard') { App.ui.renderNavigation(); App.dashboard.render(); return true; }
+                    if (App.state.routeType === 'admin') { App.ui.renderNavigation(); App.admin.render(); return true; }
                     return false;
                 },
 
                 handleHash: () => {
+                    // If a legacy hash is clicked while on a dedicated clean URL
+                    // (/studio-ai, /andi, /creator-studio, etc.), convert it to the
+                    // canonical absolute route instead of keeping /current-path#hash.
+                    const currentPath = window.location.pathname || '/';
+                    const rawHash = window.location.hash.replace(/^#/, '');
+                    const legacyRoutes = {
+                        home: '/',
+                        products: '/products',
+                        dashboard: '/dashboard',
+                        admin: '/admin',
+                        'creator-studio': '/creator-studio',
+                        'studio-ai': '/studio-ai'
+                    };
+
+                    if (rawHash && legacyRoutes[rawHash] && currentPath !== legacyRoutes[rawHash]) {
+                        window.history.replaceState({}, '', legacyRoutes[rawHash]);
+                        App.state.activeTab = rawHash;
+                        App.state.routePath = legacyRoutes[rawHash];
+                        App.router.routePath(legacyRoutes[rawHash]);
+                        App.router.navigate(rawHash);
+                        return;
+                    }
+
                     if (App.router.handlePath()) return;
-                    const hash = window.location.hash.replace('#', '') || 'home';
+                    const hash = rawHash || 'home';
                     App.state.activeTab = hash;
 
                     App.ui.renderNavigation();
@@ -1449,8 +1524,8 @@ const App = {
                             const [catRes, creatorRes, serviceRes, likeRes] = await withTimeout(
                                 Promise.all([
                                     supabaseClient.from('ai_categories').select('id,slug,name,description,icon').eq('is_active', true).order('name', { ascending: true }),
-                                    supabaseClient.from('creator_profiles').select('id,user_id,username,display_name,bio,avatar_url,cover_url,whatsapp,location,is_published,is_verified').eq('is_published', true).order('updated_at', { ascending: false }),
-                                    supabaseClient.from('creator_services').select('id,creator_id,category_id,title,description,price_from,price_to,delivery_days').eq('is_active', true).order('created_at', { ascending: false }),
+                                    supabaseClient.from('creator_profiles').select('id,user_id,username,display_name,bio,avatar_url,cover_url,whatsapp,location,is_published,is_verified').eq('is_published', true).order('updated_at', { ascending: false }).limit(100),
+                                    supabaseClient.from('creator_services').select('id,creator_id,category_id,title,description,price_from,price_to,delivery_days').eq('is_active', true).order('created_at', { ascending: false }).limit(500),
                                     supabaseClient.from('creator_likes').select('creator_id')
                                 ]),
                                 10000,
@@ -2257,14 +2332,13 @@ const App = {
                         return;
                     }
                     grid.innerHTML = creators.slice(0, 30).map(c => {
-                        const phone = String(c.whatsapp || '').replace(/\D/g,'').replace(/^0/,'62');
-                        const wa = phone ? `https://wa.me/${phone}?text=${encodeURIComponent(`Halo ${c.display_name || 'Creator'}, saya menemukan profilmu di Studihome dan ingin bertanya tentang layananmu.`)}` : '';
+                        const wa = App.creator._waUrl(c.whatsapp, c.display_name || 'Creator');
                         const service = (c.services || [])[0];
                         const initials = String(c.display_name || c.username || 'C').trim().charAt(0).toUpperCase();
                         return `
                             <article class="studio-ai-card card-3d rounded-3xl overflow-hidden bg-white">
                                 <div class="h-32 bg-gradient-to-br from-[#151c75] to-[#3f48bf] relative overflow-hidden">
-                                    ${c.cover_url ? `<img src="${App.utils.safeUrl(c.cover_url)}" alt="" class="w-full h-full object-cover opacity-60">` : ''}
+                                    ${c.cover_url ? `<img src="${App.utils.safeUrl(c.cover_url)}" alt="" class="w-full h-full object-cover opacity-60" loading="lazy" decoding="async">` : ''}
                                     <div class="absolute inset-0 bg-gradient-to-t from-[#151c75]/85 to-transparent"></div>
                                     <div class="absolute left-4 bottom-3 flex items-end gap-3">
                                         <div class="w-12 h-12 rounded-2xl bg-white text-[#151c75] flex items-center justify-center font-black text-base shadow-lg border border-blue-100 overflow-hidden">
@@ -2301,6 +2375,11 @@ const App = {
 
             creator: {
                 _slugify: (value) => String(value || '').toLowerCase().trim().normalize('NFKD').replace(/[\u0300-\u036f]/g, '').replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '').slice(0, 120),
+                _waUrl: (rawPhone, displayName) => {
+                    const phone = String(rawPhone || '').replace(/\D/g, '').replace(/^0/, '62');
+                    if (!phone || phone.length < 9 || phone.length > 15) return '';
+                    return `https://wa.me/${phone}?text=${encodeURIComponent(`Halo ${displayName || 'Creator'}, saya menemukan profilmu di Studihome dan tertarik dengan layananmu.`)}`;
+                },
                 _mediaHTML: (mediaType, url, title) => {
                     const value = String(url || '').trim();
                     if (!value) return '';
@@ -2342,8 +2421,7 @@ const App = {
                                 'mainEntity': { '@type': 'Person', 'name': c.display_name || c.username }
                             }
                         });
-                        const phone = String(c.whatsapp || '').replace(/\D/g,'').replace(/^0/,'62');
-                        const defaultWa = phone ? `https://wa.me/${phone}?text=${encodeURIComponent(`Halo ${c.display_name || 'Creator'}, saya menemukan profilmu di Studihome dan tertarik dengan layananmu.`)}` : '';
+                        const defaultWa = App.creator._waUrl(c.whatsapp, c.display_name || 'Creator');
                         const initials = String(c.display_name || c.username || 'C').trim().charAt(0).toUpperCase();
                         const targetPortfolio = portfolioSlug ? (data.portfolios || []).find(p => App.creator._slugify(p.title) === String(portfolioSlug).toLowerCase()) : null;
                         if (portfolioSlug && !targetPortfolio) {
