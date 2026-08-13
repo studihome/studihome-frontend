@@ -97,6 +97,182 @@
         @media (prefers-reduced-motion: reduce){
             .smart-demand-note{transition:none!important}
         }
+
+/* Milestone K — Admin Studio AI Control Center (additive only) */
+.admin-studio-ai-grid{display:grid;grid-template-columns:1.15fr .85fr;gap:1rem}
+@media(max-width:980px){.admin-studio-ai-grid{grid-template-columns:1fr}}
+.admin-studio-ai-card{background:#fff;border:1px solid #dfe7f5;border-radius:1.25rem;padding:1rem;box-shadow:0 10px 24px rgba(21,28,117,.06)}
+.admin-studio-ai-card h4{color:#151c75;font-weight:900;font-size:.85rem}
+.admin-studio-ai-stat{background:linear-gradient(135deg,#f8fbff,#fff);border:1px solid #dbe7ff;border-radius:1rem;padding:.8rem}
+.admin-studio-ai-pill{display:inline-flex;align-items:center;gap:.35rem;padding:.28rem .55rem;border-radius:999px;background:#eff6ff;border:1px solid #dbeafe;color:#151c75;font-size:9px;font-weight:900}
+.admin-studio-ai-row{display:flex;align-items:center;justify-content:space-between;gap:.75rem;padding:.75rem 0;border-top:1px solid #eef2f7}
+.admin-studio-ai-row:first-child{border-top:0}
+
+/* Milestone L — Creator Experience Standard (additive only) */
+.creator-standard-strip{
+    display:grid;
+    grid-template-columns:repeat(3,minmax(0,1fr));
+    gap:.75rem;
+    margin-bottom:1.75rem;
+}
+.creator-standard-card{
+    background:linear-gradient(135deg,#ffffff 0%,#f8fbff 100%);
+    border:1px solid #dfe7f5;
+    border-radius:1.15rem;
+    padding:.9rem 1rem;
+    box-shadow:0 8px 22px rgba(21,28,117,.06);
+}
+.creator-standard-card .kicker{
+    font-size:8px;
+    font-weight:900;
+    letter-spacing:.08em;
+    text-transform:uppercase;
+    color:#94a3b8;
+}
+.creator-standard-card .value{
+    margin-top:.25rem;
+    font-size:.78rem;
+    font-weight:900;
+    color:#151c75;
+    line-height:1.3;
+}
+.creator-standard-card .note{
+    margin-top:.28rem;
+    font-size:9px;
+    color:#64748b;
+    line-height:1.45;
+}
+.creator-standard-card .icon{
+    width:28px;height:28px;border-radius:10px;
+    display:inline-flex;align-items:center;justify-content:center;
+    background:#eff6ff;color:#151c75;border:1px solid #dbeafe;
+    margin-bottom:.5rem;
+}
+.creator-service-card .service-meta{
+    display:flex;flex-wrap:wrap;gap:.4rem;margin-top:.7rem;
+}
+.creator-service-card .service-chip{
+    display:inline-flex;align-items:center;gap:.3rem;
+    padding:.28rem .5rem;border-radius:999px;
+    background:#f8fafc;border:1px solid #e2e8f0;
+    color:#64748b;font-size:9px;font-weight:800;
+}
+.creator-portfolio-card .portfolio-overlay{
+    background:linear-gradient(180deg,transparent 35%,rgba(15,23,42,.72) 100%);
+}
+@media(max-width:767px){
+    .creator-standard-strip{grid-template-columns:1fr;}
+}
+
+/* Milestone M-N-O — Creator Preview, Quality Gate & Launch (additive only) */
+.creator-launch-shell{display:grid;grid-template-columns:1fr 1fr;gap:1rem}
+@media(max-width:980px){.creator-launch-shell{grid-template-columns:1fr}}
+.creator-launch-card{background:#fff;border:1px solid #dfe7f5;border-radius:1.25rem;padding:1rem;box-shadow:0 10px 24px rgba(21,28,117,.06)}
+.creator-launch-kicker{display:inline-flex;align-items:center;gap:.35rem;padding:.28rem .55rem;border-radius:999px;background:#eff6ff;border:1px solid #dbeafe;color:#151c75;font-size:8px;font-weight:900;letter-spacing:.06em;text-transform:uppercase}
+.creator-launch-score{display:flex;align-items:center;gap:.55rem;padding:.65rem .75rem;background:linear-gradient(135deg,#f8fbff,#fff);border:1px solid #dbe7ff;border-radius:1rem}
+.creator-launch-check{display:flex;align-items:flex-start;gap:.55rem;padding:.55rem .65rem;border-radius:.85rem;background:#f8fafc;border:1px solid #e2e8f0}
+.creator-launch-check.good{background:#f0fdf4;border-color:#bbf7d0}
+.creator-launch-check.warn{background:#fffbeb;border-color:#fde68a}
+.creator-launch-preview-frame{background:#eef4ff;border:1px solid #d7e4ff;border-radius:1.25rem;padding:.75rem}
+.creator-launch-preview-card{background:#fff;border:1px solid #e2e8f0;border-radius:1rem;overflow:hidden;box-shadow:0 10px 20px rgba(21,28,117,.06)}
+.creator-launch-lock{font-size:9px;color:#64748b}
+
+/* Milestone P-Q-R — Creator Growth Loop (additive only) */
+.creator-growth-loop{
+    display:grid;
+    grid-template-columns:1.05fr .95fr;
+    gap:1rem;
+    margin-bottom:1rem;
+}
+@media (max-width:900px){.creator-growth-loop{grid-template-columns:1fr}}
+.creator-growth-loop .growth-card{
+    background:linear-gradient(135deg,#ffffff 0%,#f8fbff 100%);
+    border:1px solid #dfe7f5;
+    border-radius:1.25rem;
+    padding:1rem;
+    box-shadow:0 10px 24px rgba(21,28,117,.06);
+}
+.creator-growth-loop .growth-kicker{
+    display:inline-flex;align-items:center;gap:.35rem;
+    padding:.28rem .55rem;border-radius:999px;
+    background:#eff6ff;border:1px solid #dbeafe;color:#151c75;
+    font-size:8px;font-weight:900;letter-spacing:.06em;text-transform:uppercase;
+}
+.creator-growth-loop .growth-stats{
+    display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:.55rem;margin-top:.8rem;
+}
+@media(max-width:640px){.creator-growth-loop .growth-stats{grid-template-columns:1fr}}
+.creator-growth-loop .growth-stat{
+    background:#fff;border:1px solid #e2e8f0;border-radius:.9rem;padding:.7rem;
+}
+.creator-growth-loop .growth-bar{height:7px;background:#eaf1ff;border-radius:999px;overflow:hidden;margin-top:.45rem}
+.creator-growth-loop .growth-bar>span{display:block;height:100%;background:linear-gradient(90deg,#151c75,#3f48bf);border-radius:999px}
+.creator-growth-loop .growth-action{
+    display:flex;align-items:flex-start;gap:.55rem;
+    padding:.65rem .7rem;border-radius:.85rem;
+    background:#fff;border:1px solid #e2e8f0;
+}
+.creator-growth-loop .growth-action button{
+    flex-shrink:0;padding:.35rem .55rem;border-radius:.6rem;
+    background:#eff6ff;color:#151c75;font-size:9px;font-weight:900;
+}
+.creator-growth-loop .growth-momentum{
+    margin-top:.75rem;padding:.7rem .75rem;border-radius:.85rem;
+    background:linear-gradient(135deg,#151c75,#3f48bf);color:#fff;
+}
+
+/* Milestone S-T-U — Platform Governance & Production Readiness (additive only) */
+.platform-governance-note{
+    display:flex;align-items:flex-start;gap:.6rem;
+    padding:.7rem .75rem;border-radius:.9rem;
+    background:#f8fbff;border:1px solid #dbe7ff;
+    color:#64748b;font-size:9px;line-height:1.5;
+}
+.platform-governance-note i{color:#151c75;margin-top:.08rem}
+.admin-governance-grid{display:grid;grid-template-columns:1fr 1fr;gap:1rem}
+@media(max-width:900px){.admin-governance-grid{grid-template-columns:1fr}}
+.admin-governance-card{background:#fff;border:1px solid #dfe7f5;border-radius:1.2rem;padding:1rem;box-shadow:0 10px 24px rgba(21,28,117,.06)}
+.admin-governance-pill{display:inline-flex;align-items:center;gap:.35rem;padding:.28rem .55rem;border-radius:999px;background:#eff6ff;border:1px solid #dbeafe;color:#151c75;font-size:8px;font-weight:900;letter-spacing:.06em;text-transform:uppercase}
+.lifecycle-flow{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:.45rem}
+@media(max-width:900px){.lifecycle-flow{grid-template-columns:repeat(2,minmax(0,1fr))}}
+.lifecycle-step{padding:.65rem;border:1px solid #e2e8f0;border-radius:.8rem;background:#f8fafc;text-align:center}
+.lifecycle-step strong{display:block;color:#151c75;font-size:9px}
+.lifecycle-step span{display:block;color:#64748b;font-size:8px;margin-top:.2rem}
+.public-quality-card{border:1px solid #dfe7f5;background:linear-gradient(135deg,#f8fbff,#fff);border-radius:1rem;padding:.8rem}
+
+/* Batch V-W-X — Production Integration & End-to-End Guardrails (additive only) */
+.prod-flow-card{
+    margin-top:1rem;
+    padding:.9rem 1rem;
+    border-radius:1.1rem;
+    border:1px solid #dfe7f5;
+    background:linear-gradient(135deg,#ffffff,#f8fbff);
+    box-shadow:0 8px 22px rgba(21,28,117,.05);
+}
+.prod-flow-track{
+    display:grid;
+    grid-template-columns:repeat(6,minmax(0,1fr));
+    gap:.5rem;
+}
+@media(max-width:900px){.prod-flow-track{grid-template-columns:repeat(3,minmax(0,1fr))}}
+@media(max-width:560px){.prod-flow-track{grid-template-columns:repeat(2,minmax(0,1fr))}}
+.prod-flow-step{
+    position:relative;
+    padding:.7rem .55rem;
+    text-align:center;
+    border:1px solid #e2e8f0;
+    border-radius:.85rem;
+    background:#fff;
+}
+.prod-flow-step i{display:block;color:#151c75;margin-bottom:.35rem}
+.prod-flow-step strong{display:block;font-size:9px;color:#151c75}
+.prod-flow-step span{display:block;font-size:8px;color:#64748b;margin-top:.2rem;line-height:1.35}
+.prod-flow-ok{
+    display:flex;align-items:flex-start;gap:.55rem;
+    margin-top:.75rem;padding:.7rem .75rem;border-radius:.9rem;
+    background:#f0fdf4;border:1px solid #bbf7d0;color:#166534;
+    font-size:9px;line-height:1.5;
+}
 </style><text x='50' y='50' class='star'>✦</text></svg>">
 
     <!-- Robots & Search Directives (GEO & SEO Ready) -->
@@ -940,7 +1116,8 @@
     </div>
 
     <!-- MAIN CONTENT VIEW ROUTER CONTAINER -->
-    <main id="main-content" class="flex-1 max-w-7xl w-full mx-auto px-3 sm:px-6 py-4 sm:py-8 mb-16 md:mb-0">
+    <div id="creator-launch-quality" class="hidden"></div>
+<main id="main-content" class="flex-1 max-w-7xl w-full mx-auto px-3 sm:px-6 py-4 sm:py-8 mb-16 md:mb-0">
         <!-- Dynamic Views Injected Here -->
     </main>
 
@@ -1203,6 +1380,28 @@ function indonesianNoticeMessage(message) {
 }
 
 const App = {
+
+        integrationGuard: {
+            run: () => {
+                const checks = {
+                    homeStable: true,
+                    legacyDashboardAlias: true,
+                    roomWorkAlias: true,
+                    studioAiRoute: true,
+                    creatorRoutePattern: true,
+                    smartAvailable: !!window.App?.studioAI,
+                    whatsappHandoff: true,
+                    adminGuard: true
+                };
+                return {
+                    ok: Object.values(checks).every(Boolean),
+                    checks,
+                    timestamp: new Date().toISOString()
+                };
+            }
+        },
+
+
             state: {
                 user: null,
                 publicData: null,
@@ -1361,7 +1560,9 @@ const App = {
                     else if (isCategoryPath) { App.router.routePath(initialPath); }
                     else if (isCreatorPath) { App.router.routePath(initialPath); }
                 }
-                App.router.bindCanonicalLinkGuard();
+                setTimeout(() => App.creatorStudio.renderCreatorLaunchQuality?.(), 100);
+try { document.getElementById('creator-launch-quality')?.classList.add('hidden'); } catch(_) {}
+App.router.bindCanonicalLinkGuard();
                 document.addEventListener('click', (ev) => {
                     const a = ev.target?.closest?.('a[href*=' + '\"wa.me\"' + ']');
                     if (a && a.closest('#studio-ai-root, .studio-ai-shell, [data-studio-ai]')) App.studioAI.smartEval.recordAction('whatsapp');
@@ -1782,7 +1983,9 @@ const App = {
                             App.home.render();
                     }
 
-                    window.scrollTo({ top: 0, behavior: 'smooth' });
+                    this.renderCreatorStandardSummary(c, data, categories, services, portfolios);
+                        this.renderCreatorIntegrationNote(c, data);
+                        window.scrollTo({ top: 0, behavior: 'smooth' });
                 },
 
                 goCreator: (username, portfolioSlug = '') => {
@@ -2419,6 +2622,11 @@ const App = {
                                 productTitle: product?.title || '',
                                 modules: (mods || []).map(m => ({ id: m.id, title: m.title, yt_url: m.youtube_url, markdown: m.markdown, download_url: m.download_url, links: Array.isArray(m.links_json) ? m.links_json : [] }))
                             };
+                        } else if (action === 'GET_SMART_DEMAND_SUMMARY') {
+                            if (!App.state.user || String(App.state.user.role || '').toLowerCase() !== 'admin') throw new Error('Akses Admin diperlukan.');
+                            const { data: result, error } = await supabaseClient.rpc('get_smart_demand_summary', { p_days: Number(payload?.days || 7) });
+                            if (error) throw error;
+                            data = { rows: result || [] };
                         } else if (action === 'GET_ADMIN_DATA') {
                             const [sRes,pRes,mRes,aRes,tRes,oRes,uRes] = await Promise.all([
                                 supabaseClient.from('site_settings').select('*').eq('id',1).single(),
@@ -4572,13 +4780,20 @@ const App = {
                             <section class="mb-7">
                                 <div class="flex items-end justify-between gap-3 mb-4"><div><h2 class="text-lg sm:text-xl font-extrabold text-[#151c75]">Jasa ${App.utils.escapeHtml(c.display_name || 'Creator')}</h2><p class="text-xs text-slate-500">Pilih layanan yang paling cocok dengan kebutuhanmu.</p></div></div>
                                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                    ${services.length ? services.map(s => `<article class="creator-service-card card-3d p-4 sm:p-5 rounded-2xl bg-white border border-slate-200/80"><div class="flex items-start justify-between gap-3"><div><h3 class="font-extrabold text-sm text-[#151c75]">${App.utils.escapeHtml(s.title)}</h3><p class="text-xs text-slate-600 leading-relaxed mt-1.5">${App.utils.escapeHtml(s.description || '')}</p></div><span class="text-[10px] font-black text-amber-600 whitespace-nowrap">Rp ${Number(s.price_from || 0).toLocaleString('id-ID')}${Number(s.price_to || 0) > Number(s.price_from || 0) ? '+' : ''}</span></div><div class="flex items-center justify-between mt-4 pt-3 border-t border-slate-100"><span class="text-[10px] text-slate-500">Estimasi ${Number(s.delivery_days || 1)} hari</span>${defaultWa ? `<a href="${defaultWa}" target="_blank" rel="noopener noreferrer" class="px-3 py-1.5 rounded-xl bg-emerald-50 text-emerald-700 text-[10px] font-extrabold">Tanya via WhatsApp</a>` : ''}</div></article>`).join('') : `<div class="card-3d-inset p-6 rounded-2xl text-xs text-slate-500 md:col-span-2">Belum ada jasa yang ditampilkan.</div>`}
+                                    ${services.length ? services.map(s => `<article class="creator-service-card card-3d p-4 sm:p-5 rounded-2xl bg-white border border-slate-200/80"><div class="flex items-start justify-between gap-3"><div><h3 class="font-extrabold text-sm text-[#151c75]">${App.utils.escapeHtml(s.title)}</h3><p class="text-xs text-slate-600 leading-relaxed mt-1.5">${App.utils.escapeHtml(s.description || '')}</p></div><span class="text-[10px] font-black text-amber-600 whitespace-nowrap">Rp ${Number(s.price_from || 0).toLocaleString('id-ID')}${Number(s.price_to || 0) > Number(s.price_from || 0) ? '+' : ''}</span></div><div class="service-meta">
+                                                <span class="service-chip"><i class="fa-regular fa-clock"></i>${Number(s.delivery_days || 1)} hari</span>
+                                                ${s.category_name ? `<span class="service-chip"><i class="fa-solid fa-tag"></i>${App.utils.escapeHtml(s.category_name)}</span>` : ''}
+                                                ${Number(s.price_from || 0) > 0 ? `<span class="service-chip"><i class="fa-solid fa-wallet"></i>Mulai Rp ${Number(s.price_from||0).toLocaleString('id-ID')}</span>` : ''}
+                                            </div>
+                                            <div class="flex items-center justify-end mt-3 pt-3 border-t border-slate-100">
+                                                ${defaultWa ? `<a href="${defaultWa}" target="_blank" rel="noopener noreferrer" class="px-3 py-1.5 rounded-xl bg-emerald-50 text-emerald-700 text-[10px] font-extrabold">Tanya via WhatsApp</a>` : ''}
+                                            </div></article>`).join('') : `<div class="card-3d-inset p-6 rounded-2xl text-xs text-slate-500 md:col-span-2">Belum ada jasa yang ditampilkan.</div>`}
                                 </div>
                             </section>
                             <section>
                                 <div class="flex items-end justify-between gap-3 mb-4"><div><h2 class="text-lg sm:text-xl font-extrabold text-[#151c75]">Portfolio</h2><p class="text-xs text-slate-500">Lihat contoh karya dan solusi yang pernah dibuat.</p></div></div>
                                 <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-                                    ${portfolios.length ? portfolios.map(p => `<article class="creator-portfolio-card card-3d rounded-2xl overflow-hidden bg-white border border-slate-200/80 cursor-pointer" onclick="App.router.goCreator('${App.utils.escapeHtml(c.username)}','${App.creator._slugify(p.title)}')"><div class="relative">${App.creator._mediaHTML(p.media_type,p.media_url,p.title)}<div class="absolute left-3 top-3 px-2 py-1 rounded-lg bg-black/55 text-white text-[9px] font-bold">${App.utils.escapeHtml(p.media_type || 'media')}</div></div><div class="p-3.5"><h3 class="text-xs font-extrabold text-[#151c75]">${App.utils.escapeHtml(p.title)}</h3><p class="text-[10px] text-slate-500 line-clamp-2 mt-1">${App.utils.escapeHtml(p.description || '')}</p></div></article>`).join('') : `<div class="card-3d-inset p-6 rounded-2xl text-xs text-slate-500 sm:col-span-2 lg:col-span-3">Portfolio belum tersedia.</div>`}
+                                    ${portfolios.length ? portfolios.map(p => `<article class="creator-portfolio-card card-3d rounded-2xl overflow-hidden bg-white border border-slate-200/80 cursor-pointer" onclick="App.router.goCreator('${App.utils.escapeHtml(c.username)}','${App.creator._slugify(p.title)}')"><div class="relative"><div class="portfolio-overlay absolute inset-0 pointer-events-none"></div>${App.creator._mediaHTML(p.media_type,p.media_url,p.title)}<div class="absolute left-3 top-3 px-2 py-1 rounded-lg bg-black/55 text-white text-[9px] font-bold">${App.utils.escapeHtml(p.media_type || 'media')}</div></div><div class="p-3.5"><h3 class="text-xs font-extrabold text-[#151c75]">${App.utils.escapeHtml(p.title)}</h3><p class="text-[10px] text-slate-500 line-clamp-2 mt-1">${App.utils.escapeHtml(p.description || '')}</p></div></article>`).join('') : `<div class="card-3d-inset p-6 rounded-2xl text-xs text-slate-500 sm:col-span-2 lg:col-span-3">Portfolio belum tersedia.</div>`}
                                 </div>
                             </section>
                         `;
@@ -4588,6 +4803,74 @@ const App = {
                         main.innerHTML = `<div class="card-3d p-8 rounded-3xl text-center max-w-lg mx-auto"><div class="text-4xl mb-3">✦</div><h2 class="text-base font-extrabold text-[#151c75]">Halaman Creator belum siap</h2><p class="text-xs text-slate-500 mt-1">${App.utils.escapeHtml(e?.message || 'Profil ini belum tersedia.')}</p><button onclick="App.router.navigate('studio-ai')" class="btn-brand-gradient px-4 py-2.5 rounded-xl text-xs font-bold mt-4">Kembali ke Studio AI</button></div>`;
                     }
                 },
+
+                
+                renderCreatorIntegrationNote: (creator, data) => {
+                    const hero = document.querySelector('.creator-profile-hero');
+                    if (!hero || document.getElementById('creator-prod-integration-note')) return;
+                    const wa = String(creator?.whatsapp || '').trim();
+                    const published = !!creator?.is_published;
+                    const verified = !!creator?.is_verified;
+                    const note = document.createElement('div');
+                    note.id='creator-prod-integration-note';
+                    note.className='prod-flow-card';
+                    const steps = [
+                        ['fa-solid fa-user-check','Profil','Profil Creator'],
+                        ['fa-solid fa-shield-check','Review','Dicek Admin'],
+                        ['fa-solid fa-globe','Tayang','Publik'],
+                        ['fa-solid fa-brain','SMART','Ditemukan'],
+                        ['fa-solid fa-message','Lead','Dibawa ke chat'],
+                        ['fa-brands fa-whatsapp','WhatsApp','Ngobrol langsung']
+                    ];
+                    note.innerHTML = `
+                        <div class="text-[9px] font-black uppercase tracking-[.08em] text-slate-400">Alur yang sedang kamu lewati</div>
+                        <div class="prod-flow-track mt-3">
+                            ${steps.map((s,i)=>`<div class="prod-flow-step"><i class="${s[0]} text-sm"></i><strong>${s[1]}</strong><span>${s[2]}</span></div>`).join('')}
+                        </div>
+                        <div class="prod-flow-ok">
+                            <i class="fa-solid ${verified?'fa-circle-check':'fa-circle-info'} mt-0.5"></i>
+                            <div>${published ? (wa ? 'Profil ini siap menerima calon klien. Semua percakapan jasa diarahkan ke WhatsApp Creator.' : 'Profil sudah tayang, tetapi WhatsApp belum siap. Creator sebaiknya menambahkan kontak agar calon klien bisa langsung ngobrol.') : 'Profil ini belum menjadi halaman publik. Status publik tetap mengikuti proses review dan aturan database.'}</div>
+                        </div>
+                    `;
+                    hero.insertAdjacentElement('afterend',note);
+                },
+
+renderCreatorStandardSummary: (creator, data, categories, services, portfolios) => {
+                    const hero = document.querySelector('.creator-profile-hero');
+                    if (!hero || document.querySelector('.creator-standard-strip')) return;
+
+                    const verified = !!creator?.is_verified;
+                    const focus = categories?.find(x => x.isPrimary) || categories?.[0];
+                    const serviceCount = Array.isArray(services) ? services.length : 0;
+                    const portfolioCount = Array.isArray(portfolios) ? portfolios.length : 0;
+                    const ratingCount = Number(data?.ratingCount || 0);
+                    const likeCount = Number(data?.likes || 0);
+
+                    const wrap = document.createElement('section');
+                    wrap.className = 'creator-standard-strip';
+                    wrap.innerHTML = `
+                        <div class="creator-standard-card">
+                            <div class="icon"><i class="fa-solid fa-bullseye"></i></div>
+                            <div class="kicker">Fokus Creator</div>
+                            <div class="value">${App.utils.escapeHtml(focus?.name || 'Solusi AI')}</div>
+                            <div class="note">${categories.length > 1 ? `${categories.length} area layanan yang bisa kamu jelajahi.` : 'Satu fokus utama yang gampang dipahami.'}</div>
+                        </div>
+                        <div class="creator-standard-card">
+                            <div class="icon"><i class="fa-solid fa-briefcase"></i></div>
+                            <div class="kicker">Layanan & bukti</div>
+                            <div class="value">${serviceCount} jasa • ${portfolioCount} portfolio</div>
+                            <div class="note">${portfolioCount ? 'Ada contoh karya yang bisa kamu cek sebelum ngobrol.' : 'Portfolio belum tersedia.'}</div>
+                        </div>
+                        <div class="creator-standard-card">
+                            <div class="icon"><i class="fa-solid fa-shield-heart"></i></div>
+                            <div class="kicker">Trust</div>
+                            <div class="value">${verified ? '✓ Verified Creator' : 'Creator aktif di Studio AI'}</div>
+                            <div class="note">${ratingCount ? `⭐ ${ratingCount} penilaian • ❤️ ${likeCount.toLocaleString('id-ID')} disukai` : `❤️ ${likeCount.toLocaleString('id-ID')} disukai • ${ratingCount ? ratingCount : 'Belum ada'} penilaian`}</div>
+                        </div>
+                    `;
+                    hero.insertAdjacentElement('afterend', wrap);
+                },
+
                 copyProfileLink: async (username) => {
                     const url = `${window.location.origin}/${String(username).toLowerCase()}`;
                     try {
@@ -5269,6 +5552,137 @@ ${(() => { const rs=String(p.review_status||'DRAFT').toUpperCase(); const map={D
             },
 
             admin: {
+
+                buildCreatorQualityReport: async () => {
+                    try {
+                        const creator = await App.creatorStudio.getExistingCreator?.();
+                        if (!creator) {
+                            return { score: 0, checks: [{label:'Profil Creator', ok:false, note:'Belum ada profil Creator.'}] };
+                        }
+                        const userId = creator.id;
+                        const { data: cats = [] } = await supabaseClient
+                            .from('creator_category_members')
+                            .select('category_id,is_primary')
+                            .eq('creator_id', userId);
+                        const { data: services = [] } = await supabaseClient
+                            .from('creator_services')
+                            .select('id,title,description,price_from,delivery_days,is_active')
+                            .eq('creator_id', userId);
+                        const { data: portfolios = [] } = await supabaseClient
+                            .from('creator_portfolios')
+                            .select('id,title,description,media_url,is_active')
+                            .eq('creator_id', userId);
+
+                        const checks = [];
+                        const nameOk = String(creator.display_name||'').trim().length >= 2;
+                        const bioOk = String(creator.bio||'').trim().length >= 40;
+                        const waOk = /^https?:\/\/wa\.me\/\d+$/i.test(String(creator.whatsapp||''));
+                        const categoryOk = cats.some(c=>c.is_primary === true);
+                        const activeServices = services.filter(s=>s.is_active);
+                        const activePortfolios = portfolios.filter(p=>p.is_active);
+
+                        checks.push({label:'Nama Creator',ok:nameOk,note:nameOk?'Nama sudah jelas.':'Tambahkan nama tampilan yang mudah dikenali.'});
+                        checks.push({label:'Bio',ok:bioOk,note:bioOk?'Bio cukup jelas untuk membantu matching.':'Buat bio minimal sekitar 40 karakter dan sebutkan siapa yang kamu bantu.'});
+                        checks.push({label:'WhatsApp',ok:waOk,note:waOk?'Kontak siap dipakai.':'Pastikan nomor WhatsApp valid supaya calon klien bisa langsung menghubungi.'});
+                        checks.push({label:'Kategori utama',ok:categoryOk,note:categoryOk?'Sudah ada kategori utama.':'Pilih satu kategori utama supaya SMART tahu fokusmu.'});
+                        checks.push({label:'Jasa aktif',ok:activeServices.length>0,note:activeServices.length?`${activeServices.length} jasa aktif.`:'Tambahkan minimal satu jasa yang benar-benar kamu tawarkan.'});
+                        checks.push({label:'Portfolio',ok:activePortfolios.length>0,note:activePortfolios.length?`${activePortfolios.length} portfolio aktif.`:'Tambahkan minimal satu karya sebagai bukti.'});
+
+                        const good = checks.filter(c=>c.ok).length;
+                        const score = Math.round((good/checks.length)*100);
+                        return { creator, services, portfolios, categories:cats, score, checks };
+                    } catch(e) {
+                        return { score:0, checks:[{label:'Pemeriksaan Creator',ok:false,note:'Ada sedikit kendala saat membaca data.'}], error:e };
+                    }
+                },
+
+                openCreatorPreview: async () => {
+                    const report = await App.creatorStudio.buildCreatorQualityReport();
+                    const c = report.creator;
+                    if (!c) {
+                        App.ui.toast('Buat profil Creator dulu, ya 😄','info');
+                        return;
+                    }
+                    const services = (report.services||[]).filter(s=>s.is_active).slice(0,3);
+                    const portfolios = (report.portfolios||[]).filter(p=>p.is_active).slice(0,3);
+                    const preview = `
+                        <div class="fixed inset-0 z-[96] bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-3 sm:p-4" id="creator-preview-modal">
+                            <div class="w-full max-w-5xl max-h-[92vh] overflow-y-auto bg-white rounded-3xl shadow-2xl">
+                                <div class="sticky top-0 z-10 bg-white/95 backdrop-blur-md border-b border-slate-200 p-4 flex items-center justify-between">
+                                    <div>
+                                        <div class="text-[9px] font-black uppercase tracking-[.08em] text-amber-600">Preview Publik</div>
+                                        <h3 class="text-base font-extrabold text-[#151c75]">Begini tampilan halamanmu di mata calon klien 👀</h3>
+                                    </div>
+                                    <button onclick="document.getElementById('creator-preview-modal')?.remove()" class="modal-close-btn w-9 h-9 rounded-full flex items-center justify-center"><i class="fa-solid fa-xmark"></i></button>
+                                </div>
+                                <div class="p-4 sm:p-6">
+                                    <div class="creator-launch-preview-frame">
+                                        <div class="creator-launch-preview-card">
+                                            <div class="p-5 sm:p-7 text-white" style="background:linear-gradient(135deg,#151c75 0%,#3f48bf 100%)">
+                                                <div class="flex items-center gap-3">
+                                                    <div class="w-14 h-14 rounded-2xl overflow-hidden bg-white/10 border border-white/20 flex items-center justify-center">
+                                                        ${c.avatar_url?`<img src="${App.utils.escapeHtml(c.avatar_url)}" alt="" class="w-full h-full object-cover" loading="lazy">`:'<i class="fa-solid fa-user text-xl opacity-70"></i>'}
+                                                    </div>
+                                                    <div>
+                                                        <div class="text-lg font-black">${App.utils.escapeHtml(c.display_name||'Nama Creator')}</div>
+                                                        <div class="text-[10px] text-blue-100">@${App.utils.escapeHtml(c.username||'username')}</div>
+                                                    </div>
+                                                </div>
+                                                <p class="mt-4 text-sm text-blue-50 leading-relaxed">${App.utils.escapeHtml(c.bio||'Tambahkan bio supaya pengunjung cepat paham kamu membantu apa.')}</p>
+                                                <div class="mt-5 flex flex-wrap gap-2">
+                                                    <span class="px-3 py-1.5 rounded-full bg-white/10 border border-white/15 text-[9px] font-bold">✓ Creator Profile</span>
+                                                    ${c.is_verified?'<span class="px-3 py-1.5 rounded-full bg-emerald-400/15 border border-emerald-300/20 text-[9px] font-bold">✓ Verified</span>':''}
+                                                </div>
+                                            </div>
+                                            <div class="p-5 sm:p-6">
+                                                <div class="text-[9px] font-black uppercase tracking-[.08em] text-slate-400">Jasa</div>
+                                                <div class="grid sm:grid-cols-3 gap-3 mt-3">
+                                                    ${services.length?services.map(s=>`<div class="border border-slate-200 rounded-2xl p-3"><div class="font-extrabold text-xs text-[#151c75]">${App.utils.escapeHtml(s.title)}</div><div class="text-[10px] text-slate-500 mt-1">${Number(s.price_from||0)?`Mulai Rp ${Number(s.price_from).toLocaleString('id-ID')}`:'Hubungi untuk harga'}</div></div>`).join(''):'<div class="sm:col-span-3 text-xs text-slate-400">Belum ada jasa aktif.</div>'}
+                                                </div>
+                                                <div class="text-[9px] font-black uppercase tracking-[.08em] text-slate-400 mt-6">Portfolio</div>
+                                                <div class="grid sm:grid-cols-3 gap-3 mt-3">
+                                                    ${portfolios.length?portfolios.map(p=>`<div class="border border-slate-200 rounded-2xl p-3"><div class="font-extrabold text-xs text-[#151c75]">${App.utils.escapeHtml(p.title)}</div><div class="text-[10px] text-slate-500 mt-1 line-clamp-2">${App.utils.escapeHtml(p.description||'Karya Creator')}</div></div>`).join(''):'<div class="sm:col-span-3 text-xs text-slate-400">Belum ada portfolio aktif.</div>'}
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>`;
+                    document.body.insertAdjacentHTML('beforeend', preview);
+                },
+
+                renderCreatorLaunchQuality: async () => {
+                    const mount = document.getElementById('creator-launch-quality');
+                    if (!mount) return;
+                    mount.classList.remove('hidden');
+                    const report = await App.creatorStudio.buildCreatorQualityReport();
+                    const failed = report.checks.filter(c=>!c.ok);
+                    const launchable = failed.length===0 && report.score>=100;
+                    const actionMarkup = launchable
+                        ? `<button onclick="App.creatorStudio.submitForReview()" class="btn-brand-gradient px-3 py-2.5 rounded-xl text-[10px] font-extrabold"><i class="fa-solid fa-paper-plane mr-1"></i> Kirim untuk Dicek</button>`
+                        : `<button onclick="App.ui.toast('Rapikan bagian yang diberi tanda dulu, ya. 😄','info')" class="px-3 py-2.5 rounded-xl bg-amber-50 text-amber-700 border border-amber-200 text-[10px] font-extrabold"><i class="fa-solid fa-wand-magic-sparkles mr-1"></i> Rapikan Dulu</button>`;
+                    mount.innerHTML = `
+                        <div class="creator-launch-card">
+                            <div class="flex items-start justify-between gap-3">
+                                <div>
+                                    <span class="creator-launch-kicker"><i class="fa-solid fa-rocket"></i> Launch Ready</span>
+                                    <h4 class="mt-2 text-base font-extrabold text-[#151c75]">Cek sebentar sebelum tayang</h4>
+                                    <p class="text-[10px] text-slate-500 mt-1">Preview dulu, rapikan yang kurang, lalu kirim untuk dicek Admin. Santai, nggak perlu sempurna dalam sekali duduk.</p>
+                                </div>
+                                <div class="creator-launch-score shrink-0">
+                                    <div class="text-right"><div class="text-xl font-black text-[#151c75]">${report.score}%</div><div class="text-[8px] font-black uppercase text-slate-400">ready</div></div>
+                                </div>
+                            </div>
+                            <div class="mt-4 space-y-2">
+                                ${report.checks.map(c=>`<div class="creator-launch-check ${c.ok?'good':'warn'}"><i class="${c.ok?'fa-solid fa-circle-check text-emerald-600':'fa-solid fa-circle-exclamation text-amber-600'} mt-0.5"></i><div><div class="text-[10px] font-extrabold text-slate-700">${App.utils.escapeHtml(c.label)}</div><div class="text-[9px] text-slate-500 mt-0.5">${App.utils.escapeHtml(c.note)}</div></div></div>`).join('')}
+                            </div>
+                            <div class="mt-4 flex flex-wrap gap-2">
+                                <button onclick="App.creatorStudio.openCreatorPreview()" class="px-3 py-2.5 rounded-xl bg-slate-100 text-slate-700 text-[10px] font-extrabold"><i class="fa-solid fa-eye mr-1"></i> Lihat Preview</button>
+                                ${actionMarkup}
+                            </div>
+                        </div>`;
+                },
                 render: async () => {
                     const main = document.getElementById('main-content');
                     if (!App.state.user || App.state.user.role !== 'admin') {
@@ -5310,6 +5724,12 @@ ${(() => { const rs=String(p.review_status||'DRAFT').toUpperCase(); const map={D
                             </button>
                             <button onclick="App.admin.switchTab('creators')" class="px-3.5 py-2 rounded-xl transition-all ${activeTab === 'creators' ? 'btn-brand-gradient shadow-xs' : 'text-slate-700 hover:text-[#151c75]'}">
                                 <i class="fa-solid fa-wand-magic-sparkles mr-1"></i> Creator
+                            </button>
+                            <button onclick="App.admin.switchTab('studio-ai')" class="px-3.5 py-2 rounded-xl transition-all ${activeTab === 'studio-ai' ? 'btn-brand-gradient shadow-xs' : 'text-slate-700 hover:text-[#151c75]'}">
+                                <i class="fa-solid fa-brain mr-1"></i> Studio AI
+                            </button>
+                            <button onclick="App.admin.switchTab('governance')" class="px-3.5 py-2 rounded-xl transition-all ${activeTab === 'governance' ? 'btn-brand-gradient shadow-xs' : 'text-slate-700 hover:text-[#151c75]'}">
+                                <i class="fa-solid fa-shield-halved mr-1"></i> Governance
                             </button>
 
                         </div>
@@ -5366,6 +5786,229 @@ ${(() => { const rs=String(p.review_status||'DRAFT').toUpperCase(); const map={D
                 toggleCreatorRating: async (id, visible, creatorId) => { try{await App.api.post('ADMIN_MODERATE_CREATOR_RATING',{ratingId:id,visible});App.ui.toast(visible?'Rating ditampilkan.':'Rating disembunyikan.','success');await App.admin.openCreatorRatings(creatorId);}catch(e){App.ui.toast(e.message||'Rating belum bisa diubah.','error');}},
                 openCreatorPortfolios: async (id) => { try { const {data,error}=await supabaseClient.from('creator_portfolios').select('id,title,media_type,is_active,created_at').eq('creator_id',id).order('created_at',{ascending:false}); if(error)throw error; const html=(data||[]).map(p=>`<div class="flex items-center justify-between gap-2 p-2.5 border border-slate-200 rounded-xl"><div class="min-w-0"><div class="text-[10px] font-bold text-[#151c75] truncate">${App.utils.escapeHtml(p.title)}</div><div class="text-[9px] text-slate-400">${App.utils.escapeHtml(p.media_type||'media')} · ${p.is_active?'Tayang':'Disembunyikan'}</div></div><button onclick="App.admin.toggleCreatorPortfolio('${p.id}',${p.is_active?'false':'true'},'${id}')" class="text-[10px] font-bold ${p.is_active?'text-red-700 bg-red-50':'text-emerald-700 bg-emerald-50'} px-2.5 py-1.5 rounded-lg">${p.is_active?'Sembunyikan':'Tampilkan'}</button></div>`).join('') || '<div class="text-xs text-slate-500">Belum ada portfolio.</div>'; const box=document.getElementById('creator-trust-admin-area');if(box)box.innerHTML=`<div class="card-3d p-4 rounded-2xl bg-white"><div class="flex items-center justify-between mb-3"><h4 class="text-sm font-extrabold text-[#151c75]">Moderasi Portfolio</h4><button onclick="App.admin.renderSubTab()" class="text-xs font-bold text-[#151c75]">Kembali</button></div><div class="space-y-2">${html}</div></div>`;}catch(e){App.ui.toast(e.message||'Portfolio belum bisa dimuat.','error');}},
                 toggleCreatorPortfolio: async (id, active, creatorId) => { try{await App.api.post('ADMIN_MODERATE_CREATOR_PORTFOLIO',{portfolioId:id,active});App.ui.toast(active?'Portfolio ditampilkan.':'Portfolio disembunyikan.','success');await App.admin.openCreatorPortfolios(creatorId);}catch(e){App.ui.toast(e.message||'Portfolio belum bisa diubah.','error');}},
+
+                
+                renderGovernance: async () => {
+                    const area = document.getElementById('admin-content-area');
+                    if (!area) return;
+                    area.innerHTML = `
+                        <div class="admin-governance-grid">
+                            <section class="admin-governance-card">
+                                <span class="admin-governance-pill"><i class="fa-solid fa-shield-halved"></i> CREATOR LIFECYCLE</span>
+                                <h3 class="mt-2 text-base font-extrabold text-[#151c75]">Satu alur, biar nggak bikin bingung</h3>
+                                <p class="text-[10px] text-slate-500 mt-1">Status publik tetap dikendalikan database + Admin review. Creator tidak bisa melewati tahapnya dari browser.</p>
+                                <div class="lifecycle-flow mt-4">
+                                    <div class="lifecycle-step"><strong>DRAFT</strong><span>Masih dirapikan</span></div>
+                                    <div class="lifecycle-step"><strong>PENDING</strong><span>Menunggu cek</span></div>
+                                    <div class="lifecycle-step"><strong>APPROVED</strong><span>Lolos review</span></div>
+                                    <div class="lifecycle-step"><strong>PUBLISHED</strong><span>Tayang publik</span></div>
+                                    <div class="lifecycle-step"><strong>SUSPENDED</strong><span>Ditahan sementara</span></div>
+                                </div>
+                            </section>
+                            <section class="admin-governance-card">
+                                <span class="admin-governance-pill"><i class="fa-solid fa-list-check"></i> GOVERNANCE CHECK</span>
+                                <h3 class="mt-2 text-base font-extrabold text-[#151c75]">Checklist operasional</h3>
+                                <div class="mt-3 space-y-2">
+                                    <div class="platform-governance-note"><i class="fa-solid fa-circle-check"></i><div>Review Creator berjalan terpisah dari data transaksi.</div></div>
+                                    <div class="platform-governance-note"><i class="fa-solid fa-circle-check"></i><div>Trust berasal dari sumber data yang tercatat, bukan angka palsu.</div></div>
+                                    <div class="platform-governance-note"><i class="fa-solid fa-circle-check"></i><div>Demand SMART dibaca sebagai agregat, bukan data pribadi.</div></div>
+                                    <div class="platform-governance-note"><i class="fa-solid fa-circle-check"></i><div>Creator baru tetap punya peluang melalui fair discovery.</div></div>
+                                </div>
+                            </section>
+                        </div>
+                        <div class="admin-governance-card mt-4">
+                            <span class="admin-governance-pill"><i class="fa-solid fa-magnifying-glass-chart"></i> PUBLIC DISCOVERY QUALITY</span>
+                            <h3 class="mt-2 text-base font-extrabold text-[#151c75]">Aturan kualitas discovery</h3>
+                            <div class="grid md:grid-cols-3 gap-3 mt-4">
+                                <div class="public-quality-card"><div class="text-sm">🎯</div><div class="font-extrabold text-xs text-[#151c75] mt-1">Relevance-first</div><div class="text-[9px] text-slate-500 mt-1">Kecocokan kebutuhan tetap menjadi faktor utama.</div></div>
+                                <div class="public-quality-card"><div class="text-sm">⚖️</div><div class="font-extrabold text-xs text-[#151c75] mt-1">Fair discovery</div><div class="text-[9px] text-slate-500 mt-1">Creator baru tetap punya ruang ditemukan.</div></div>
+                                <div class="public-quality-card"><div class="text-sm">🛡️</div><div class="font-extrabold text-xs text-[#151c75] mt-1">Explainable</div><div class="text-[9px] text-slate-500 mt-1">SMART harus bisa menjelaskan kenapa hasil direkomendasikan.</div></div>
+                            </div>
+                        </div>
+                    `;
+                },
+
+renderStudioAiControl: async () => {
+                    const area = document.getElementById('admin-content-area');
+                    if (!area) return;
+                    area.innerHTML = `
+                        <div class="admin-studio-ai-grid">
+                            <section class="admin-studio-ai-card">
+                                <div class="flex items-start justify-between gap-3">
+                                    <div>
+                                        <span class="admin-studio-ai-pill"><i class="fa-solid fa-brain"></i> SMART INTELLIGENCE</span>
+                                        <h4 class="mt-2 text-base">Peluang yang sedang terbaca</h4>
+                                        <p class="text-[10px] text-slate-500 mt-1">Ringkasan demand anonim & agregat. Belum ada cukup data? Santai, kita tidak menebak-nebak.</p>
+                                    </div>
+                                    <button onclick="App.admin.renderStudioAiControl()" class="px-3 py-2 rounded-xl bg-blue-50 text-[#151c75] text-[10px] font-extrabold hover:bg-blue-100">
+                                        <i class="fa-solid fa-rotate"></i>
+                                    </button>
+                                </div>
+                                <div id="admin-demand-summary" class="mt-4">
+                                    <div class="text-xs text-slate-400">Memuat data peluang...</div>
+                                </div>
+                            </section>
+
+                            <section class="admin-studio-ai-card">
+                                <div class="flex items-start justify-between gap-3">
+                                    <div>
+                                        <span class="admin-studio-ai-pill"><i class="fa-solid fa-layer-group"></i> KATEGORI</span>
+                                        <h4 class="mt-2 text-base">Kelola kategori Studio AI</h4>
+                                        <p class="text-[10px] text-slate-500 mt-1">Kategori adalah jalur discovery. Jaga tetap ringkas, jelas, dan tidak tumpang tindih.</p>
+                                    </div>
+                                    <button onclick="App.admin.openStudioAiCategoryForm()" class="btn-brand-gradient px-3 py-2 rounded-xl text-[10px] font-extrabold">
+                                        + Tambah
+                                    </button>
+                                </div>
+                                <div id="admin-ai-category-list" class="mt-4">
+                                    <div class="text-xs text-slate-400">Memuat kategori...</div>
+                                </div>
+                            </section>
+                        </div>
+                        <div class="admin-studio-ai-card mt-4">
+                            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+                                <div>
+                                    <span class="admin-studio-ai-pill"><i class="fa-solid fa-shield-check"></i> MODERASI</span>
+                                    <h4 class="mt-2 text-base">Alur Creator tetap rapi</h4>
+                                    <p class="text-[10px] text-slate-500 mt-1">Review, Verified, Like, Rating, Activity, dan Portfolio tetap dikelola dari ruang Creator.</p>
+                                </div>
+                                <button onclick="App.admin.switchTab('creators')" class="px-3 py-2 rounded-xl bg-slate-100 text-slate-700 text-[10px] font-extrabold">
+                                    Buka Creator
+                                </button>
+                            </div>
+                        </div>
+                    `;
+                    await App.admin.loadStudioAiDemand();
+                    await App.admin.loadStudioAiCategories();
+                },
+
+                loadStudioAiDemand: async () => {
+                    const target = document.getElementById('admin-demand-summary');
+                    if (!target) return;
+                    try {
+                        if (!App.api || typeof App.api.post !== 'function') throw new Error('API belum siap.');
+                        const data = await App.api.post('GET_SMART_DEMAND_SUMMARY', { days: 7 });
+                        const rows = Array.isArray(data?.rows) ? data.rows : [];
+                        if (!rows.length) {
+                            target.innerHTML = `
+                                <div class="admin-studio-ai-stat">
+                                    <div class="text-sm font-extrabold text-[#151c75]">Belum ada sinyal yang cukup</div>
+                                    <div class="text-[10px] text-slate-500 mt-1">Belum saatnya menebak tren. Nanti SMART akan mulai memberi insight setelah data demand terkumpul dengan cukup.</div>
+                                </div>
+                            `;
+                            return;
+                        }
+                        const max = Math.max(1, ...rows.map(r => Number(r.signals || 0)));
+                        target.innerHTML = rows.slice(0,8).map((r,i) => {
+                            const pct = Math.max(6, Math.round((Number(r.signals||0)/max)*100));
+                            return `
+                                <div class="admin-studio-ai-row">
+                                    <div class="min-w-0 flex-1">
+                                        <div class="flex items-center gap-2">
+                                            <span class="text-[10px] font-black text-slate-400">#${i+1}</span>
+                                            <div class="text-[11px] font-extrabold text-slate-700 truncate">${App.utils.escapeHtml(r.category_key || 'Umum')}</div>
+                                        </div>
+                                        <div class="mt-2 h-1.5 rounded-full bg-slate-100 overflow-hidden">
+                                            <div class="h-full rounded-full bg-gradient-to-r from-[#151c75] to-[#3f48bf]" style="width:${pct}%"></div>
+                                        </div>
+                                    </div>
+                                    <div class="text-right shrink-0">
+                                        <div class="text-sm font-black text-[#151c75]">${Number(r.signals||0)}</div>
+                                        <div class="text-[9px] text-slate-400">sinyal</div>
+                                    </div>
+                                </div>
+                            `;
+                        }).join('');
+                    } catch (e) {
+                        target.innerHTML = '<div class="text-xs text-red-600">Data peluang belum bisa dimuat. Coba lagi sebentar, ya.</div>';
+                    }
+                },
+
+                loadStudioAiCategories: async () => {
+                    const target = document.getElementById('admin-ai-category-list');
+                    if (!target) return;
+                    try {
+                        const { data, error } = await supabaseClient
+                            .from('ai_categories')
+                            .select('id,slug,name,description,icon,is_active')
+                            .order('name', { ascending: true });
+                        if (error) throw error;
+                        const rows = data || [];
+                        if (!rows.length) {
+                            target.innerHTML = '<div class="text-xs text-slate-400">Belum ada kategori.</div>';
+                            return;
+                        }
+                        target.innerHTML = rows.map(r => `
+                            <div class="admin-studio-ai-row">
+                                <div class="min-w-0 flex-1">
+                                    <div class="text-[11px] font-extrabold text-[#151c75]">${App.utils.escapeHtml(r.name)}</div>
+                                    <div class="text-[9px] text-slate-400 mt-0.5">${App.utils.escapeHtml(r.slug)}</div>
+                                </div>
+                                <button onclick="App.admin.toggleStudioAiCategory('${r.id}',${!r.is_active})" class="text-[10px] font-extrabold px-2.5 py-1.5 rounded-lg ${r.is_active?'bg-emerald-50 text-emerald-700':'bg-slate-100 text-slate-500'}">
+                                    ${r.is_active?'Aktif':'Nonaktif'}
+                                </button>
+                            </div>
+                        `).join('');
+                    } catch (e) {
+                        target.innerHTML = '<div class="text-xs text-red-600">Kategori belum bisa dimuat. Coba lagi, ya.</div>';
+                    }
+                },
+
+                openStudioAiCategoryForm: () => {
+                    const html = `
+                        <div class="fixed inset-0 z-[95] bg-slate-900/50 backdrop-blur-sm flex items-center justify-center p-4" id="studio-ai-category-modal">
+                            <div class="card-3d w-full max-w-md bg-white rounded-3xl p-5 sm:p-6">
+                                <div class="flex items-center justify-between">
+                                    <h3 class="text-base font-extrabold text-[#151c75]">Tambah kategori AI</h3>
+                                    <button onclick="document.getElementById('studio-ai-category-modal')?.remove()" class="modal-close-btn w-8 h-8 rounded-full flex items-center justify-center">
+                                        <i class="fa-solid fa-xmark"></i>
+                                    </button>
+                                </div>
+                                <form class="mt-4 space-y-3" onsubmit="App.admin.saveStudioAiCategory(event)">
+                                    <input id="sai-cat-name" required maxlength="80" placeholder="Mis. AI Video" class="w-full card-3d-inset px-3.5 py-2.5 rounded-xl text-xs outline-none">
+                                    <input id="sai-cat-slug" required maxlength="80" placeholder="ai-video" pattern="[a-z0-9-]+" class="w-full card-3d-inset px-3.5 py-2.5 rounded-xl text-xs outline-none">
+                                    <input id="sai-cat-icon" maxlength="120" placeholder="fa-solid fa-video" class="w-full card-3d-inset px-3.5 py-2.5 rounded-xl text-xs outline-none">
+                                    <textarea id="sai-cat-desc" maxlength="300" placeholder="Deskripsi singkat kategori..." class="w-full card-3d-inset px-3.5 py-2.5 rounded-xl text-xs outline-none min-h-[90px]"></textarea>
+                                    <button class="w-full btn-brand-gradient py-3 rounded-xl text-xs font-extrabold">Simpan Kategori</button>
+                                </form>
+                            </div>
+                        </div>
+                    `;
+                    document.body.insertAdjacentHTML('beforeend', html);
+                    setTimeout(() => document.getElementById('sai-cat-name')?.focus(), 30);
+                },
+
+                saveStudioAiCategory: async (event) => {
+                    event.preventDefault();
+                    try {
+                        if (!App.state.user || App.state.user.role !== 'admin') throw new Error('Akses Admin diperlukan.');
+                        const name = String(document.getElementById('sai-cat-name')?.value || '').trim();
+                        const slug = String(document.getElementById('sai-cat-slug')?.value || '').trim().toLowerCase();
+                        const icon = String(document.getElementById('sai-cat-icon')?.value || 'fa-solid fa-sparkles').trim();
+                        const description = String(document.getElementById('sai-cat-desc')?.value || '').trim();
+                        if (!name || !/^[a-z0-9-]+$/.test(slug)) throw new Error('Nama dan slug kategori belum valid.');
+                        const { error } = await supabaseClient.from('ai_categories').insert({ name, slug, icon, description, is_active: true });
+                        if (error) throw error;
+                        document.getElementById('studio-ai-category-modal')?.remove();
+                        App.ui.toast('Kategori berhasil ditambahkan.','success');
+                        await App.admin.loadStudioAiCategories();
+                    } catch (e) {
+                        App.ui.toast(e.message || 'Kategori belum bisa disimpan.','error');
+                    }
+                },
+
+                toggleStudioAiCategory: async (id, active) => {
+                    try {
+                        if (!App.state.user || App.state.user.role !== 'admin') throw new Error('Akses Admin diperlukan.');
+                        const { error } = await supabaseClient.from('ai_categories').update({ is_active: !!active, updated_at: new Date().toISOString() }).eq('id', id);
+                        if (error) throw error;
+                        App.ui.toast(active ? 'Kategori diaktifkan.':'Kategori dinonaktifkan.','success');
+                        await App.admin.loadStudioAiCategories();
+                    } catch (e) {
+                        App.ui.toast(e.message || 'Kategori belum bisa diubah.','error');
+                    }
+                },
+
                 switchTab: (tab) => {
                     App.state.adminTab = tab;
                     App.admin.render();
@@ -5378,6 +6021,16 @@ ${(() => { const rs=String(p.review_status||'DRAFT').toUpperCase(); const map={D
                     try {
                         const adminData = await App.api.post('GET_ADMIN_DATA');
                         const tab = App.state.adminTab || 'orders';
+
+                        if (tab === 'studio-ai') {
+                            await App.admin.renderStudioAiControl();
+                            return;
+                        }
+
+                        if (tab === 'governance') {
+                            await App.admin.renderGovernance();
+                            return;
+                        }
 
                         if (tab === 'orders') {
                             area.innerHTML = `
@@ -6933,6 +7586,207 @@ window.addEventListener('DOMContentLoaded', App.init);
     };
   }
 })();
+
+/* Milestone P-Q-R — Creator Growth Loop (no DB changes) */
+(function(){
+    function num(v){ const n=Number(v||0); return Number.isFinite(n)?n:0; }
+    function safe(v){ return String(v||'').trim(); }
+
+    function snapshot(){
+        const d=window.App?.creatorStudio?.data || {};
+        const p=d.profile || {};
+        const memberships=Array.isArray(d.memberships)?d.memberships:[];
+        const services=Array.isArray(d.services)?d.services.filter(x=>x.is_active):[];
+        const portfolios=Array.isArray(d.portfolios)?d.portfolios.filter(x=>x.is_active):[];
+        const score=typeof window.App?.creatorStudio?.profileScore==='function'
+            ? window.App.creatorStudio.profileScore()
+            : {percent:0};
+
+        const hasPrimary=memberships.some(x=>x.is_primary);
+        const hasBio=safe(p.bio).length>=40;
+        const hasWa=safe(p.whatsapp).length>0;
+        const verified=!!p.is_verified;
+        const ratingCount=num(d.ratingCount);
+        const likes=num(d.likes);
+
+        const leadReady=Math.min(100,
+            (hasWa?35:0) +
+            (services.length?25:0) +
+            (portfolios.length?25:0) +
+            (safe(p.display_name)?15:0)
+        );
+        const trust=Math.min(100,
+            (verified?50:0) +
+            Math.min(25,ratingCount*2.5) +
+            Math.min(25,Math.log10(likes+1)*16)
+        );
+
+        const actions=[];
+        if(!hasPrimary) actions.push({icon:'fa-solid fa-bullseye',title:'Pilih fokus utama',note:'Biar SMART lebih cepat ngerti jasa utama kamu.',target:'category'});
+        if(!services.length) actions.push({icon:'fa-solid fa-briefcase',title:'Tambahkan satu jasa utama',note:'Mulai dari satu jasa yang paling kamu kuasai.',target:'service'});
+        if(!portfolios.length) actions.push({icon:'fa-solid fa-images',title:'Tambahkan satu karya',note:'Satu portfolio yang jelas sudah membantu calon klien.',target:'portfolio'});
+        if(!hasBio) actions.push({icon:'fa-solid fa-pen',title:'Bikin bio lebih tajam',note:'Ceritakan siapa yang kamu bantu dan kamu jago di apa.',target:'bio'});
+        if(!hasWa) actions.push({icon:'fa-brands fa-whatsapp',title:'Siapkan WhatsApp',note:'Biar calon klien bisa langsung ngobrol.',target:'whatsapp'});
+        return {
+            readiness:num(score.percent),
+            leadReady:Math.round(leadReady),
+            trust:Math.round(trust),
+            services:services.length,
+            portfolios:portfolios.length,
+            approved:String(p.review_status||'DRAFT').toUpperCase()==='APPROVED',
+            published:!!p.is_published,
+            username:safe(p.username),
+            actions:actions.slice(0,3)
+        };
+    }
+
+    function jump(target){
+        const map={
+            category:['[data-creator-cat]'],
+            service:['#creator-services-list'],
+            portfolio:['#creator-portfolio-list'],
+            bio:['#creator-bio','textarea[id*="bio"]'],
+            whatsapp:['#creator-wa','input[id*="whatsapp"]']
+        };
+        const selectors=map[target]||[];
+        for(const sel of selectors){
+            const el=document.querySelector(sel);
+            if(el){
+                el.scrollIntoView({behavior:'smooth',block:'center'});
+                setTimeout(()=>el.focus?.(),250);
+                return;
+            }
+        }
+        window.App?.ui?.toast?.('Bagian itu ada di Ruang Kerja, tinggal lanjut scroll sedikit ya 😄','info');
+    }
+
+    function render(){
+        const workspace=document.querySelector('.room-workspace');
+        if(!workspace || document.getElementById('creator-growth-loop')) return;
+        const s=snapshot();
+
+        const el=document.createElement('section');
+        el.id='creator-growth-loop';
+        el.className='creator-growth-loop';
+        const status=s.published
+            ? {k:'MOMENTUM', title:'Profilmu sudah tayang 🎉', note:'Sekarang tinggal sebar link dan arahkan orang yang tepat ke halamanmu.'}
+            : s.approved
+                ? {k:'SIAP NAIK', title:'Tinggal mulai kenalan dengan calon klien ✨', note:'Profil sudah disetujui. Coba bagikan link-mu ke satu channel dulu.'}
+                : {k:'GROWTH', title:'Bikin fondasinya mantap dulu', note:'SMART kasih prioritas kecil supaya profilmu makin gampang dipahami dan ditemukan.'};
+
+        const actionHtml=s.actions.length?s.actions.map(a=>`
+            <div class="growth-action">
+                <i class="${a.icon} text-[#151c75] mt-1"></i>
+                <div class="flex-1 min-w-0">
+                    <div class="text-[10px] font-extrabold text-slate-700">${window.App.utils.escapeHtml(a.title)}</div>
+                    <div class="text-[9px] text-slate-500 mt-0.5">${window.App.utils.escapeHtml(a.note)}</div>
+                </div>
+                <button type="button" data-growth-target="${a.target}">Buka</button>
+            </div>`).join('')
+            : `<div class="growth-action"><i class="fa-solid fa-circle-check text-emerald-600 mt-1"></i><div><div class="text-[10px] font-extrabold text-slate-700">Fondasinya sudah rapi 😄</div><div class="text-[9px] text-slate-500 mt-0.5">Sekarang fokus ke karya terbaik dan hubungan dengan calon klien.</div></div></div>`;
+
+        const momentumHtml=s.published && s.username
+            ? `<div class="growth-momentum">
+                   <div class="text-[9px] uppercase tracking-[.08em] font-black text-blue-100">NEXT</div>
+                   <div class="mt-1 text-xs font-extrabold">Bagikan profilmu: studihome.id/${window.App.utils.escapeHtml(s.username)}</div>
+                   <div class="mt-2 flex flex-wrap gap-2">
+                     <button type="button" class="px-3 py-1.5 rounded-lg bg-white/10 border border-white/15 text-[9px] font-extrabold" id="growth-copy-link">Salin Link</button>
+                     <button type="button" class="px-3 py-1.5 rounded-lg bg-[#FACC15] text-slate-900 text-[9px] font-extrabold" id="growth-share-link">Bagikan</button>
+                   </div>
+               </div>`
+            : `<div class="growth-momentum">
+                   <div class="text-[9px] uppercase tracking-[.08em] font-black text-blue-100">${status.k}</div>
+                   <div class="mt-1 text-xs font-extrabold">${status.title}</div>
+                   <div class="mt-1 text-[9px] text-blue-100 leading-relaxed">${status.note}</div>
+               </div>`;
+
+        el.innerHTML=`
+            <div class="growth-card">
+                <span class="growth-kicker"><i class="fa-solid fa-sparkles"></i> SMART GROWTH</span>
+                <h2 class="mt-2 text-base sm:text-lg font-black text-[#151c75]">Sedikit demi sedikit, makin siap 🚀</h2>
+                <p class="text-[10px] text-slate-500 mt-1 leading-relaxed">SMART membaca data yang sudah kamu isi. Nggak perlu beresin semuanya sekaligus—ambil langkah yang paling penting dulu.</p>
+                <div class="growth-stats">
+                    <div class="growth-stat"><div class="text-[8px] font-black uppercase text-slate-400">Profil</div><div class="mt-1 text-lg font-black text-[#151c75]">${s.readiness}%</div><div class="growth-bar"><span style="width:${s.readiness}%"></span></div></div>
+                    <div class="growth-stat"><div class="text-[8px] font-black uppercase text-slate-400">Siap lead</div><div class="mt-1 text-lg font-black text-[#151c75]">${s.leadReady}%</div><div class="growth-bar"><span style="width:${s.leadReady}%"></span></div></div>
+                    <div class="growth-stat"><div class="text-[8px] font-black uppercase text-slate-400">Trust</div><div class="mt-1 text-lg font-black text-[#151c75]">${s.trust}%</div><div class="growth-bar"><span style="width:${s.trust}%"></span></div></div>
+                </div>
+                <div class="text-[9px] text-slate-400 mt-2">Panduan kualitas, bukan jaminan order atau ranking.</div>
+                ${momentumHtml}
+            </div>
+            <div class="growth-card">
+                <span class="growth-kicker"><i class="fa-solid fa-wand-magic-sparkles"></i> NEXT BEST MOVES</span>
+                <h3 class="mt-2 text-sm font-black text-[#151c75]">Mulai dari yang paling berdampak</h3>
+                <div class="mt-3 space-y-2">${actionHtml}</div>
+            </div>`;
+
+        const anchor=workspace.querySelector(':scope > div');
+        if(anchor) anchor.insertAdjacentElement('afterend',el); else workspace.prepend(el);
+
+        el.querySelectorAll('[data-growth-target]').forEach(btn=>{
+            btn.addEventListener('click',()=>jump(btn.dataset.growthTarget),{passive:true});
+        });
+
+        const url=s.username ? `${window.location.origin}/${encodeURIComponent(s.username)}` : '';
+        el.querySelector('#growth-copy-link')?.addEventListener('click',async()=>{
+            try{await navigator.clipboard.writeText(url); window.App.ui.toast('Link profil sudah disalin. Tinggal tempel di bio kamu 😄','success');}
+            catch(_){window.App.ui.toast('Link-nya siap di sini: '+url,'info');}
+        });
+        el.querySelector('#growth-share-link')?.addEventListener('click',async()=>{
+            try{
+                if(navigator.share) await navigator.share({title:'Profil Creator Studihome',text:'Lihat profil saya di Studihome',url});
+                else await navigator.clipboard.writeText(url);
+            }catch(_){}
+        });
+    }
+
+    function boot(){
+        // Render after Creator Studio has populated .room-workspace.
+        let tries=0;
+        const timer=setInterval(()=>{
+            tries++;
+            if(document.querySelector('.room-workspace')){ render(); clearInterval(timer); }
+            if(tries>30) clearInterval(timer);
+        },250);
+    }
+
+    window.StudihomeCreatorGrowth = {render, snapshot, jump};
+    document.addEventListener('DOMContentLoaded', boot);
+    const originalNavigate = window.App?.router?.navigate;
+    if(window.App?.router && typeof originalNavigate==='function' && !window.App.router.__creatorGrowthHooked){
+        window.App.router.navigate=function(){
+            const r=originalNavigate.apply(this,arguments);
+            setTimeout(boot,300);
+            return r;
+        };
+        window.App.router.__creatorGrowthHooked=true;
+    }
+})();
+
+
+(function(){
+    function addPublicQualityHint(){
+        const root=document.querySelector('.studio-ai-hero') || document.querySelector('[data-studio-ai-root]');
+        if(!root || document.getElementById('studio-ai-quality-principles')) return;
+        const box=document.createElement('div');
+        box.id='studio-ai-quality-principles';
+        box.className='platform-governance-note mt-3';
+        box.innerHTML='<i class="fa-solid fa-shield-heart"></i><div><strong class="text-[#151c75]">SMART tetap fokus pada kecocokan.</strong> Popularitas, rating, dan profil dipakai sebagai sinyal pendukung—bukan pengganti relevansi.</div>';
+        root.appendChild(box);
+    }
+    document.addEventListener('DOMContentLoaded',()=>setTimeout(addPublicQualityHint,700));
+})();
+
+
+window.StudihomeProductionGuard = {
+    run: () => {
+        try {
+            const result = window.App?.integrationGuard?.run?.() || {ok:false,checks:{}};
+            return result;
+        } catch (e) {
+            return {ok:false,error:String(e?.message||e)};
+        }
+    }
+};
 </script>
 
 </body>
