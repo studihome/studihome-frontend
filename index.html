@@ -8301,9 +8301,6 @@ window.StudihomeProductionPilotSimulation = {
 })();
 </script>
 
-</body>
-</html>
-
 <!--
   RC16 — FINAL RELEASE LOCK
   Immutable-style release fingerprint + live DB closure evidence.
@@ -8319,7 +8316,7 @@ window.StudihomeProductionPilotSimulation = {
   const RELEASE_ID = 'STUDIHOME-RC16-FINAL-RELEASE';
   const source = document.documentElement?.outerHTML || '';
   const rc16Marker = '<script id="studihome-final-release-lock">';
-  const baseCandidate = source.includes(rc16Marker) ? source.split(rc16Marker)[0].replace(/\s*$/, '') + '\n</body>\n</html>' : source;
+  const prefix = source.includes(rc16Marker) ? source.split(rc16Marker)[0].replace(/\s*$/, '') : source;
 
   async function sha256Hex(value) {
     if (!window.crypto?.subtle) return null;
@@ -8331,16 +8328,10 @@ window.StudihomeProductionPilotSimulation = {
   const checks = [];
   const pass = (id, detail) => checks.push({id, status:'PASS', detail});
   const drift = (id, detail) => checks.push({id, status:'BASELINE_DRIFT', detail});
-  const action = (id, detail) => checks.push({id, status:'DB_ACTION_REQUIRED', detail});
 
-  // 1) Release identity and protected visual contracts.
-  pass('release.identity', `Release ${{RELEASE_ID}} is the controlled final candidate.`);
-  if (source.includes('window.StudihomeQALock')) pass('lock.qa','Studihome QA lock present.');
-  else drift('lock.qa','Studihome QA lock missing.');
-  if (source.includes('studihome-favicon-locked')) pass('lock.favicon','Favicon lock present.');
-  else drift('lock.favicon','Favicon lock missing.');
-
-  // 2) Database closure evidence supplied and verified by owner.
+  pass('release.identity', `Release ${RELEASE_ID} is the controlled final candidate.`);
+  if (source.includes('window.StudihomeQALock')) pass('lock.qa','Studihome QA lock present.'); else drift('lock.qa','Studihome QA lock missing.');
+  if (source.includes('studihome-favicon-locked')) pass('lock.favicon','Favicon lock present.'); else drift('lock.favicon','Favicon lock missing.');
   pass('db.is-admin-anon-deny','Owner-supplied live verification: public.is_admin() anon_execute=false.');
   pass('db.is-admin-auth-allow','Owner-supplied live verification: public.is_admin() authenticated_execute=true.');
   pass('db.is-admin-hardening','Owner-supplied live verification: SECURITY DEFINER + search_path="".');
@@ -8350,33 +8341,51 @@ window.StudihomeProductionPilotSimulation = {
   pass('db.rls','Owner-supplied live verification: critical tables report RLS enabled.');
   pass('db.creator-governance','Owner-supplied live verification: creator review/profile triggers are present.');
 
-  const expected = BASELINE_SHA256;
   const buildReport = (hash) => {
-    if (!hash) drift('release.fingerprint','Web Crypto unavailable; baseline fingerprint cannot be verified in this runtime.');
-    else if (hash === expected) pass('release.fingerprint','RC15 baseline fingerprint matches exactly; no drift detected before RC16 lock.');
-    else drift('release.fingerprint',`Expected ${expected}, received ${hash}.`);
+    // Fingerprint is anchored to the RC15 baseline captured in the release manifest.
+    if (hash === null) drift('release.fingerprint','Web Crypto unavailable; baseline fingerprint cannot be verified in this runtime.');
+    else if (hash === BASELINE_SHA256) pass('release.fingerprint','Baseline fingerprint matches the controlled release reference.');
+    else drift('release.fingerprint',`Baseline fingerprint mismatch. Expected ${BASELINE_SHA256}; observed ${hash}.`);
 
     const blocking = checks.filter(x => x.status !== 'PASS');
-    const report = {
-      releaseId: RELEASE_ID,
-      version: 'RC16-final-release-lock',
-      baselineSha256: expected,
-      observedSha256: hash,
-      passed: checks.filter(x => x.status === 'PASS').length,
-      total: checks.length,
-      blocking: blocking.length,
-      releaseStatus: blocking.length ? 'LOCKED_PENDING_ACTION' : 'FINAL_LOCKED',
-      checks
-    };
-    window.StudihomeFinalReleaseLock = Object.freeze({
-      version: report.version,
-      run: () => JSON.parse(JSON.stringify(report)),
-      status: report.releaseStatus,
-      releaseId: RELEASE_ID
-    });
+    const report = { releaseId: RELEASE_ID, version:'RC16-final-release-lock', baselineSha256:BASELINE_SHA256, observedSha256:hash, passed:checks.filter(x=>x.status==='PASS').length, total:checks.length, blocking:blocking.length, releaseStatus:blocking.length?'LOCKED_PENDING_ACTION':'FINAL_LOCKED', checks };
+    window.StudihomeFinalReleaseLock = Object.freeze({ version:report.version, run:()=>JSON.parse(JSON.stringify(report)), status:report.releaseStatus, releaseId:RELEASE_ID });
   };
+  sha256Hex(prefix).then(buildReport).catch(() => buildReport(null));
+})();
+</script>
 
-  sha256Hex(baseCandidate).then(buildReport).catch(() => buildReport(null));
+<!--
+  RC17 — PRODUCTION OPERATIONAL VALIDATION GATE
+  Read-only. No DB writes. No UI mutation.
+  Purpose: verify release structure, contract presence, and pilot prerequisites.
+-->
+<script id="studihome-production-operational-validation-gate">
+(() => {
+  'use strict';
+  if (window.StudihomeOperationalValidationGate) return;
+  const source = document.documentElement?.outerHTML || '';
+  const checks = [];
+  const pass = (id, detail) => checks.push({id, status:'PASS', detail});
+  const review = (id, detail) => checks.push({id, status:'ACTION_REQUIRED', detail});
+
+  const bodyCount = (source.match(/<body(?:\s|>)/gi) || []).length;
+  const htmlCloseCount = (source.match(/<\/html>/gi) || []).length;
+  const bodyCloseCount = (source.match(/<\/body>/gi) || []).length;
+  if (bodyCount===1 && htmlCloseCount===1 && bodyCloseCount===1) pass('html.structure','Single html/body document structure is present.'); else review('html.structure','Document structure requires manual review.');
+  if (source.includes('window.StudihomeQALock')) pass('lock.qa','QA lock present.'); else review('lock.qa','QA lock missing.');
+  if (source.includes('studihome-favicon-locked')) pass('lock.favicon','Favicon lock present.'); else review('lock.favicon','Favicon lock missing.');
+  if (source.includes('window.StudihomeFinalReleaseLock')) pass('lock.release','Final release lock present.'); else review('lock.release','Final release lock missing.');
+
+  const requiredRpc=['create_order','submit_payment_confirmation','claim_free_product','admin_verify_order','admin_reject_order'];
+  const missingRpc=requiredRpc.filter(name=>!source.includes(name));
+  if (!missingRpc.length) pass('security.rpc-contracts','Sensitive RPC contracts are present.'); else review('security.rpc-contracts',`Missing RPC contract(s): ${missingRpc.join(', ')}.`);
+  if (source.includes('/kamar') && source.includes('/ruang-kerja')) pass('routing.canonical','Canonical route contracts preserved.'); else review('routing.canonical','Canonical route contract missing.');
+
+  ['real Supabase customer account','real Supabase Creator account','Admin verification flow','WhatsApp handoff','desktop + mobile browser acceptance'].forEach((item,i)=>review(`pilot.${i+1}`,`Manual pilot validation required: ${item}.`));
+  const blockers=checks.filter(x=>x.status!=='PASS');
+  const report={version:'RC17-production-operational-validation-gate',releaseBaseline:'STUDIHOME-RC16-FINAL-RELEASE',passed:checks.filter(x=>x.status==='PASS').length,total:checks.length,actionRequired:blockers.length,releaseStatus:blockers.length?'PILOT_VALIDATION_REQUIRED':'OPERATIONAL_GATE_PASS',checks};
+  window.StudihomeOperationalValidationGate=Object.freeze({version:report.version,run:()=>JSON.parse(JSON.stringify(report)),status:report.releaseStatus});
 })();
 </script>
 
