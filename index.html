@@ -1313,11 +1313,11 @@ const App = {
 
                 const initialPath = window.location.pathname.toLowerCase().replace(/\/$/, '') || '/';
                 if (!window.location.hash && initialPath !== '/') {
-                    const knownPaths = ['/', '/products', '/kamar', '/dashboard', '/admin', '/studio-ai', '/ruang-kerja', '/creator-studio'];
+                    const knownPaths = ['/', '/products', '/kamar', '/dashboard', '/admin', '/studio-ai', '/dapur', '/ruang-kerja', '/creator-studio'];
                     const isCategoryPath = /^(\/ai-|\/kursus-ai|\/jasa-ai|\/ai-untuk-)/i.test(initialPath);
                     const isCreatorPath = /^\/[a-z0-9][a-z0-9-]{2,39}(?:\/portfolio\/[a-z0-9][a-z0-9-]{0,120})?$/i.test(initialPath) && !knownPaths.includes(initialPath) && !isCategoryPath;
                     if (initialPath === '/studio-ai') { App.router.routePath('/studio-ai'); }
-                    else if (initialPath === '/ruang-kerja' || initialPath === '/creator-studio') { window.history.replaceState({}, '', '/ruang-kerja'); App.router.routePath('/ruang-kerja'); }
+                    else if (initialPath === '/ruang-kerja' || initialPath === '/creator-studio') { window.history.replaceState({}, '', '/dapur'); App.router.routePath('/dapur'); }
                     else if (initialPath === '/dashboard') { window.history.replaceState({}, '', '/kamar'); App.router.routePath('/kamar'); }
                     else if (isCategoryPath) { App.router.routePath(initialPath); }
                     else if (isCreatorPath) { App.router.routePath(initialPath); }
@@ -1325,7 +1325,7 @@ const App = {
                 setTimeout(() => {
                     try {
                         const mount = document.getElementById('creator-launch-quality');
-                        const isWorkspace = window.location.pathname === '/ruang-kerja';
+                        const isWorkspace = /^\/dapur(?:\/|$)/.test(window.location.pathname) || window.location.pathname === '/ruang-kerja';
                         if (mount) mount.classList.toggle('hidden', !isWorkspace);
                         if (isWorkspace) App.creatorStudio.renderCreatorLaunchQuality?.();
                     } catch(_) {}
@@ -1624,7 +1624,7 @@ App.router.bindCanonicalLinkGuard();
                     const mNav = document.getElementById('mobile-nav-links');
                     
                     const user = App.state.user;
-                    const hash = App.state.routeType === 'studio-ai' ? 'studio-ai' : (App.state.routeType === 'creator' || App.state.routeType === 'ruang-kerja' ? 'studio-ai' : (App.state.activeTab || 'home'));
+                    const hash = App.state.routeType === 'studio-ai' ? 'studio-ai' : (App.state.routeType === 'creator' ? 'studio-ai' : (App.state.routeType === 'dapur' ? 'dapur' : (App.state.activeTab || 'home')));
 
                     let items = [
                         { key: 'home', label: 'Teras', icon: 'fa-house' },
@@ -1633,6 +1633,7 @@ App.router.bindCanonicalLinkGuard();
                     ];
 
                     if (user) {
+                        items.push({ key: 'dapur', label: 'Dapur', icon: 'fa-kitchen-set' });
                         if (user.role === 'admin') {
                             items.push({ key: 'admin', label: 'Admin', icon: 'fa-user-shield' });
                         } else {
@@ -1699,7 +1700,12 @@ App.router.bindCanonicalLinkGuard();
                         products: '/products',
                         dashboard: '/kamar',
                         admin: '/admin',
-                        'ruang-kerja': '/ruang-kerja',
+                        dapur: '/dapur',
+                        'dapur-foyer': '/dapur/foyer',
+                        'dapur-menu': '/dapur/menu',
+                        'dapur-hidangan': '/dapur/hidangan',
+                        'dapur-ambalan': '/dapur/ambalan',
+                        'ruang-kerja': '/dapur',
                         'studio-ai': '/studio-ai'
                     };
 
@@ -1712,6 +1718,8 @@ App.router.bindCanonicalLinkGuard();
                     if (currentUrl !== nextUrl || window.location.hash) {
                         window.history.pushState({}, '', nextUrl);
                     }
+                    App.router.routePath(nextUrl);
+                    App.router.handlePath();
 
                     App.state.activeTab = tab;
                     App.state.routePath = canonicalUrl.pathname;
@@ -1741,7 +1749,7 @@ App.router.bindCanonicalLinkGuard();
                         case 'admin':
                             App.admin.render();
                             break;
-                        case 'ruang-kerja':
+                        case 'dapur':
                             App.creatorStudio.render();
                             break;
                         case 'studio-ai':
@@ -1761,7 +1769,7 @@ App.router.bindCanonicalLinkGuard();
                     window.history.pushState({}, '', path);
                     App.state.routeType = 'creator';
                     App.state.creatorUsername = safeUsername;
-                    App.state.creatorPortfolioSlug = safeSlug;
+                    App.state.creatorAmbalanSlug = safeSlug;
                     App.ui.renderNavigation();
                     App.creator.render(safeUsername, safeSlug);
                     window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -1773,13 +1781,18 @@ App.router.bindCanonicalLinkGuard();
                     App.state.routePath = clean;
                     if (!parts.length) { App.state.routeType = 'home'; return; }
                     if (parts[0] === 'studio-ai') { App.state.routeType = 'studio-ai'; App.state.studioAICategory = ''; return; }
-                    if (parts[0] === 'ruang-kerja' || parts[0] === 'creator-studio') { App.state.routeType = 'ruang-kerja'; return; }
+                    if (parts[0] === 'dapur' || parts[0] === 'ruang-kerja' || parts[0] === 'creator-studio' || ['foyer','menu','hidangan','ambalan'].includes(parts[0])) {
+                        App.state.routeType = 'dapur';
+                        const sec = parts[0] === 'dapur' ? (parts[1] || '') : (['foyer','menu','hidangan','ambalan'].includes(parts[0]) ? parts[0] : '');
+                        App.state.dapurSection = ['foyer','menu','hidangan','ambalan'].includes(String(sec).toLowerCase()) ? String(sec).toLowerCase() : '';
+                        return;
+                    }
                     if (parts[0] === 'products') { App.state.routeType = 'products'; return; }
                     if (parts[0] === 'dashboard' || parts[0] === 'kamar') { App.state.routeType = 'dashboard'; return; }
                     if (parts[0] === 'admin') { App.state.routeType = 'admin'; return; }
                     if (/^(ai-|kursus-ai|jasa-ai|ai-untuk-)/i.test(parts[0])) { App.state.routeType = 'studio-ai'; App.state.studioAICategory = parts[0].toLowerCase(); return; }
-                    if (parts.length === 1) { App.state.routeType = 'creator'; App.state.creatorUsername = parts[0].toLowerCase(); App.state.creatorPortfolioSlug = ''; return; }
-                    if (parts.length >= 3 && parts[1] === 'portfolio') { App.state.routeType = 'creator'; App.state.creatorUsername = parts[0].toLowerCase(); App.state.creatorPortfolioSlug = parts.slice(2).join('-').toLowerCase(); return; }
+                    if (parts.length === 1) { App.state.routeType = 'creator'; App.state.creatorUsername = parts[0].toLowerCase(); App.state.creatorAmbalanSlug = ''; return; }
+                    if (parts.length >= 3 && parts[1] === 'portfolio') { App.state.routeType = 'creator'; App.state.creatorUsername = parts[0].toLowerCase(); App.state.creatorAmbalanSlug = parts.slice(2).join('-').toLowerCase(); return; }
                     App.state.routeType = 'home';
                 },
 
@@ -1789,7 +1802,12 @@ App.router.bindCanonicalLinkGuard();
                         products: '/products',
                         dashboard: '/kamar',
                         admin: '/admin',
-                        'ruang-kerja': '/ruang-kerja',
+                        dapur: '/dapur',
+                        'dapur-foyer': '/dapur/foyer',
+                        'dapur-menu': '/dapur/menu',
+                        'dapur-hidangan': '/dapur/hidangan',
+                        'dapur-ambalan': '/dapur/ambalan',
+                        'ruang-kerja': '/dapur',
                         'studio-ai': '/studio-ai'
                     };
 
@@ -1800,7 +1818,12 @@ App.router.bindCanonicalLinkGuard();
                     // remain visible as the active URL after navigation/back/refresh.
                     const legacyPaths = {
                         '/dashboard': '/kamar',
-                        '/creator-studio': '/ruang-kerja'
+                        '/creator-studio': '/dapur',
+                        '/ruang-kerja': '/dapur',
+                        '/foyer': '/dapur/foyer',
+                        '/menu': '/dapur/menu',
+                        '/hidangan': '/dapur/hidangan',
+                        '/ambalan': '/dapur/ambalan'
                     };
                     if (legacyPaths[path]) {
                         const canonical = legacyPaths[path];
@@ -1837,7 +1860,7 @@ App.router.bindCanonicalLinkGuard();
                             App.ui.renderNavigation();
                             App.studioAI.render(App.state.studioAICategory || '');
                             return true;
-                        case 'ruang-kerja':
+                        case 'dapur':
                             App.ui.renderNavigation();
                             App.creatorStudio.render();
                             return true;
@@ -1866,7 +1889,12 @@ App.router.bindCanonicalLinkGuard();
                         products: '/products',
                         dashboard: '/kamar',
                         admin: '/admin',
-                        'ruang-kerja': '/ruang-kerja',
+                        dapur: '/dapur',
+                        'dapur-foyer': '/dapur/foyer',
+                        'dapur-menu': '/dapur/menu',
+                        'dapur-hidangan': '/dapur/hidangan',
+                        'dapur-ambalan': '/dapur/ambalan',
+                        'ruang-kerja': '/dapur',
                         'studio-ai': '/studio-ai'
                     };
 
@@ -1915,7 +1943,12 @@ App.router.bindCanonicalLinkGuard();
                         products: '/products',
                         dashboard: '/kamar',
                         admin: '/admin',
-                        'ruang-kerja': '/ruang-kerja',
+                        dapur: '/dapur',
+                        'dapur-foyer': '/dapur/foyer',
+                        'dapur-menu': '/dapur/menu',
+                        'dapur-hidangan': '/dapur/hidangan',
+                        'dapur-ambalan': '/dapur/ambalan',
+                        'ruang-kerja': '/dapur',
                         'studio-ai': '/studio-ai'
                     };
 
@@ -2917,7 +2950,7 @@ App.router.bindCanonicalLinkGuard();
                             <div class="flex items-end justify-between gap-3 mb-4">
                                 <div>
                                     <h2 class="text-lg sm:text-xl font-extrabold text-[#151c75]" id="studio-ai-results-title">Creator yang siap membantu</h2>
-                                    <p class="text-xs text-slate-500">Profil publik, jasa, portfolio, dan tombol WhatsApp.</p>
+                                    <p class="text-xs text-slate-500">Foyer publik, hidangan, ambalan, dan tombol WhatsApp.</p>
                                     <div class="mt-2 inline-flex items-center gap-1.5 px-2.5 py-1 rounded-xl bg-blue-50 border border-blue-100 text-[9px] font-bold text-[#151c75]"><i class="fa-solid fa-wand-magic-sparkles text-amber-500"></i> Makin spesifik pencarianmu, makin nyambung hasilnya.</div>
                                 </div>
                             </div>
@@ -4331,7 +4364,7 @@ App.router.bindCanonicalLinkGuard();
                                         </div>
                                         <div class="text-[10px] text-slate-500 whitespace-nowrap">❤️ ${c.likes || 0}</div>
                                     </div>
-                                    <p class="text-xs text-slate-600 leading-relaxed mt-3 line-clamp-3">${App.utils.escapeHtml(c.bio || 'Ruang Kerja AI di Studihome.')}</p>
+                                    <p class="text-xs text-slate-600 leading-relaxed mt-3 line-clamp-3">${App.utils.escapeHtml(c.bio || 'Dapur AI di Studihome.')}</p>
                                     <div class="flex items-center justify-between mt-4 pt-3 border-t border-slate-100 gap-2">
                                         <div class="text-[10px] font-bold text-slate-500">${App.utils.escapeHtml(c.location || 'Indonesia')}</div>
                                         <div class="flex items-center gap-1.5">
@@ -4368,7 +4401,18 @@ App.router.bindCanonicalLinkGuard();
                     }
                     if (mediaType === 'video' || /\.(mp4|webm|ogg)(?:$|[?#])/i.test(lower)) return `<div class="aspect-video rounded-2xl overflow-hidden bg-black"><video class="w-full h-full object-contain" controls playsinline preload="metadata"><source src="${safe}"></video></div>`;
                     if (mediaType === 'image' || /\.(png|jpe?g|gif|webp|svg)(?:$|[?#])/i.test(lower)) return `<div class="aspect-[4/3] rounded-2xl overflow-hidden bg-slate-50"><img src="${safe}" alt="${App.utils.escapeHtml(title || 'Portfolio')}" class="w-full h-full object-cover" loading="lazy" referrerpolicy="no-referrer"></div>`;
-                    return `<a href="${safe}" target="_blank" rel="noopener noreferrer" class="block rounded-2xl bg-blue-50 p-4 text-xs font-bold text-[#151c75]">Buka portfolio ↗</a>`;
+                    return `<button type="button" class="creator-portfolio-preview-btn" onclick="App.creator.openMediaPreview('${App.utils.escapeHtml(mediaType||'link')}','${App.utils.escapeHtml(value)}','${App.utils.escapeHtml(title||'Portfolio')}')">Buka media ↗</button>`;
+                },
+                openMediaPreview:(mediaType,url,title)=>{
+                    const existing=document.getElementById('creator-media-modal'); if(existing)existing.remove();
+                    const safe=App.utils.safeUrl(url,'#'); const escTitle=App.utils.escapeHtml(title||'Portfolio'); let content='';
+                    if(mediaType==='youtube'){const m=String(url).match(/(?:youtube\.com\/(?:watch\?v=|shorts\/|live\/)|youtu\.be\/)([A-Za-z0-9_-]{6,})/i);if(m)content=`<iframe src="https://www.youtube.com/embed/${m[1]}?autoplay=1" title="${escTitle}" allow="autoplay; encrypted-media; picture-in-picture; fullscreen" allowfullscreen></iframe>`;}
+                    else if(mediaType==='drive'){const m=String(url).match(/[-\w]{25,}/);if(m)content=`<iframe src="https://drive.google.com/file/d/${m[0]}/preview" title="${escTitle}" allow="autoplay; fullscreen; picture-in-picture" allowfullscreen></iframe>`;}
+                    else if(mediaType==='tiktok'){content=`<div class="creator-media-fallback"><div class="text-3xl mb-2">▶</div><div class="font-extrabold text-white">Buka video TikTok</div><p class="text-xs mt-2">TikTok dapat membatasi pemutaran di dalam frame. Buka media resminya untuk memutar penuh.</p><a href="${safe}" target="_blank" rel="noopener noreferrer" class="inline-flex mt-4 px-4 py-2.5 rounded-xl bg-white text-slate-900 text-xs font-extrabold">Putar di TikTok</a></div>`;}
+                    else if(mediaType==='instagram'){content=`<div class="creator-media-fallback"><div class="text-3xl mb-2">◎</div><div class="font-extrabold text-white">Buka media Instagram</div><p class="text-xs mt-2">Instagram dapat membatasi embed lintas situs. Buka posting resmi untuk melihat atau memutar media.</p><a href="${safe}" target="_blank" rel="noopener noreferrer" class="inline-flex mt-4 px-4 py-2.5 rounded-xl bg-white text-slate-900 text-xs font-extrabold">Buka di Instagram</a></div>`;}
+                    if(!content) content=`<div class="creator-media-fallback"><div class="font-extrabold text-white">Media belum bisa dipratinjau</div><a href="${safe}" target="_blank" rel="noopener noreferrer" class="inline-flex mt-4 px-4 py-2.5 rounded-xl bg-white text-slate-900 text-xs font-extrabold">Buka sumber asli</a></div>`;
+                    const modal=document.createElement('div'); modal.id='creator-media-modal'; modal.className='is-open'; modal.innerHTML=`<div class="creator-media-sheet"><div class="creator-media-head"><div class="min-w-0"><div class="text-[9px] uppercase tracking-wider text-amber-300 font-black">AMBALAN</div><div class="text-sm font-extrabold truncate">${escTitle}</div></div><button type="button" class="w-9 h-9 rounded-full bg-white/10 text-white flex items-center justify-center" onclick="document.getElementById('creator-media-modal')?.remove()" aria-label="Tutup media"><i class="fa-solid fa-xmark"></i></button></div><div class="creator-media-stage">${content}</div></div>`;
+                    modal.addEventListener('click',e=>{if(e.target===modal)modal.remove();}); document.body.appendChild(modal);
                 },
                 openBrief: (username, displayName, serviceTitle = '', phone = '') => {
                     window.__creatorBriefPhone = phone;
@@ -4451,15 +4495,15 @@ App.router.bindCanonicalLinkGuard();
                                             ${c.is_verified ? `<span class="creator-trust-chip px-2.5 py-1 rounded-xl text-[10px] font-extrabold text-amber-200"><i class="fa-solid fa-circle-check mr-1"></i> Verified Creator</span>` : ''}
                                         </div>
                                         <div class="flex items-center gap-4">
-                                            <div class="w-20 h-20 sm:w-24 sm:h-24 rounded-3xl bg-white text-[#151c75] flex items-center justify-center font-black text-2xl overflow-hidden shadow-2xl border-2 border-white/50 shrink-0">
+                                            <div class="w-28 h-28 sm:w-32 sm:h-32 rounded-3xl bg-white text-[#151c75] flex items-center justify-center font-black text-2xl overflow-hidden shadow-2xl border-2 border-white/50 shrink-0">
                                                 ${c.avatar_url ? `<img src="${App.utils.safeUrl(c.avatar_url)}" alt="${App.utils.escapeHtml(c.display_name)}" class="w-full h-full object-cover">` : initials}
                                             </div>
                                             <div>
                                                 <h1 class="text-2xl sm:text-3xl md:text-4xl font-black leading-tight">${App.utils.escapeHtml(c.display_name || c.username)}</h1>
-                                                <p class="text-blue-100 text-xs sm:text-sm mt-1">${App.utils.escapeHtml(primaryCategory?.name || 'Ruang Kerja AI')} ${c.location ? '• ' + App.utils.escapeHtml(c.location) : ''}</p>
+                                                <p class="text-blue-100 text-xs sm:text-sm mt-1">${App.utils.escapeHtml(primaryCategory?.name || 'Dapur AI')} ${c.location ? '• ' + App.utils.escapeHtml(c.location) : ''}</p>
                                             </div>
                                         </div>
-                                        <p class="text-xs sm:text-sm text-blue-50/95 max-w-2xl leading-relaxed mt-5">${App.utils.escapeHtml(c.bio || 'Ruang Kerja AI di Studihome.')}</p>
+                                        <p class="text-xs sm:text-sm text-blue-50/95 max-w-2xl leading-relaxed mt-5">${App.utils.escapeHtml(c.bio || 'Dapur AI di Studihome.')}</p>
                                         <div class="flex flex-wrap gap-2 mt-4">
                                             ${categories.slice(0,6).map(x => `<span class="creator-trust-chip px-2.5 py-1 rounded-xl text-[9px] font-bold">${App.utils.escapeHtml(x.name)}</span>`).join('')}
                                         </div>
@@ -4580,7 +4624,7 @@ App.router.bindCanonicalLinkGuard();
                             <section>
                                 <div class="flex items-end justify-between gap-3 mb-4"><div><h2 class="text-lg sm:text-xl font-extrabold text-[#151c75]">Portfolio</h2><p class="text-xs text-slate-500">Lihat contoh karya dan solusi yang pernah dibuat.</p></div></div>
                                 <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-                                    ${portfolios.length ? portfolios.map(p => `<article class="creator-portfolio-card card-3d rounded-2xl overflow-hidden bg-white border border-slate-200/80 cursor-pointer" onclick="App.router.goCreator('${App.utils.escapeHtml(c.username)}','${App.creator._slugify(p.title)}')"><div class="relative"><div class="portfolio-overlay absolute inset-0 pointer-events-none"></div>${App.creator._mediaHTML(p.media_type,p.media_url,p.title)}<div class="absolute left-3 top-3 px-2 py-1 rounded-lg bg-black/55 text-white text-[9px] font-bold">${App.utils.escapeHtml(p.media_type || 'media')}</div></div><div class="p-3.5"><h3 class="text-xs font-extrabold text-[#151c75]">${App.utils.escapeHtml(p.title)}</h3><p class="text-[10px] text-slate-500 line-clamp-2 mt-1">${App.utils.escapeHtml(p.description || '')}</p></div></article>`).join('') : `<div class="card-3d-inset p-6 rounded-2xl text-xs text-slate-500 sm:col-span-2 lg:col-span-3">Portfolio belum tersedia.</div>`}
+                                    ${portfolios.length ? portfolios.map(p => `<article class="creator-portfolio-card card-3d rounded-2xl overflow-hidden bg-white border border-slate-200/80"><div class="relative"><div class="portfolio-overlay absolute inset-0 pointer-events-none"></div><div class="aspect-video rounded-2xl overflow-hidden bg-slate-950 flex items-center justify-center"><button type="button" onclick="App.creator.openMediaPreview('${App.utils.escapeHtml(p.media_type||'link')}','${App.utils.escapeHtml(p.media_url||'')}','${App.utils.escapeHtml(p.title||'Portfolio')}')" class="w-full h-full flex items-center justify-center text-white"><span class="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-white/10 border border-white/20 backdrop-blur text-xs font-extrabold"><i class="fa-solid fa-play"></i> Buka ${App.utils.escapeHtml(p.media_type||'media')}</span></button></div><div class="absolute left-3 top-3 px-2 py-1 rounded-lg bg-black/55 text-white text-[9px] font-bold">${App.utils.escapeHtml(p.media_type || 'media')}</div></div><div class="p-3.5"><h3 class="text-xs font-extrabold text-[#151c75]">${App.utils.escapeHtml(p.title)}</h3><p class="text-[10px] text-slate-500 line-clamp-2 mt-1">${App.utils.escapeHtml(p.description || '')}</p><a href="/${App.utils.escapeHtml(c.username)}/portfolio/${App.creator._slugify(p.title)}" onclick="event.stopPropagation()" class="inline-flex mt-3 text-[10px] font-extrabold text-[#151c75]">Detail ambalan →</a></div></article>`).join('') : `<div class="card-3d-inset p-6 rounded-2xl text-xs text-slate-500 sm:col-span-2 lg:col-span-3">Portfolio belum tersedia.</div>`}
                                 </div>
                             </section>
                         `;
@@ -5012,11 +5056,11 @@ renderCreatorStandardSummary: (creator, data, categories, services, portfolios) 
                                                         <i class="fa-solid fa-briefcase text-[#151c75]"></i>
                                                     </div>
                                                     <div>
-                                                        <div class="text-xs font-extrabold text-[#151c75]">Ruang kerja kamu siap dipakai ✨</div>
+                                                        <div class="text-xs font-extrabold text-[#151c75]">Dapur kamu siap dipakai ✨</div>
                                                         <div class="text-[11px] sm:text-xs text-slate-600 mt-0.5 leading-relaxed">Kelola profil, jasa, dan portfolio kamu dari satu tempat.</div>
                                                     </div>
                                                 </div>
-                                                <button onclick="App.router.navigate('ruang-kerja')" class="btn-brand-gradient px-3.5 py-2 rounded-xl text-[11px] font-bold shrink-0">Buka Ruang Kerja</button>
+                                                <button onclick="App.router.navigate('ruang-kerja')" class="btn-brand-gradient px-3.5 py-2 rounded-xl text-[11px] font-bold shrink-0">Buka Dapur</button>
                                             </div>`
                                         : `
                                             <div class="card-3d p-4 sm:p-5 rounded-2xl mb-6 bg-white border border-blue-100 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
@@ -5029,7 +5073,7 @@ renderCreatorStandardSummary: (creator, data, categories, services, portfolios) 
                                                         <div class="text-[11px] sm:text-xs text-slate-600 mt-0.5 leading-relaxed">Kamu sudah punya Premium. Yuk, bikin halaman gratis untuk jasa dan portfolio kamu.</div>
                                                     </div>
                                                 </div>
-                                                <button onclick="App.router.navigate('ruang-kerja')" class="btn-brand-gradient px-3.5 py-2 rounded-xl text-[11px] font-bold shrink-0">Mulai di Ruang Kerja</button>
+                                                <button onclick="App.router.navigate('ruang-kerja')" class="btn-brand-gradient px-3.5 py-2 rounded-xl text-[11px] font-bold shrink-0">Mulai di Dapur</button>
                                             </div>`;
                                     creatorEntry.classList.remove('hidden');
                                 } catch (_) {
@@ -5243,7 +5287,9 @@ renderCreatorStandardSummary: (creator, data, categories, services, portfolios) 
                         return;
                     }
                     this.renderEditor();
+                    setTimeout(()=>this.focusSection(App.state.dapurSection||''),80);
                 },
+                focusSection(section){ const map={foyer:'#creator-foyer',menu:'#creator-menu',hidangan:'#creator-hidangan',ambalan:'#creator-ambalan'}; const el=document.querySelector(map[section]||''); if(el) el.scrollIntoView({behavior:'smooth',block:'start'}); },
                 profileScore() {
                     const d = this.data || {};
                     const p = d.profile || {};
@@ -5268,7 +5314,13 @@ renderCreatorStandardSummary: (creator, data, categories, services, portfolios) 
                     const primaryCategory = (d.categories||[]).find(c=>c.id===primary);
                     const primaryCategoryName = primaryCategory?.name || '';
                     main.innerHTML=`<div class="room-workspace max-w-5xl mx-auto space-y-5">
-                        <div class="flex flex-col sm:flex-row justify-between gap-3"><div><div class="text-[10px] font-black text-amber-600 uppercase tracking-wider">RUANG KERJA</div><h1 class="text-xl sm:text-2xl font-black text-[#151c75]">Bangun halamanmu</h1><p class="text-xs text-slate-500 mt-1">Satu link untuk profil, jasa, portfolio, dan kontakmu.</p></div><button onclick="App.router.navigate('kamar')" class="px-3.5 py-2 rounded-xl text-xs font-bold bg-slate-100">Kembali ke Kamar</button></div>
+                        <nav class="dapur-subnav" aria-label="Navigasi Dapur">
+                            <a href="/dapur/foyer" class="${App.state.dapurSection==='foyer'?'is-active':''}" onclick="event.preventDefault();App.router.navigate('dapur-foyer')"><i class="fa-solid fa-id-card"></i> Foyer</a>
+                            <a href="/dapur/menu" class="${App.state.dapurSection==='menu'?'is-active':''}" onclick="event.preventDefault();App.router.navigate('dapur-menu')"><i class="fa-solid fa-layer-group"></i> Menu</a>
+                            <a href="/dapur/hidangan" class="${App.state.dapurSection==='hidangan'?'is-active':''}" onclick="event.preventDefault();App.router.navigate('dapur-hidangan')"><i class="fa-solid fa-bowl-food"></i> Hidangan</a>
+                            <a href="/dapur/ambalan" class="${App.state.dapurSection==='ambalan'?'is-active':''}" onclick="event.preventDefault();App.router.navigate('dapur-ambalan')"><i class="fa-solid fa-images"></i> Ambalan</a>
+                        </nav>
+                        <div class="flex flex-col sm:flex-row justify-between gap-3"><div><div class="text-[10px] font-black text-amber-600 uppercase tracking-wider">DAPUR</div><h1 class="text-xl sm:text-2xl font-black text-[#151c75]">Bangun halamanmu</h1><p class="text-xs text-slate-500 mt-1">Satu link untuk profil, jasa, portfolio, dan kontakmu.</p><div class="mt-3 rounded-2xl bg-amber-50 border border-amber-100 p-3 text-[10px] text-slate-600 leading-relaxed"><strong class="text-[#151c75]">Kenalan dengan Dapur:</strong> Foyer = identitas/profil brand · Menu = kategori keahlian · Hidangan = jasa yang kamu tawarkan · Ambalan = etalase portfolio. Dapur adalah tempat kamu merapikan semua bahan sebelum diperkenalkan ke calon klien.</div></div><button onclick="App.router.navigate('kamar')" class="px-3.5 py-2 rounded-xl text-xs font-bold bg-slate-100">Kembali ke Kamar</button></div>
 ${(() => { const rs=String(p.review_status||'DRAFT').toUpperCase(); const map={DRAFT:['Draft','Profilmu masih kamu rapikan. Santai, lanjutkan dulu.','fa-pen'],PENDING:['Sedang dicek','Profilmu sudah masuk antrean review Admin.','fa-hourglass-half'],APPROVED:['Sudah disetujui','Mantap! Profilmu sudah boleh tampil di Studio AI.','fa-circle-check'],REJECTED:['Perlu dirapikan','Ada catatan dari Admin. Rapikan lalu kirim lagi, ya.','fa-wand-magic-sparkles']}; const x=map[rs]||map.DRAFT; return `<div class="creator-review-panel card-3d p-4 sm:p-5 rounded-2xl flex items-start gap-3 mb-5"><span class="creator-review-badge"><i class="fa-solid ${x[2]}"></i>${x[0]}</span><div class="text-[11px] sm:text-xs text-slate-600 leading-relaxed">${x[1]}${rs==='REJECTED'&&p.review_note?`<div class="mt-1 font-semibold text-slate-700">Catatan: ${App.utils.escapeHtml(p.review_note)}</div>`:''}</div></div>`; })()}
 
                         <section class="creator-launch-card card-3d p-5 sm:p-6 rounded-3xl">
@@ -5302,33 +5354,78 @@ ${(() => { const rs=String(p.review_status||'DRAFT').toUpperCase(); const map={D
                                 </div>
                             </div>
                         </section>
-                        <section class="card-3d p-5 sm:p-6 rounded-3xl bg-white"><div class="flex justify-between mb-4"><h2 class="font-extrabold text-[#151c75]">Profil</h2><span class="text-[10px] font-bold ${p.is_published?'text-emerald-600':'text-amber-600'}">${p.is_published?'Sudah Publik':(String(p.review_status||'DRAFT').toUpperCase()==='PENDING'?'Sedang Dicek':(String(p.review_status||'DRAFT').toUpperCase()==='REJECTED'?'Perlu Dirapikan':'Draft'))}</span></div><div class="grid md:grid-cols-2 gap-3">
+                        <section id="creator-foyer" class="card-3d p-5 sm:p-6 rounded-3xl bg-white"><div class="flex justify-between mb-4"><h2 class="font-extrabold text-[#151c75]">Foyer</h2><span class="text-[10px] font-bold ${p.is_published?'text-emerald-600':'text-amber-600'}">${p.is_published?'Sudah Publik':(String(p.review_status||'DRAFT').toUpperCase()==='PENDING'?'Sedang Dicek':(String(p.review_status||'DRAFT').toUpperCase()==='REJECTED'?'Perlu Dirapikan':'Draft'))}</span></div><div class="grid md:grid-cols-2 gap-3">
                         <div><label class="block text-xs font-bold mb-1">Username</label><div class="flex items-center gap-1.5"><span class="text-xs text-slate-500">studihome.id/</span><input id="creator-username" value="${App.utils.escapeHtml(p.username||'')}" ${p.is_published?'disabled':''} placeholder="nama-kamu" class="w-full card-3d-inset px-3 py-2.5 rounded-xl text-xs outline-none"></div></div>
                         <div><label class="block text-xs font-bold mb-1">Nama tampilan</label><input id="creator-display" value="${App.utils.escapeHtml(p.display_name||App.state.user.name||'')}" class="w-full card-3d-inset px-3 py-2.5 rounded-xl text-xs outline-none"></div>
                         <div class="md:col-span-2"><label class="block text-xs font-bold mb-1">Bio</label><textarea id="creator-bio" rows="3" class="w-full card-3d-inset px-3 py-2.5 rounded-xl text-xs outline-none">${App.utils.escapeHtml(p.bio||'')}</textarea></div>
                         <div><label class="block text-xs font-bold mb-1">WhatsApp</label><input id="creator-wa" value="${App.utils.escapeHtml(p.whatsapp||App.state.user.phone||'')}" class="w-full card-3d-inset px-3 py-2.5 rounded-xl text-xs outline-none"></div>
                         <div><label class="block text-xs font-bold mb-1">Lokasi</label><input id="creator-location" value="${App.utils.escapeHtml(p.location||'')}" class="w-full card-3d-inset px-3 py-2.5 rounded-xl text-xs outline-none"></div>
-                        <div><label class="block text-xs font-bold mb-1">URL Foto Profil</label><input id="creator-avatar" value="${App.utils.escapeHtml(p.avatar_url||'')}" class="w-full card-3d-inset px-3 py-2.5 rounded-xl text-xs outline-none"></div>
-                        <div><label class="block text-xs font-bold mb-1">URL Cover</label><input id="creator-cover" value="${App.utils.escapeHtml(p.cover_url||'')}" class="w-full card-3d-inset px-3 py-2.5 rounded-xl text-xs outline-none"></div></div><button onclick="App.creatorStudio.saveProfile()" class="btn-brand-gradient mt-4 px-4 py-2.5 rounded-xl text-xs font-bold">Simpan Profil</button>${p.username?`<button onclick="App.router.goCreator('${App.utils.escapeHtml(p.username)}')" class="ml-2 px-4 py-2.5 rounded-xl text-xs font-bold bg-slate-100 text-[#151c75]">Lihat Halaman</button>`:''}</section>
-                        <section class="card-3d p-5 sm:p-6 rounded-3xl bg-white"><h2 class="font-extrabold text-[#151c75] mb-1">Kategori</h2><p class="text-[10px] text-slate-500 mb-3">Pilih kategori yang paling sesuai dan satu kategori utama.</p><div class="grid sm:grid-cols-2 gap-2">${(d.categories||[]).map(c=>`<label class="flex items-center gap-2 p-3 rounded-xl border border-slate-200"><input type="checkbox" data-creator-cat="${c.id}" ${selected.has(c.id)?'checked':''}><span class="flex-1 text-xs font-bold text-[#151c75]">${App.utils.escapeHtml(c.name)}</span><span class="text-[10px] text-slate-500 flex items-center gap-1">Utama <input type="radio" name="creator-primary" value="${c.id}" ${primary===c.id?'checked':''}></span></label>`).join('')}</div><button onclick="App.creatorStudio.saveCategories()" class="btn-brand-gradient mt-4 px-4 py-2.5 rounded-xl text-xs font-bold">Simpan Kategori</button></section>
-                        <section class="card-3d p-5 sm:p-6 rounded-3xl bg-white"><div class="flex justify-between items-center mb-3"><h2 class="font-extrabold text-[#151c75]">Jasa</h2><button onclick="App.creatorStudio.addServiceForm()" class="btn-brand-gradient px-3 py-2 rounded-xl text-[10px] font-bold">+ Jasa</button></div><div id="creator-services-list">${this.serviceList()}</div></section>
-                        <section class="card-3d p-5 sm:p-6 rounded-3xl bg-white"><div class="flex justify-between items-center mb-3"><h2 class="font-extrabold text-[#151c75]">Portfolio</h2><button onclick="App.creatorStudio.addPortfolioForm()" class="btn-brand-gradient px-3 py-2 rounded-xl text-[10px] font-bold">+ Portfolio</button></div><div id="creator-portfolio-list">${this.portfolioList()}</div></section>
+                        <div class="md:col-span-2"><label class="block text-xs font-bold mb-2">Logo/Avatar Brand</label><div class="creator-avatar-stage"><div id="creator-avatar-preview" class="creator-avatar-preview">${p.avatar_url?`<img src="${App.utils.safeUrl(p.avatar_url)}" alt="Logo ${App.utils.escapeHtml(p.display_name||'Creator')}" loading="lazy">`:'✦'}</div><div><div class="flex flex-wrap gap-2"><label for="creator-avatar-file" class="btn-brand-gradient px-4 py-2.5 rounded-xl text-xs font-bold cursor-pointer"><i class="fa-solid fa-upload mr-1"></i> Unggah Logo</label><input id="creator-avatar-file" type="file" accept="image/png,image/jpeg,image/webp" class="hidden" onchange="App.creatorStudio.uploadAvatar(this.files[0])"></div><input id="creator-avatar" value="${App.utils.escapeHtml(p.avatar_url||'')}" type="hidden"><p class="creator-media-note mt-2">Gunakan logo brand yang jelas. Gambar otomatis diperkecil dan dikompres ke WebP sebelum disimpan. Maksimal file sumber 8 MB.</p><p id="creator-avatar-status" class="text-[10px] font-bold text-slate-500 mt-1"></p></div></div></div>
+                        <div><label class="block text-xs font-bold mb-1">URL Cover</label><input id="creator-cover" value="${App.utils.escapeHtml(p.cover_url||'')}" class="w-full card-3d-inset px-3 py-2.5 rounded-xl text-xs outline-none"></div></div><button onclick="App.creatorStudio.saveProfile()" class="btn-brand-gradient mt-4 px-4 py-2.5 rounded-xl text-xs font-bold">Simpan Foyer</button>${p.username?`<button onclick="App.router.goCreator('${App.utils.escapeHtml(p.username)}')" class="ml-2 px-4 py-2.5 rounded-xl text-xs font-bold bg-slate-100 text-[#151c75]">Lihat Halaman</button>`:''}</section>
+                        <section id="creator-menu" class="card-3d p-5 sm:p-6 rounded-3xl bg-white"><h2 class="font-extrabold text-[#151c75] mb-1">Menu</h2><p class="text-[10px] text-slate-500 mb-3">Menu adalah kategori keahlianmu. Pilih yang benar-benar sesuai dengan kemampuan dan jenis klien yang ingin kamu bantu.</p><div class="grid sm:grid-cols-2 gap-2">${(d.categories||[]).map(c=>`<label class="flex items-center gap-2 p-3 rounded-xl border border-slate-200"><input type="checkbox" data-creator-cat="${c.id}" ${selected.has(c.id)?'checked':''}><span class="flex-1 text-xs font-bold text-[#151c75]">${App.utils.escapeHtml(c.name)}</span><span class="text-[10px] text-slate-500 flex items-center gap-1">Utama <input type="radio" name="creator-primary" value="${c.id}" ${primary===c.id?'checked':''}></span></label>`).join('')}</div><button onclick="App.creatorStudio.saveCategories()" class="btn-brand-gradient mt-4 px-4 py-2.5 rounded-xl text-xs font-bold">Simpan Menu</button></section>
+                        <section id="creator-hidangan" class="card-3d p-5 sm:p-6 rounded-3xl bg-white"><div class="flex justify-between items-center mb-3"><div><h2 class="font-extrabold text-[#151c75]">Hidangan</h2><p class="text-[10px] text-slate-500 mt-1">Hidangan adalah jasa/solusi yang kamu tawarkan kepada pelanggan.</p></div><button onclick="App.creatorStudio.addServiceForm()" class="btn-brand-gradient px-3 py-2 rounded-xl text-[10px] font-bold">+ Hidangan</button></div><div id="creator-services-list">${this.serviceList()}</div></section>
+                        <section id="creator-ambalan" class="card-3d p-5 sm:p-6 rounded-3xl bg-white"><div class="flex justify-between items-center mb-3"><div><h2 class="font-extrabold text-[#151c75]">Ambalan</h2><p class="text-[10px] text-slate-500 mt-1">Ambalan adalah tempat memajang bukti karya. Media wajib berasal dari YouTube, Google Drive, TikTok, atau Instagram.</p></div><button onclick="App.creatorStudio.addPortfolioForm()" class="btn-brand-gradient px-3 py-2 rounded-xl text-[10px] font-bold">+ Ambalan</button></div><div id="creator-portfolio-list">${this.portfolioList()}</div></section>
                         <section class="card-3d p-5 sm:p-6 rounded-3xl bg-white border border-blue-100 flex flex-col sm:flex-row justify-between gap-3 items-start sm:items-center"><div><div class="text-xs font-extrabold text-[#151c75]">${p.is_published?'Halamanmu sudah tayang':'Siap dikenalin ke orang?'} </div><div class="text-[10px] text-slate-500 mt-1">${p.is_published?'Kamu bisa update isinya kapan saja.':'Lengkapi semua bagian di atas dulu. Setelah itu tinggal publish.'}</div></div><div class="flex gap-2 flex-wrap"><button onclick="App.creatorStudio.publish()" ${((!canPublishLocal && !p.is_published) || String(p.review_status||'DRAFT').toUpperCase()==='PENDING')?'disabled':''} class="btn-brand-gradient px-4 py-2.5 rounded-xl text-xs font-bold ${(!canPublishLocal && !p.is_published)?'opacity-50 cursor-not-allowed':''}">${p.is_published?'Simpan & Tayang Lagi':(String(p.review_status||'DRAFT').toUpperCase()==='PENDING'?'Sedang Dicek':(String(p.review_status||'DRAFT').toUpperCase()==='REJECTED'?'Kirim Lagi':'Kirim untuk Dicek'))}</button>${p.is_published?`<button onclick="App.creatorStudio.unpublish()" class="px-4 py-2.5 rounded-xl text-xs font-bold bg-slate-100">Sembunyikan</button>`:''}</div></section></div>`;
                 },
                 serviceList(){ const rows=this.data?.services||[]; return rows.length?rows.map(s=>`<div class="flex items-center gap-2 p-3 border border-slate-200 rounded-xl mb-2"><div class="flex-1"><div class="text-xs font-extrabold text-[#151c75]">${App.utils.escapeHtml(s.title)}</div><div class="text-[10px] text-slate-500 mt-0.5">Mulai Rp ${Number(s.price_from||0).toLocaleString('id-ID')} · ${Number(s.delivery_days||1)} hari</div></div><button onclick="App.creatorStudio.editService('${s.id}')" class="px-2.5 py-1.5 rounded-lg text-[10px] font-bold bg-slate-100">Edit</button><button onclick="App.creatorStudio.deleteService('${s.id}')" class="px-2.5 py-1.5 rounded-lg text-[10px] font-bold bg-red-50 text-red-600">Hapus</button></div>`).join(''):`<div class="p-5 text-center text-xs text-slate-500 card-3d-inset rounded-xl">Belum ada jasa. Tambahkan yang pertama, ya.</div>`; },
                 portfolioList(){ const rows=this.data?.portfolios||[]; return rows.length?rows.map(p=>`<div class="flex items-center gap-2 p-3 border border-slate-200 rounded-xl mb-2"><div class="flex-1"><div class="text-xs font-extrabold text-[#151c75]">${App.utils.escapeHtml(p.title)}</div><div class="text-[10px] text-slate-500 mt-0.5">${App.utils.escapeHtml(p.media_type)}</div></div><button onclick="App.creatorStudio.editPortfolio('${p.id}')" class="px-2.5 py-1.5 rounded-lg text-[10px] font-bold bg-slate-100">Edit</button><button onclick="App.creatorStudio.deletePortfolio('${p.id}')" class="px-2.5 py-1.5 rounded-lg text-[10px] font-bold bg-red-50 text-red-600">Hapus</button></div>`).join(''):`<div class="p-5 text-center text-xs text-slate-500 card-3d-inset rounded-xl">Belum ada portfolio. Tambahkan karya terbaikmu.</div>`; },
-                async reload(){ this.data=await App.api.post('GET_CREATOR_STUDIO'); this.renderEditor(); },
+                async reload(){ this.data=await App.api.post('GET_CREATOR_STUDIO'); this.renderEditor(); setTimeout(()=>this.focusSection(App.state.dapurSection||''),80); },
+                async uploadAvatar(file){
+                    const status=document.getElementById('creator-avatar-status');
+                    const preview=document.getElementById('creator-avatar-preview');
+                    if(!file)return;
+                    try{
+                        if(file.size>8*1024*1024) throw new Error('File logo terlalu besar. Pilih file di bawah 8 MB.');
+                        if(!/^image\/(png|jpe?g|webp)$/i.test(file.type)) throw new Error('Gunakan PNG, JPG, atau WebP.');
+                        if(status) status.textContent='Mengompres logo…';
+                        const blob=await App.creatorStudio.compressAvatar(file);
+                        const user=await App.api._profile(); if(!user?.id) throw new Error('Sesi login tidak ditemukan.');
+                        const path=`${user.id}/avatar.webp`;
+                        const up=await supabaseClient.storage.from('creator-media').upload(path,blob,{upsert:true,contentType:'image/webp',cacheControl:'3600'});
+                        if(up.error) throw up.error;
+                        const pub=supabaseClient.storage.from('creator-media').getPublicUrl(path);
+                        const url=pub?.data?.publicUrl; if(!url) throw new Error('URL logo belum berhasil dibuat.');
+                        const input=document.getElementById('creator-avatar'); if(input) input.value=url;
+                        if(preview) preview.innerHTML=`<img src="${App.utils.safeUrl(url)}" alt="Logo brand" loading="eager">`;
+                        if(status) status.textContent=`Logo siap. Ukuran hasil ${(blob.size/1024).toFixed(0)} KB.`;
+                        App.ui.toast('Logo berhasil dikompres dan disiapkan. Tinggal Simpan Foyer.','success');
+                    }catch(e){if(status)status.textContent='';App.ui.toast(e.message||'Logo belum berhasil diunggah.','error');}
+                },
+                compressAvatar(file){
+                    return new Promise((resolve,reject)=>{
+                        const img=new Image(), url=URL.createObjectURL(file);
+                        img.onload=()=>{
+                            try{
+                                const max=640, scale=Math.min(1,max/Math.max(img.width,img.height));
+                                const canvas=document.createElement('canvas'); canvas.width=Math.max(1,Math.round(img.width*scale)); canvas.height=Math.max(1,Math.round(img.height*scale));
+                                const ctx=canvas.getContext('2d'); ctx.clearRect(0,0,canvas.width,canvas.height); ctx.drawImage(img,0,0,canvas.width,canvas.height);
+                                let q=.86; const target=240*1024; const loop=()=>canvas.toBlob(b=>{ if(!b)return reject(new Error('Kompresi logo gagal.')); if(b.size<=target || q<=.5){URL.revokeObjectURL(url);resolve(b);} else {q-=.06;loop();}},'image/webp',q); loop();
+                            }catch(e){URL.revokeObjectURL(url);reject(e);}
+                        };
+                        img.onerror=()=>{URL.revokeObjectURL(url);reject(new Error('File gambar tidak bisa dibaca.'));}; img.src=url;
+                    });
+                },
+                validatePortfolioUrl(raw){
+                    const value=String(raw||'').trim(); if(!/^https?:\/\//i.test(value)) return {ok:false,provider:''};
+                    let u; try{u=new URL(value)}catch{return {ok:false,provider:''};}
+                    const host=u.hostname.toLowerCase().replace(/^www\./,'');
+                    if(host==='youtube.com'||host==='youtu.be'||host.endsWith('.youtube.com')) return {ok:true,provider:'youtube'};
+                    if(host==='drive.google.com'||host==='docs.google.com') return {ok:true,provider:'drive'};
+                    if(host==='tiktok.com'||host.endsWith('.tiktok.com')) return {ok:true,provider:'tiktok'};
+                    if(host==='instagram.com'||host.endsWith('.instagram.com')) return {ok:true,provider:'instagram'};
+                    return {ok:false,provider:''};
+                },
                 async saveProfile(){ try{await App.api.post('CREATOR_SAVE_PROFILE',{creatorId:this.data.profile?.id,username:document.getElementById('creator-username').value,displayName:document.getElementById('creator-display').value,bio:document.getElementById('creator-bio').value,whatsapp:document.getElementById('creator-wa').value,location:document.getElementById('creator-location').value,avatarUrl:document.getElementById('creator-avatar').value,coverUrl:document.getElementById('creator-cover').value});App.ui.toast('Profil Creator tersimpan. Mantap!','success');await this.reload();}catch(e){App.ui.toast(e.message||'Profil belum bisa disimpan. Coba lagi, ya.','error');} },
                 async saveCategories(){ try{const ids=[...document.querySelectorAll('[data-creator-cat]:checked')].map(x=>x.getAttribute('data-creator-cat'));const primary=document.querySelector('input[name="creator-primary"]:checked')?.value||'';await App.api.post('CREATOR_SAVE_CATEGORIES',{items:ids.map(id=>({categoryId:id,isPrimary:id===primary}))});App.ui.toast('Kategori sudah tersimpan.','success');await this.reload();}catch(e){App.ui.toast(e.message||'Kategori belum bisa disimpan.','error');} },
-                serviceForm(id=''){const s=(this.data?.services||[]).find(x=>x.id===id)||{};const cats=this.data?.categories||[];return `<div class="card-3d-inset p-4 rounded-xl mb-3"><div class="grid sm:grid-cols-2 gap-2"><input id="cs-title" value="${App.utils.escapeHtml(s.title||'')}" placeholder="Nama jasa" class="w-full card-3d-inset px-3 py-2.5 rounded-xl text-xs outline-none"><select id="cs-cat" class="w-full card-3d-inset px-3 py-2.5 rounded-xl text-xs outline-none"><option value="">Kategori</option>${cats.map(c=>`<option value="${c.id}" ${s.category_id===c.id?'selected':''}>${App.utils.escapeHtml(c.name)}</option>`).join('')}</select><input id="cs-from" type="number" min="0" value="${Number(s.price_from||0)}" placeholder="Harga mulai" class="w-full card-3d-inset px-3 py-2.5 rounded-xl text-xs outline-none"><input id="cs-to" type="number" min="0" value="${Number(s.price_to||0)}" placeholder="Harga sampai" class="w-full card-3d-inset px-3 py-2.5 rounded-xl text-xs outline-none"><input id="cs-days" type="number" min="1" value="${Number(s.delivery_days||1)}" placeholder="Estimasi hari" class="w-full card-3d-inset px-3 py-2.5 rounded-xl text-xs outline-none sm:col-span-2"></div><textarea id="cs-desc" rows="3" placeholder="Deskripsi jasa" class="w-full card-3d-inset px-3 py-2.5 rounded-xl text-xs outline-none mt-2">${App.utils.escapeHtml(s.description||'')}</textarea><div class="flex gap-2 mt-2"><button onclick="App.creatorStudio.saveService('${id}')" class="btn-brand-gradient px-3.5 py-2 rounded-xl text-xs font-bold">Simpan</button><button onclick="App.creatorStudio.reload()" class="px-3.5 py-2 rounded-xl text-xs font-bold bg-slate-100">Batal</button></div></div>`;},
+                serviceForm(id=''){const s=(this.data?.services||[]).find(x=>x.id===id)||{};const cats=this.data?.categories||[];return `<div class="card-3d-inset p-4 rounded-xl mb-3"><div class="grid sm:grid-cols-2 gap-2"><input id="cs-title" value="${App.utils.escapeHtml(s.title||'')}" placeholder="Nama hidangan" class="w-full card-3d-inset px-3 py-2.5 rounded-xl text-xs outline-none"><select id="cs-cat" class="w-full card-3d-inset px-3 py-2.5 rounded-xl text-xs outline-none"><option value="">Menu</option>${cats.map(c=>`<option value="${c.id}" ${s.category_id===c.id?'selected':''}>${App.utils.escapeHtml(c.name)}</option>`).join('')}</select><input id="cs-from" type="number" min="0" value="${Number(s.price_from||0)}" placeholder="Harga mulai" class="w-full card-3d-inset px-3 py-2.5 rounded-xl text-xs outline-none"><input id="cs-to" type="number" min="0" value="${Number(s.price_to||0)}" placeholder="Harga sampai" class="w-full card-3d-inset px-3 py-2.5 rounded-xl text-xs outline-none"><input id="cs-days" type="number" min="1" value="${Number(s.delivery_days||1)}" placeholder="Estimasi hari" class="w-full card-3d-inset px-3 py-2.5 rounded-xl text-xs outline-none sm:col-span-2"></div><textarea id="cs-desc" rows="3" placeholder="Deskripsi hidangan" class="w-full card-3d-inset px-3 py-2.5 rounded-xl text-xs outline-none mt-2">${App.utils.escapeHtml(s.description||'')}</textarea><div class="flex gap-2 mt-2"><button onclick="App.creatorStudio.saveService('${id}')" class="btn-brand-gradient px-3.5 py-2 rounded-xl text-xs font-bold">Simpan</button><button onclick="App.creatorStudio.reload()" class="px-3.5 py-2 rounded-xl text-xs font-bold bg-slate-100">Batal</button></div></div>`;},
                 addServiceForm(){const box=document.getElementById('creator-services-list');if(box)box.innerHTML=this.serviceForm()+this.serviceList();},
                 editService(id){const box=document.getElementById('creator-services-list');if(box)box.innerHTML=this.serviceForm(id)+this.serviceList();},
                 async saveService(id=''){try{await App.api.post('CREATOR_SAVE_SERVICE',{id,categoryId:document.getElementById('cs-cat').value||null,title:document.getElementById('cs-title').value,description:document.getElementById('cs-desc').value,priceFrom:document.getElementById('cs-from').value,priceTo:document.getElementById('cs-to').value,deliveryDays:document.getElementById('cs-days').value,isActive:true});App.ui.toast('Jasa berhasil disimpan.','success');await this.reload();}catch(e){App.ui.toast(e.message||'Jasa belum bisa disimpan.','error');}},
                 async deleteService(id){if(!confirm('Jasa ini mau dihapus?'))return;try{await App.api.post('CREATOR_DELETE_SERVICE',{id});App.ui.toast('Jasa dihapus.','info');await this.reload();}catch(e){App.ui.toast(e.message||'Jasa belum bisa dihapus.','error');}},
-                portfolioForm(id=''){const p=(this.data?.portfolios||[]).find(x=>x.id===id)||{};const services=this.data?.services||[];return `<div class="card-3d-inset p-4 rounded-xl mb-3"><input id="cp-title" value="${App.utils.escapeHtml(p.title||'')}" placeholder="Judul portfolio" class="w-full card-3d-inset px-3 py-2.5 rounded-xl text-xs outline-none"><textarea id="cp-desc" rows="2" placeholder="Deskripsi singkat" class="w-full card-3d-inset px-3 py-2.5 rounded-xl text-xs outline-none mt-2">${App.utils.escapeHtml(p.description||'')}</textarea><div class="grid sm:grid-cols-2 gap-2 mt-2"><select id="cp-service" class="w-full card-3d-inset px-3 py-2.5 rounded-xl text-xs outline-none"><option value="">Jasa terkait (opsional)</option>${services.map(s=>`<option value="${s.id}" ${p.service_id===s.id?'selected':''}>${App.utils.escapeHtml(s.title)}</option>`).join('')}</select><select id="cp-type" class="w-full card-3d-inset px-3 py-2.5 rounded-xl text-xs outline-none"><option value="image" ${p.media_type==='image'?'selected':''}>Gambar</option><option value="youtube" ${p.media_type==='youtube'?'selected':''}>YouTube</option><option value="drive" ${p.media_type==='drive'?'selected':''}>Google Drive</option><option value="video" ${p.media_type==='video'?'selected':''}>Video file</option><option value="link" ${p.media_type==='link'?'selected':''}>Link</option></select></div><input id="cp-url" value="${App.utils.escapeHtml(p.media_url||'')}" placeholder="URL media" class="w-full card-3d-inset px-3 py-2.5 rounded-xl text-xs outline-none mt-2"><div class="flex gap-2 mt-2"><button onclick="App.creatorStudio.savePortfolio('${id}')" class="btn-brand-gradient px-3.5 py-2 rounded-xl text-xs font-bold">Simpan</button><button onclick="App.creatorStudio.reload()" class="px-3.5 py-2 rounded-xl text-xs font-bold bg-slate-100">Batal</button></div></div>`;},
+                portfolioForm(id=''){const p=(this.data?.portfolios||[]).find(x=>x.id===id)||{};const services=this.data?.services||[];const vt=p.media_type||'';return `<div class="card-3d-inset p-4 rounded-xl mb-3"><input id="cp-title" value="${App.utils.escapeHtml(p.title||'')}" placeholder="Judul ambalan" class="w-full card-3d-inset px-3 py-2.5 rounded-xl text-xs outline-none"><textarea id="cp-desc" rows="2" placeholder="Deskripsi singkat karya" class="w-full card-3d-inset px-3 py-2.5 rounded-xl text-xs outline-none mt-2">${App.utils.escapeHtml(p.description||'')}</textarea><div class="grid sm:grid-cols-2 gap-2 mt-2"><select id="cp-service" class="w-full card-3d-inset px-3 py-2.5 rounded-xl text-xs outline-none"><option value="">Hidangan terkait (opsional)</option>${services.map(s=>`<option value="${s.id}" ${p.service_id===s.id?'selected':''}>${App.utils.escapeHtml(s.title)}</option>`).join('')}</select><select id="cp-type" class="w-full card-3d-inset px-3 py-2.5 rounded-xl text-xs outline-none"><option value="youtube" ${vt==='youtube'?'selected':''}>YouTube</option><option value="drive" ${vt==='drive'?'selected':''}>Google Drive</option><option value="tiktok" ${vt==='tiktok'?'selected':''}>TikTok</option><option value="instagram" ${vt==='instagram'?'selected':''}>Instagram</option></select></div><input id="cp-url" value="${App.utils.escapeHtml(p.media_url||'')}" placeholder="Tempel tautan YouTube / Drive / TikTok / Instagram" class="w-full card-3d-inset px-3 py-2.5 rounded-xl text-xs outline-none mt-2"><p class="creator-media-note mt-2">Foto/video tidak diunggah langsung. Gunakan tautan publik dari YouTube, Google Drive, TikTok, atau Instagram. Sistem akan memeriksa domain sebelum menyimpan.</p><div class="flex gap-2 mt-2"><button onclick="App.creatorStudio.savePortfolio('${id}')" class="btn-brand-gradient px-3.5 py-2 rounded-xl text-xs font-bold">Simpan Ambalan</button><button onclick="App.creatorStudio.reload()" class="px-3.5 py-2 rounded-xl text-xs font-bold bg-slate-100">Batal</button></div></div>`;},
                 addPortfolioForm(){const box=document.getElementById('creator-portfolio-list');if(box)box.innerHTML=this.portfolioForm()+this.portfolioList();},
                 editPortfolio(id){const box=document.getElementById('creator-portfolio-list');if(box)box.innerHTML=this.portfolioForm(id)+this.portfolioList();},
-                async savePortfolio(id=''){try{await App.api.post('CREATOR_SAVE_PORTFOLIO',{id,serviceId:document.getElementById('cp-service').value||null,title:document.getElementById('cp-title').value,description:document.getElementById('cp-desc').value,mediaType:document.getElementById('cp-type').value,mediaUrl:document.getElementById('cp-url').value,sortOrder:0,isActive:true});App.ui.toast('Portfolio berhasil disimpan.','success');await this.reload();}catch(e){App.ui.toast(e.message||'Portfolio belum bisa disimpan.','error');}},
+                async savePortfolio(id=''){try{const url=String(document.getElementById('cp-url')?.value||'').trim();const v=this.validatePortfolioUrl(url);if(!v.ok)throw new Error('Tautan harus berasal dari YouTube, Google Drive, TikTok, atau Instagram.');await App.api.post('CREATOR_SAVE_PORTFOLIO',{id,serviceId:document.getElementById('cp-service').value||null,title:document.getElementById('cp-title').value,description:document.getElementById('cp-desc').value,mediaType:v.provider,mediaUrl:url,sortOrder:0,isActive:true});App.ui.toast('Ambalan berhasil disimpan.','success');await this.reload();}catch(e){App.ui.toast(e.message||'Ambalan belum bisa disimpan.','error');}},
                 async deletePortfolio(id){if(!confirm('Portfolio ini mau dihapus?'))return;try{await App.api.post('CREATOR_DELETE_PORTFOLIO',{id});App.ui.toast('Portfolio dihapus.','info');await this.reload();}catch(e){App.ui.toast(e.message||'Portfolio belum bisa dihapus.','error');}},
                 async copyPublicLink(url){ try{ await navigator.clipboard.writeText(url); App.ui.toast('Link profilmu sudah disalin. Tinggal tempel di bio 😎','success'); } catch(e){ App.ui.toast('Link belum bisa disalin otomatis. Coba salin manual ya.','info'); } },
                 async shareProfile(url){ const text=`Lihat profil saya di Studihome: ${url}`; try{ if(navigator.share){ await navigator.share({title:'Profil Studihome',text,url}); } else { await navigator.clipboard.writeText(url); App.ui.toast('Link profilmu sudah disalin. Tinggal dibagikan ✨','success'); } } catch(e){ if(e?.name!=='AbortError') App.ui.toast('Belum berhasil membagikan. Link-nya tetap siap kamu salin.','info'); } },
@@ -5657,7 +5754,7 @@ renderStudioAiControl: async () => {
                                 <div>
                                     <span class="admin-studio-ai-pill"><i class="fa-solid fa-shield-check"></i> MODERASI</span>
                                     <h4 class="mt-2 text-base">Alur Creator tetap rapi</h4>
-                                    <p class="text-[10px] text-slate-500 mt-1">Review, Verified, Like, Rating, Activity, dan Portfolio tetap dikelola dari ruang Creator.</p>
+                                    <p class="text-[10px] text-slate-500 mt-1">Review, Verified, Like, Rating, Activity, dan Portfolio tetap dikelola dari Dapur Creator.</p>
                                 </div>
                                 <button onclick="App.admin.switchTab('creators')" class="px-3 py-2 rounded-xl bg-slate-100 text-slate-700 text-[10px] font-extrabold">
                                     Buka Creator
@@ -5756,7 +5853,7 @@ renderStudioAiControl: async () => {
                                     <input id="sai-cat-slug" required maxlength="80" placeholder="ai-video" pattern="[a-z0-9-]+" class="w-full card-3d-inset px-3.5 py-2.5 rounded-xl text-xs outline-none">
                                     <input id="sai-cat-icon" maxlength="120" placeholder="fa-solid fa-video" class="w-full card-3d-inset px-3.5 py-2.5 rounded-xl text-xs outline-none">
                                     <textarea id="sai-cat-desc" maxlength="300" placeholder="Deskripsi singkat kategori..." class="w-full card-3d-inset px-3.5 py-2.5 rounded-xl text-xs outline-none min-h-[90px]"></textarea>
-                                    <button class="w-full btn-brand-gradient py-3 rounded-xl text-xs font-extrabold">Simpan Kategori</button>
+                                    <button class="w-full btn-brand-gradient py-3 rounded-xl text-xs font-extrabold">Simpan Menu</button>
                                 </form>
                             </div>
                         </div>
@@ -7257,8 +7354,8 @@ window.addEventListener('DOMContentLoaded', App.init);
         if(!catsA.length) out.push({icon:'fa-tags',title:'Pilih kategori utama',text:'Satu kategori utama membantu SMART memahami jalur layananmu sejak awal.',action:null});
         if(servicesA.length===0) out.push({icon:'fa-wand-magic-sparkles',title:'Tambahkan 1 jasa dulu',text:'Mulai dari satu jasa paling kamu kuasai. Nanti bisa ditambah pelan-pelan.',action:null});
         if(servicesA.length>0 && servicesA.length<3) out.push({icon:'fa-layer-group',title:'Tambahkan 1–2 jasa pendukung',text:'Layanan yang saling nyambung bikin profilmu lebih gampang dipahami dan memberi pilihan ke calon klien.',action:null});
-        if(portfolioA.length===0) out.push({icon:'fa-images',title:'Upload portfolio pertama',text:'Satu contoh karya yang jelas lebih berguna daripada banyak deskripsi tanpa bukti.',action:null});
-        if(portfolioA.length>0 && portfolioA.length<3) out.push({icon:'fa-star',title:'Tambah karya yang paling relevan',text:'Pilih karya yang benar-benar dekat dengan jenis kebutuhan yang ingin kamu dapatkan.',action:null});
+        if(portfolioA.length===0) out.push({icon:'fa-images',title:'Tambahkan ambalan pertama',text:'Satu contoh karya yang jelas lebih berguna daripada banyak deskripsi tanpa bukti.',action:null});
+        if(portfolioA.length>0 && portfolioA.length<3) out.push({icon:'fa-star',title:'Tambah ambalan yang paling relevan',text:'Pilih karya yang benar-benar dekat dengan jenis kebutuhan yang ingin kamu dapatkan.',action:null});
         if(String(profile?.whatsapp||'').trim().length<8) out.push({icon:'fa-whatsapp',title:'Pasang WhatsApp',text:'Biar calon klien bisa langsung ngobrol tanpa muter-muter.',action:null});
         if(profile?.is_verified!==true && String(profile?.review_status||'DRAFT').toUpperCase()!=='APPROVED') out.push({icon:'fa-shield-heart',title:'Kejar status verified',text:'Lengkapi profil lalu kirim untuk dicek. Badge verified akan membantu trust saat profilmu sudah disetujui.',action:null});
         if(!out.length) out.push({icon:'fa-sparkles',title:'Profilmu sudah solid',text:'Mantap. Sekarang fokus memperbarui portfolio dan menjaga jasa tetap relevan. ✨',action:null});
@@ -7280,7 +7377,7 @@ window.addEventListener('DOMContentLoaded', App.init);
       async refresh(){
         try{
           const user=A.state?.user;
-          if(!user || A.state.routeType!=='ruang-kerja') return;
+          if(!user || A.state.routeType!=='dapur') return;
           const data=await A.api.post('GET_CREATOR_STUDIO');
           if(!data) return;
           this.render(data.profile||{},data.categories||[],data.services||[],data.portfolios||[]);
@@ -7460,7 +7557,7 @@ window.addEventListener('DOMContentLoaded', App.init);
                 return;
             }
         }
-        window.App?.ui?.toast?.('Bagian itu ada di Ruang Kerja, tinggal lanjut scroll sedikit ya 😄','info');
+        window.App?.ui?.toast?.('Bagian itu ada di Dapur, tinggal lanjut scroll sedikit ya 😄','info');
     }
 
     function render(){
@@ -7595,7 +7692,7 @@ window.StudihomeRegressionGuard = {
   version: 'AA.1',
   run(){
     const path = (window.location.pathname || '/').replace(/\/$/,'') || '/';
-    const known = new Set(['','/','/products','/kamar','/admin','/studio-ai','/ruang-kerja','/dashboard','/creator-studio']);
+    const known = new Set(['','/','/products','/kamar','/admin','/studio-ai','/dapur','/dapur/foyer','/dapur/menu','/dapur/hidangan','/dapur/ambalan','/ruang-kerja','/dashboard','/creator-studio']);
     const creatorPath = /^\/[a-z0-9][a-z0-9-]{2,39}(?:\/portfolio\/[a-z0-9][a-z0-9-]{0,120})?$/i.test(path) && !known.has(path);
     const checks = {
       canonicalPath: known.has(path) || creatorPath,
@@ -7612,7 +7709,7 @@ window.StudihomeRegressionGuard = {
   syncWorkspaceNotice(){
     const mount=document.getElementById('creator-launch-quality');
     if(!mount) return;
-    const isWorkspace=(window.location.pathname || '') === '/ruang-kerja';
+    const isWorkspace=/^\/dapur(?:\/|$)/.test(window.location.pathname) || window.location.pathname === '/ruang-kerja';
     mount.classList.toggle('hidden', !isWorkspace);
     if(isWorkspace) window.App?.creatorStudio?.renderCreatorLaunchQuality?.();
   }
@@ -7657,7 +7754,7 @@ window.StudihomeProductionAcceptanceGate = {
     const checks = {};
     const app = window.App;
     const path = (window.location.pathname || '/').replace(/\/{2,}/g,'/').replace(/\/$/,'') || '/';
-    const knownRoutes = new Set(['','/','/products','/kamar','/admin','/studio-ai','/ruang-kerja','/dashboard','/creator-studio']);
+    const knownRoutes = new Set(['','/','/products','/kamar','/admin','/studio-ai','/dapur','/dapur/foyer','/dapur/menu','/dapur/hidangan','/dapur/ambalan','/ruang-kerja','/dashboard','/creator-studio']);
     const creatorPath = /^\/[a-z0-9][a-z0-9-]{2,39}(?:\/portfolio\/[a-z0-9][a-z0-9-]{0,120})?$/i.test(path) && !knownRoutes.has(path);
 
     checks.appBootstrapped = !!app;
@@ -7672,7 +7769,7 @@ window.StudihomeProductionAcceptanceGate = {
     checks.smartDiagnostics = typeof app?.studioAI?.smartSelfCheck === 'function';
     checks.visualLock = !!window.StudihomeQALock && window.StudihomeQALock.callout === 'blue-outline-no-rail-no-tail' && window.StudihomeQALock.favicon === '✦-hero-gradient';
     checks.visualContract = !!window.StudihomeVisualContract?.run && !!window.StudihomeVisualContract.run().ok;
-    checks.legacyRouteGuard = /\/dashboard.*\/kamar|\/creator-studio.*\/ruang-kerja/s.test(document.documentElement.innerHTML);
+    checks.legacyRouteGuard = /\/dashboard.*\/kamar|\/creator-studio.*\/dapur/s.test(document.documentElement.innerHTML);
 
     const values = Object.values(checks);
     return { ok: values.every(Boolean), version: this.version, path, checks, runtime: { online: checks.supabaseConfigured && checks.supabaseClient } };
@@ -7728,7 +7825,7 @@ window.StudihomeProductionPilotSimulation = {
     const fail = (id, label, detail) => results.push({id,label,ok:false,detail});
     const routeMap = {
       home: '/', products: '/products', kamar: '/kamar', studio: '/studio-ai',
-      workspace: '/ruang-kerja', admin: '/admin'
+      workspace: '/dapur', admin: '/admin'
     };
 
     // Scenario A — Customer discovery → recommendation → profile → lead handoff.
@@ -8385,7 +8482,7 @@ window.StudihomeProductionPilotSimulation = {
   const requiredRpc=['create_order','submit_payment_confirmation','claim_free_product','admin_verify_order','admin_reject_order'];
   const missingRpc=requiredRpc.filter(name=>!source.includes(name));
   if (!missingRpc.length) pass('security.rpc-contracts','Sensitive RPC contracts are present.'); else review('security.rpc-contracts',`Missing RPC contract(s): ${missingRpc.join(', ')}.`);
-  if (source.includes('/kamar') && source.includes('/ruang-kerja')) pass('routing.canonical','Canonical route contracts preserved.'); else review('routing.canonical','Canonical route contract missing.');
+  if (source.includes('/kamar') && source.includes('/ruang-kerja')) pass('routing.canonical','Canonical route contracts preserved with /dapur canonical and legacy aliases.'); else review('routing.canonical','Canonical route contract missing.');
 
   ['real Supabase customer account','real Supabase Creator account','Admin verification flow','WhatsApp handoff','desktop + mobile browser acceptance'].forEach((item,i)=>review(`pilot.${i+1}`,`Manual pilot validation required: ${item}.`));
   const blockers=checks.filter(x=>x.status!=='PASS');
@@ -8496,6 +8593,33 @@ window.StudihomeProductionPilotSimulation = {
 <style id="studihome-managed-creator-style">
 .studihome-managed-star{display:inline-flex;align-items:center;justify-content:center;width:1rem;height:1rem;border-radius:999px;background:rgba(255,255,255,.92);color:#151c75;font-size:.58rem;font-weight:900;box-shadow:0 2px 6px rgba(21,28,117,.12);}
 .studihome-official-card{border-color:#f6d365!important;box-shadow:0 0 0 1px rgba(250,204,21,.18),0 16px 36px rgba(245,158,11,.12)!important;}
+
+/* RC23 — Dapur terminology + creator media UX */
+.dapur-subnav{display:flex;flex-wrap:wrap;gap:.45rem;margin:.25rem 0 .75rem;padding:.4rem;border:1px solid #dbe7ff;border-radius:1rem;background:rgba(248,251,255,.9)}
+.dapur-subnav a{display:inline-flex;align-items:center;gap:.35rem;padding:.55rem .75rem;border-radius:.8rem;font-size:10px;font-weight:800;color:#334155;transition:.18s}
+.dapur-subnav a:hover,.dapur-subnav a.is-active{background:#151c75;color:#fff;box-shadow:0 6px 18px rgba(21,28,117,.12)}
+.creator-avatar-stage{display:grid;grid-template-columns:auto 1fr;gap:1rem;align-items:center;padding:1rem;border:1px solid #dbe7ff;border-radius:1.25rem;background:linear-gradient(135deg,#f7faff,#fff)}
+.creator-avatar-preview{width:110px;height:110px;border-radius:1.75rem;overflow:hidden;background:#eef4ff;border:4px solid #fff;box-shadow:0 10px 25px rgba(21,28,117,.12);display:flex;align-items:center;justify-content:center;color:#151c75;font-size:1.75rem;font-weight:900}
+.creator-avatar-preview img{width:100%;height:100%;object-fit:cover}
+.creator-media-note{font-size:10px;line-height:1.55;color:#64748b}
+.creator-portfolio-preview-btn{display:inline-flex;align-items:center;gap:.35rem;padding:.5rem .75rem;border-radius:.8rem;background:#eef4ff;color:#151c75;font-size:10px;font-weight:800}
+#creator-media-modal{position:fixed;inset:0;z-index:120;background:rgba(2,6,23,.88);backdrop-filter:blur(10px);display:none;align-items:center;justify-content:center;padding:1rem}
+#creator-media-modal.is-open{display:flex}
+#creator-media-modal .creator-media-sheet{width:min(1100px,100%);max-height:92vh;background:#0f172a;border:1px solid rgba(255,255,255,.12);border-radius:1.25rem;overflow:hidden;display:flex;flex-direction:column}
+#creator-media-modal .creator-media-head{display:flex;align-items:center;justify-content:space-between;gap:.75rem;padding:.8rem 1rem;color:#fff;border-bottom:1px solid rgba(255,255,255,.08)}
+#creator-media-modal .creator-media-stage{flex:1;min-height:0;display:flex;align-items:center;justify-content:center;background:#020617;overflow:auto}
+#creator-media-modal iframe,#creator-media-modal video{width:100%;height:min(76vh,760px);border:0;background:#000}
+#creator-media-modal img{max-width:100%;max-height:76vh;object-fit:contain}
+#creator-media-modal .creator-media-fallback{padding:2rem;text-align:center;color:#cbd5e1}
+@media(max-width:640px){
+  .creator-avatar-stage{grid-template-columns:1fr;text-align:center}
+  .creator-avatar-preview{width:150px;height:150px;margin:0 auto}
+  #creator-media-modal{padding:0}
+  #creator-media-modal .creator-media-sheet{width:100%;height:100dvh;max-height:none;border-radius:0}
+  #creator-media-modal .creator-media-head{padding:.75rem .9rem}
+  #creator-media-modal .creator-media-stage{height:calc(100dvh - 54px)}
+  #creator-media-modal iframe,#creator-media-modal video{height:100%;max-height:none}
+}
 </style>
 
 </body>
