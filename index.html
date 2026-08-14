@@ -13,7 +13,7 @@
     <link rel="canonical" href="https://studihome.id/">
 
     <!-- Static SVG Retina Blue Favicon (100% Size) -->
-    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><style>.star { fill: %231b5df0; font-size: 100px; text-anchor: middle; dominant-baseline: central; font-family: sans-serif; font-weight: bold; }
+    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><style>.star { fill: %23151c75; font-size: 120px; text-anchor: middle; dominant-baseline: central; font-family: sans-serif; font-weight: bold; }
         /* Step 26 — Creator Launch Kit (additive only) */
         .creator-launch-card{background:linear-gradient(135deg,#f8fbff 0%,#ffffff 55%,#eef5ff 100%);border:1px solid #dbe7ff;box-shadow:0 12px 32px rgba(21,28,117,.08)}
         .creator-launch-action{min-height:44px;transition:transform .18s ease,box-shadow .18s ease,background .18s ease}
@@ -273,7 +273,12 @@
     background:#f0fdf4;border:1px solid #bbf7d0;color:#166534;
     font-size:9px;line-height:1.5;
 }
-</style><text x='50' y='50' class='star'>✦</text></svg>">
+
+/* Milestone AA — Regression Hardening (final authority) */
+.toast-bubble::after{content:none !important;display:none !important;}
+.toast-bubble{border-radius:1.35rem !important;}
+@media (prefers-reduced-motion: reduce){.toast-bubble{animation:none !important;transform:none;opacity:1;}}
+</style><text x='50' y='52' class='star'>✦</text></svg>">
 
     <!-- Robots & Search Directives (GEO & SEO Ready) -->
     <meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1">
@@ -1009,7 +1014,7 @@
             <!-- Top Right Utilities -->
             <div class="flex items-center gap-2 sm:gap-3">
                 <!-- Global Search — Desktop Icon -->
-                <button type="button" onclick="App.search.openModal()" aria-label="Buka pencarian" title="Cari produk" class="hidden lg:flex w-9 h-9 items-center justify-center rounded-xl text-[#151c75] hover:bg-blue-50 transition-all">
+                <button type="button" onclick="App.search.openModal()" aria-label="Buka pencarian" title="Cari di Lobi" class="hidden lg:flex w-9 h-9 items-center justify-center rounded-xl text-[#151c75] hover:bg-blue-50 transition-all">
                     <i class="fa-solid fa-magnifying-glass text-sm"></i>
                 </button>
 
@@ -1046,7 +1051,7 @@
     </nav>
 
     <!-- TOAST NOTIFICATION CONTAINER -->
-    <div id="toast-container" class="fixed top-[4.75rem] sm:top-[4.9rem] left-3 sm:left-5 z-[80] flex flex-col items-start gap-3 pointer-events-none max-w-lg w-[calc(100%-1.5rem)] sm:w-[36rem] px-0"></div>
+    <div id="toast-container" class="fixed top-[4.75rem] sm:top-[4.9rem] left-1/2 -translate-x-1/2 z-[80] flex flex-col items-center gap-2.5 pointer-events-none max-w-[calc(100%-1rem)] w-full sm:w-[36rem] px-2 sm:px-0"></div>
 
     <!-- GLOBAL SEARCH MODAL -->
     <div id="search-modal" class="fixed inset-0 z-[90] hidden bg-slate-900/60 backdrop-blur-sm items-center justify-center p-4">
@@ -1560,8 +1565,14 @@ const App = {
                     else if (isCategoryPath) { App.router.routePath(initialPath); }
                     else if (isCreatorPath) { App.router.routePath(initialPath); }
                 }
-                setTimeout(() => App.creatorStudio.renderCreatorLaunchQuality?.(), 100);
-try { document.getElementById('creator-launch-quality')?.classList.add('hidden'); } catch(_) {}
+                setTimeout(() => {
+                    try {
+                        const mount = document.getElementById('creator-launch-quality');
+                        const isWorkspace = window.location.pathname === '/ruang-kerja';
+                        if (mount) mount.classList.toggle('hidden', !isWorkspace);
+                        if (isWorkspace) App.creatorStudio.renderCreatorLaunchQuality?.();
+                    } catch(_) {}
+                }, 120);
 App.router.bindCanonicalLinkGuard();
                 document.addEventListener('click', (ev) => {
                     const a = ev.target?.closest?.('a[href*=' + '\"wa.me\"' + ']');
@@ -1860,7 +1871,7 @@ App.router.bindCanonicalLinkGuard();
 
                     let items = [
                         { key: 'home', label: 'Teras', icon: 'fa-house' },
-                        { key: 'products', label: 'Produk', icon: 'fa-box-open' },
+                        { key: 'products', label: 'Lobi', icon: 'fa-box-open' },
                         { key: 'studio-ai', label: 'Studio AI', icon: 'fa-wand-magic-sparkles' }
                     ];
 
@@ -7527,6 +7538,16 @@ window.addEventListener('DOMContentLoaded', App.init);
 .smart-opportunity-badge{display:inline-flex;align-items:center;gap:.35rem;padding:.3rem .55rem;border-radius:999px;background:#eff6ff;border:1px solid #dbeafe;color:#151c75;font-size:9px;font-weight:800}
 .smart-gap-item{display:flex;align-items:flex-start;gap:.65rem;padding:.7rem .75rem;border:1px solid #e5edf9;border-radius:14px;background:#fff}
 .smart-gap-item:hover{border-color:#c7d8ff;box-shadow:0 8px 18px rgba(21,28,117,.07)}
+
+/* Milestone AB — Minimal Centered Notice & Popup Scrollbar Hardening */
+#toast-container{left:50% !important;right:auto !important;transform:translateX(-50%) !important;align-items:center !important;}
+#toast-container .toast-bubble{width:auto !important;max-width:min(34rem,calc(100vw - 1.5rem)) !important;margin-inline:auto !important;border-radius:1.1rem !important;padding:.68rem .82rem !important;background:rgba(255,255,255,.98) !important;border:1px solid rgba(207,221,248,.92) !important;box-shadow:0 18px 42px rgba(21,28,117,.13),0 7px 18px rgba(15,23,42,.07) !important;backdrop-filter:blur(14px) saturate(1.04) !important;-webkit-backdrop-filter:blur(14px) saturate(1.04) !important;}
+#toast-container .toast-bubble::after{content:none !important;display:none !important;}
+#toast-container .toast-bubble::before{left:0 !important;top:12px !important;bottom:auto !important;width:3px !important;height:calc(100% - 24px) !important;border-radius:999px !important;}
+.fixed.inset-0 > div,.fixed.inset-0 .overflow-y-auto,.fixed.inset-0 [role="dialog"],[role="dialog"].overflow-y-auto{scrollbar-width:none !important;-ms-overflow-style:none !important;}
+.fixed.inset-0 > div::-webkit-scrollbar,.fixed.inset-0 .overflow-y-auto::-webkit-scrollbar,.fixed.inset-0 [role="dialog"]::-webkit-scrollbar,[role="dialog"].overflow-y-auto::-webkit-scrollbar{width:0 !important;height:0 !important;display:none !important;}
+@media(max-width:640px){#toast-container .toast-bubble{max-width:calc(100vw - 1.25rem) !important;}}
+@media(prefers-reduced-motion:reduce){#toast-container .toast-bubble{animation:none !important;transform:none !important;opacity:1 !important;}}
 </style>
 <script>
 (() => {
@@ -7787,6 +7808,40 @@ window.StudihomeProductionGuard = {
         }
     }
 };
+/* Milestone AA — Runtime/Regression Guard */
+window.StudihomeRegressionGuard = {
+  version: 'AA.1',
+  run(){
+    const path = (window.location.pathname || '/').replace(/\/$/,'') || '/';
+    const known = new Set(['','/','/products','/kamar','/admin','/studio-ai','/ruang-kerja','/dashboard','/creator-studio']);
+    const creatorPath = /^\/[a-z0-9][a-z0-9-]{2,39}(?:\/portfolio\/[a-z0-9][a-z0-9-]{0,120})?$/i.test(path) && !known.has(path);
+    const checks = {
+      canonicalPath: known.has(path) || creatorPath,
+      smartEngine: !!window.App?.studioAI?.smartEngine,
+      smartScore: typeof window.App?.studioAI?._smartScoreCreator === 'function',
+      smartDiagnostics: typeof window.App?.studioAI?.smartSelfCheck === 'function',
+      creatorStudio: !!window.App?.creatorStudio,
+      admin: !!window.App?.admin,
+      demandIntel: !!window.App?.studioAI?.demandIntel,
+      productionGuard: typeof window.StudihomeProductionGuard?.run === 'function'
+    };
+    return {ok:Object.values(checks).every(Boolean),path,checks};
+  },
+  syncWorkspaceNotice(){
+    const mount=document.getElementById('creator-launch-quality');
+    if(!mount) return;
+    const isWorkspace=(window.location.pathname || '') === '/ruang-kerja';
+    mount.classList.toggle('hidden', !isWorkspace);
+    if(isWorkspace) window.App?.creatorStudio?.renderCreatorLaunchQuality?.();
+  }
+};
+try{
+  window.addEventListener('popstate',()=>window.StudihomeRegressionGuard.syncWorkspaceNotice(),{passive:true});
+  window.addEventListener('hashchange',()=>window.StudihomeRegressionGuard.syncWorkspaceNotice(),{passive:true});
+  document.addEventListener('click',()=>setTimeout(()=>window.StudihomeRegressionGuard.syncWorkspaceNotice(),80),{passive:true});
+}catch(_){}
+
+window.StudihomeVisualNavigationGuard = {expectedMenuLabel:'Lobi',expectedFaviconGlyph:'✦',noticePosition:'center-below-header',popupScrollbar:'hidden-visual-only'};
 </script>
 
 </body>
