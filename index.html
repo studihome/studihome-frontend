@@ -5036,19 +5036,6 @@ renderCreatorStandardSummary: (creator, data, categories, services, portfolios) 
 
                         <div id="kamar-creator-entry" class="hidden"></div>
 
-                        <div class="card-3d p-4 sm:p-5 rounded-2xl mb-6 bg-white border border-amber-100 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
-                            <div class="flex items-start gap-3">
-                                <div class="w-10 h-10 rounded-2xl bg-amber-50 flex items-center justify-center shrink-0">
-                                    <i class="fa-solid fa-kitchen-set text-amber-600"></i>
-                                </div>
-                                <div>
-                                    <div class="text-xs font-extrabold text-[#151c75]">Dapur Creator</div>
-                                    <div class="text-[11px] sm:text-xs text-slate-600 mt-0.5 leading-relaxed">Tempat khusus member Premium untuk mengelola Foyer, Menu, Hidangan, dan Ambalan.</div>
-                                </div>
-                            </div>
-                            <button onclick="App.router.navigate('dapur')" class="btn-brand-gradient px-3.5 py-2 rounded-xl text-[11px] font-bold shrink-0">Buka Dapur</button>
-                        </div>
-
                         <div>
                             <h2 class="text-base sm:text-lg font-bold text-[#151c75] mb-4">Modul & Produk Saya</h2>
                             <div id="owned-products-container" class="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6">
@@ -5071,19 +5058,13 @@ renderCreatorStandardSummary: (creator, data, categories, services, portfolios) 
                         // The detailed eligibility check remains server-side via is_creator_eligible().
                         const creatorEntry = document.getElementById('kamar-creator-entry');
                         if (creatorEntry) {
-                            try {
-                                // Authoritative eligibility check: the server decides whether this Member has Premium access.
-                                const { data: creatorEligible, error: eligibilityError } = await supabaseClient.rpc('is_creator_eligible');
-                                if (eligibilityError) throw eligibilityError;
-                                if (creatorEligible === true) {
-                                    // Managed Studihome brands must not be mistaken for the Member's own Creator profile.
+                            const hasPremium = verifiedProducts.some(p => p && p.isFree === false);
+                            if (hasPremium) {
+                                try {
                                     const { data: creatorProfile, error: creatorProfileError } = await supabaseClient
                                         .from('creator_profiles')
-                                        .select('id,username,is_published,managed_by_studihome')
+                                        .select('id,username,is_published')
                                         .eq('user_id', App.state.user.id)
-                                        .eq('managed_by_studihome', false)
-                                        .order('updated_at', { ascending: false })
-                                        .limit(1)
                                         .maybeSingle();
                                     if (creatorProfileError) throw creatorProfileError;
                                     creatorEntry.innerHTML = creatorProfile
@@ -5114,8 +5095,8 @@ renderCreatorStandardSummary: (creator, data, categories, services, portfolios) 
                                                 <button onclick="App.router.navigate('dapur')" class="btn-brand-gradient px-3.5 py-2 rounded-xl text-[11px] font-bold shrink-0">Mulai di Dapur</button>
                                             </div>`;
                                     creatorEntry.classList.remove('hidden');
-                                } catch (e) {
-                                    creatorEntry.innerHTML = '';
+                                } catch (_) {
+                                    // Silent fail: the existing Kamar must remain unaffected if this optional panel cannot load.
                                 }
                             }
                         }
