@@ -2156,7 +2156,7 @@ App.router.bindCanonicalLinkGuard();
                             const [catRes, creatorRes, serviceRes, likeRes, memberRes, trustRes] = await withTimeout(
                                 Promise.all([
                                     supabaseClient.from('ai_categories').select('id,slug,name,description,icon').eq('is_active', true).order('name', { ascending: true }),
-                                    supabaseClient.from('creator_profiles').select('id,user_id,username,display_name,bio,avatar_url,cover_url,whatsapp,location,is_published,is_verified').eq('is_published', true).order('updated_at', { ascending: false }).limit(100),
+                                    supabaseClient.from('creator_profiles').select('id,user_id,username,display_name,bio,avatar_url,cover_url,whatsapp,location,is_published,is_verified,managed_by_studihome,contact_email,is_studihome_official').eq('is_published', true).order('updated_at', { ascending: false }).limit(100),
                                     supabaseClient.from('creator_services').select('id,creator_id,category_id,title,description,price_from,price_to,delivery_days').eq('is_active', true).order('created_at', { ascending: false }).limit(500),
                                     supabaseClient.from('creator_likes').select('creator_id'),
                                     supabaseClient.from('creator_category_members').select('creator_id,category_id,is_primary'),
@@ -4301,9 +4301,14 @@ App.router.bindCanonicalLinkGuard();
                         const wa = App.creator._waUrl(c.whatsapp, c.display_name || 'Creator');
                         const service = (c.services || [])[0];
                         const initials = String(c.display_name || c.username || 'C').trim().charAt(0).toUpperCase();
+                        const managedBadge = c.managed_by_studihome ? '<span class="inline-flex items-center justify-center w-4 h-4 rounded-full bg-white/90 text-[#151c75] text-[9px] font-black shadow-sm" title="Creator dikelola Studihome" aria-label="Creator dikelola Studihome">✦</span>' : '';
+                        const officialStyle = c.is_studihome_official ? 'border-amber-200 ring-1 ring-amber-200/70' : '';
+                        const heroStyle = c.is_studihome_official ? 'bg-gradient-to-br from-[#f59e0b] via-[#facc15] to-[#fff7ed]' : 'bg-gradient-to-br from-[#151c75] to-[#3f48bf]';
+                        const nameColor = c.is_studihome_official ? 'text-[#151c75]' : 'text-white';
+                        const subColor = c.is_studihome_official ? 'text-[#7c5a00]' : 'text-blue-100';
                         return `
-                            <article class="studio-ai-card card-3d rounded-3xl overflow-hidden bg-white">
-                                <div class="h-32 bg-gradient-to-br from-[#151c75] to-[#3f48bf] relative overflow-hidden">
+                            <article class="studio-ai-card card-3d rounded-3xl overflow-hidden bg-white ${officialStyle}">
+                                <div class="h-32 ${heroStyle} relative overflow-hidden">
                                     ${c.cover_url ? `<img src="${App.utils.safeUrl(c.cover_url)}" alt="" class="w-full h-full object-cover opacity-60" loading="lazy" decoding="async">` : ''}
                                     <div class="absolute inset-0 bg-gradient-to-t from-[#151c75]/85 to-transparent"></div>
                                     <div class="absolute left-4 bottom-3 flex items-end gap-3">
@@ -4311,8 +4316,8 @@ App.router.bindCanonicalLinkGuard();
                                             ${c.avatar_url ? `<img src="${App.utils.safeUrl(c.avatar_url)}" alt="${App.utils.escapeHtml(c.display_name)}" class="w-full h-full object-cover">` : initials}
                                         </div>
                                         <div class="pb-0.5">
-                                            <div class="text-white text-sm font-extrabold leading-tight">${App.utils.escapeHtml(c.display_name || c.username)}</div>
-                                            <div class="flex items-center gap-1.5 text-blue-100 text-[10px] mt-0.5">
+                                            <div class="${nameColor} text-sm font-extrabold leading-tight flex items-center gap-1">${App.utils.escapeHtml(c.display_name || c.username)}${managedBadge}${c.is_studihome_official ? '<span class="ml-1 inline-flex items-center px-1.5 py-0.5 rounded-full bg-white/75 border border-white/80 text-[7px] font-black text-[#7c5a00]">Studihome</span>' : ''}</div>
+                                            <div class="flex items-center gap-1.5 ${subColor} text-[10px] mt-0.5">
                                                 <span>@${App.utils.escapeHtml(c.username)}</span>
                                                 ${c.is_verified ? '<span class="text-amber-200" title="Creator terverifikasi"><i class="fa-solid fa-circle-check"></i></span>' : ''}
                                             </div>
@@ -5407,7 +5412,7 @@ ${(() => { const rs=String(p.review_status||'DRAFT').toUpperCase(); const map={D
                                                     </div>
                                                     <div>
                                                         <div class="text-lg font-black">${App.utils.escapeHtml(c.display_name||'Nama Creator')}</div>
-                                                        <div class="text-[10px] text-blue-100">@${App.utils.escapeHtml(c.username||'username')}</div>
+                                                        <div class="text-[10px] text-blue-100 flex items-center gap-1">@${App.utils.escapeHtml(c.username||'username')}${c.managed_by_studihome ? '<span title="Creator dikelola Studihome" aria-label="Creator dikelola Studihome">✦</span>' : ''}</div>
                                                     </div>
                                                 </div>
                                                 <p class="mt-4 text-sm text-blue-50 leading-relaxed">${App.utils.escapeHtml(c.bio||'Tambahkan bio supaya pengunjung cepat paham kamu membantu apa.')}</p>
@@ -8414,6 +8419,119 @@ window.StudihomeProductionPilotSimulation = {
   window.StudihomeProductionFreezeLock = Object.freeze({version:report.version, rc17Sha256:report.rc17Sha256, run:()=>JSON.parse(JSON.stringify(report)), status:report.status});
 })();
 </script>
+\n<!--
+  RC19 — OPERATIONAL HEALTH & OBSERVABILITY LOCK
+  Read-only local diagnostics. No network calls, no DB writes, no UI mutations.
+  Purpose: distinguish release drift, bootstrap/config issues, and missing contracts after deployment.
+-->
+<script id="studihome-operational-health-lock">
+(() => {
+  'use strict';
+  if (window.StudihomeOperationalHealth) return;
 
+  const source = document.documentElement?.outerHTML || '';
+  const checks = [];
+  const pass = (id, detail) => checks.push({id, status:'PASS', detail});
+  const warn = (id, detail) => checks.push({id, status:'CHECK_REQUIRED', detail});
+
+  const has = (needle) => source.includes(needle);
+  const rpcNames = ['create_order','submit_payment_confirmation','claim_free_product','admin_verify_order','admin_reject_order'];
+
+  if (document.documentElement?.querySelectorAll('body').length === 1) pass('html.body','Exactly one body element detected.');
+  else warn('html.body','Body structure differs from the frozen release contract.');
+
+  if (has('studihome-production-freeze-lock')) pass('release.freeze','Production freeze lock is embedded.');
+  else warn('release.freeze','Production freeze lock is missing.');
+
+  if (has('window.StudihomeQALock')) pass('release.qa','QA lock is embedded.');
+  else warn('release.qa','QA lock is missing.');
+
+  if (has('studihome-favicon-locked')) pass('release.favicon','Favicon lock is embedded.');
+  else warn('release.favicon','Favicon lock is missing.');
+
+  if (has('window.StudihomeFinalReleaseLock')) pass('release.fingerprint','Final release fingerprint gate is embedded.');
+  else warn('release.fingerprint','Final release fingerprint gate is missing.');
+
+  if (typeof window.App === 'object' && window.App) pass('runtime.app','Application object is available.');
+  else warn('runtime.app','Application object is not available at diagnostic time.');
+
+  if (typeof window.supabase !== 'undefined') pass('runtime.supabase-lib','Supabase client library is available.');
+  else warn('runtime.supabase-lib','Supabase client library is not detected.');
+
+  if (typeof window.SUPABASE_URL === 'string' && window.SUPABASE_URL) pass('runtime.supabase-config','Supabase URL config is populated.');
+  else warn('runtime.supabase-config','Supabase URL is not exposed in this diagnostic scope or has not initialized yet.');
+
+  rpcNames.forEach((name) => {
+    if (has(".rpc('"+name+"'") || has('.rpc("'+name+'"')) pass('rpc.'+name,'Sensitive RPC contract detected.');
+    else warn('rpc.'+name,'Sensitive RPC contract is not detected in the current source.');
+  });
+
+  const finalSecurity = window.StudihomeFinalSecurityClosureGate;
+  if (finalSecurity?.status === 'SECURITY_CLOSED') pass('security.final','Final security closure reports SECURITY_CLOSED.');
+  else warn('security.final','Final security closure gate is not currently reporting SECURITY_CLOSED.');
+
+  const freeze = window.StudihomeProductionFreezeLock;
+  if (freeze?.status === 'FROZEN') pass('release.status','Production freeze reports FROZEN.');
+  else warn('release.status','Production freeze is not currently reporting FROZEN.');
+
+  const blockers = checks.filter(x => x.status === 'CHECK_REQUIRED');
+  const report = {
+    version: 'RC19-operational-health-observability-lock',
+    timestamp: new Date().toISOString(),
+    status: blockers.length ? 'CHECK_REQUIRED' : 'HEALTHY',
+    passed: checks.filter(x=>x.status==='PASS').length,
+    total: checks.length,
+    checks
+  };
+
+  window.StudihomeOperationalHealth = Object.freeze({
+    version: report.version,
+    status: report.status,
+    run: () => JSON.parse(JSON.stringify(report))
+  });
+})();
+</script>
+
+
+<style id="studihome-managed-creator-style">
+.studihome-managed-star{display:inline-flex;align-items:center;justify-content:center;width:1rem;height:1rem;border-radius:999px;background:rgba(255,255,255,.92);color:#151c75;font-size:.58rem;font-weight:900;box-shadow:0 2px 6px rgba(21,28,117,.12);}
+.studihome-official-card{border-color:#f6d365!important;box-shadow:0 0 0 1px rgba(250,204,21,.18),0 16px 36px rgba(245,158,11,.12)!important;}
+</style>
+<!-- RC20 — One-time Admin Provisioning Tool. Remove after 43/43 provisioning is confirmed. -->
+<script id="studihome-managed-creator-provision-tool">
+(() => {
+  'use strict';
+  if (window.__studihomeProvisionToolInstalled) return;
+  window.__studihomeProvisionToolInstalled = true;
+  const FN = 'provision_managed_creators';
+  const css = document.createElement('style');
+  css.textContent = `#studihome-managed-creator-provision-tool{position:fixed;right:18px;bottom:18px;z-index:99999;display:none}#studihome-managed-creator-provision-tool button{border:1px solid #f59e0b;background:linear-gradient(135deg,#fff7d6,#facc15);color:#151c75;font-weight:900;border-radius:14px;padding:10px 14px;box-shadow:0 16px 34px rgba(21,28,117,.18);font-size:12px}#studihome-managed-creator-provision-status{font-size:10px;margin-top:6px;color:#475569;text-align:right;max-width:300px}`;
+  document.head.appendChild(css);
+  const wrap=document.createElement('div');
+  wrap.id='studihome-managed-creator-provision-tool';
+  wrap.innerHTML='<button type="button" id="studihome-managed-creator-provision-btn">✦ Provision 43 Creator Studihome</button><div id="studihome-managed-creator-provision-status"></div>';
+  document.body.appendChild(wrap);
+  const btn=wrap.querySelector('#studihome-managed-creator-provision-btn');
+  const status=wrap.querySelector('#studihome-managed-creator-provision-status');
+  const show=()=>{ if(window.App?.state?.user?.role==='admin' && window.supabaseClient) wrap.style.display='block'; else wrap.style.display='none'; };
+  const poll=setInterval(show,1200);
+  btn.addEventListener('click', async()=>{
+    btn.disabled=true; status.textContent='Memulai provisioning…';
+    try{
+      const {data:{session},error}=await window.supabaseClient.auth.getSession();
+      if(error || !session?.access_token) throw new Error('Session Admin tidak tersedia. Login Admin dulu.');
+      const projectUrl=(window.STUDIHOME_SUPABASE_URL||window.SUPABASE_URL||'').replace(/\/$/,'');
+      if(!projectUrl) throw new Error('Supabase URL belum tersedia.');
+      const res=await fetch(projectUrl+'/functions/v1/'+FN,{method:'POST',headers:{'Authorization':'Bearer '+session.access_token,'Content-Type':'application/json'},body:'{}'});
+      const data=await res.json().catch(()=>({}));
+      if(!res.ok || !data.ok) throw new Error(data.error || ('HTTP '+res.status));
+      status.textContent='Berhasil: '+(data.total||0)+' Creator diprovision.';
+      btn.textContent='✓ Provisioning selesai';
+    }catch(e){ status.textContent='Gagal: '+(e?.message||e); btn.disabled=false; }
+  });
+  window.addEventListener('auth:changed',show);
+  setTimeout(show,1500);
+})();
+</script>
 </body>
 </html>
