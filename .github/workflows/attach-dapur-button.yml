@@ -1,0 +1,44 @@
+name: Attach Dapur Creator button
+
+on:
+  push:
+    branches: [main]
+
+permissions:
+  contents: write
+
+jobs:
+  patch:
+    if: github.actor == 'studihome' || github.actor == 'github-actions[bot]'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 2
+
+      - name: Attach script to index
+        shell: python
+        run: |
+          from pathlib import Path
+          p = Path('index.html')
+          s = p.read_text(encoding='utf-8')
+          tag = '<script src="/dapur-button.js"></script>'
+          if tag not in s:
+              marker = '</body>'
+              if s.count(marker) != 1:
+                  raise SystemExit(f'Expected exactly one </body>, found {s.count(marker)}. No change made.')
+              s = s.replace(marker, f'{tag}\n{marker}', 1)
+              p.write_text(s, encoding='utf-8')
+
+          wf = Path('.github/workflows/attach-dapur-button.yml')
+          wf.unlink(missing_ok=True)
+
+      - name: Commit patch and remove workflow
+        shell: bash
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add index.html .github/workflows/attach-dapur-button.yml
+          if git diff --cached --quiet; then exit 0; fi
+          git commit -m "fix: expose Dapur Creator entry in Kamar"
+          git push origin HEAD:main
