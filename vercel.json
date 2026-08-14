@@ -1,44 +1,40 @@
 {
   "$schema": "https://openapi.vercel.sh/vercel.json",
-  "cleanUrls": true,
   "trailingSlash": false,
-
   "rewrites": [
-    {
-      "source": "/(.*)",
-      "destination": "/index.html"
-    }
+    { "source": "/studio-ai", "destination": "/index.html" },
+    { "source": "/products", "destination": "/index.html" },
+    { "source": "/kamar", "destination": "/index.html" },
+    { "source": "/dashboard", "destination": "/index.html" },
+    { "source": "/admin", "destination": "/index.html" },
+    { "source": "/dapur", "destination": "/index.html" },
+    { "source": "/dapur/foyer", "destination": "/index.html" },
+    { "source": "/dapur/menu", "destination": "/index.html" },
+    { "source": "/dapur/hidangan", "destination": "/index.html" },
+    { "source": "/dapur/ambalan", "destination": "/index.html" },
+    { "source": "/creator-studio", "destination": "/index.html" },
+    { "source": "/ai-video", "destination": "/index.html" },
+    { "source": "/ai-automation", "destination": "/index.html" },
+    { "source": "/ai-content", "destination": "/index.html" },
+    { "source": "/ai-untuk-guru", "destination": "/index.html" },
+    { "source": "/ai-untuk-umkm", "destination": "/index.html" },
+    { "source": "/:username/portfolio/:slug*", "destination": "/index.html" },
+    { "source": "/:username([a-z0-9][a-z0-9-]{2,39})", "destination": "/index.html" }
   ],
-
   "headers": [
     {
       "source": "/(.*)",
       "headers": [
-        {
-          "key": "X-Content-Type-Options",
-          "value": "nosniff"
-        },
-        {
-          "key": "X-Frame-Options",
-          "value": "DENY"
-        },
-        {
-          "key": "Referrer-Policy",
-          "value": "strict-origin-when-cross-origin"
-        },
-        {
-          "key": "Permissions-Policy",
-          "value": "camera=(), microphone=(), geolocation=()"
-        }
+        { "key": "X-Content-Type-Options", "value": "nosniff" },
+        { "key": "X-Frame-Options", "value": "DENY" },
+        { "key": "Referrer-Policy", "value": "strict-origin-when-cross-origin" },
+        { "key": "Permissions-Policy", "value": "camera=(), microphone=(), geolocation=()" }
       ]
     },
     {
       "source": "/index.html",
       "headers": [
-        {
-          "key": "Cache-Control",
-          "value": "public, max-age=0, must-revalidate"
-        }
+        { "key": "Cache-Control", "value": "public, max-age=0, must-revalidate" }
       ]
     }
   ]
