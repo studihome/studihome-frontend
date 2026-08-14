@@ -1,0 +1,51 @@
+name: One-time add Dapur button
+
+on:
+  push:
+    branches: [main]
+
+permissions:
+  contents: write
+
+jobs:
+  patch:
+    if: github.actor == 'studihome' || github.actor == 'github-actions[bot]'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 2
+
+      - name: Patch index.html and remove this workflow
+        shell: python
+        run: |
+          from pathlib import Path
+
+          path = Path('index.html')
+          text = path.read_text(encoding='utf-8')
+
+          marker = '                        <div id="kamar-creator-entry" class="hidden"></div>\n'
+          block = '''\n                        <div class="card-3d p-4 sm:p-5 rounded-2xl mb-6 bg-white border border-amber-100 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">\n                            <div class="flex items-start gap-3">\n                                <div class="w-10 h-10 rounded-2xl bg-amber-50 flex items-center justify-center shrink-0">\n                                    <i class="fa-solid fa-kitchen-set text-amber-600"></i>\n                                </div>\n                                <div>\n                                    <div class="text-xs font-extrabold text-[#151c75]">Dapur Creator</div>\n                                    <div class="text-[11px] sm:text-xs text-slate-600 mt-0.5 leading-relaxed">Tempat khusus member Premium untuk mengelola Foyer, Menu, Hidangan, dan Ambalan.</div>\n                                </div>\n                            </div>\n                            <button onclick="App.router.navigate('dapur')" class="btn-brand-gradient px-3.5 py-2 rounded-xl text-[11px] font-bold shrink-0">Buka Dapur</button>\n                        </div>\n'''
+
+          if 'Dapur Creator' not in text:
+              if marker not in text:
+                  raise SystemExit('Kamar marker not found; aborting without changes.')
+              text = text.replace(marker, marker + block, 1)
+              path.write_text(text, encoding='utf-8')
+
+          wf = Path('.github/workflows/one-time-add-dapur-button.yml')
+          if wf.exists():
+              wf.unlink()
+
+      - name: Commit and push
+        shell: bash
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add index.html .github/workflows/one-time-add-dapur-button.yml
+          if git diff --cached --quiet; then
+            exit 0
+          fi
+          git commit -m "fix: restore Dapur Creator button in Kamar"
+          git push origin HEAD:main
