@@ -2,46 +2,12 @@
   "$schema": "https://openapi.vercel.sh/vercel.json",
   "cleanUrls": true,
   "trailingSlash": false,
-
   "rewrites": [
     {
-      "source": "/studio-ai",
-      "destination": "/index"
-    },
-    {
-      "source": "/ai-video",
-      "destination": "/index"
-    },
-    {
-      "source": "/ai-automation",
-      "destination": "/index"
-    },
-    {
-      "source": "/ai-content",
-      "destination": "/index"
-    },
-    {
-      "source": "/ai-untuk-guru",
-      "destination": "/index"
-    },
-    {
-      "source": "/ai-untuk-umkm",
-      "destination": "/index"
-    },
-    {
-      "source": "/creator-studio",
-      "destination": "/index"
-    },
-    {
-      "source": "/:username/portfolio/:slug*",
-      "destination": "/index"
-    },
-    {
-      "source": "/:username",
-      "destination": "/index"
+      "source": "/(.*)",
+      "destination": "/index.html"
     }
   ],
-
   "headers": [
     {
       "source": "/(.*)",
@@ -73,10 +39,5 @@
         }
       ]
     }
-  ]
-}
-{
-  "rewrites": [
-    { "source": "/(.*)", "destination": "/index.html" }
   ]
 }
