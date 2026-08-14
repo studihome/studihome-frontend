@@ -1,6 +1,9 @@
 (() => {
   'use strict';
-  const ID = 'studihome-dapur-entry';
+
+  const PLACEHOLDER_ID = 'kamar-creator-entry';
+  const CARD_ID = 'studihome-dapur-entry';
+  const LEGACY_ID = 'studihome-open-dapur';
 
   function isKamar() {
     return (location.pathname || '/').replace(/\/+$/, '') === '/kamar';
@@ -17,52 +20,52 @@
   }
 
   function render() {
-    const existing = document.getElementById(ID);
-    if (!isKamar()) {
-      existing?.remove();
-      return;
-    }
-    if (existing) return;
+    if (!isKamar()) return;
 
-    const host = document.querySelector('main') || document.querySelector('#app') || document.body;
+    const host = document.getElementById(PLACEHOLDER_ID);
     if (!host) return;
 
-    const card = document.createElement('section');
-    card.id = ID;
-    card.className = 'card-3d';
-    card.style.cssText = 'margin:0 1rem 1.25rem; padding:1rem; border-radius:1.25rem; display:flex; align-items:center; justify-content:space-between; gap:1rem; background:#fff; border:1px solid #fde68a; box-shadow:0 10px 25px -5px rgba(21,28,117,.07);';
-    card.innerHTML = `
-      <div style="display:flex;align-items:flex-start;gap:.75rem;min-width:0">
-        <div style="width:2.5rem;height:2.5rem;border-radius:.9rem;background:#fffbeb;display:flex;align-items:center;justify-content:center;flex:none;color:#d97706">
-          <i class="fa-solid fa-kitchen-set"></i>
-        </div>
-        <div style="min-width:0">
-          <div style="font-size:.78rem;font-weight:800;color:#151c75">Dapur Creator</div>
-          <div style="font-size:.7rem;line-height:1.45;color:#64748b;margin-top:.2rem">Kelola Foyer, Menu, Hidangan, dan Ambalan dari satu ruang kerja.</div>
-        </div>
-      </div>
-      <button type="button" id="studihome-open-dapur" style="border:0;border-radius:.75rem;padding:.6rem .85rem;background:linear-gradient(135deg,#151c75,#3f48bf);color:#fff;font-size:.7rem;font-weight:800;white-space:nowrap;cursor:pointer;box-shadow:0 4px 14px rgba(21,28,117,.25)">Buka Dapur</button>`;
+    host.classList.remove('hidden');
 
-    const first = host.firstElementChild;
-    if (first) host.insertBefore(card, first);
-    else host.appendChild(card);
-    card.querySelector('#studihome-open-dapur')?.addEventListener('click', goDapur);
+    if (document.getElementById(CARD_ID)) return;
+
+    host.innerHTML = `
+      <div id="${CARD_ID}" class="card-3d p-4 sm:p-5 rounded-2xl mb-6 bg-white border border-blue-100 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
+        <div class="flex items-start gap-3 min-w-0">
+          <div class="w-10 h-10 rounded-2xl bg-blue-50 flex items-center justify-center shrink-0">
+            <i class="fa-solid fa-kitchen-set text-[#151c75]"></i>
+          </div>
+          <div class="min-w-0">
+            <div class="text-xs font-extrabold text-[#151c75]">Dapur Creator ✨</div>
+            <div class="text-[11px] sm:text-xs text-slate-600 mt-0.5 leading-relaxed">Kelola Foyer, Menu, Hidangan, dan Ambalan dari satu ruang kerja.</div>
+          </div>
+        </div>
+        <button type="button" id="${LEGACY_ID}" class="btn-brand-gradient px-3.5 py-2 rounded-xl text-[11px] font-bold shrink-0">Buka Dapur</button>
+      </div>`;
+
+    document.getElementById(LEGACY_ID)?.addEventListener('click', goDapur, { once: true });
   }
 
-  let lastPath = '';
   function tick() {
-    if (location.pathname !== lastPath) {
-      lastPath = location.pathname;
-      render();
-    } else if (isKamar()) {
-      render();
-    }
+    if (!isKamar()) return;
+    render();
   }
 
   window.addEventListener('popstate', tick);
   window.addEventListener('hashchange', tick);
   new MutationObserver(tick).observe(document.documentElement, { childList: true, subtree: true });
-  setInterval(tick, 750);
-  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', tick, { once: true });
-  else tick();
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', tick, { once: true });
+  } else {
+    tick();
+  }
+
+  // Kamar is rendered asynchronously; keep a lightweight retry window for the router render.
+  let attempts = 0;
+  const retry = setInterval(() => {
+    tick();
+    attempts += 1;
+    if (attempts >= 40) clearInterval(retry);
+  }, 500);
 })();
