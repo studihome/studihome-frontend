@@ -1,6 +1,20 @@
 (() => {
   'use strict';
 
+  // Runtime guard: Dapur can render through the SPA router before the main
+  // App bootstrap has finished constructing App.utils. Never let an optional
+  // utility race break the entire workspace render loop.
+  window.App = window.App || {};
+  window.App.utils = window.App.utils || {};
+  if (typeof window.App.utils.escapeHtml !== 'function') {
+    window.App.utils.escapeHtml = (value) => {
+      const text = String(value ?? '');
+      const node = document.createElement('textarea');
+      node.textContent = text;
+      return node.innerHTML;
+    };
+  }
+
   const PLACEHOLDER_ID = 'kamar-creator-entry';
   const CARD_ID = 'studihome-dapur-entry';
   const LEGACY_ID = 'studihome-open-dapur';
