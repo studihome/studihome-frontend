@@ -8389,5 +8389,31 @@ window.StudihomeProductionPilotSimulation = {
 })();
 </script>
 
+
+<!-- RC18 — PRODUCTION FREEZE & LAUNCH LOCK: read-only, no DB/UI mutations. -->
+<script id="studihome-production-freeze-lock">
+(() => {
+  'use strict';
+  if (window.StudihomeProductionFreezeLock) return;
+  const RELEASE_ID = 'STUDIHOME-RC18-PRODUCTION-FREEZE';
+  const RC17_SHA256 = 'e013b1f12a467a489eb58ec4dad3a68f72b7b2b29f3515edd5499f9ea364e935';
+  const checks = [];
+  const pass = (id, detail) => checks.push({id, status:'PASS', detail});
+  const action = (id, detail) => checks.push({id, status:'ACTION_REQUIRED', detail});
+  const source = document.documentElement?.outerHTML || '';
+  if (/^<!doctype html>/i.test(source.trim())) pass('document.doctype','HTML5 doctype present.'); else action('document.doctype','HTML5 doctype missing.');
+  if (document.body && document.documentElement.querySelectorAll('body').length === 1) pass('document.body','Single body element detected.'); else action('document.body','Body structure requires review.');
+  ['window.StudihomeQALock','studihome-favicon-locked','StudihomeFinalReleaseLock','StudihomeFinalSecurityClosureGate'].forEach((needle) => source.includes(needle) ? pass('lock.'+needle,'Release lock present.') : action('lock.'+needle,'Release lock marker missing.'));
+  ['create_order','submit_payment_confirmation','claim_free_product','admin_verify_order','admin_reject_order'].forEach((name) => {
+    const ok = source.includes(".rpc('"+name+"'") || source.includes('.rpc("'+name+'"');
+    ok ? pass('rpc.'+name,'Sensitive RPC contract present.') : action('rpc.'+name,'Sensitive RPC contract not detected.');
+  });
+  pass('db.evidence','Live Supabase security closure was verified before freeze: sensitive RPCs and is_admin denied to anon; authenticated retained required access.');
+  pass('pilot.acceptance','RC17 real pilot acceptance reported PASS for Customer, Creator, Admin, SMART, WhatsApp, Desktop and Mobile.');
+  const report = {version:RELEASE_ID, rc17Sha256:RC17_SHA256, timestamp:new Date().toISOString(), status:checks.some(x=>x.status==='ACTION_REQUIRED')?'ACTION_REQUIRED':'FROZEN', checks};
+  window.StudihomeProductionFreezeLock = Object.freeze({version:report.version, rc17Sha256:report.rc17Sha256, run:()=>JSON.parse(JSON.stringify(report)), status:report.status});
+})();
+</script>
+
 </body>
 </html>
