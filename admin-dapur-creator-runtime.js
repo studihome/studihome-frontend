@@ -52,6 +52,7 @@
               <button class="px-3 py-2 rounded-xl text-[10px] font-bold ${creator.is_verified ? 'bg-red-50 text-red-700' : 'bg-emerald-50 text-emerald-700'}" onclick="window.AdminDapurCreatorRuntime.toggleVerified('${id}', ${!creator.is_verified})">${creator.is_verified ? 'Cabut Verified' : 'Verifikasi'}</button>
               <button class="px-3 py-2 rounded-xl text-[10px] font-bold ${creator.is_published ? 'bg-red-50 text-red-700' : 'btn-brand-gradient'}" onclick="window.AdminDapurCreatorRuntime.togglePublished('${id}', ${!creator.is_published})">${creator.is_published ? 'Tarik Publish' : 'Publish'}</button>
               <a href="/${encodeURIComponent(creator.username)}" target="_blank" rel="noopener" class="px-3 py-2 rounded-xl bg-white border border-blue-100 text-[10px] font-bold text-[#151c75]">Lihat Profil</a>
+              <button type="button" class="px-3 py-2 rounded-xl bg-blue-50 border border-blue-100 text-[10px] font-bold text-[#151c75]" onclick="window.AdminDapurCreatorRuntime.editProfile('${creatorId}')"><i class="fa-solid fa-pen-to-square mr-1"></i>Kelola Profil</button>
             </div>
           </div>
           <div class="grid xl:grid-cols-2 gap-4">
