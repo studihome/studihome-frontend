@@ -1,8 +1,10 @@
 window.STUDIHOME_SUPABASE_URL =
   "https://hbfmhwwxbgidsnljupca.supabase.co";
 
+// Public browser key. This project currently serves its REST API with the
+// legacy anon key; keep service_role keys out of the frontend permanently.
 window.STUDIHOME_SUPABASE_ANON_KEY =
-  "sb_publishable_134slHOJ_kcw5-kxDQDVaw1jFO4Lv";
+  "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImhiZm1od3d4YmdpZHNubGp1cGNhIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODY0NjQ4NTAsImV4cCI6MjEwMjA0MDg1MH0.-yvhEk9TxbqWGCQZvP_VZt9iax-bADY1ZprzXokmrCU";
 
 // Canonical Supabase singleton: every module reuses this same client.
 (function bootstrapStudihomeSupabaseSingleton() {
