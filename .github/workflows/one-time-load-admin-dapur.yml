@@ -1,0 +1,44 @@
+name: One-time load Admin Dapur module
+
+on:
+  push:
+    branches: [main]
+
+permissions:
+  contents: write
+
+jobs:
+  patch:
+    if: github.actor == 'studihome'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 2
+      - name: Inject loader into dapur-button.js
+        shell: python
+        run: |
+          from pathlib import Path
+          p = Path('dapur-button.js')
+          s = p.read_text(encoding='utf-8')
+          marker = "  function ensureAdminDapurModule() {\n"
+          fn = '''  function ensureAdminDapurModule() {\n    if ((location.pathname || '/') !== '/admin') return;\n    if (document.querySelector('script[data-studihome-admin-dapur]')) return;\n    const s = document.createElement('script');\n    s.src = '/admin-dapur.js?v=1';\n    s.dataset.studihomeAdminDapur = '1';\n    s.defer = true;\n    document.head.appendChild(s);\n  }\n\n'''
+          if marker not in s:
+              anchor = "  function tick() {\n"
+              if anchor not in s:
+                  raise SystemExit('tick anchor not found; aborting')
+              s = s.replace(anchor, fn + anchor, 1)
+          if 'ensureAdminDapurModule();' not in s:
+              s = s.replace('    renderKamarEntry(); normalizePortfolioForm(); hardenPortfolioSave(); ensurePublicCreatorModule(); renderFoyerAvatar();', '    renderKamarEntry(); normalizePortfolioForm(); hardenPortfolioSave(); ensurePublicCreatorModule(); renderFoyerAvatar(); ensureAdminDapurModule();', 1)
+          p.write_text(s, encoding='utf-8')
+          wf = Path('.github/workflows/one-time-load-admin-dapur.yml')
+          wf.unlink()
+      - name: Commit and push
+        shell: bash
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add dapur-button.js .github/workflows/one-time-load-admin-dapur.yml
+          if git diff --cached --quiet; then exit 0; fi
+          git commit -m "feat: load Admin Dapur management module"
+          git push origin HEAD:main
