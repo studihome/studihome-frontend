@@ -1,7 +1,18 @@
 {
   "$schema": "https://openapi.vercel.sh/vercel.json",
   "rewrites": [
+    { "source": "/studio-ai", "destination": "/index.html" },
+    { "source": "/products", "destination": "/index.html" },
+    { "source": "/kamar", "destination": "/index.html" },
+    { "source": "/dashboard", "destination": "/index.html" },
+    { "source": "/admin", "destination": "/index.html" },
     { "source": "/dapur", "destination": "/dapur.html" },
-    { "source": "/dapur/:username", "destination": "/dapur.html" }
+    { "source": "/dapur/:username", "destination": "/dapur.html" },
+    { "source": "/creator-studio", "destination": "/index.html" },
+    { "source": "/ai-video", "destination": "/index.html" },
+    { "source": "/ai-automation", "destination": "/index.html" },
+    { "source": "/ai-content", "destination": "/index.html" },
+    { "source": "/ai-untuk-guru", "destination": "/index.html" },
+    { "source": "/ai-untuk-umkm", "destination": "/index.html" }
   ]
 }
