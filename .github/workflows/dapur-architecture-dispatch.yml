@@ -1,0 +1,29 @@
+name: Trigger Dapur Architecture Migration
+
+on:
+  push:
+    branches: [main]
+
+permissions:
+  actions: write
+  contents: write
+
+jobs:
+  dispatch-and-clean:
+    if: ${{ github.actor != 'github-actions[bot]' }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Dispatch final migration
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh workflow run dapur-architecture-finalize.yml --ref main
+      - name: Remove dispatcher
+        uses: actions/checkout@v4
+      - name: Commit removal
+        shell: bash
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git rm .github/workflows/dapur-architecture-dispatch.yml
+          git commit -m "chore: remove Dapur migration dispatcher"
+          git push origin main
