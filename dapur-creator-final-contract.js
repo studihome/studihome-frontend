@@ -3,74 +3,47 @@
 
   const norm = (v = '') => String(v).replace(/\s+/g, ' ').trim().toLowerCase();
   const isAdmin = () => (location.pathname || '/').replace(/\/+$/, '') === '/admin';
-  const globalLabels = new Set(['dapur', 'dapur creator', 'creator']);
 
-  function isGlobal(el) {
-    if (!el) return false;
-    if (el.closest('#admin-content-area, #admin-dapur-creator-content, #admin-dapur-content')) return false;
-    const r = el.getBoundingClientRect();
-    return r.top >= 0 && r.top < 150;
-  }
+  // FINAL NAVIGATION CONTRACT
+  // Global header/mobile primary navigation: Teras | Lobi | Studio AI | Admin.
+  // Dapur is contextual only: Admin panel = Dapur Creator; Member/Kamar = Dapur Creator.
+  const CONTEXTUAL_LABELS = new Set(['dapur', 'dapur creator', 'creator']);
 
-  function hideGlobalContextual() {
-    document.querySelectorAll('a,button,[role="button"]').forEach(el => {
-      if (!globalLabels.has(norm(el.textContent || ''))) return;
-      if (!isGlobal(el)) return;
-      el.dataset.studihomeFinalContextualHidden = '1';
-      el.style.setProperty('display', 'none', 'important');
-      el.setAttribute('aria-hidden', 'true');
-      el.setAttribute('tabindex', '-1');
-    });
-  }
-
-  function adminButtons() {
-    return [...document.querySelectorAll('button[onclick*="switchTab"]')];
-  }
-
-  function findAdminTab(key) {
-    const target = `'${key}'`;
-    return adminButtons().find(b => String(b.getAttribute('onclick') || '').includes(target)) || null;
-  }
-
-  function findAdminDapurButton() {
-    return adminButtons().find(b => norm(b.textContent || '') === 'dapur')
-      || document.getElementById('admin-dapur-tab-btn')
-      || document.querySelector('[data-admin-dapur-nav="1"]');
-  }
-
-  function openRuntimeCreator(id) {
-    const list = document.getElementById('admin-dc-runtime-list');
-    const row = list?.querySelector(`.dc-runtime-item[data-creator-id="${CSS.escape(id)}"]`)
-      || document.querySelector(`.dc-runtime-item [data-creator-id="${CSS.escape(id)}"]`)?.closest('.dc-runtime-item');
-    if (row) {
-      row.open = true;
-      row.scrollIntoView({ behavior: 'smooth', block: 'center' });
-      const host = row.querySelector('[data-creator-id]');
-      if (host && !host.dataset.loaded) {
-        const rt = window.AdminDapurCreatorRuntime;
-        if (rt?.loadDetail) rt.loadDetail(host, id);
-      }
-      return;
+  function hideGlobalContextualItems() {
+    for (const navId of ['top-nav-links', 'mobile-nav-links']) {
+      const nav = document.getElementById(navId);
+      if (!nav) continue;
+      nav.querySelectorAll('a,button,[role="button"]').forEach((el) => {
+        if (!CONTEXTUAL_LABELS.has(norm(el.textContent || ''))) return;
+        el.dataset.studihomeContextualNavHidden = '1';
+        el.style.setProperty('display', 'none', 'important');
+        el.setAttribute('aria-hidden', 'true');
+        el.setAttribute('tabindex', '-1');
+      });
     }
-    window.AdminDapurCreatorRuntime?.open?.();
   }
 
-  function removeLegacyDapurButtons() {
-    const creator = findAdminTab('creators');
-    const dapur = findAdminDapurButton();
-    if (dapur && dapur !== creator) dapur.remove();
-    document.querySelectorAll('#admin-dapur-tab-btn,[data-admin-dapur-nav="1"]').forEach(el => {
-      if (el !== creator && !el.closest('#admin-content-area')) el.remove();
+  function findAdminCreatorTab() {
+    return [...document.querySelectorAll('#admin-content-area, body button[onclick*="switchTab"]')]
+      .flatMap(root => root.matches?.('button[onclick*="switchTab"]') ? [root] : [...root.querySelectorAll?.('button[onclick*="switchTab"]') || []])
+      .find((btn) => String(btn.getAttribute('onclick') || '').includes("'creators'")) || null;
+  }
+
+  function removeLegacyAdminDapurTabs() {
+    document.querySelectorAll('#admin-dapur-tab-btn,[data-admin-dapur-nav="1"]').forEach((el) => {
+      if (!el.closest('#admin-content-area')) el.remove();
+    });
+    [...document.querySelectorAll('button[onclick*="switchTab"]')].forEach((btn) => {
+      const label = norm(btn.textContent || '');
+      if (label === 'dapur') btn.remove();
     });
   }
 
-  function ensureAdminDapurCreator() {
+  function canonicalizeAdminCreatorTab() {
     if (!isAdmin()) return;
-    const creator = findAdminTab('creators');
+    const creator = findAdminCreatorTab();
     if (!creator) return;
-
-    removeLegacyDapurButtons();
-
+    removeLegacyAdminDapurTabs();
     creator.id = 'admin-dapur-creator-tab-btn';
     creator.dataset.studihomeCanonicalAdminCreator = '1';
     creator.innerHTML = '<i class="fa-solid fa-kitchen-set mr-1"></i> Dapur Creator';
@@ -82,48 +55,21 @@
     };
   }
 
-  function injectManageButtons() {
-    if (!isAdmin()) return;
-    document.querySelectorAll('#admin-dc-runtime-list .dc-runtime-item').forEach(row => {
-      const host = row.querySelector('[data-creator-id]');
-      if (!host) return;
-      const id = host.getAttribute('data-creator-id');
-      if (!id || host.querySelector('[data-dc-manage-button]')) return;
-
-      const actionBars = host.querySelectorAll('.flex.flex-wrap.gap-2');
-      const bar = [...actionBars].find(x => x.querySelector('a[href]')) || actionBars[0];
-      if (!bar) return;
-
-      const btn = document.createElement('button');
-      btn.type = 'button';
-      btn.dataset.dcManageButton = '1';
-      btn.className = 'px-3 py-2 rounded-xl bg-blue-50 border border-blue-100 text-[10px] font-bold text-[#151c75]';
-      btn.innerHTML = '<i class="fa-solid fa-kitchen-set mr-1"></i> Kelola Dapur';
-      btn.addEventListener('click', (e) => {
-        e.preventDefault();
-        e.stopPropagation();
-        openRuntimeCreator(id);
-      });
-      bar.appendChild(btn);
-    });
-  }
-
-  function ensureMemberDapurButton() {
+  function normalizeMemberDapur() {
     const path = (location.pathname || '/').replace(/\/+$/, '') || '/';
     if (path !== '/kamar') return;
     const host = document.getElementById('kamar-creator-entry');
-    const legacy = document.getElementById('studihome-open-dapur');
-    if (!host || !legacy) return;
-    const label = host.querySelector('.text-xs.font-extrabold');
-    if (label) label.textContent = 'Dapur Creator ✨';
-    legacy.textContent = 'Buka Dapur Creator';
+    if (!host) return;
+    const title = host.querySelector('.text-xs.font-extrabold');
+    if (title) title.textContent = 'Dapur Creator ✨';
+    const button = host.querySelector('#studihome-open-dapur');
+    if (button) button.textContent = 'Buka Dapur Creator';
   }
 
   function reconcile() {
-    hideGlobalContextual();
-    ensureAdminDapurCreator();
-    injectManageButtons();
-    ensureMemberDapurButton();
+    hideGlobalContextualItems();
+    canonicalizeAdminCreatorTab();
+    normalizeMemberDapur();
   }
 
   let pending = false;
