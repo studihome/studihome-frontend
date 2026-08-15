@@ -85,3 +85,5 @@
   }
   window.AdminDapur=Object.assign(window.AdminDapur||{},{editCategories,addService,editService,addPortfolio,editPortfolio,createCreator});
 })();
+
+;(()=>{if(document.querySelector('script[data-studihome-admin-dapur-ui-bridge]'))return;const s=document.createElement('script');s.src='/admin-dapur-ui-bridge.js?v=1';s.dataset.studihomeAdminDapurUiBridge='1';s.defer=true;document.head.appendChild(s)})();
