@@ -171,3 +171,5 @@
   window.addEventListener('DOMContentLoaded',boot);
   new MutationObserver(()=>init()).observe(document.documentElement,{childList:true,subtree:true});
 })();
+
+;(()=>{if(document.querySelector('script[data-studihome-admin-dapur-theme]'))return;const s=document.createElement('script');s.src='/admin-dapur-theme.js?v=1';s.dataset.studihomeAdminDapurTheme='1';s.defer=true;document.head.appendChild(s)})();
