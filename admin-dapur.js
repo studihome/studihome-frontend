@@ -7,6 +7,15 @@
   const toast = (m,t='info') => window.App?.ui?.toast?.(m,t);
   const isAdminPage = () => (location.pathname || '/') === '/admin';
 
+  function loadAdminDapurActions() {
+    if (document.querySelector('script[data-studihome-admin-dapur-actions]')) return;
+    const s = document.createElement('script');
+    s.src = '/admin-dapur-actions.js?v=1';
+    s.dataset.studihomeAdminDapurActions = '1';
+    s.defer = true;
+    document.head.appendChild(s);
+  }
+
   async function loadManagedCreators() {
     const { data, error } = await supa().from('creator_profiles')
       .select('id,user_id,username,display_name,bio,avatar_url,cover_url,whatsapp,location,is_published,is_verified,review_status,updated_at,is_studihome_official,managed_by_studihome')
@@ -34,6 +43,7 @@
 
   async function render() {
     if (!isAdminPage()) return;
+    loadAdminDapurActions();
     const root = panel();
     if (!root) return;
     root.innerHTML = '<div class="py-12 text-center text-xs text-slate-500"><i class="fa-solid fa-spinner fa-spin mr-2"></i>Memuat Creator yang dikelola Studihome…</div>';
