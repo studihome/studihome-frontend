@@ -1,0 +1,49 @@
+name: Recover index after safe key fix
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/_recover-index-after-safe-key-fix.yml'
+
+permissions:
+  contents: write
+
+jobs:
+  recover:
+    if: github.actor != 'github-actions[bot]'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Restore last known-good index and bump config cache
+        shell: bash
+        run: |
+          set -euo pipefail
+          git checkout e8f85ae187b214190373820724ce7b95b1ac5e0d -- index.html
+          python - <<'PY'
+          from pathlib import Path
+          p = Path('index.html')
+          s = p.read_text(encoding='utf-8')
+          s = s.replace('/supabase-config.js?v=boot3', '/supabase-config.js?v=boot4', 1)
+          p.write_text(s, encoding='utf-8')
+          PY
+          test "$(grep -o 'supabase-config.js?v=boot4' index.html | wc -l)" -eq 1
+          test "$(wc -c < index.html)" -gt 100000
+          grep -q "window.supabaseClient = supabaseClient;" index.html
+
+      - name: Self remove workflow
+        shell: bash
+        run: |
+          rm -f .github/workflows/_recover-index-after-safe-key-fix.yml
+
+      - name: Commit recovery
+        shell: bash
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add index.html .github/workflows/_recover-index-after-safe-key-fix.yml
+          git commit -m 'fix: restore full index after Supabase key correction'
+          git push
