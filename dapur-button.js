@@ -20,6 +20,7 @@
   function isKamar() { return (location.pathname || '/').replace(/\/+$/, '') === '/kamar'; }
   function isDapur() { return /^\/dapur(?:\/|$)/i.test((location.pathname || '/').replace(/\/+$/, '') || '/'); }
   function isFoyer() { return /^\/dapur\/foyer$/i.test((location.pathname || '/').replace(/\/+$/, '')); }
+  function isAdmin() { return (location.pathname || '/').replace(/\/+$/, '') === '/admin'; }
   function isCreatorPath() {
     const path = (location.pathname || '/').replace(/\/+$/, '') || '/';
     return !RESERVED.has(path) && /^\/[a-z0-9][a-z0-9-]{2,39}(?:\/portfolio\/[a-z0-9][a-z0-9-]{0,120})?$/i.test(path);
@@ -157,7 +158,7 @@
     if (!avatarUrl) throw new Error('URL logo tidak berhasil dibuat.');
     const { error } = await supabaseClient.from('creator_profiles').update({avatar_url:avatarUrl}).eq('id',creator.id).eq('user_id',uid).eq('managed_by_studihome',false);
     if (error) throw error;
-    return {avatarUrl, size:blob.size, width:null, height:null};
+    return {avatarUrl, size:blob.size};
   }
 
   async function renderFoyerAvatar() {
@@ -169,21 +170,51 @@
     const card=document.createElement('section'); card.id='studihome-foyer-avatar'; card.className='card-3d p-5 sm:p-6 rounded-3xl mb-6';
     const initial = String(creator.display_name||creator.username||'C').charAt(0).toUpperCase();
     const src = creator.avatar_url ? App.utils.escapeHtml(creator.avatar_url) : '';
-    card.innerHTML=`<div class="flex flex-col sm:flex-row gap-5 items-start sm:items-center">
-      <div id="foyer-avatar-preview" class="w-32 h-32 sm:w-40 sm:h-40 rounded-3xl bg-blue-50 border border-blue-100 overflow-hidden flex items-center justify-center shrink-0">${src?`<img src="${src}" alt="Logo ${App.utils.escapeHtml(creator.display_name||'Creator')}" class="w-full h-full object-contain bg-white" loading="eager">`:`<span class="text-4xl font-black text-[#151c75]">${App.utils.escapeHtml(initial)}</span>`}</div>
-      <div class="min-w-0 flex-1"><div class="text-[9px] font-black uppercase tracking-[.08em] text-amber-600">FOYER · Identitas Brand</div><h2 class="mt-1 text-base sm:text-lg font-black text-[#151c75]">Logo Creator</h2><p class="mt-1 text-[10px] sm:text-xs text-slate-500 leading-relaxed">Unggah logo brand yang jelas. Sistem otomatis mengecilkan ukuran gambar, mengubahnya ke WebP, dan mengoptimalkannya untuk tampilan profil.</p><div class="mt-3 flex flex-wrap gap-2 items-center"><label class="btn-brand-gradient px-3.5 py-2 rounded-xl text-[10px] font-extrabold cursor-pointer"><i class="fa-solid fa-cloud-arrow-up mr-1"></i> Unggah Logo<input id="foyer-avatar-input" type="file" accept="image/png,image/jpeg,image/webp" class="hidden"></label><span class="text-[9px] text-slate-400">PNG/JPG/WebP · max 8 MB</span></div><div id="foyer-avatar-status" class="mt-2 text-[9px] text-slate-500"></div></div></div>`;
+    card.innerHTML=`<div class="flex flex-col sm:flex-row gap-5 items-start sm:items-center"><div id="foyer-avatar-preview" class="w-32 h-32 sm:w-40 sm:h-40 rounded-3xl bg-blue-50 border border-blue-100 overflow-hidden flex items-center justify-center shrink-0">${src?`<img src="${src}" alt="Logo ${App.utils.escapeHtml(creator.display_name||'Creator')}" class="w-full h-full object-contain bg-white" loading="eager">`:`<span class="text-4xl font-black text-[#151c75]">${App.utils.escapeHtml(initial)}</span>`}</div><div class="min-w-0 flex-1"><div class="text-[9px] font-black uppercase tracking-[.08em] text-amber-600">FOYER · Identitas Brand</div><h2 class="mt-1 text-base sm:text-lg font-black text-[#151c75]">Logo Creator</h2><p class="mt-1 text-[10px] sm:text-xs text-slate-500 leading-relaxed">Unggah logo brand yang jelas. Sistem otomatis mengecilkan ukuran gambar, mengubahnya ke WebP, dan mengoptimalkannya untuk tampilan profil.</p><div class="mt-3 flex flex-wrap gap-2 items-center"><label class="btn-brand-gradient px-3.5 py-2 rounded-xl text-[10px] font-extrabold cursor-pointer"><i class="fa-solid fa-cloud-arrow-up mr-1"></i> Unggah Logo<input id="foyer-avatar-input" type="file" accept="image/png,image/jpeg,image/webp" class="hidden"></label><span class="text-[9px] text-slate-400">PNG/JPG/WebP · max 8 MB</span></div><div id="foyer-avatar-status" class="mt-2 text-[9px] text-slate-500"></div></div></div>`;
     workspace.prepend(card);
-    card.querySelector('#foyer-avatar-input')?.addEventListener('change',async(e)=>{
-      const file=e.target.files?.[0]; if(!file) return;
-      const status=card.querySelector('#foyer-avatar-status'); status.textContent='Mengompres dan menyimpan logo…';
-      try{
-        const result=await uploadLogo(file);
-        card.querySelector('#foyer-avatar-preview').innerHTML=`<img src="${App.utils.escapeHtml(result.avatarUrl)}" alt="Logo Creator" class="w-full h-full object-contain bg-white" loading="eager">`;
-        status.innerHTML=`<span class="text-emerald-600 font-bold">Logo tersimpan.</span> Ukuran hasil ${(result.size/1024).toFixed(0)} KB.`;
-        App.ui?.toast?.('Logo brand berhasil dikompres dan disimpan.','success');
-      }catch(err){status.innerHTML=`<span class="text-red-600">${App.utils.escapeHtml(err?.message||'Logo belum bisa disimpan.')}</span>`;App.ui?.toast?.(err?.message||'Logo belum bisa disimpan.','error');}
-      finally{e.target.value='';}
-    });
+    card.querySelector('#foyer-avatar-input')?.addEventListener('change',async(e)=>{const file=e.target.files?.[0];if(!file)return;const status=card.querySelector('#foyer-avatar-status');status.textContent='Mengompres dan menyimpan logo…';try{const result=await uploadLogo(file);card.querySelector('#foyer-avatar-preview').innerHTML=`<img src="${App.utils.escapeHtml(result.avatarUrl)}" alt="Logo Creator" class="w-full h-full object-contain bg-white" loading="eager">`;status.innerHTML=`<span class="text-emerald-600 font-bold">Logo tersimpan.</span> Ukuran hasil ${(result.size/1024).toFixed(0)} KB.`;App.ui?.toast?.('Logo brand berhasil dikompres dan disimpan.','success');}catch(err){status.innerHTML=`<span class="text-red-600">${App.utils.escapeHtml(err?.message||'Logo belum bisa disimpan.')}</span>`;App.ui?.toast?.(err?.message||'Logo belum bisa disimpan.','error');}finally{e.target.value='';}});
+  }
+
+  function adminNavHost() {
+    if (!isAdmin()) return null;
+    const labels = ['Governance','Studio AI','Creator'];
+    const btn = Array.from(document.querySelectorAll('button')).find(b => labels.includes(String(b.textContent || '').trim().replace(/\s+/g,' ')));
+    if (!btn) return null;
+    return btn.parentElement;
+  }
+
+  function openAdminDapur() {
+    const area = document.getElementById('admin-content-area');
+    if (!area) return;
+    area.innerHTML = `
+      <div id="admin-dapur-panel" class="space-y-5">
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+          <div><h3 class="font-black text-sm sm:text-base text-[#151c75]">Dapur Studihome</h3><p class="text-[10px] sm:text-xs text-slate-500 mt-1">Pusat pengelolaan ekosistem Creator: Foyer, Menu, Hidangan, dan Ambalan.</p></div>
+          <a href="/dapur" class="btn-brand-gradient px-3.5 py-2 rounded-xl text-[10px] font-extrabold text-center">Buka Dapur</a>
+        </div>
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
+          ${[
+            ['fa-id-card','Foyer','Identitas & logo brand','creators'],
+            ['fa-utensils','Menu','Kategori & positioning','studio-ai'],
+            ['fa-bowl-food','Hidangan','Jasa / service Creator','creators'],
+            ['fa-layer-group','Ambalan','Portfolio & media','creators']
+          ].map(([icon,title,note,tab])=>`<button type="button" data-admin-dapur-tab="${tab}" class="card-3d p-4 rounded-2xl bg-white text-left hover:border-blue-200"><div class="w-9 h-9 rounded-xl bg-blue-50 text-[#151c75] flex items-center justify-center"><i class="fa-solid ${icon}"></i></div><div class="mt-3 text-xs font-black text-[#151c75]">${title}</div><div class="mt-1 text-[9px] text-slate-500 leading-relaxed">${note}</div><div class="mt-3 text-[9px] font-extrabold text-blue-600">Kelola →</div></button>`).join('')}
+        </div>
+        <div class="card-3d-inset p-4 rounded-2xl bg-slate-50/70"><div class="text-[9px] font-black uppercase tracking-[.08em] text-slate-400">Governance</div><p class="mt-1 text-[10px] text-slate-500 leading-relaxed">Semua tindakan Creator tetap melewati RLS, lifecycle review, dan kontrol Admin yang sudah aktif. Dapur ini hanya menjadi pusat navigasi operator.</p></div>
+      </div>`;
+    area.querySelectorAll('[data-admin-dapur-tab]').forEach(btn=>btn.addEventListener('click',()=>{const tab=btn.dataset.adminDapurTab;try{if(window.App?.admin?.switchTab)window.App.admin.switchTab(tab);}catch(_){}}));
+  }
+
+  function renderAdminDapurEntry() {
+    const host = adminNavHost();
+    if (!host || document.getElementById('admin-dapur-nav-btn')) return;
+    const btn=document.createElement('button');
+    btn.id='admin-dapur-nav-btn';
+    btn.type='button';
+    btn.className='px-3.5 py-2 rounded-xl transition-all text-slate-700 hover:text-[#151c75]';
+    btn.innerHTML='<i class="fa-solid fa-kitchen-set mr-1"></i> Dapur';
+    btn.addEventListener('click',openAdminDapur);
+    host.appendChild(btn);
   }
 
   function ensurePublicCreatorModule() {
@@ -193,7 +224,7 @@
   }
 
   function tick() {
-    renderKamarEntry(); normalizePortfolioForm(); hardenPortfolioSave(); ensurePublicCreatorModule(); renderFoyerAvatar();
+    renderKamarEntry(); normalizePortfolioForm(); hardenPortfolioSave(); ensurePublicCreatorModule(); renderFoyerAvatar(); renderAdminDapurEntry();
   }
 
   window.addEventListener('popstate', tick); window.addEventListener('hashchange', tick);
