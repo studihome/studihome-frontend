@@ -1,0 +1,43 @@
+<!doctype html>
+<html lang="id">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+  <title>Program Creator — Studihome</title>
+  <meta name="description" content="Program Creator Studihome: bangun identitas, tampilkan karya, dan kelola Dapur Creator dalam satu alamat.">
+  <meta name="robots" content="index,follow,max-image-preview:large">
+  <meta name="theme-color" content="#151c75">
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2" crossorigin="anonymous"></script>
+  <script src="/supabase-config.js?v=dapur2"></script>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+  <style>
+    :root{--brand:#151c75;--brand2:#4a54c7;--amber:#f59e0b;--bg:#f6f8ff}
+    *{font-family:Inter,sans-serif;-webkit-tap-highlight-color:transparent}
+    body{margin:0;background:var(--bg);color:#0f172a}
+    .btn-brand{background:linear-gradient(135deg,var(--brand),var(--brand2));color:#fff;box-shadow:0 10px 24px rgba(21,28,117,.18);transition:.2s ease}
+    .btn-brand:hover{transform:translateY(-1px);box-shadow:0 14px 28px rgba(21,28,117,.24)}
+    .btn-amber{background:linear-gradient(135deg,#eab308,#f59e0b);color:#111827;box-shadow:0 10px 24px rgba(245,158,11,.18);transition:.2s ease}
+    .glass{background:rgba(255,255,255,.9);backdrop-filter:blur(14px);border:1px solid rgba(219,231,255,.95)}
+    .shadow-soft{box-shadow:0 18px 50px rgba(21,28,117,.08)}
+    .focus-ring:focus-visible{outline:3px solid rgba(59,130,246,.35);outline-offset:3px}
+    @media(prefers-reduced-motion:reduce){*,*:before,*:after{scroll-behavior:auto!important;transition:none!important;animation:none!important}}
+  </style>
+</head>
+<body>
+  <header class="sticky top-0 z-40 glass">
+    <div class="max-w-6xl mx-auto px-4 py-3 flex items-center justify-between gap-3">
+      <a href="/" class="flex items-center gap-2.5 min-w-0">
+        <span class="w-9 h-9 rounded-xl bg-[#151c75] text-white flex items-center justify-center shadow-sm"><i class="fa-solid fa-star text-xs"></i></span>
+        <span><span class="block text-sm font-black text-[#151c75]">Studihome</span><span class="block text-[9px] font-bold tracking-[.12em] uppercase text-slate-400">Program Creator</span></span>
+      </a>
+      <div id="top-action"></div>
+    </div>
+  </header>
+
+  <main id="app" class="min-h-[calc(100vh-66px)]"></main>
+
+  <script src="/dapur-app-v1.js?v=1" defer></script>
+</body>
+</html>
