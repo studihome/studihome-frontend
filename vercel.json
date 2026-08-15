@@ -13,6 +13,7 @@
     { "source": "/ai-automation", "destination": "/index.html" },
     { "source": "/ai-content", "destination": "/index.html" },
     { "source": "/ai-untuk-guru", "destination": "/index.html" },
-    { "source": "/ai-untuk-umkm", "destination": "/index.html" }
+    { "source": "/ai-untuk-umkm", "destination": "/index.html" },
+    { "source": "/:username", "destination": "/index.html" }
   ]
 }
