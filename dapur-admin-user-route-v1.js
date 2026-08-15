@@ -4,7 +4,6 @@
 
   const RESERVED = new Set(['foyer','menu','hidangan','ambalan']);
   const esc = (v) => window.App?.utils?.escapeHtml ? window.App.utils.escapeHtml(v) : String(v ?? '').replace(/[&<>\"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','\"':'&quot;',"'":'&#39;'}[c]));
-  const toast = (m, t='info') => window.App?.ui?.toast?.(m, t);
   const getDb = () => window.supabaseClient || null;
 
   function targetSlug() {
@@ -45,8 +44,7 @@
   }
 
   async function getCreator(slug) {
-    const db = getDb();
-    const { data, error } = await db.from('creator_profiles')
+    const { data, error } = await getDb().from('creator_profiles')
       .select('id,user_id,username,display_name,bio,avatar_url,cover_url,whatsapp,location,contact_email,is_published,is_verified,review_status,review_note,managed_by_studihome,is_studihome_official')
       .eq('username', slug)
       .maybeSingle();
@@ -110,7 +108,10 @@
         </div>
       </div>`;
 
-    container.querySelector('#dc-user-refresh').onclick = () => refresh(container, slug);
+    const rerender = () => refresh(container, slug).catch(e => window.App?.ui?.toast?.(e.message || 'Dapur Creator belum bisa diperbarui.', 'error'));
+    window.AdminDapur = window.AdminDapur || {};
+    window.AdminDapur.render = rerender;
+    container.querySelector('#dc-user-refresh').onclick = rerender;
     container.querySelector('#dc-user-back').onclick = () => { location.href = '/admin'; };
     container.querySelector('[data-edit="profile"]').onclick = () => window.AdminDapurUI?.profile(creator.id);
     container.querySelector('[data-edit="categories"]').onclick = () => window.AdminDapurUI?.categories(creator.id);
@@ -133,8 +134,7 @@
     }
     try {
       await loadScript('/admin-dapur-ui.js?v=2','studihomeAdminDapurUI');
-      const existing = getDb();
-      if (!existing) throw new Error('Koneksi Admin belum siap.');
+      if (!getDb()) throw new Error('Koneksi Admin belum siap.');
       main.innerHTML = '<div class="max-w-5xl mx-auto"><div id="admin-dapur-user-root" class="py-12 text-center text-xs text-slate-500"><i class="fa-solid fa-spinner fa-spin mr-2"></i>Menyiapkan Dapur Creator…</div></div>';
       App.ui.renderNavigation();
       await refresh(document.getElementById('admin-dapur-user-root'), slug);
