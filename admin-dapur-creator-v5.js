@@ -115,7 +115,7 @@
             <div><div class="text-[9px] font-black uppercase tracking-[.1em] text-amber-600">Dapur Creator</div><div class="mt-1 text-sm font-black text-[#151c75]">${esc(creator.display_name || creator.username)}</div><div class="text-[9px] text-slate-500">@${esc(creator.username || '-')} · ${creator.managed_by_studihome ? 'Managed Studihome' : 'Community'}</div></div>
             <div class="flex flex-wrap gap-2">
               <a href="/${encodeURIComponent(creator.username || '')}" target="_blank" rel="noopener" class="px-3 py-2 rounded-xl bg-white border border-blue-100 text-[10px] font-extrabold text-[#151c75]">Dapurku</a>
-              <a href="/dapur" target="_blank" rel="noopener" class="px-3 py-2 rounded-xl bg-[#151c75] text-white text-[10px] font-extrabold">Kelola Dapur</a>
+              <a href="/dapur/${encodeURIComponent(creator.username || "")}" rel="noopener" class="px-3 py-2 rounded-xl bg-[#151c75] text-white text-[10px] font-extrabold" aria-label="Kelola Dapur ${esc(creator.display_name || creator.username)}">Kelola Dapur</a>
               <button type="button" data-action="verify" class="px-3 py-2 rounded-xl ${creator.is_verified ? 'bg-red-50 text-red-700' : 'bg-emerald-50 text-emerald-700'} text-[10px] font-extrabold">${creator.is_verified ? 'Cabut Verifikasi' : 'Verifikasi'}</button>
               <button type="button" data-action="publish" class="px-3 py-2 rounded-xl ${creator.is_published ? 'bg-red-50 text-red-700' : 'bg-[#3f48bf] text-white'} text-[10px] font-extrabold">${creator.is_published ? 'Tarik Publish' : 'Publish'}</button>
             </div>
