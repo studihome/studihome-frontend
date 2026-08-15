@@ -29,32 +29,37 @@ jobs:
           p = Path('index.html')
           s = p.read_text(encoding='utf-8')
 
-          # 1) Load the SDK + Supabase config before any Admin runtime scripts.
-          head_marker = '    <!-- Tailwind CSS CDN -->'
-          boot_block = '''    <!-- CANONICAL SUPABASE BOOT: SDK + config must load before feature runtimes -->\n    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2" crossorigin="anonymous"></script>\n    <script src="/supabase-config.js?v=boot2"></script>\n\n'''
-          if boot_block not in s:
-              s = s.replace(head_marker, boot_block + head_marker, 1)
-
-          # 2) Remove duplicate late SDK/config tags from the legacy bottom bootstrap.
+          # Remove any existing SDK/config tags first, wherever they are.
           s = re.sub(r'\s*<script src="https://cdn\.jsdelivr\.net/npm/@supabase/supabase-js@2" crossorigin="anonymous"></script>', '', s)
-          s = re.sub(r'\s*<script src="\./supabase-config\.js"></script>', '', s)
+          s = re.sub(r'\s*<script src="\./supabase-config\.js(?:\?[^\"]*)?"\s*></script>', '', s)
+          s = re.sub(r'\s*<script src="/supabase-config\.js(?:\?[^\"]*)?"\s*></script>', '', s)
 
-          # 3) Main bootstrap reuses the canonical singleton; never creates a second GoTrue client.
+          # Insert exactly one canonical boot block before feature runtimes/Tailwind.
+          head_marker = '    <!-- Tailwind CSS CDN -->'
+          boot_block = '''    <!-- CANONICAL SUPABASE BOOT: SDK + config before all feature runtimes -->\n    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2" crossorigin="anonymous"></script>\n    <script src="/supabase-config.js?v=boot3"></script>\n\n'''
+          if head_marker not in s:
+              raise SystemExit('Head insertion marker not found.')
+          s = s.replace(head_marker, boot_block + head_marker, 1)
+
+          # Reuse the singleton and publish the exact same client to window.
           old = 'supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {'
           new = 'supabaseClient = window.supabaseClient || window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {'
           if old in s:
               s = s.replace(old, new, 1)
 
           if 'window.supabaseClient = supabaseClient;' not in s:
-              target = re.search(r'(supabaseClient\s*=\s*window\.supabaseClient\s*\|\|\s*window\.supabase\.createClient\(SUPABASE_URL, SUPABASE_ANON_KEY, \{.*?\n\s*\}\);)', s, re.S)
-              if not target:
-                  raise SystemExit('Canonical Supabase createClient block not found after patch.')
-              end = target.end(1)
+              marker = '        supabaseClient = window.supabaseClient || window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {'
+              start = s.find(marker)
+              if start == -1:
+                  raise SystemExit('Canonical main createClient assignment not found.')
+              end = s.find('            });', start)
+              if end == -1:
+                  raise SystemExit('Canonical main createClient closing not found.')
+              end += len('            });')
               s = s[:end] + '\n            window.supabaseClient = supabaseClient;' + s[end:]
 
-          # 4) Ensure the canonical global navigation cannot declare Dapur.
           if "label: 'Dapur'" in s or "label: 'Dapur Creator'" in s:
-              raise SystemExit('Global header navigation still declares Dapur; aborting.')
+              raise SystemExit('Global header still declares Dapur; aborting.')
           if 'admin-dapur.js' in s:
               raise SystemExit('index.html still references legacy admin-dapur.js; aborting.')
 
@@ -65,14 +70,14 @@ jobs:
         run: |
           from pathlib import Path
           s = Path('index.html').read_text(encoding='utf-8')
-          assert s.count('/supabase-config.js?v=boot2') == 1
           assert s.count('cdn.jsdelivr.net/npm/@supabase/supabase-js@2') == 1
+          assert s.count('/supabase-config.js?v=boot3') == 1
           assert 'window.supabaseClient = supabaseClient;' in s
           assert 'supabaseClient = window.supabaseClient || window.supabase.createClient' in s
           assert "label: 'Dapur'" not in s
           assert "label: 'Dapur Creator'" not in s
           assert 'admin-dapur.js' not in s
-          print('Canonical boot and navigation contract OK')
+          print('Canonical boot/navigation contract OK')
 
       - name: Self remove workflow
         shell: bash
