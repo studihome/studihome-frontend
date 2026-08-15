@@ -8,6 +8,7 @@
     { "source": "/dashboard", "destination": "/index.html" },
     { "source": "/admin", "destination": "/index.html" },
     { "source": "/dapur", "destination": "/index.html" },
+    { "source": "/dapur/:username([a-z0-9][a-z0-9-]{2,39})", "destination": "/index.html" },
     { "source": "/dapur/foyer", "destination": "/index.html" },
     { "source": "/dapur/menu", "destination": "/index.html" },
     { "source": "/dapur/hidangan", "destination": "/index.html" },
@@ -34,7 +35,7 @@
     {
       "source": "/index.html",
       "headers": [
-        { "key": "Cache-Control", "value": "public, max-age=0, must-revalidate" }
+        { "key": "Cache-Control", "value": "no-store, no-cache, must-revalidate, proxy-revalidate, max-age=0" }
       ]
     }
   ]
