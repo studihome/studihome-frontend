@@ -764,7 +764,8 @@
             display: initial !important;
         }
     </style>
-    <script src="/dapur-creator-final-contract.js?v=1"></script>
+    <script src="/admin-dapur-creator-v5.js?v=5"></script>
+    <script src="/admin-gudang-v2.js?v=2"></script>
 </head>
 <body class="min-h-full flex flex-col antialiased selection:bg-amber-400 selection:text-slate-900 text-slate-800">
 
@@ -5626,16 +5627,12 @@ ${(() => { const rs=String(p.review_status||'DRAFT').toUpperCase(); const map={D
                             <button onclick="App.admin.switchTab('users')" class="px-3.5 py-2 rounded-xl transition-all ${activeTab === 'users' ? 'btn-brand-gradient shadow-xs' : 'text-slate-700 hover:text-[#151c75]'}">
                                 <i class="fa-solid fa-users mr-1"></i> Pengguna
                             </button>
-                            <button onclick="App.admin.switchTab('creators')" class="px-3.5 py-2 rounded-xl transition-all ${activeTab === 'creators' ? 'btn-brand-gradient shadow-xs' : 'text-slate-700 hover:text-[#151c75]'}">
-                                <i class="fa-solid fa-wand-magic-sparkles mr-1"></i> Creator
+                            <button onclick="App.admin.switchTab('dapur-creator')" class="px-3.5 py-2 rounded-xl transition-all ${activeTab === 'dapur-creator' ? 'btn-brand-gradient shadow-xs' : 'text-slate-700 hover:text-[#151c75]'}">
+                                <i class="fa-solid fa-kitchen-set mr-1"></i> Dapur Creator
                             </button>
-                            <button onclick="App.admin.switchTab('studio-ai')" class="px-3.5 py-2 rounded-xl transition-all ${activeTab === 'studio-ai' ? 'btn-brand-gradient shadow-xs' : 'text-slate-700 hover:text-[#151c75]'}">
-                                <i class="fa-solid fa-brain mr-1"></i> Studio AI
+                            <button onclick="App.admin.switchTab('gudang')" class="px-3.5 py-2 rounded-xl transition-all ${activeTab === 'gudang' ? 'btn-brand-gradient shadow-xs' : 'text-slate-700 hover:text-[#151c75]'}">
+                                <i class="fa-solid fa-warehouse mr-1"></i> Gudang
                             </button>
-                            <button onclick="App.admin.switchTab('governance')" class="px-3.5 py-2 rounded-xl transition-all ${activeTab === 'governance' ? 'btn-brand-gradient shadow-xs' : 'text-slate-700 hover:text-[#151c75]'}">
-                                <i class="fa-solid fa-shield-halved mr-1"></i> Governance
-                            </button>
-
                         </div>
 
                         <div id="admin-content-area" class="card-3d p-4 sm:p-6 rounded-3xl bg-white">
@@ -5962,9 +5959,18 @@ renderStudioAiControl: async () => {
                     const area = document.getElementById('admin-content-area');
                     if (!area) return;
 
+                    const tab = App.state.adminTab || 'orders';
+                    if (tab === 'dapur-creator') {
+                        window.StudihomeAdminDapurCreatorV5?.open?.();
+                        return;
+                    }
+                    if (tab === 'gudang') {
+                        window.StudihomeGudangV2?.open?.();
+                        return;
+                    }
+
                     try {
                         const adminData = await App.api.post('GET_ADMIN_DATA');
-                        const tab = App.state.adminTab || 'orders';
 
                         if (tab === 'studio-ai') {
                             await App.admin.renderStudioAiControl();
