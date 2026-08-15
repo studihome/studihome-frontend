@@ -1,0 +1,49 @@
+name: One-time enable Dapur navigation governance
+
+on:
+  push:
+    branches: [main]
+
+permissions:
+  contents: write
+
+jobs:
+  patch:
+    if: github.actor == 'studihome' || github.actor == 'github-actions[bot]'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 2
+
+      - name: Attach global Dapur governance module and remove workflow
+        shell: python
+        run: |
+          from pathlib import Path
+
+          path = Path('index.html')
+          text = path.read_text(encoding='utf-8')
+          marker = 'dapur-nav-governance.js?v=1'
+          script = '<script src="/dapur-nav-governance.js?v=1" defer></script>'
+
+          if marker not in text:
+              close_head = text.lower().rfind('</head>')
+              if close_head == -1:
+                  raise SystemExit('index.html has no </head>; aborting without changes.')
+              text = text[:close_head] + script + '\n' + text[close_head:]
+              path.write_text(text, encoding='utf-8')
+
+          wf = Path('.github/workflows/one-time-enable-dapur-nav-governance.yml')
+          if wf.exists():
+              wf.unlink()
+
+      - name: Commit and push
+        shell: bash
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add index.html .github/workflows/one-time-enable-dapur-nav-governance.yml
+          if git diff --cached --quiet; then exit 0; fi
+          git commit -m "fix: enforce Dapur context-specific navigation"
+          git push origin HEAD:main
