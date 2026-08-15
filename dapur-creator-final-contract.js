@@ -9,6 +9,17 @@
   // Dapur is contextual only: Admin panel = Dapur Creator; Member/Kamar = Dapur Creator.
   const CONTEXTUAL_LABELS = new Set(['dapur', 'dapur creator', 'creator']);
 
+  function loadAdminRuntime() {
+    if (!isAdmin()) return;
+    if (window.AdminDapurCreatorRuntime) return;
+    if (document.querySelector('script[data-studihome-admin-dapur-creator-runtime]')) return;
+    const script = document.createElement('script');
+    script.src = '/admin-dapur-creator-runtime.js?v=2';
+    script.dataset.studihomeAdminDapurCreatorRuntime = '1';
+    script.defer = true;
+    document.head.appendChild(script);
+  }
+
   function hideGlobalContextualItems() {
     for (const navId of ['top-nav-links', 'mobile-nav-links']) {
       const nav = document.getElementById(navId);
@@ -24,8 +35,7 @@
   }
 
   function findAdminCreatorTab() {
-    return [...document.querySelectorAll('#admin-content-area, body button[onclick*="switchTab"]')]
-      .flatMap(root => root.matches?.('button[onclick*="switchTab"]') ? [root] : [...root.querySelectorAll?.('button[onclick*="switchTab"]') || []])
+    return [...document.querySelectorAll('button[onclick*="switchTab"]')]
       .find((btn) => String(btn.getAttribute('onclick') || '').includes("'creators'")) || null;
   }
 
@@ -34,8 +44,7 @@
       if (!el.closest('#admin-content-area')) el.remove();
     });
     [...document.querySelectorAll('button[onclick*="switchTab"]')].forEach((btn) => {
-      const label = norm(btn.textContent || '');
-      if (label === 'dapur') btn.remove();
+      if (norm(btn.textContent || '') === 'dapur') btn.remove();
     });
   }
 
@@ -51,7 +60,7 @@
       event?.preventDefault?.();
       const rt = window.AdminDapurCreatorRuntime;
       if (rt?.open) rt.open();
-      else if (rt?.render) rt.render();
+      else loadAdminRuntime();
     };
   }
 
@@ -67,6 +76,7 @@
   }
 
   function reconcile() {
+    loadAdminRuntime();
     hideGlobalContextualItems();
     canonicalizeAdminCreatorTab();
     normalizeMemberDapur();
