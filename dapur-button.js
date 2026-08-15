@@ -200,8 +200,19 @@
     document.head.appendChild(s);
   }
 
+  function ensureAdminDapurRoute() {
+    if (!isDapur()) return;
+    if (document.querySelector('script[data-studihome-admin-dapur-route]')) return;
+    const s = document.createElement('script');
+    s.src = '/dapur-admin-user-route-v1.js?v=2';
+    s.dataset.studihomeAdminDapurRoute = '1';
+    s.defer = true;
+    document.head.appendChild(s);
+  }
+
   function tick() {
     if (path() === '/admin') return;
+    ensureAdminDapurRoute();
     renderKamarEntry();
     normalizePortfolioForm();
     hardenPortfolioSave();
