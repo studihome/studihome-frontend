@@ -3,21 +3,21 @@
 
   const norm = (v = '') => String(v).replace(/\s+/g, ' ').trim().toLowerCase();
   const isAdmin = () => (location.pathname || '/').replace(/\/+$/, '') === '/admin';
-
-  // FINAL NAVIGATION CONTRACT
-  // Global header/mobile primary navigation: Teras | Lobi | Studio AI | Admin.
-  // Dapur is contextual only: Admin panel = Dapur Creator; Member/Kamar = Dapur Creator.
   const CONTEXTUAL_LABELS = new Set(['dapur', 'dapur creator', 'creator']);
 
-  function loadAdminRuntime() {
-    if (!isAdmin()) return;
-    if (window.AdminDapurCreatorRuntime) return;
-    if (document.querySelector('script[data-studihome-admin-dapur-creator-runtime]')) return;
+  function loadScript(src, marker) {
+    if (document.querySelector(`script[data-${marker}]`)) return;
     const script = document.createElement('script');
-    script.src = '/admin-dapur-creator-runtime.js?v=2';
-    script.dataset.studihomeAdminDapurCreatorRuntime = '1';
+    script.src = src;
+    script.dataset[marker] = '1';
     script.defer = true;
     document.head.appendChild(script);
+  }
+
+  function loadAdminModules() {
+    if (!isAdmin()) return;
+    loadScript('/admin-dapur-creator-v3.js?v=3', 'studihome-admin-dapur-creator-v3');
+    loadScript('/admin-gudang-runtime.js?v=1', 'studihome-admin-gudang-runtime');
   }
 
   function hideGlobalContextualItems() {
@@ -58,9 +58,8 @@
     creator.innerHTML = '<i class="fa-solid fa-kitchen-set mr-1"></i> Dapur Creator';
     creator.onclick = (event) => {
       event?.preventDefault?.();
-      const rt = window.AdminDapurCreatorRuntime;
-      if (rt?.open) rt.open();
-      else loadAdminRuntime();
+      const runtime = window.AdminDapurCreatorV3;
+      if (runtime?.open) runtime.open();
     };
   }
 
@@ -76,10 +75,11 @@
   }
 
   function reconcile() {
-    loadAdminRuntime();
+    loadAdminModules();
     hideGlobalContextualItems();
     canonicalizeAdminCreatorTab();
     normalizeMemberDapur();
+    window.AdminGudangRuntime?.install?.();
   }
 
   let pending = false;
