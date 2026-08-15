@@ -33,7 +33,7 @@ Workspace URL:
 Section Foyer/Menu/Hidangan/Ambalan adalah section editor, BUKAN route terpisah.
 
 ## 4. CURRENT CANONICAL RUNTIME
-Source utama Dapur sekarang:
+Source utama Dapur:
 - `dapur.html` — HTML shell minimal;
 - `dapur-entry.js` — satu renderer + route/auth/UX orchestration;
 - `dapur-editor.js` — editor modal standalone, lazy-loaded;
@@ -83,7 +83,13 @@ Editor harus progresif: pengguna menyelesaikan bagian utama tanpa form panjang s
 - Tidak ada perubahan SQL/RLS pada refactor Dapur ini.
 
 ## 8. ROUTING RULES
-`vercel.json` hanya mengarahkan `/dapur` dan `/dapur/:username` ke `dapur.html`.
+`vercel.json` canonical:
+- `/dapur` → `/dapur.html`
+- `/dapur/:username` → `/dapur.html`
+- `/:username/portfolio/:slug*` → `/index.html`
+- `/:username` → `/index.html`
+
+PENTING: jangan memakai inline regex seperti `/:username([a-z0-9]...)` pada `rewrites.source`; deployment Vercel terbukti menolak konfigurasi tersebut dengan `Invalid vercel.json file provided`. Username tetap divalidasi di runtime oleh `dapur-entry.js`/`creator-public.js`.
 
 Jangan menghidupkan kembali route section:
 - `/dapur/foyer`
@@ -91,19 +97,28 @@ Jangan menghidupkan kembali route section:
 - `/dapur/hidangan`
 - `/dapur/ambalan`
 
-Slug username tetap divalidasi di runtime; konfigurasi Vercel tidak perlu regex kompleks untuk workspace.
-
 ## 9. LEGACY POLICY
-Generasi lama seperti `dapur-entry-v*`, `dapur-app-v*`, `dapur-workspace-*`, `dapur-runtime-*`, dan editor lama boleh tetap berada di repository sementara.
+Generasi superseded Dapur berikut sudah dihapus setelah audit runtime:
+- `dapur-app-v1.js` … `dapur-app-v4.js`
+- `dapur-entry-v6.js`, `dapur-entry-v7.js`
+- `dapur-runtime-v4.js`
+- `dapur-workspace-v2.js`, `dapur-workspace-v3.js`
+- `dapur-cta-v1.js`
+- `dapur-design-v2.js`
+- `dapur-enhancements-v1.js`
 
-Hapus hanya setelah:
+Tetap jangan menghapus compatibility/admin surfaces berikut sampai reference proof lebih kuat:
+- `dapur-admin-user-route-v1.js`
+- `dapur-button.js`
+- `admin-dapur-creator-v5.js`
+- `admin-dapur-ui-v2.js`
+
+Hapus legacy berikutnya hanya setelah:
 1. seluruh references dicari;
 2. runtime owner ditentukan;
 3. canonical replacement live;
 4. rollback path dipahami;
 5. tidak ada dependency aktif.
-
-Search code yang tersedia sebelumnya tidak cukup kuat untuk membuktikan references legacy = 0, sehingga cleanup penuh belum boleh diklaim selesai.
 
 ## 10. CHANGE PROTOCOL
 Sebelum perubahan:
@@ -120,20 +135,25 @@ Sebelum perubahan:
 11. baru nyatakan selesai.
 
 ## 11. CURRENT CODE STATE
-Canonical refactor sudah di-merge ke `main`.
-- Merge commit: `0ad1b33b7704623beb8b9ca72b895a06e0b862bd`
-- PR: `#1` — canonicalize Creator workspace runtime.
-- Perubahan: 4 file inti Dapur, tanpa SQL/RLS change.
+Canonical Dapur refactor + legacy runtime cleanup sudah berada di `main`.
+
+Cleanup merge commit:
+`319ec74889389d7af385b812273a518d9af2afc5`
+
+Vercel routing fix commit:
+`a01be6678281c5835e026d9217f15a7057ca6891`
+
+Perubahan routing hanya menghapus regex inline dari public username rewrite. Tidak ada SQL/RLS change.
 
 ## 12. PRODUCTION VERIFICATION STATE
-PENTING: saat handoff ini dibuat, Vercel belum menerbitkan deployment production baru yang memakai merge commit `0ad1b33...`.
-
-Verified production baseline yang masih aktif:
+Production yang terakhir terverifikasi masih:
 - commit: `53659423b83d3fb9fed8fbc0f97701871c392159`
 - deployment: `dpl_9WQBEfTqRJEijycmGrnAA6V2Jcrc`
 - state: `READY`
 
-Preview sebelumnya gagal dengan pesan Vercel: `Invalid vercel.json file provided`. Penyebab konfigurasi sudah disederhanakan dan merge terbaru memakai `/dapur/:username` tanpa regex workspace. Deployment final WAJIB diuji lagi sebelum release dinyatakan selesai.
+Preview cleanup commit `102cfccfda27bfd735078c78cbc292b6b0c9097f` gagal karena Vercel melaporkan `Invalid vercel.json file provided`. Build log tidak menunjukkan error syntax/build; deployment metadata mengidentifikasi error konfigurasi Vercel. Penyebab ditemukan pada inline regex di public username rewrite dan sudah diperbaiki di `a01be667...`.
+
+Saat handoff ini diperbarui, deployment production baru yang memakai `a01be667...` belum berhasil diverifikasi. Jangan mengklaim production sudah menggunakan commit tersebut sampai Vercel menunjukkan `READY` dengan SHA yang sama.
 
 ## 13. RELEASE GATE
 Jangan menyatakan `live`, `production ready`, atau `selesai` sampai:
@@ -158,4 +178,5 @@ Jangan:
 - menambah second renderer/decorator;
 - memakai observer global sebagai patch UI;
 - memasukkan service-role key ke frontend;
+- mengembalikan inline regex invalid pada `vercel.json`;
 - menyatakan production selesai tanpa deployment SHA verification.
