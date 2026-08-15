@@ -71,6 +71,10 @@
     }
     </script>
 
+    <!-- CANONICAL SUPABASE BOOT: SDK + config before all feature runtimes -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2" crossorigin="anonymous"></script>
+    <script src="/supabase-config.js?v=boot3"></script>
+
     <!-- Tailwind CSS CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- FontAwesome Icons -->
@@ -1043,9 +1047,6 @@
             </form>
         </div>
     </div>
-
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2" crossorigin="anonymous"></script>
-    <script src="./supabase-config.js"></script>
     <script>
         // SUPABASE CLIENT BOOTSTRAP
         const SUPABASE_URL = window.STUDIHOME_SUPABASE_URL || '';
@@ -1062,13 +1063,14 @@
             if (!/^https:\/\//i.test(SUPABASE_URL)) {
                 throw new Error('SUPABASE_URL tidak valid.');
             }
-            supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
+            supabaseClient = window.supabaseClient || window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
                 auth: {
                     persistSession: true,
                     autoRefreshToken: true,
                     detectSessionInUrl: true
                 }
             });
+            window.supabaseClient = supabaseClient;
             return supabaseClient;
         }
 
