@@ -23,25 +23,43 @@ jobs:
         shell: python
         run: |
           from pathlib import Path
+          import re
+
           p = Path('index.html')
           s = p.read_text(encoding='utf-8')
 
-          old = "supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {"
-          new = "supabaseClient = window.supabaseClient || window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {"
+          pattern = re.compile(
+              r"supabaseClient\s*=\s*window\.supabase\.createClient\(SUPABASE_URL,\s*SUPABASE_ANON_KEY,\s*\{.*?\n\s*\}\);",
+              re.S,
+          )
+          replacement = "supabaseClient = window.supabaseClient || window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {\n                auth: {\n                    persistSession: true,\n                    autoRefreshToken: true,\n                    detectSessionInUrl: true\n                }\n            });"
 
-          if old in s and "window.supabaseClient = supabaseClient;" not in s:
-              s = s.replace(old, new, 1)
+          if 'window.supabaseClient = supabaseClient;' not in s:
+              s2, count = pattern.subn(replacement, s, count=1)
+              if count != 1:
+                  raise SystemExit('Could not locate canonical initSupabase createClient block.')
+              s = s2
               marker = "            });\n        }"
-              replacement = "            });\n            window.supabaseClient = supabaseClient;\n        }"
               if marker not in s:
-                  raise SystemExit('Could not locate initSupabase closing marker.')
-              s = s.replace(marker, replacement, 1)
+                  raise SystemExit('Could not locate canonical initSupabase closing marker.')
+              s = s.replace(marker, "            });\n            window.supabaseClient = supabaseClient;\n        }", 1)
 
-          # Canonical global header must never contain Dapur/Creator as a top-level item.
           if 'admin-dapur.js' in s:
-              raise SystemExit('Legacy /admin-dapur.js reference still exists in index.html; remove it before shipping.')
+              raise SystemExit('Legacy /admin-dapur.js reference still exists in index.html.')
 
           p.write_text(s, encoding='utf-8')
+
+      - name: Validate boot contract
+        shell: python
+        run: |
+          from pathlib import Path
+          s = Path('index.html').read_text(encoding='utf-8')
+          assert 'window.supabaseClient = supabaseClient;' in s
+          assert 'supabaseClient = window.supabaseClient || window.supabase.createClient' in s
+          assert 'admin-dapur.js' not in s
+          assert "label: 'Dapur'" not in s
+          assert "label: 'Dapur Creator'" not in s
+          print('Boot/navigation contract OK')
 
       - name: Self remove this one-shot workflow
         shell: bash
