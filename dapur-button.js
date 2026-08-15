@@ -17,16 +17,22 @@
   const LEGACY_ID = 'studihome-open-dapur';
   const RESERVED = new Set(['','/','/products','/kamar','/admin','/studio-ai','/dapur','/dapur/foyer','/dapur/menu','/dapur/hidangan','/dapur/ambalan','/ruang-kerja','/creator-studio','/dashboard','/ai-video','/ai-automation','/ai-content','/ai-untuk-guru','/ai-untuk-umkm']);
 
-  function isKamar() { return (location.pathname || '/').replace(/\/+$/, '') === '/kamar'; }
-  function isDapur() { return /^\/dapur(?:\/|$)/i.test((location.pathname || '/').replace(/\/+$/, '') || '/'); }
-  function isFoyer() { return /^\/dapur\/foyer$/i.test((location.pathname || '/').replace(/\/+$/, '')); }
-  function isAdmin() { return (location.pathname || '/').replace(/\/+$/, '') === '/admin'; }
+  function path() { return (location.pathname || '/').replace(/\/+$/, '') || '/'; }
+  function isKamar() { return path() === '/kamar'; }
+  function isDapur() { return /^\/dapur(?:\/|$)/i.test(path()); }
+  function isFoyer() { return /^\/dapur\/foyer$/i.test(path()); }
   function isCreatorPath() {
-    const path = (location.pathname || '/').replace(/\/+$/, '') || '/';
-    return !RESERVED.has(path) && /^\/[a-z0-9][a-z0-9-]{2,39}(?:\/portfolio\/[a-z0-9][a-z0-9-]{0,120})?$/i.test(path);
+    const current = path();
+    return !RESERVED.has(current) && /^\/[a-z0-9][a-z0-9-]{2,39}(?:\/portfolio\/[a-z0-9][a-z0-9-]{0,120})?$/i.test(current);
   }
+
   function goDapur() {
-    try { if (window.App?.router?.navigate) { window.App.router.navigate('dapur'); return; } } catch (_) {}
+    try {
+      if (window.App?.router?.navigate) {
+        window.App.router.navigate('dapur');
+        return;
+      }
+    } catch (_) {}
     location.href = '/dapur';
   }
 
@@ -52,13 +58,13 @@
     try { u = new URL(String(url || '').trim()); } catch (_) { return null; }
     if (!/^https?:$/.test(u.protocol)) return null;
     const host = u.hostname.toLowerCase();
-    const path = u.pathname.toLowerCase();
+    const filePath = u.pathname.toLowerCase();
     if ((host === 'youtube.com' || host === 'www.youtube.com' || host === 'youtu.be') && (u.searchParams.get('v') || host === 'youtu.be')) return 'youtube';
     if (/(^|\.)drive\.google\.com$|(^|\.)docs\.google\.com$/.test(host)) return 'drive';
     if (/(^|\.)tiktok\.com$/.test(host)) return 'tiktok';
     if (/(^|\.)instagram\.com$/.test(host)) return 'instagram';
-    if (/\.(png|jpe?g|webp|gif|avif|svg)(?:$|[?#])/i.test(path)) return 'image';
-    if (/\.(mp4|webm|m4v|mov|ogv)(?:$|[?#])/i.test(path)) return 'video';
+    if (/\.(png|jpe?g|webp|gif|avif|svg)(?:$|[?#])/i.test(filePath)) return 'image';
+    if (/\.(mp4|webm|m4v|mov|ogv)(?:$|[?#])/i.test(filePath)) return 'video';
     return 'link';
   }
 
@@ -67,8 +73,9 @@
     const select = document.getElementById('cp-type');
     const url = document.getElementById('cp-url');
     if (!url) return;
+    const type = autoDetectMedia(url.value) || 'link';
     if (select) {
-      select.value = autoDetectMedia(url.value) || 'link';
+      select.value = type;
       select.classList.add('hidden');
       select.setAttribute('aria-hidden', 'true');
       select.dataset.studihomeAutoType = '1';
@@ -77,11 +84,11 @@
     url.setAttribute('inputmode', 'url');
     url.setAttribute('autocomplete', 'url');
     url.oninput = () => {
-      const type = autoDetectMedia(url.value) || 'link';
-      if (select) select.value = type;
+      const detected = autoDetectMedia(url.value) || 'link';
+      if (select) select.value = detected;
       const labels={image:'Gambar',video:'Video',youtube:'YouTube',drive:'Google Drive',tiktok:'TikTok',instagram:'Instagram',link:'Tautan'};
       const hint = document.getElementById('dapur-media-detected');
-      if (hint) hint.textContent = `Terdeteksi otomatis: ${labels[type] || 'Tautan'}`;
+      if (hint) hint.textContent = `Terdeteksi otomatis: ${labels[detected] || 'Tautan'}`;
     };
     let hint = document.getElementById('dapur-media-detected');
     if (!hint) {
@@ -91,7 +98,7 @@
       url.insertAdjacentElement('afterend', hint);
     }
     const labels={image:'Gambar',video:'Video',youtube:'YouTube',drive:'Google Drive',tiktok:'TikTok',instagram:'Instagram',link:'Tautan'};
-    hint.textContent = `Terdeteksi otomatis: ${labels[autoDetectMedia(url.value) || 'link'] || 'Tautan'}`;
+    hint.textContent = `Terdeteksi otomatis: ${labels[type] || 'Tautan'}`;
     const noteId = 'dapur-portfolio-media-policy';
     if (!document.getElementById(noteId)) {
       const note = document.createElement('div');
@@ -109,7 +116,10 @@
     window.App.creatorStudio.savePortfolio = async function(id = '') {
       const url = String(document.getElementById('cp-url')?.value || '').trim();
       const type = autoDetectMedia(url);
-      if (!type) { window.App.ui?.toast?.('Tautan media belum valid. Gunakan URL http/https yang benar.', 'error'); return; }
+      if (!type) {
+        window.App.ui?.toast?.('Tautan media belum valid. Gunakan URL http/https yang benar.', 'error');
+        return;
+      }
       const select = document.getElementById('cp-type');
       if (select) select.value = type;
       return original(id);
@@ -119,7 +129,12 @@
 
   async function getOwnCreator() {
     if (!window.supabaseClient || !window.App?.state?.user?.id) return null;
-    const { data, error } = await supabaseClient.from('creator_profiles').select('id,username,display_name,avatar_url,managed_by_studihome,is_published').eq('user_id', window.App.state.user.id).eq('managed_by_studihome', false).limit(1).maybeSingle();
+    const { data, error } = await window.supabaseClient.from('creator_profiles')
+      .select('id,username,display_name,avatar_url,managed_by_studihome,is_published')
+      .eq('user_id', window.App.state.user.id)
+      .eq('managed_by_studihome', false)
+      .limit(1)
+      .maybeSingle();
     if (error) throw error;
     return data || null;
   }
@@ -151,12 +166,12 @@
     const blob = await compressLogo(file);
     const uid = window.App.state.user.id;
     const path = `${uid}/avatar/${creator.id}-${Date.now()}.webp`;
-    const { error: uploadError } = await supabaseClient.storage.from('creator-media').upload(path, blob, {contentType:'image/webp', upsert:false, cacheControl:'31536000'});
+    const { error: uploadError } = await window.supabaseClient.storage.from('creator-media').upload(path, blob, {contentType:'image/webp', upsert:false, cacheControl:'31536000'});
     if (uploadError) throw uploadError;
-    const { data } = supabaseClient.storage.from('creator-media').getPublicUrl(path);
+    const { data } = window.supabaseClient.storage.from('creator-media').getPublicUrl(path);
     const avatarUrl = data?.publicUrl;
     if (!avatarUrl) throw new Error('URL logo tidak berhasil dibuat.');
-    const { error } = await supabaseClient.from('creator_profiles').update({avatar_url:avatarUrl}).eq('id',creator.id).eq('user_id',uid).eq('managed_by_studihome',false);
+    const { error } = await window.supabaseClient.from('creator_profiles').update({avatar_url:avatarUrl}).eq('id',creator.id).eq('user_id',uid).eq('managed_by_studihome',false);
     if (error) throw error;
     return {avatarUrl, size:blob.size};
   }
@@ -175,70 +190,38 @@
     card.querySelector('#foyer-avatar-input')?.addEventListener('change',async(e)=>{const file=e.target.files?.[0];if(!file)return;const status=card.querySelector('#foyer-avatar-status');status.textContent='Mengompres dan menyimpan logo…';try{const result=await uploadLogo(file);card.querySelector('#foyer-avatar-preview').innerHTML=`<img src="${App.utils.escapeHtml(result.avatarUrl)}" alt="Logo Creator" class="w-full h-full object-contain bg-white" loading="eager">`;status.innerHTML=`<span class="text-emerald-600 font-bold">Logo tersimpan.</span> Ukuran hasil ${(result.size/1024).toFixed(0)} KB.`;App.ui?.toast?.('Logo brand berhasil dikompres dan disimpan.','success');}catch(err){status.innerHTML=`<span class="text-red-600">${App.utils.escapeHtml(err?.message||'Logo belum bisa disimpan.')}</span>`;App.ui?.toast?.(err?.message||'Logo belum bisa disimpan.','error');}finally{e.target.value='';}});
   }
 
-  function adminNavHost() {
-    if (!isAdmin()) return null;
-    const labels = ['Governance','Studio AI','Creator'];
-    const btn = Array.from(document.querySelectorAll('button')).find(b => labels.includes(String(b.textContent || '').trim().replace(/\s+/g,' ')));
-    if (!btn) return null;
-    return btn.parentElement;
-  }
-
-  function openAdminDapur() {
-    const area = document.getElementById('admin-content-area');
-    if (!area) return;
-    area.innerHTML = `
-      <div id="admin-dapur-panel" class="space-y-5">
-        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-          <div><h3 class="font-black text-sm sm:text-base text-[#151c75]">Dapur Studihome</h3><p class="text-[10px] sm:text-xs text-slate-500 mt-1">Pusat pengelolaan ekosistem Creator: Foyer, Menu, Hidangan, dan Ambalan.</p></div>
-          <a href="/dapur" class="btn-brand-gradient px-3.5 py-2 rounded-xl text-[10px] font-extrabold text-center">Buka Dapur</a>
-        </div>
-        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
-          ${[
-            ['fa-id-card','Foyer','Identitas & logo brand','creators'],
-            ['fa-utensils','Menu','Kategori & positioning','studio-ai'],
-            ['fa-bowl-food','Hidangan','Jasa / service Creator','creators'],
-            ['fa-layer-group','Ambalan','Portfolio & media','creators']
-          ].map(([icon,title,note,tab])=>`<button type="button" data-admin-dapur-tab="${tab}" class="card-3d p-4 rounded-2xl bg-white text-left hover:border-blue-200"><div class="w-9 h-9 rounded-xl bg-blue-50 text-[#151c75] flex items-center justify-center"><i class="fa-solid ${icon}"></i></div><div class="mt-3 text-xs font-black text-[#151c75]">${title}</div><div class="mt-1 text-[9px] text-slate-500 leading-relaxed">${note}</div><div class="mt-3 text-[9px] font-extrabold text-blue-600">Kelola →</div></button>`).join('')}
-        </div>
-        <div class="card-3d-inset p-4 rounded-2xl bg-slate-50/70"><div class="text-[9px] font-black uppercase tracking-[.08em] text-slate-400">Governance</div><p class="mt-1 text-[10px] text-slate-500 leading-relaxed">Semua tindakan Creator tetap melewati RLS, lifecycle review, dan kontrol Admin yang sudah aktif. Dapur ini hanya menjadi pusat navigasi operator.</p></div>
-      </div>`;
-    area.querySelectorAll('[data-admin-dapur-tab]').forEach(btn=>btn.addEventListener('click',()=>{const tab=btn.dataset.adminDapurTab;try{if(window.App?.admin?.switchTab)window.App.admin.switchTab(tab);}catch(_){}}));
-  }
-
-  function renderAdminDapurEntry() {
-    const host = adminNavHost();
-    if (!host || document.getElementById('admin-dapur-nav-btn')) return;
-    const btn=document.createElement('button');
-    btn.id='admin-dapur-nav-btn';
-    btn.type='button';
-    btn.className='px-3.5 py-2 rounded-xl transition-all text-slate-700 hover:text-[#151c75]';
-    btn.innerHTML='<i class="fa-solid fa-kitchen-set mr-1"></i> Dapur';
-    btn.addEventListener('click',openAdminDapur);
-    host.appendChild(btn);
-  }
-
   function ensurePublicCreatorModule() {
     if (!isCreatorPath()) return;
     if (document.querySelector('script[data-studihome-creator-public]')) return;
-    const s=document.createElement('script'); s.src='/creator-public.js?v=2'; s.dataset.studihomeCreatorPublic='1'; s.defer=true; document.head.appendChild(s);
-  }
-
-  function ensureAdminDapurModule() {
-    if ((location.pathname || '/') !== '/admin') return;
-    if (document.querySelector('script[data-studihome-admin-dapur]')) return;
-    const s = document.createElement('script');
-    s.src = '/admin-dapur.js?v=1';
-    s.dataset.studihomeAdminDapur = '1';
-    s.defer = true;
+    const s=document.createElement('script');
+    s.src='/creator-public.js?v=2';
+    s.dataset.studihomeCreatorPublic='1';
+    s.defer=true;
     document.head.appendChild(s);
   }
 
   function tick() {
-    renderKamarEntry(); normalizePortfolioForm(); hardenPortfolioSave(); ensurePublicCreatorModule(); renderFoyerAvatar(); ensureAdminDapurModule(); renderAdminDapurEntry();
+    if (path() === '/admin') return;
+    renderKamarEntry();
+    normalizePortfolioForm();
+    hardenPortfolioSave();
+    ensurePublicCreatorModule();
+    renderFoyerAvatar();
   }
 
-  window.addEventListener('popstate', tick); window.addEventListener('hashchange', tick);
-  new MutationObserver(tick).observe(document.documentElement,{childList:true,subtree:true});
-  if(document.readyState==='loading') document.addEventListener('DOMContentLoaded',tick,{once:true}); else tick();
-  let attempts=0; const retry=setInterval(()=>{tick();attempts+=1;if(attempts>=60)clearInterval(retry);},500);
+  function scheduleRefreshes() {
+    tick();
+    window.setTimeout(tick, 600);
+    window.setTimeout(tick, 1600);
+  }
+
+  window.StudihomeDapurUI = Object.freeze({ refresh: scheduleRefreshes, goDapur });
+  window.addEventListener('popstate', scheduleRefreshes);
+  window.addEventListener('hashchange', scheduleRefreshes);
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', scheduleRefreshes, { once: true });
+  } else {
+    scheduleRefreshes();
+  }
 })();
