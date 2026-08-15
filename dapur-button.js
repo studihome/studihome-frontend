@@ -223,8 +223,18 @@
     const s=document.createElement('script'); s.src='/creator-public.js?v=2'; s.dataset.studihomeCreatorPublic='1'; s.defer=true; document.head.appendChild(s);
   }
 
+  function ensureAdminDapurModule() {
+    if ((location.pathname || '/') !== '/admin') return;
+    if (document.querySelector('script[data-studihome-admin-dapur]')) return;
+    const s = document.createElement('script');
+    s.src = '/admin-dapur.js?v=1';
+    s.dataset.studihomeAdminDapur = '1';
+    s.defer = true;
+    document.head.appendChild(s);
+  }
+
   function tick() {
-    renderKamarEntry(); normalizePortfolioForm(); hardenPortfolioSave(); ensurePublicCreatorModule(); renderFoyerAvatar(); renderAdminDapurEntry();
+    renderKamarEntry(); normalizePortfolioForm(); hardenPortfolioSave(); ensurePublicCreatorModule(); renderFoyerAvatar(); ensureAdminDapurModule(); renderAdminDapurEntry();
   }
 
   window.addEventListener('popstate', tick); window.addEventListener('hashchange', tick);
