@@ -16,21 +16,25 @@
   <script src="https://cdn.tailwindcss.com"></script>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"><link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
   <style>
-    :root{--brand:#151c75;--brand2:#3f48bf;--amber:#f59e0b;--bg:#eef4ff;--ink:#0f172a}
+    :root{--brand:#151c75;--brand2:#3f48bf;--amber:#f59e0b;--ink:#0f172a}
     *{font-family:Inter,sans-serif;-webkit-tap-highlight-color:transparent}
     html{scroll-behavior:smooth}
     body{margin:0;background:radial-gradient(circle at 20% 0,#f8fbff 0,#eef4ff 42%,#eaf1ff 100%);color:var(--ink)}
-    .glass{background:rgba(255,255,255,.86);backdrop-filter:blur(18px);-webkit-backdrop-filter:blur(18px);border-bottom:1px solid rgba(219,231,255,.9)}
+    .glass{background:rgba(255,255,255,.88);backdrop-filter:blur(18px);-webkit-backdrop-filter:blur(18px);border-bottom:1px solid rgba(219,231,255,.9)}
     .brand-gradient{background:linear-gradient(135deg,var(--brand),var(--brand2));color:#fff}
     .shadow-soft{box-shadow:0 20px 55px rgba(21,28,117,.10)}
     .shadow-card{box-shadow:0 10px 28px rgba(21,28,117,.07)}
     .focus-ring:focus-visible{outline:3px solid rgba(96,165,250,.35);outline-offset:3px}
     .brand-mark{display:inline-flex;align-items:center;justify-content:center;width:40px;height:40px;border-radius:14px;background:linear-gradient(135deg,#151c75,#3f48bf);color:#fff;font-size:18px;font-weight:800;line-height:1;box-shadow:0 8px 22px rgba(21,28,117,.10)}
-    @media(prefers-reduced-motion:reduce){html{scroll-behavior:auto}*,*:before,*:after{animation:none!important;transition:none!important}}
+    .dapur-enter{animation:dapurEnter .55s cubic-bezier(.22,1,.36,1) both;animation-delay:var(--dapur-delay,0ms)}
+    .dapur-enter:hover{transform:translateY(-2px);transition:transform .22s ease,box-shadow .22s ease}
+    @keyframes dapurEnter{from{opacity:0;transform:translateY(12px) scale(.99);filter:blur(2px)}to{opacity:1;transform:none;filter:none}}
+    @media(prefers-reduced-motion:reduce){html{scroll-behavior:auto}.dapur-enter{animation:none!important}.dapur-enter:hover{transform:none}}
   </style>
 </head>
 <body>
 <header class="sticky top-0 z-50 glass"><div class="max-w-6xl mx-auto px-4 py-3 flex items-center justify-between gap-3"><a href="/" class="focus-ring flex items-center gap-3 min-w-0 rounded-2xl"><span class="brand-mark" aria-hidden="true">✦</span><span class="min-w-0"><span class="block text-base font-black tracking-tight text-[#151c75]">Studihome</span><span class="block text-sm font-bold tracking-[.10em] uppercase text-slate-400">Dapur Creator</span></span></a><div id="top-action"></div></div></header>
 <main id="app" class="min-h-[calc(100vh-66px)]"></main>
-<script src="/dapur-app-v4.js?v=1" defer></script>
+<script src="/dapur-enhancements-v1.js?v=1" defer></script>
+<script src="/dapur-app-v4.js?v=2" defer></script>
 </body></html>
