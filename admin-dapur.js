@@ -151,13 +151,13 @@
     if(!nav.length) return;
     const tabbar=document.querySelector('#admin-content-area')?.parentElement;
     if(!tabbar) return;
-    const buttons=[...document.querySelectorAll('button[onclick*="switchTab"]')];
+    const buttons=[...document.querySelectorAll('button[onclick*=\"switchTab\"]')];
     const creatorBtn=buttons.find(b=>String(b.getAttribute('onclick')).includes("'creators'"));
     if(!creatorBtn || document.getElementById('admin-dapur-tab-btn')) return;
     const btn=document.createElement('button');
     btn.id='admin-dapur-tab-btn'; btn.className=creatorBtn.className; btn.innerHTML='<i class="fa-solid fa-kitchen-set mr-1"></i> Dapur';
     btn.addEventListener('click',()=>{
-      document.querySelectorAll('button[onclick*="switchTab"]').forEach(x=>x.classList.remove('btn-brand-gradient','shadow-xs'));
+      document.querySelectorAll('button[onclick*=\"switchTab\"]').forEach(x=>x.classList.remove('btn-brand-gradient','shadow-xs'));
       btn.classList.add('btn-brand-gradient','shadow-xs');
       const area=document.getElementById('admin-content-area');
       area.innerHTML='<div id="admin-dapur-content"></div>';
@@ -167,11 +167,9 @@
   }
 
   window.AdminDapur={init,render,filter,toggleVerified,togglePublished,editProfile};
-  const boot=()=>{init();};
-  window.addEventListener('DOMContentLoaded',boot);
-  new MutationObserver(()=>init()).observe(document.documentElement,{childList:true,subtree:true});
+  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',init,{once:true});else init();
+
+  ;(()=>{if(document.querySelector('script[data-studihome-admin-dapur-theme]'))return;const s=document.createElement('script');s.src='/admin-dapur-theme.js?v=1';s.dataset.studihomeAdminDapurTheme='1';s.defer=true;document.head.appendChild(s)})();
+  ;(()=>{if(document.querySelector('script[data-studihome-admin-dapur-position]'))return;const s=document.createElement('script');s.src='/admin-dapur-position.js?v=1';s.dataset.studihomeAdminDapurPosition='1';s.defer=true;document.head.appendChild(s)})();
+  ;(()=>{if(document.querySelector('script[data-studihome-admin-creator-scope]'))return;const s=document.createElement('script');s.src='/admin-creator-scope.js?v=1';s.dataset.studihomeAdminCreatorScope='1';s.defer=true;document.head.appendChild(s)})();
 })();
-
-;(()=>{if(document.querySelector('script[data-studihome-admin-dapur-theme]'))return;const s=document.createElement('script');s.src='/admin-dapur-theme.js?v=1';s.dataset.studihomeAdminDapurTheme='1';s.defer=true;document.head.appendChild(s)})();
-
-;(()=>{if(document.querySelector('script[data-studihome-admin-dapur-position]'))return;const s=document.createElement('script');s.src='/admin-dapur-position.js?v=1';s.dataset.studihomeAdminDapurPosition='1';s.defer=true;document.head.appendChild(s)})();
