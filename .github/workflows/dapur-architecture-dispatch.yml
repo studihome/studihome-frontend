@@ -5,25 +5,53 @@ on:
     branches: [main]
 
 permissions:
-  actions: write
   contents: write
 
 jobs:
-  dispatch-and-clean:
+  apply-and-clean:
     if: ${{ github.actor != 'github-actions[bot]' }}
     runs-on: ubuntu-latest
     steps:
-      - name: Dispatch final migration
-        env:
-          GH_TOKEN: ${{ github.token }}
-        run: gh workflow run dapur-architecture-finalize.yml --ref main
-      - name: Remove dispatcher
+      - name: Checkout
         uses: actions/checkout@v4
-      - name: Commit removal
+        with:
+          ref: main
+          fetch-depth: 0
+
+      - name: Execute canonical migration blocks
+        shell: python
+        run: |
+          from pathlib import Path
+          import re
+
+          wf = Path('.github/workflows/dapur-architecture-finalize.yml').read_text(encoding='utf-8')
+
+          def extract_after(marker, next_marker):
+              start = wf.index(marker)
+              segment = wf[start:]
+              start_py = segment.index('          from pathlib import Path')
+              segment = segment[start_py:]
+              end = segment.index(next_marker)
+              code = segment[:end]
+              return '\n'.join(line[10:] if line.startswith('          ') else line for line in code.splitlines())
+
+          blocks = []
+          blocks.append(extract_after('      - name: Apply canonical Dapur architecture', '      - name: Remove obsolete Dapur header injectors'))
+          blocks.append(extract_after('      - name: Remove obsolete Dapur header injectors', '      - name: Validate architecture'))
+          blocks.append(extract_after('      - name: Validate architecture', '      - name: Commit and push'))
+
+          for i, code in enumerate(blocks, 1):
+              compile(code, f'<embedded-finalize-block-{i}>', 'exec')
+              exec(code, {'__name__': '__main__'})
+
+      - name: Commit final source and remove one-shot workflows
         shell: bash
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git rm .github/workflows/dapur-architecture-dispatch.yml
-          git commit -m "chore: remove Dapur migration dispatcher"
+          git add index.html admin-dapur-creator-v5.js admin-dapur-ui.js dapur-admin-user-route-v1.js
+          git add -u
+          git commit -m "feat: finalize per-creator Dapur routing and remove legacy header code"
+          git rm .github/workflows/dapur-architecture-finalize.yml .github/workflows/dapur-architecture-dispatch.yml
+          git commit -m "chore: remove one-shot Dapur architecture workflows"
           git push origin main
