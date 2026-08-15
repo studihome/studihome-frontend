@@ -173,3 +173,5 @@
 })();
 
 ;(()=>{if(document.querySelector('script[data-studihome-admin-dapur-theme]'))return;const s=document.createElement('script');s.src='/admin-dapur-theme.js?v=1';s.dataset.studihomeAdminDapurTheme='1';s.defer=true;document.head.appendChild(s)})();
+
+;(()=>{if(document.querySelector('script[data-studihome-admin-dapur-position]'))return;const s=document.createElement('script');s.src='/admin-dapur-position.js?v=1';s.dataset.studihomeAdminDapurPosition='1';s.defer=true;document.head.appendChild(s)})();
