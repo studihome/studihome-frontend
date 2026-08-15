@@ -24,19 +24,13 @@ YAGNI berlaku: jangan membuat layer, loader, observer, atau abstraction baru bil
 ### Public Creator profile
 `/{username}`
 
-Fungsi: profil publik Creator yang dapat dibagikan.
-
 ### Creator workspace
 `/dapur/{username}`
-
-Fungsi: workspace pengelolaan Creator tertentu.
 
 ### Dapur root
 `/dapur`
 
-Fungsi: landing/entry program Dapur Studihome.
-
-Root bukan dashboard admin dan bukan Managed Creator Hub.
+Root adalah landing/entry program Dapur Studihome, bukan dashboard admin dan bukan Managed Creator Hub.
 
 Foyer/Menu/Hidangan/Ambalan adalah section editor, bukan route.
 
@@ -132,14 +126,18 @@ Sebelum perubahan RLS:
 
 Service-role key tidak pernah berada di frontend.
 
-Refactor canonical Dapur terakhir tidak mengubah SQL/RLS.
+Refactor canonical Dapur dan cleanup legacy runtime tidak mengubah SQL/RLS.
 
 ## Article X — Routing Contract
 `vercel.json` menjaga route Dapur canonical:
 - `/dapur` → `dapur.html`
 - `/dapur/:username` → `dapur.html`
+- `/:username/portfolio/:slug*` → `index.html`
+- `/:username` → `index.html`
 
 Username divalidasi lagi di runtime.
+
+Jangan menggunakan inline regex parameter seperti `/:username([a-z0-9]...)` di `rewrites.source`; konfigurasi tersebut telah terbukti menyebabkan deployment Vercel `Invalid vercel.json file provided`.
 
 Jangan membuat route section:
 - `/dapur/foyer`
@@ -150,14 +148,27 @@ Jangan membuat route section:
 ## Article XI — Legacy Policy
 Kode lama tidak dihapus karena terlihat tua.
 
-Sebelum delete:
+Generasi superseded Dapur yang sudah aman dihapus:
+- `dapur-app-v1.js` … `dapur-app-v4.js`
+- `dapur-entry-v6.js`, `dapur-entry-v7.js`
+- `dapur-runtime-v4.js`
+- `dapur-workspace-v2.js`, `dapur-workspace-v3.js`
+- `dapur-cta-v1.js`
+- `dapur-design-v2.js`
+- `dapur-enhancements-v1.js`
+
+Compatibility/admin surfaces yang masih ditahan:
+- `dapur-admin-user-route-v1.js`
+- `dapur-button.js`
+- `admin-dapur-creator-v5.js`
+- `admin-dapur-ui-v2.js`
+
+Sebelum delete berikutnya:
 1. cari seluruh references;
 2. tentukan runtime owner;
 3. pastikan replacement canonical sudah live;
 4. pahami rollback;
 5. pastikan tidak ada consumer aktif.
-
-Generasi legacy Dapur boleh tetap ada sementara sampai bukti references = 0 tersedia.
 
 ## Article XII — Change Protocol
 1. identifikasi owner;
@@ -182,15 +193,21 @@ Tidak boleh menyebut `selesai`, `live`, atau `production ready` bila:
 - legacy resource request belum diperiksa.
 
 ## Article XIV — Current Release State
-Refactor canonical Dapur sudah merge ke `main`.
+Canonical Dapur refactor dan legacy runtime cleanup sudah merge ke `main`.
 
-Merge commit:
-`0ad1b33b7704623beb8b9ca72b895a06e0b862bd`
+Cleanup merge:
+`319ec74889389d7af385b812273a518d9af2afc5`
+
+Vercel routing fix:
+`a01be6678281c5835e026d9217f15a7057ca6891`
+
+Handoff documentation update:
+`232fea140208c394aa4edfae4438450a755cb0bb`
 
 Production aktif yang terakhir terverifikasi masih:
 `53659423b83d3fb9fed8fbc0f97701871c392159`
 
-Artinya: `merged` belum sama dengan `production verified`. Deployment production baru dengan merge commit wajib diverifikasi.
+Artinya: `merged` belum sama dengan `production verified`.
 
 ## Article XV — Communication Rule
 Setiap laporan perubahan wajib menyebut:
