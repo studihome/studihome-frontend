@@ -5,26 +5,27 @@
   const isAdmin = () => (location.pathname || '/').replace(/\/+$/, '') === '/admin';
   const GLOBAL_CONTEXTUAL = new Set(['dapur', 'dapur creator', 'creator']);
 
-  function loadOnce(src, marker, onReady) {
+  function loadOnce(src, marker, onReady, onError) {
     if (window[marker]) {
       onReady?.();
       return;
     }
     let script = document.querySelector(`script[data-${marker}]`);
     if (script) {
-      if (onReady) script.addEventListener('load', onReady, { once: true });
+      script.addEventListener('load', () => onReady?.(), { once: true });
+      script.addEventListener('error', () => onError?.(), { once: true });
       return;
     }
     script = document.createElement('script');
     script.src = src;
     script.defer = true;
     script.dataset[marker] = '1';
-    if (onReady) script.addEventListener('load', onReady, { once: true });
+    script.addEventListener('load', () => onReady?.(), { once: true });
+    script.addEventListener('error', () => onError?.(), { once: true });
     document.head.appendChild(script);
   }
 
   function hideGlobalDapur() {
-    // The global header is the only place where Dapur is forbidden.
     document.querySelectorAll('#top-nav-links a,#top-nav-links button,#top-nav-links [role="button"],#mobile-nav-links a,#mobile-nav-links button,#mobile-nav-links [role="button"],header a,header button').forEach(el => {
       const label = norm(el.textContent || '');
       if (!GLOBAL_CONTEXTUAL.has(label)) return;
@@ -36,47 +37,83 @@
   }
 
   function adminButtons() {
-    return [...document.querySelectorAll('#admin-content-area button[onclick*="switchTab"],button[onclick*="switchTab"]')];
+    return [...document.querySelectorAll('#admin-content-area button[onclick*="switchTab"],button[onclick*="switchTab"],#admin-content-area button[data-studihome-admin-canonical]')];
   }
 
-  function findTab(key) {
-    return adminButtons().find(btn => String(btn.getAttribute('onclick') || '').includes(`'${key}'`)) || null;
+  function adminNavHost() {
+    const existing = adminButtons()[0];
+    return existing?.parentElement || document.querySelector('#admin-content-area nav') || document.querySelector('#admin-content-area .admin-tab-nav');
   }
 
-  function removeLegacyDapurAdminTabs() {
-    document.querySelectorAll('#admin-dapur-tab-btn,[data-admin-dapur-nav="1"]').forEach(el => el.remove());
-    adminButtons().filter(btn => norm(btn.textContent || '') === 'dapur').forEach(btn => btn.remove());
+  function makeButton(id, label, icon, className, handler) {
+    let btn = document.getElementById(id);
+    if (!btn) {
+      btn = document.createElement('button');
+      btn.type = 'button';
+      btn.id = id;
+      btn.dataset.studihomeAdminCanonical = id;
+      btn.className = className;
+    }
+    btn.innerHTML = `<i class="${icon} mr-1"></i> ${label}`;
+    btn.onclick = handler;
+    return btn;
+  }
+
+  function openDapur(btn) {
+    btn?.classList.add('bg-[#2f3aa6]', 'text-white');
+    loadOnce('/admin-dapur-creator-v5.js?v=5', 'studihomeAdminDapurCreatorV5', () => {
+      window.StudihomeAdminDapurCreatorV5?.open?.();
+    }, () => {
+      window.App?.ui?.toast?.('Dapur Creator gagal dimuat. Silakan muat ulang halaman Admin.', 'error');
+    });
+  }
+
+  function openGudang(btn) {
+    btn?.classList.add('bg-[#2f3aa6]', 'text-white');
+    loadOnce('/admin-gudang-v2.js?v=2', 'studihomeGudangV2', () => {
+      window.StudihomeGudangV2?.open?.();
+    }, () => {
+      window.App?.ui?.toast?.('Gudang gagal dimuat. Silakan muat ulang halaman Admin.', 'error');
+    });
   }
 
   function canonicalAdminNav() {
     if (!isAdmin()) return;
-    removeLegacyDapurAdminTabs();
 
-    const creator = findTab('creators');
-    const studio = findTab('studio-ai');
-    const governance = findTab('governance');
+    const host = adminNavHost();
+    if (!host) return;
 
-    if (creator) {
-      creator.id = 'admin-dapur-creator-tab-btn';
-      creator.dataset.studihomeCanonical = 'dapur-creator';
-      creator.innerHTML = '<i class="fa-solid fa-kitchen-set mr-1"></i> Dapur Creator';
-      creator.onclick = event => {
-        event?.preventDefault?.();
-        loadOnce('/admin-dapur-creator-v4.js?v=4', 'studihomeAdminDapurCreatorV4', () => window.StudihomeAdminDapurCreatorV4?.open?.());
-      };
-    }
+    // Remove obsolete standalone Dapur/Governance controls.
+    host.querySelectorAll('button,a').forEach(btn => {
+      const label = norm(btn.textContent || '');
+      if (label === 'dapur' || label === 'dapur creator') {
+        if (btn.id !== 'admin-dapur-creator-tab-btn') btn.remove();
+      }
+      if (label === 'governance') btn.remove();
+    });
 
-    if (studio) {
+    // Keep the existing Studio AI button as the canonical Gudang entry.
+    const studio = [...host.querySelectorAll('button,a')].find(btn => norm(btn.textContent || '').includes('studio ai'));
+    if (studio && studio.id !== 'admin-gudang-tab-btn') {
       studio.id = 'admin-gudang-tab-btn';
-      studio.dataset.studihomeCanonical = 'gudang';
+      studio.dataset.studihomeAdminCanonical = 'admin-gudang-tab-btn';
       studio.innerHTML = '<i class="fa-solid fa-warehouse mr-1"></i> Gudang';
-      studio.onclick = event => {
-        event?.preventDefault?.();
-        loadOnce('/admin-gudang-v1.js?v=1', 'studihomeGudangV1', () => window.StudihomeGudangV1?.open?.());
-      };
+      studio.onclick = event => { event?.preventDefault?.(); openGudang(studio); };
     }
 
-    if (governance && governance !== studio) governance.remove();
+    let gudang = document.getElementById('admin-gudang-tab-btn');
+    if (!gudang) {
+      gudang = makeButton('admin-gudang-tab-btn', 'Gudang', 'fa-solid fa-warehouse', 'px-5 py-2.5 rounded-2xl text-sm font-bold text-[#334155] hover:bg-white/70', () => openGudang(gudang));
+      host.appendChild(gudang);
+    }
+
+    let dapur = document.getElementById('admin-dapur-creator-tab-btn');
+    if (!dapur) {
+      dapur = makeButton('admin-dapur-creator-tab-btn', 'Dapur Creator', 'fa-solid fa-kitchen-set', 'px-5 py-2.5 rounded-2xl text-sm font-bold text-[#334155] hover:bg-white/70', () => openDapur(dapur));
+      host.insertBefore(dapur, gudang);
+    } else {
+      dapur.onclick = () => openDapur(dapur);
+    }
   }
 
   function normalizeMemberDapur() {
@@ -106,8 +143,10 @@
     });
   }
 
-  const observer = new MutationObserver(schedule);
-  observer.observe(document.documentElement, { childList: true, subtree: true });
+  if (document.documentElement) {
+    const observer = new MutationObserver(schedule);
+    observer.observe(document.documentElement, { childList: true, subtree: true });
+  }
   window.addEventListener('resize', schedule, { passive: true });
   window.addEventListener('popstate', schedule);
   window.addEventListener('hashchange', schedule);
