@@ -1,0 +1,41 @@
+name: One-time lock Admin Dapur position
+
+on:
+  push:
+    branches: [main]
+
+permissions:
+  contents: write
+
+jobs:
+  patch:
+    if: github.actor == 'studihome' || github.actor == 'github-actions[bot]'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 2
+
+      - name: Attach position module and remove workflow
+        shell: python
+        run: |
+          from pathlib import Path
+          p = Path('admin-dapur.js')
+          text = p.read_text(encoding='utf-8')
+          marker = "data-studihome-admin-dapur-position"
+          if marker not in text:
+              text += "\n;(()=>{if(document.querySelector('script[data-studihome-admin-dapur-position]'))return;const s=document.createElement('script');s.src='/admin-dapur-position.js?v=1';s.dataset.studihomeAdminDapurPosition='1';s.defer=true;document.head.appendChild(s)})();\n"
+              p.write_text(text, encoding='utf-8')
+          wf = Path('.github/workflows/one-time-lock-admin-dapur-position.yml')
+          if wf.exists():
+              wf.unlink()
+
+      - name: Commit and push
+        shell: bash
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add admin-dapur.js .github/workflows/one-time-lock-admin-dapur-position.yml
+          if git diff --cached --quiet; then exit 0; fi
+          git commit -m "fix: activate locked Admin Dapur navigation position"
+          git push origin HEAD:main
