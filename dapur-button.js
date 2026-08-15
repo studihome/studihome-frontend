@@ -111,15 +111,15 @@
     const s=document.createElement('script'); s.src='/creator-public.js?v=2'; s.dataset.studihomeCreatorPublic='1'; s.defer=true; document.head.appendChild(s);
   }
 
-  function ensureAdminDapurRouter() {
-    if (!isDapur() || String(window.App?.state?.user?.role || '').toLowerCase() !== 'admin') return;
-    if (window.StudihomeDapurAdminRouterV2 || document.querySelector('script[data-studihome-dapur-admin-router-v2]')) return;
-    const s=document.createElement('script'); s.src='/dapur-admin-router-v2.js?v=2'; s.dataset.studihomeDapurAdminRouterV2='1'; s.defer=true; document.head.appendChild(s);
+  function ensureDapurRoute() {
+    if (!isDapur()) return;
+    if (window.StudihomeDapurRouteV3 || document.querySelector('script[data-studihome-dapur-route-v3]')) return;
+    const s=document.createElement('script'); s.src='/dapur-route-v3.js?v=1'; s.dataset.studihomeDapurRouteV3='1'; s.defer=true; document.head.appendChild(s);
   }
 
   function tick() {
     if (path() === '/admin') return;
-    ensureAdminDapurRouter();
+    ensureDapurRoute();
     renderKamarEntry(); normalizePortfolioForm(); hardenPortfolioSave(); ensurePublicCreatorModule(); renderFoyerAvatar();
   }
 
