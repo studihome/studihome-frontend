@@ -16,7 +16,7 @@
     { "source": "/ai-untuk-guru", "destination": "/index.html" },
     { "source": "/ai-untuk-umkm", "destination": "/index.html" },
     { "source": "/:username/portfolio/:slug*", "destination": "/index.html" },
-    { "source": "/:username([a-z0-9][a-z0-9-]{2,39})", "destination": "/index.html" }
+    { "source": "/:username", "destination": "/index.html" }
   ],
   "headers": [
     {
