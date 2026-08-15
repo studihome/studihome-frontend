@@ -5,32 +5,38 @@
   const isAdmin = () => (location.pathname || '/').replace(/\/+$/, '') === '/admin';
   const GLOBAL_CONTEXTUAL = new Set(['dapur', 'dapur creator', 'creator']);
 
-  function loadOnce(src, marker) {
-    if (window[marker]) return;
-    if (document.querySelector(`script[data-${marker}]`)) return;
-    const s = document.createElement('script');
-    s.src = src;
-    s.defer = true;
-    s.dataset[marker] = '1';
-    document.head.appendChild(s);
+  function loadOnce(src, marker, onReady) {
+    if (window[marker]) {
+      onReady?.();
+      return;
+    }
+    let script = document.querySelector(`script[data-${marker}]`);
+    if (script) {
+      if (onReady) script.addEventListener('load', onReady, { once: true });
+      return;
+    }
+    script = document.createElement('script');
+    script.src = src;
+    script.defer = true;
+    script.dataset[marker] = '1';
+    if (onReady) script.addEventListener('load', onReady, { once: true });
+    document.head.appendChild(script);
   }
 
   function hideGlobalDapur() {
-    ['top-nav-links', 'mobile-nav-links'].forEach(id => {
-      const nav = document.getElementById(id);
-      if (!nav) return;
-      nav.querySelectorAll('a,button,[role="button"]').forEach(el => {
-        const label = norm(el.textContent || '');
-        if (!GLOBAL_CONTEXTUAL.has(label)) return;
-        el.style.setProperty('display', 'none', 'important');
-        el.setAttribute('aria-hidden', 'true');
-        el.setAttribute('tabindex', '-1');
-      });
+    // The global header is the only place where Dapur is forbidden.
+    document.querySelectorAll('#top-nav-links a,#top-nav-links button,#top-nav-links [role="button"],#mobile-nav-links a,#mobile-nav-links button,#mobile-nav-links [role="button"],header a,header button').forEach(el => {
+      const label = norm(el.textContent || '');
+      if (!GLOBAL_CONTEXTUAL.has(label)) return;
+      el.style.setProperty('display', 'none', 'important');
+      el.setAttribute('aria-hidden', 'true');
+      el.setAttribute('tabindex', '-1');
+      el.dataset.studihomeContextualHidden = '1';
     });
   }
 
   function adminButtons() {
-    return [...document.querySelectorAll('button[onclick*="switchTab"]')];
+    return [...document.querySelectorAll('#admin-content-area button[onclick*="switchTab"],button[onclick*="switchTab"]')];
   }
 
   function findTab(key) {
@@ -54,10 +60,9 @@
       creator.id = 'admin-dapur-creator-tab-btn';
       creator.dataset.studihomeCanonical = 'dapur-creator';
       creator.innerHTML = '<i class="fa-solid fa-kitchen-set mr-1"></i> Dapur Creator';
-      creator.onclick = (event) => {
+      creator.onclick = event => {
         event?.preventDefault?.();
-        loadOnce('/admin-dapur-creator-v4.js?v=4', 'studihomeAdminDapurCreatorV4');
-        setTimeout(() => window.StudihomeAdminDapurCreatorV4?.open?.(), 25);
+        loadOnce('/admin-dapur-creator-v4.js?v=4', 'studihomeAdminDapurCreatorV4', () => window.StudihomeAdminDapurCreatorV4?.open?.());
       };
     }
 
@@ -65,10 +70,9 @@
       studio.id = 'admin-gudang-tab-btn';
       studio.dataset.studihomeCanonical = 'gudang';
       studio.innerHTML = '<i class="fa-solid fa-warehouse mr-1"></i> Gudang';
-      studio.onclick = (event) => {
+      studio.onclick = event => {
         event?.preventDefault?.();
-        loadOnce('/admin-gudang-v1.js?v=1', 'studihomeGudangV1');
-        setTimeout(() => window.StudihomeGudangV1?.open?.(), 25);
+        loadOnce('/admin-gudang-v1.js?v=1', 'studihomeGudangV1', () => window.StudihomeGudangV1?.open?.());
       };
     }
 
