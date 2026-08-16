@@ -4,9 +4,9 @@
   /**
    * Canonical Kamar -> Dapur CTA synchronizer.
    *
-   * The Kamar panel is rendered by index.html. This small controller only
-   * synchronizes its label + destination from the authenticated user's
-   * server-backed Creator access and own creator profile.
+   * The Kamar panel is rendered by index.html. This controller only
+   * synchronizes its label + destination from authenticated, server-backed
+   * Creator access and the user's own creator profile.
    *
    * Security boundary: Supabase RPC/RLS. The button is UX/navigation only.
    */
@@ -20,9 +20,9 @@
   let timer = 0;
   let inFlight = false;
   let observer = null;
+  let authSubscription = null;
 
   const db = () => window.supabaseClient || null;
-
   const sleep = (ms) => new Promise(resolve => setTimeout(resolve, ms));
 
   function safeCreatorPath(username) {
@@ -40,9 +40,9 @@
 
     const label = String(button.textContent || '').trim();
     if (LEGACY_LABELS.has(label)) {
-      button.textContent = 'Memuat Dapur...';
-      button.disabled = true;
-      button.setAttribute('aria-busy', 'true');
+      if (button.textContent !== 'Memuat Dapur...') button.textContent = 'Memuat Dapur...';
+      if (!button.disabled) button.disabled = true;
+      if (button.getAttribute('aria-busy') !== 'true') button.setAttribute('aria-busy', 'true');
     }
   }
 
@@ -83,14 +83,18 @@
     const button = findButton();
     if (!button || !target) return false;
 
+    const currentPath = button.dataset.dapurTarget || '';
+    const currentLabel = String(button.textContent || '').trim();
+
     button.removeAttribute('onclick');
     button.type = 'button';
-    button.disabled = false;
-    button.removeAttribute('aria-busy');
-    button.removeAttribute('aria-disabled');
-    button.textContent = target.label;
-    button.dataset.dapurCtaManaged = '1';
-    button.dataset.dapurTarget = target.path;
+
+    if (currentLabel !== target.label) button.textContent = target.label;
+    if (button.disabled) button.disabled = false;
+    if (button.hasAttribute('aria-busy')) button.removeAttribute('aria-busy');
+    if (button.hasAttribute('aria-disabled')) button.removeAttribute('aria-disabled');
+    if (button.dataset.dapurCtaManaged !== '1') button.dataset.dapurCtaManaged = '1';
+    if (currentPath !== target.path) button.dataset.dapurTarget = target.path;
 
     if (button.dataset.dapurListenerBound !== '1') {
       button.addEventListener('click', (event) => {
@@ -122,7 +126,7 @@
       if (target) applyTarget(target);
     } catch (error) {
       console.warn('[Studihome Dapur CTA]', error?.message || error);
-      // Keep the Kamar panel functional; never expose a guessed Creator URL.
+      // Never invent a Creator URL. Preserve Kamar if access lookup fails.
       const current = findButton();
       if (current && current.dataset.dapurCtaManaged !== '1') {
         current.disabled = false;
@@ -154,7 +158,10 @@
       observer.observe(document.body, { childList: true, subtree: true });
     }
 
-    db().auth.onAuthStateChange(() => schedule());
+    if (!authSubscription) {
+      const { data } = db().auth.onAuthStateChange(() => schedule());
+      authSubscription = data?.subscription || null;
+    }
   }
 
   if (document.readyState === 'loading') {
