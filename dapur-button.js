@@ -1,6 +1,7 @@
 (()=>{
   'use strict';
 
+  // Kamar-only compatibility bridge. Canonical Dapur runtime lives in /dapur.html + /dapur-entry.js.
   const SELECTOR='#kamar-creator-entry';
   const BUTTON_SELECTOR=`${SELECTOR} button`;
   const LEGACY_LABELS=new Set([
@@ -56,15 +57,11 @@
     b.removeAttribute('aria-disabled');
     b.dataset.dapurCtaManaged='1';
     b.dataset.dapurTarget=state.path;
-    if(state.provision)b.dataset.dapurProvision='1';else delete b.dataset.dapurProvision;
 
     if(b.dataset.dapurListenerBound!=='1'){
       b.addEventListener('click',e=>{
         e.preventDefault();
         const target=b.dataset.dapurTarget||'/dapur';
-        if(target==='/dapur'&&b.dataset.dapurProvision==='1'){
-          try{sessionStorage.setItem('studihome_creator_provision','1')}catch{}
-        }
         if(target==='/dapur'||target==='/'||target.startsWith('/kamar?')||safeWorkspace(target.replace(/^\/dapur\//,''))){
           window.location.assign(target);
         }
@@ -83,7 +80,7 @@
     if(error)throw error;
     const currentUser=data?.user;
     if(!currentUser?.id){
-      return {label:LOGIN_LABEL,path:'/kamar?next=%2Fdapur&intent=creator'};
+      return {label:LOGIN_LABEL,path:'/dapur'};
     }
 
     const {data:access,error:accessError}=await c.rpc('has_creator_workspace_access');
@@ -102,7 +99,7 @@
     const workspace=safeWorkspace(creator?.username);
     const state=workspace
       ? {label:CREATOR_LABEL,path:workspace}
-      : {label:CREATE_LABEL,path:'/dapur',provision:true};
+      : {label:CREATE_LABEL,path:'/dapur'};
     state.cacheKey=keyFor(currentUser.id,creator?.username||'',true);
     return state;
   }
@@ -139,7 +136,7 @@
 
   function schedule(force=false){
     clearTimeout(timer);
-    timer=window.setTimeout(()=>void sync(force),force?0:0);
+    timer=window.setTimeout(()=>void sync(force),0);
   }
 
   function observeHost(){
