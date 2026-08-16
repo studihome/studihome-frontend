@@ -2,27 +2,28 @@
   'use strict';
 
   /**
-   * Kamar → Dapur CTA controller.
+   * Canonical Kamar -> Dapur CTA synchronizer.
    *
-   * Canonical UI contract:
-   *   Premium + no Creator  -> Mulai Membuat Dapur -> /dapur
-   *   Premium + Creator     -> Kelola Dapur Kamu   -> /dapur/{username}
-   *   Non-Premium           -> leave Kamar flow untouched
+   * The Kamar panel is rendered by index.html. This small controller only
+   * synchronizes its label + destination from the authenticated user's
+   * server-backed Creator access and own creator profile.
    *
-   * Authorization remains server-side in Dapur access gate + RLS.
+   * Security boundary: Supabase RPC/RLS. The button is UX/navigation only.
    */
 
   const SELECTOR = '#kamar-creator-entry';
   const BUTTON_SELECTOR = `${SELECTOR} button`;
+  const LEGACY_LABELS = new Set(['Mulai di Dapur', 'Buka Dapur']);
   const SLUG_RE = /^[a-z0-9][a-z0-9-]{2,39}$/i;
+  const CHECK_DELAY = 180;
 
-  let refreshTimer = null;
-  let observer = null;
+  let timer = 0;
   let inFlight = false;
+  let observer = null;
 
-  const app = () => window.App || null;
   const db = () => window.supabaseClient || null;
-  const wait = (ms) => new Promise(resolve => setTimeout(resolve, ms));
+
+  const sleep = (ms) => new Promise(resolve => setTimeout(resolve, ms));
 
   function safeCreatorPath(username) {
     const slug = String(username || '').trim().toLowerCase();
@@ -33,57 +34,44 @@
     return document.querySelector(BUTTON_SELECTOR);
   }
 
-  function normalizeLegacyButton() {
+  function normalizeLegacyState() {
     const button = findButton();
-    if (!button) return false;
+    if (!button) return;
 
-    // Remove the legacy inline route immediately. The canonical controller owns this CTA.
-    button.removeAttribute('onclick');
-    button.type = 'button';
-    button.dataset.dapurCtaManaged = '1';
-
-    // Never leave the obsolete label visible while async state is resolving.
-    if (!button.dataset.dapurResolved) {
-      button.textContent = 'Mulai Membuat Dapur';
-      button.dataset.dapurPending = '1';
+    const label = String(button.textContent || '').trim();
+    if (LEGACY_LABELS.has(label)) {
+      button.textContent = 'Memuat Dapur...';
+      button.disabled = true;
+      button.setAttribute('aria-busy', 'true');
     }
-
-    return true;
-  }
-
-  function hasPremiumEntitlement() {
-    const products = Array.isArray(app()?.state?.memberData?.verifiedProducts)
-      ? app().state.memberData.verifiedProducts
-      : [];
-    return products.some(product => product && product.isFree === false);
-  }
-
-  async function getOwnCreator(userId) {
-    const client = db();
-    if (!client || !userId) return null;
-
-    const { data, error } = await client
-      .from('creator_profiles')
-      .select('username')
-      .eq('user_id', userId)
-      .order('updated_at', { ascending: false })
-      .limit(1);
-
-    if (error) throw error;
-
-    return safeCreatorPath(data?.[0]?.username);
   }
 
   async function resolveTarget() {
-    const A = app();
-    const user = A?.state?.user;
+    const client = db();
+    if (!client?.auth) return null;
+
+    const { data: userData, error: userError } = await client.auth.getUser();
+    if (userError) throw userError;
+
+    const user = userData?.user;
     if (!user?.id) return null;
 
-    const premium = hasPremiumEntitlement();
-    const isAdmin = String(user.role || '').toLowerCase() === 'admin';
-    if (!premium && !isAdmin) return null;
+    // Single authoritative access decision for Creator workspace.
+    const { data: access, error: accessError } = await client.rpc('has_creator_workspace_access');
+    if (accessError) throw accessError;
+    if (access !== true) return null;
 
-    const creatorPath = await getOwnCreator(user.id);
+    const { data: creator, error: creatorError } = await client
+      .from('creator_profiles')
+      .select('username')
+      .eq('user_id', user.id)
+      .order('updated_at', { ascending: false })
+      .limit(1)
+      .maybeSingle();
+
+    if (creatorError) throw creatorError;
+
+    const creatorPath = safeCreatorPath(creator?.username);
 
     return {
       label: creatorPath ? 'Kelola Dapur Kamu' : 'Mulai Membuat Dapur',
@@ -93,78 +81,80 @@
 
   function applyTarget(target) {
     const button = findButton();
-    if (!button) return false;
+    if (!button || !target) return false;
 
     button.removeAttribute('onclick');
     button.type = 'button';
+    button.disabled = false;
+    button.removeAttribute('aria-busy');
+    button.removeAttribute('aria-disabled');
     button.textContent = target.label;
     button.dataset.dapurCtaManaged = '1';
     button.dataset.dapurTarget = target.path;
-    button.dataset.dapurResolved = '1';
-    button.dataset.dapurPending = '0';
 
-    if (button.dataset.dapurListenerBound === '1') return true;
+    if (button.dataset.dapurListenerBound !== '1') {
+      button.addEventListener('click', (event) => {
+        event.preventDefault();
 
-    button.addEventListener('click', (event) => {
-      event.preventDefault();
+        const rawPath = button.dataset.dapurTarget || '/dapur';
+        const safePath = rawPath === '/dapur'
+          ? '/dapur'
+          : safeCreatorPath(rawPath.replace(/^\/dapur\//, ''));
 
-      const targetPath = button.dataset.dapurTarget || '/dapur';
-      const safePath = targetPath === '/dapur'
-        ? '/dapur'
-        : safeCreatorPath(targetPath.replace(/^\/dapur\//, ''));
+        if (!safePath) return;
+        window.location.assign(safePath);
+      }, { passive: false });
 
-      if (!safePath) return;
-      window.location.assign(safePath);
-    });
+      button.dataset.dapurListenerBound = '1';
+    }
 
-    button.dataset.dapurListenerBound = '1';
     return true;
   }
 
-  async function refresh() {
-    if (inFlight || !findButton()) return;
+  async function sync() {
+    const button = findButton();
+    if (!button || inFlight) return;
 
     inFlight = true;
     try {
-      normalizeLegacyButton();
+      normalizeLegacyState();
       const target = await resolveTarget();
-      if (target) {
-        applyTarget(target);
-      }
+      if (target) applyTarget(target);
     } catch (error) {
-      // Keep Kamar stable. Security never depends on this optional UI controller.
       console.warn('[Studihome Dapur CTA]', error?.message || error);
+      // Keep the Kamar panel functional; never expose a guessed Creator URL.
+      const current = findButton();
+      if (current && current.dataset.dapurCtaManaged !== '1') {
+        current.disabled = false;
+        current.removeAttribute('aria-busy');
+      }
     } finally {
       inFlight = false;
     }
   }
 
-  function scheduleRefresh() {
-    clearTimeout(refreshTimer);
-    refreshTimer = setTimeout(() => void refresh(), 80);
+  function schedule() {
+    clearTimeout(timer);
+    timer = window.setTimeout(() => void sync(), CHECK_DELAY);
   }
 
   async function boot() {
-    // Wait for canonical Kamar bootstrap.
-    for (let i = 0; i < 100; i += 1) {
-      if (app()?.state && db()?.auth) break;
-      await wait(50);
+    for (let i = 0; i < 120; i += 1) {
+      if (db()?.auth) break;
+      await sleep(50);
+    }
+    if (!db()?.auth) return;
+
+    schedule();
+
+    if (!observer && document.body) {
+      observer = new MutationObserver(() => {
+        if (document.querySelector(SELECTOR)) schedule();
+      });
+      observer.observe(document.body, { childList: true, subtree: true });
     }
 
-    if (!app()?.state || !db()?.auth) return;
-
-    // Fast visual normalization first, then authoritative state resolution.
-    normalizeLegacyButton();
-    scheduleRefresh();
-
-    const main = document.getElementById('main-content');
-    if (!main || observer) return;
-
-    observer = new MutationObserver(() => {
-      normalizeLegacyButton();
-      scheduleRefresh();
-    });
-    observer.observe(main, { childList: true, subtree: true });
+    db().auth.onAuthStateChange(() => schedule());
   }
 
   if (document.readyState === 'loading') {
