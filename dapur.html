@@ -28,116 +28,43 @@
   <!-- TERAS BRAND HEADER CONTRACT: yellow mark + blue wordmark -->
   <style id="studihome-brand-header-contract">
     .brand,
-    .brand * {
-      font-family: 'Inter', sans-serif !important;
-    }
-    .brand {
-      color: #151c75 !important;
-      font-weight: 900 !important;
-      letter-spacing: -0.045em !important;
-    }
+    .brand * { font-family: 'Inter', sans-serif !important; }
+    .brand { color: #151c75 !important; font-weight: 900 !important; letter-spacing: -0.045em !important; }
     .brand .mark {
-      width: auto !important;
-      height: auto !important;
-      display: inline-block !important;
-      flex: 0 0 auto !important;
-      border-radius: 0 !important;
-      background: linear-gradient(135deg, #EAB308 0%, #F59E0B 100%) !important;
-      -webkit-background-clip: text !important;
-      background-clip: text !important;
-      -webkit-text-fill-color: transparent !important;
-      color: transparent !important;
-      box-shadow: none !important;
-      line-height: 1 !important;
-      font-size: 30px !important;
-      font-weight: 900 !important;
+      width: auto !important; height: auto !important; display: inline-block !important; flex: 0 0 auto !important;
+      border-radius: 0 !important; background: linear-gradient(135deg, #EAB308 0%, #F59E0B 100%) !important;
+      -webkit-background-clip: text !important; background-clip: text !important; -webkit-text-fill-color: transparent !important;
+      color: transparent !important; box-shadow: none !important; line-height: 1 !important; font-size: 30px !important; font-weight: 900 !important;
     }
+    .eyebrow { font-size: 0 !important; }
+    .eyebrow::after { content: 'Dapur Creator'; font-size: 12px; font-weight: 900; letter-spacing: .08em; color: #151c75; }
 
-    /* Visible root label: canonical runtime renders the semantic .eyebrow label. */
-    .eyebrow {
-      font-size: 0 !important;
-    }
-    .eyebrow::after {
-      content: 'Dapur Creator';
-      font-size: 12px;
-      font-weight: 900;
-      letter-spacing: .08em;
-      color: #151c75;
-    }
-
-    /* Root copy refinement: keep canonical renderer unchanged while presenting final copy. */
-    .creator-kicker {
-      font-size: 0 !important;
-    }
-    .creator-kicker::after {
-      content: 'Creator sedang tayang';
-      font-size: 11px;
-      font-weight: 900;
-      letter-spacing: .12em;
-      color: #f8d56f;
-    }
-    .creator-title {
-      font-size: 0 !important;
-    }
-    .creator-title::after {
-      content: 'Creator yang sedang menyalakan kompor..';
-      display: block;
-      font-size: clamp(24px, 3vw, 34px);
-      line-height: 1.08;
-      letter-spacing: -.03em;
-      color: #fff;
-    }
+    .creator-kicker { font-size: 0 !important; }
+    .creator-kicker::after { content: 'Creator sedang tayang'; font-size: 11px; font-weight: 900; letter-spacing: .12em; color: #f8d56f; }
+    .creator-title { font-size: 0 !important; }
+    .creator-title::after { content: 'Creator yang sedang menyalakan kompor..'; display: block; font-size: clamp(24px, 3vw, 34px); line-height: 1.08; letter-spacing: -.03em; color: #fff; }
+    .creator-note { font-size: 0 !important; }
+    .creator-note::after { content: 'Creator lagi menerima pesanan...'; font-size: 13px; line-height: 1.6; color: #dbe4ff; }
+    .creator-link { font-size: 0 !important; }
+    .creator-link::after { content: 'Lihat'; font-size: 11px; font-weight: 900; line-height: 1.1; }
 
     /* Homepage footer visual contract — only visible on root /dapur. */
     #homepage-footer {
-      display: none;
-      margin-top: 0;
-      border-top: 1px solid #e2e8f0;
-      background: linear-gradient(135deg, #151c75 0%, #3f48bf 100%);
-      color: #fff;
-      padding: 24px 16px 32px;
-      box-shadow: inset 0 1px 0 rgba(255,255,255,.08);
+      display: none; margin-top: 0; border-top: 1px solid #e2e8f0;
+      background: linear-gradient(135deg, #151c75 0%, #3f48bf 100%); color: #fff;
+      padding: 24px 16px 32px; box-shadow: inset 0 1px 0 rgba(255,255,255,.08);
     }
     body:has(.creator-title) #homepage-footer { display: block; }
-    .homepage-footer-inner {
-      width: min(1280px, 100%);
-      margin: 0 auto;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 16px;
-      font-size: 12px;
-      font-weight: 500;
-    }
-    .homepage-footer-brand,
-    .homepage-footer-links {
-      display: flex;
-      align-items: center;
-      gap: 12px;
-    }
+    .homepage-footer-inner { width: min(1280px, 100%); margin: 0 auto; display: flex; align-items: center; justify-content: space-between; gap: 16px; font-size: 12px; font-weight: 500; }
+    .homepage-footer-brand, .homepage-footer-links { display: flex; align-items: center; gap: 12px; }
     .homepage-footer-brand { text-align: left; }
     .homepage-footer-brand strong { color: #fff; font-size: 14px; font-weight: 900; }
     .homepage-footer-star { color: #FACC15; font-weight: 900; }
     .homepage-footer-copy { color: #dbeafe; }
     .homepage-footer-links { gap: 18px; }
-    .homepage-footer-links a {
-      color: #dbeafe;
-      text-decoration: none;
-      transition: color .18s ease;
-    }
+    .homepage-footer-links a { color: #dbeafe; text-decoration: none; transition: color .18s ease; }
     .homepage-footer-links a:hover { color: #fff; }
-    .homepage-footer-links .help {
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      min-height: 32px;
-      padding: 7px 14px;
-      border-radius: 12px;
-      background: linear-gradient(135deg, #EAB308 0%, #F59E0B 100%);
-      color: #0f172a;
-      font-weight: 900;
-      box-shadow: 0 4px 14px rgba(234,179,8,.22);
-    }
+    .homepage-footer-links .help { display: inline-flex; align-items: center; justify-content: center; min-height: 32px; padding: 7px 14px; border-radius: 12px; background: linear-gradient(135deg, #EAB308 0%, #F59E0B 100%); color: #0f172a; font-weight: 900; box-shadow: 0 4px 14px rgba(234,179,8,.22); }
 
     @media (max-width: 680px) {
       .brand .mark { font-size: 27px !important; }
@@ -145,36 +72,16 @@
       .eyebrow::after { font-size: 11px; }
       .creator-kicker::after { font-size: 10px; letter-spacing: .09em; }
       .creator-title::after { font-size: 24px; }
+      .creator-note::after { font-size: 12px; }
+      .creator-link::after { font-size: 10px; }
       #homepage-footer { padding: 12px 10px; }
-      .homepage-footer-inner {
-        width: 100%;
-        flex-direction: row;
-        justify-content: space-between;
-        align-items: center;
-        gap: 8px;
-        flex-wrap: nowrap;
-        white-space: nowrap;
-        overflow: hidden;
-      }
-      .homepage-footer-brand,
-      .homepage-footer-links {
-        justify-content: flex-start;
-        flex-wrap: nowrap;
-        flex: 0 0 auto;
-      }
-      .homepage-footer-brand {
-        text-align: left;
-        gap: 0;
-      }
-      .homepage-footer-star,
-      .homepage-footer-copy { display: none; }
+      .homepage-footer-inner { width: 100%; flex-direction: row; justify-content: space-between; align-items: center; gap: 8px; flex-wrap: nowrap; white-space: nowrap; overflow: hidden; }
+      .homepage-footer-brand, .homepage-footer-links { justify-content: flex-start; flex-wrap: nowrap; flex: 0 0 auto; }
+      .homepage-footer-brand { text-align: left; gap: 0; }
+      .homepage-footer-star, .homepage-footer-copy { display: none; }
       .homepage-footer-brand strong { font-size: 12px; }
       .homepage-footer-links { gap: 10px; font-size: 10px; }
-      .homepage-footer-links .help {
-        min-height: 28px;
-        padding: 5px 9px;
-        border-radius: 9px;
-      }
+      .homepage-footer-links .help { min-height: 28px; padding: 5px 9px; border-radius: 9px; }
     }
   </style>
 
@@ -183,7 +90,6 @@
 </head>
 <body>
   <main id="app" aria-live="polite"></main>
-
   <footer id="homepage-footer" class="site-footer" aria-label="Footer Studihome">
     <div class="homepage-footer-inner">
       <div class="homepage-footer-brand">
@@ -198,7 +104,6 @@
       </div>
     </div>
   </footer>
-
-  <script src="/dapur-entry.js?v=20260816marquee4" defer></script>
+  <script src="/dapur-entry.js?v=20260816marquee5" defer></script>
 </body>
 </html>
