@@ -4,9 +4,12 @@
   /**
    * Kamar → Dapur CTA controller.
    *
-   * Additive-only integration: only owns #kamar-creator-entry.
-   * UI state comes from the canonical Kamar member entitlement/profile data.
-   * Security remains server-side in Dapur access gate + RLS.
+   * Canonical UI contract:
+   *   Premium + no Creator  -> Mulai Membuat Dapur -> /dapur
+   *   Premium + Creator     -> Kelola Dapur Kamu   -> /dapur/{username}
+   *   Non-Premium           -> leave Kamar flow untouched
+   *
+   * Authorization remains server-side in Dapur access gate + RLS.
    */
 
   const SELECTOR = '#kamar-creator-entry';
@@ -26,10 +29,31 @@
     return SLUG_RE.test(slug) ? `/dapur/${encodeURIComponent(slug)}` : null;
   }
 
+  function findButton() {
+    return document.querySelector(BUTTON_SELECTOR);
+  }
+
+  function normalizeLegacyButton() {
+    const button = findButton();
+    if (!button) return false;
+
+    // Remove the legacy inline route immediately. The canonical controller owns this CTA.
+    button.removeAttribute('onclick');
+    button.type = 'button';
+    button.dataset.dapurCtaManaged = '1';
+
+    // Never leave the obsolete label visible while async state is resolving.
+    if (!button.dataset.dapurResolved) {
+      button.textContent = 'Mulai Membuat Dapur';
+      button.dataset.dapurPending = '1';
+    }
+
+    return true;
+  }
+
   function hasPremiumEntitlement() {
-    const A = app();
-    const products = Array.isArray(A?.state?.memberData?.verifiedProducts)
-      ? A.state.memberData.verifiedProducts
+    const products = Array.isArray(app()?.state?.memberData?.verifiedProducts)
+      ? app().state.memberData.verifiedProducts
       : [];
     return products.some(product => product && product.isFree === false);
   }
@@ -47,8 +71,7 @@
 
     if (error) throw error;
 
-    const username = data?.[0]?.username || '';
-    return safeCreatorPath(username);
+    return safeCreatorPath(data?.[0]?.username);
   }
 
   async function resolveTarget() {
@@ -56,8 +79,6 @@
     const user = A?.state?.user;
     if (!user?.id) return null;
 
-    // The Kamar panel itself is only surfaced for Premium users. Re-check the
-    // entitlement here so the CTA cannot accidentally expose Creator to others.
     const premium = hasPremiumEntitlement();
     const isAdmin = String(user.role || '').toLowerCase() === 'admin';
     if (!premium && !isAdmin) return null;
@@ -71,7 +92,7 @@
   }
 
   function applyTarget(target) {
-    const button = document.querySelector(BUTTON_SELECTOR);
+    const button = findButton();
     if (!button) return false;
 
     button.removeAttribute('onclick');
@@ -79,6 +100,8 @@
     button.textContent = target.label;
     button.dataset.dapurCtaManaged = '1';
     button.dataset.dapurTarget = target.path;
+    button.dataset.dapurResolved = '1';
+    button.dataset.dapurPending = '0';
 
     if (button.dataset.dapurListenerBound === '1') return true;
 
@@ -99,13 +122,17 @@
   }
 
   async function refresh() {
-    if (inFlight || !document.querySelector(SELECTOR)) return;
+    if (inFlight || !findButton()) return;
 
     inFlight = true;
     try {
+      normalizeLegacyButton();
       const target = await resolveTarget();
-      if (target) applyTarget(target);
+      if (target) {
+        applyTarget(target);
+      }
     } catch (error) {
+      // Keep Kamar stable. Security never depends on this optional UI controller.
       console.warn('[Studihome Dapur CTA]', error?.message || error);
     } finally {
       inFlight = false;
@@ -114,23 +141,29 @@
 
   function scheduleRefresh() {
     clearTimeout(refreshTimer);
-    refreshTimer = setTimeout(() => void refresh(), 120);
+    refreshTimer = setTimeout(() => void refresh(), 80);
   }
 
   async function boot() {
-    for (let i = 0; i < 80; i += 1) {
+    // Wait for canonical Kamar bootstrap.
+    for (let i = 0; i < 100; i += 1) {
       if (app()?.state && db()?.auth) break;
       await wait(50);
     }
 
     if (!app()?.state || !db()?.auth) return;
 
+    // Fast visual normalization first, then authoritative state resolution.
+    normalizeLegacyButton();
     scheduleRefresh();
 
     const main = document.getElementById('main-content');
     if (!main || observer) return;
 
-    observer = new MutationObserver(() => scheduleRefresh());
+    observer = new MutationObserver(() => {
+      normalizeLegacyButton();
+      scheduleRefresh();
+    });
     observer.observe(main, { childList: true, subtree: true });
   }
 
