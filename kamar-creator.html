@@ -1,82 +1,79 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="id">
 <head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width,initial-scale=1">
-  <title>Jadi Creator Studihome | Promo Besar Produk Premium</title>
-  <meta name="description" content="Ketentuan menjadi Creator Studihome dan produk Premium dengan diskon terbesar yang sedang tersedia.">
-  <meta name="theme-color" content="#151c75">
-  <link rel="canonical" href="https://studihome.id/kamar?intent=creator">
-  <meta property="og:type" content="website">
-  <meta property="og:site_name" content="Studihome">
-  <meta property="og:title" content="Jadi Creator Studihome | Promo Besar">
-  <meta property="og:description" content="Pahami ketentuan Creator dan lihat promo besar produk Premium Studihome.">
-  <meta property="og:url" content="https://studihome.id/kamar?intent=creator">
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2" crossorigin="anonymous"></script>
-  <script src="/supabase-config.js?v=boot5"></script>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Creator Studihome</title>
+  <meta name="description" content="Ketentuan singkat menjadi Creator Studihome dan pilihan produk Premium yang sedang promo.">
   <style>
-    :root{--bg:#ebf3ff;--brand:#151c75;--brand2:#3f48bf;--ink:#0f172a;--muted:#64748b;--line:#dbe6f7;--success:#047857}
-    *{box-sizing:border-box}html{scroll-behavior:smooth}body{margin:0;background:var(--bg);color:var(--ink);font-family:Inter,system-ui,sans-serif}button{font:inherit}img{display:block;max-width:100%}
-    .wrap{width:min(1120px,calc(100% - 24px));margin:0 auto}.topbar{position:sticky;top:0;z-index:20;background:rgba(255,255,255,.94);backdrop-filter:blur(14px);border-bottom:1px solid #dbe7f7}.nav{min-height:62px;display:flex;align-items:center}.brand{display:flex;align-items:center;gap:9px;color:var(--brand);font-weight:900;font-size:20px;letter-spacing:-.03em}.brand-mark{width:32px;height:32px;display:grid;place-items:center;border-radius:11px;color:#fff;background:linear-gradient(135deg,var(--brand),var(--brand2));box-shadow:0 7px 18px rgba(21,28,117,.2)}
-    .hero{padding:28px 0 16px}.hero-card{background:linear-gradient(135deg,var(--brand),var(--brand2) 70%,#5868e5);border-radius:28px;padding:24px;color:#fff;position:relative;overflow:hidden;box-shadow:0 22px 48px rgba(21,28,117,.2)}.hero-card:after{content:"";position:absolute;width:230px;height:230px;border-radius:50%;right:-80px;top:-95px;background:radial-gradient(circle,rgba(255,255,255,.2),transparent 68%)}.hero-card>*{position:relative;z-index:1}.eyebrow{display:inline-flex;align-items:center;gap:7px;padding:7px 10px;border-radius:999px;background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.2);font-size:9px;font-weight:900;letter-spacing:.1em}.hero h1{margin:14px 0 9px;max-width:820px;font-size:clamp(30px,5vw,54px);line-height:1;letter-spacing:-.05em}.hero p{margin:0;max-width:780px;color:#dce4ff;font-size:12px;line-height:1.75}.hero-highlight{margin-top:17px;display:flex;flex-wrap:wrap;gap:8px}.hero-chip{padding:7px 9px;border-radius:12px;background:rgba(255,255,255,.11);border:1px solid rgba(255,255,255,.16);font-size:9px;font-weight:800}.hero-chip strong{color:#fde68a}
-    .section{padding:16px 0}.section-head{margin-bottom:12px}.kicker{color:#a15c00;font-size:9px;font-weight:900;letter-spacing:.12em;text-transform:uppercase}.title{margin:4px 0 0;color:var(--brand);font-size:21px;letter-spacing:-.03em}.subtitle{margin:5px 0 0;color:var(--muted);font-size:10px;line-height:1.7}
-    .rule-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}.card{background:#fff;border:1px solid var(--line);border-radius:21px;box-shadow:0 12px 30px rgba(21,28,117,.055)}.rule-card{padding:17px}.rule-card h3{margin:0 0 8px;color:var(--brand);font-size:12px}.rule-card ol{margin:0;padding-left:18px}.rule-card li{margin:6px 0;color:#5c6b7e;font-size:10px;line-height:1.7}.rule-card li strong{color:#27364d}.flow-note{margin-top:10px;padding:10px 12px;border-radius:13px;background:#f6f9ff;border:1px solid #e8effa;color:#536174;font-size:9px;line-height:1.7}.flow-note b{color:var(--brand)}
-    .promo-head{padding:18px;border-radius:24px;background:linear-gradient(135deg,#fffdf1,#fff8d7);border:1px solid #f2db85;display:flex;align-items:center;justify-content:space-between;gap:14px}.promo-copy h2{margin:0;color:#7c4a03;font-size:20px}.promo-copy p{margin:5px 0 0;color:#6e6037;font-size:10px;line-height:1.7}.promo-flag{flex:none;min-width:92px;padding:10px 11px;border-radius:16px;background:#fff;border:1px solid #f4dda0;text-align:center;color:#a15c00;font-size:9px;font-weight:900}.promo-flag b{display:block;font-size:23px;line-height:1;margin-bottom:2px}.promo-flag span{font-size:8px}
-    .products{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}.product{overflow:hidden}.product-img{aspect-ratio:16/9;background:#f1f5fb}.product-img img{width:100%;height:100%;object-fit:cover}.product-body{padding:14px}.promo-badge{display:inline-flex;align-items:center;gap:5px;padding:5px 7px;border-radius:999px;background:#fff4cf;color:#9a6700;font-size:8px;font-weight:900}.product-title{margin:8px 0 4px;color:var(--brand);font-size:13px;line-height:1.4;font-weight:900}.product-cat{color:#8b97a8;font-size:9px;font-weight:700}.product-desc{margin:8px 0 0;color:#657388;font-size:9.5px;line-height:1.65;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden}.pricing{margin-top:11px}.old{color:#94a3b8;font-size:9px;text-decoration:line-through}.new{margin-top:1px;color:var(--ink);font-size:18px;font-weight:900}.saving{margin-top:4px;color:var(--success);font-size:9px;font-weight:900}.buy{width:100%;min-height:41px;margin-top:12px;border:0;border-radius:13px;cursor:pointer;color:#fff;background:linear-gradient(135deg,var(--brand),var(--brand2));box-shadow:0 8px 18px rgba(21,28,117,.18);font-size:10px;font-weight:900;transition:.18s ease}.buy:hover{transform:translateY(-1px);box-shadow:0 11px 22px rgba(21,28,117,.25)}.buy:disabled{opacity:.6;cursor:wait;transform:none}
-    .loading,.empty{padding:22px;text-align:center;color:var(--muted);font-size:10px}.loading{grid-column:1/-1}.footer{padding:18px 0 28px;color:#8a96a8;font-size:9px}.footer-note{padding:11px 13px;border-radius:15px;background:#f7f9fd;border:1px solid #e9eef7;line-height:1.7}.footer-note strong{color:var(--brand)}
-    .checkout-layer{position:fixed;inset:0;z-index:100;background:#fff;display:none}.checkout-layer.show{display:flex;flex-direction:column}.checkout-top{min-height:50px;display:flex;align-items:center;justify-content:space-between;gap:10px;padding:0 10px 0 14px;background:#fff;border-bottom:1px solid #dbe7f7}.checkout-top strong{font-size:10px;color:var(--brand)}.checkout-top button{width:30px;height:30px;border:0;border-radius:10px;background:#eef4ff;color:var(--brand);cursor:pointer;font-weight:900}.checkout-frame{width:100%;height:calc(100vh - 50px);border:0;background:var(--bg)}
-    @media(max-width:900px){.products{grid-template-columns:1fr 1fr}.rule-grid{grid-template-columns:1fr}}@media(max-width:620px){.wrap{width:min(100% - 16px,560px)}.hero{padding-top:18px}.hero-card{padding:20px}.promo-head{align-items:flex-start}.products{grid-template-columns:1fr}.product-title{font-size:14px}.new{font-size:19px}}@media(prefers-reduced-motion:reduce){html{scroll-behavior:auto}.buy:hover{transform:none}}
+    html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#EBF3FF}
+    iframe{display:block;width:100%;height:100dvh;border:0}
   </style>
 </head>
 <body>
-  <header class="topbar"><div class="wrap nav"><div class="brand"><span class="brand-mark">✦</span><span>Studihome</span></div></div></header>
-  <main class="wrap">
-    <section class="hero"><div class="hero-card"><span class="eyebrow"><i class="fa-solid fa-bolt"></i> PROMO BESAR • PROGRAM CREATOR</span><h1>Jadi Creator Studihome dimulai dari punya <span style="color:#fde68a">1 produk Premium.</span></h1><p>Pahami ketentuannya, lalu manfaatkan promo terbesar yang sedang aktif. Pembelian tetap memakai alur checkout resmi Studihome; setelah proses pembelian selesai, aksesmu masuk ke Kamar seperti pembelian dari Lobi.</p><div class="hero-highlight"><span class="hero-chip"><strong>Premium</strong> membuka akses Creator</span><span class="hero-chip">Checkout resmi Studihome</span><span class="hero-chip">Akses lanjut ke Kamar</span></div></div></section>
-    <section class="section"><div class="section-head"><div class="kicker">Ketentuan Creator</div><h2 class="title">Yang perlu kamu penuhi</h2><p class="subtitle">Ringkas dan langsung ke syarat yang dipakai sistem Creator Studihome saat ini.</p></div><div class="rule-grid"><article class="card rule-card"><h3><i class="fa-solid fa-circle-check mr-1"></i> Syarat utama</h3><ol><li><strong>Punya akun Studihome aktif.</strong> Creator dikelola dari akun member.</li><li><strong>Memiliki minimal 1 produk Premium Studihome</strong> yang sudah menjadi hak akses akun.</li><li><strong>Lengkapi Dapur Creator</strong>: nama, username, bio, WhatsApp, kategori utama, minimal 1 jasa aktif, dan minimal 1 portfolio aktif.</li></ol></article><article class="card rule-card"><h3><i class="fa-solid fa-shield-check mr-1"></i> Ketentuan publikasi</h3><ol><li>Profil Creator mengikuti <strong>review Admin</strong> sebelum menjadi halaman publik.</li><li>Data dan karya yang ditampilkan harus relevan, jelas, dan tidak menyesatkan calon pengguna.</li><li>Status tayang, verifikasi, dan akses Creator tetap mengikuti aturan serta data yang tercatat di Studihome.</li></ol><div class="flow-note"><b>Alurnya:</b> beli Premium → akses masuk ke Kamar → buka Dapur → lengkapi profil → kirim review → siap ditayangkan setelah disetujui.</div></article></div></section>
-    <section class="section"><div class="promo-head"><div class="promo-copy"><div class="kicker">Rekomendasi sekarang</div><h2>Ambil promo Premium dengan diskon terbesar.</h2><p>Daftar di bawah dihitung otomatis dari produk Premium yang aktif dan sedang memiliki harga promo.</p></div><div class="promo-flag"><b id="max-discount">—</b><span>DISKON TERBESAR</span></div></div></section>
-    <section class="section" style="padding-top:0"><div id="products" class="products"><div class="card loading">Memuat produk promo...</div></div></section>
-    <section class="footer"><div class="footer-note"><strong>Catatan pembelian:</strong> tombol <b>Beli Produk</b> membuka <b>alur checkout yang sama seperti produk di Lobi</b>. Untuk pengunjung yang belum login, alur login/daftar berjalan di checkout yang sama. Setelah pembayaran dikonfirmasi, alur resmi Studihome mengarahkan akun ke <b>Kamar</b>.</div></section>
-  </main>
-  <section id="checkout-layer" class="checkout-layer" aria-label="Checkout Studihome"><div class="checkout-top"><strong><i class="fa-solid fa-lock mr-1"></i> Checkout Studihome</strong><button id="close-checkout" type="button" aria-label="Tutup checkout">×</button></div><iframe id="checkout-frame" class="checkout-frame" title="Checkout produk Studihome"></iframe></section>
-<script>
-(() => {
-  'use strict';
-  const $ = (s) => document.querySelector(s);
-  const db = () => window.supabaseClient || null;
-  const esc = (v) => String(v ?? '').replace(/[&<>\"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','\"':'&quot;',"'":'&#039;'}[c]));
-  const money = (n) => Number(n || 0).toLocaleString('id-ID');
-  const discountPct = (p) => { const oldP=Number(p.price_original||0), newP=Number(p.price||0); return oldP>newP&&oldP>0 ? Number(((oldP-newP)/oldP*100).toFixed(1)) : 0; };
-  const safeImage = (url) => { try { const u=new URL(String(url||''),location.origin); return ['https:','http:'].includes(u.protocol)?u.href:''; } catch { return ''; } };
-  let routePoll=null, checkoutStartPoll=null;
-  const stopPolls=()=>{clearInterval(routePoll);clearInterval(checkoutStartPoll);routePoll=null;checkoutStartPoll=null;};
-  function closeCheckout(){ stopPolls(); const layer=$('#checkout-layer'),frame=$('#checkout-frame'); layer?.classList.remove('show'); if(frame) frame.src='about:blank'; document.querySelectorAll('.buy').forEach(b=>{b.disabled=false;b.textContent='Beli Produk';}); }
-  function parentRedirectToKamar(){ stopPolls(); location.assign('/kamar'); }
-  function inspectCheckoutRoute(){ try { const path=String($('#checkout-frame')?.contentWindow?.location?.pathname||'').replace(/\/+$/,'')||'/'; if(path==='/dashboard'||path==='/kamar') parentRedirectToKamar(); } catch(_){} }
-  function startExactLobbyCheckout(productId){
-    const frame=$('#checkout-frame'), startedAt=Date.now();
-    checkoutStartPoll=setInterval(()=>{
-      try{
-        const app=frame?.contentWindow?.App, products=app?.state?.publicData?.products||[], productReady=products.some(p=>p&&p.id===productId);
-        if(app?.shop?.startCheckout&&productReady){ clearInterval(checkoutStartPoll);checkoutStartPoll=null;app.shop.startCheckout(productId);routePoll=setInterval(inspectCheckoutRoute,300);return; }
-      }catch(_){}
-      if(Date.now()-startedAt>20000){ clearInterval(checkoutStartPoll);checkoutStartPoll=null; const frameEl=$('#checkout-frame');frameEl.style.display='none';const layer=$('#checkout-layer');const note=document.createElement('div');note.style='position:absolute;inset:50px 0 0;display:grid;place-items:center;padding:20px;background:#ebf3ff';note.innerHTML='<div style="max-width:420px;text-align:center;background:#fff;border:1px solid #dbe6f7;border-radius:20px;padding:22px;box-shadow:0 14px 30px rgba(21,28,117,.08)"><div style="font-size:26px;color:#151c75">✦</div><h3 style="margin:8px 0;color:#151c75;font:800 16px Inter,sans-serif">Checkout belum siap</h3><p style="margin:0;color:#64748b;font:10px/1.7 Inter,sans-serif">Tutup checkout lalu tekan Beli Produk lagi. Sistem akan memakai alur checkout Lobi yang sama.</p></div>';layer.appendChild(note); }
-    },200);
-  }
-  function openCheckout(productId){ document.querySelectorAll('.buy').forEach(b=>{b.disabled=true;if(b.dataset.productId===productId)b.textContent='Membuka checkout…';}); const layer=$('#checkout-layer'),frame=$('#checkout-frame');layer.classList.add('show');frame.style.display='block';frame.src='/';frame.onload=()=>{document.querySelectorAll('#checkout-layer>div:not(.checkout-top)').forEach(x=>x.remove());startExactLobbyCheckout(productId);}; }
-  function renderProducts(products){
-    const list=products.filter(p=>p&&p.is_active!==false&&p.is_free===false&&Number(p.price)>0&&Number(p.price_original)>Number(p.price)).map(p=>({...p,discountPct:discountPct(p)})).sort((a,b)=>b.discountPct-a.discountPct||new Date(b.updated_at||0)-new Date(a.updated_at||0)).slice(0,3), grid=$('#products');
-    if(!list.length){grid.innerHTML='<div class="card empty">Belum ada produk Premium yang sedang diskon. Promo akan muncul otomatis saat katalog diperbarui.</div>';$('#max-discount').textContent='—';return;}
-    $('#max-discount').textContent=`${Math.max(...list.map(p=>p.discountPct))}%`;
-    grid.innerHTML=list.map(p=>{const image=safeImage(p.image_url),saved=Math.max(0,Number(p.price_original)-Number(p.price));return `<article class="card product"><div class="product-img">${image?`<img src="${esc(image)}" alt="${esc(p.title)}" loading="lazy" referrerpolicy="no-referrer">`:''}</div><div class="product-body"><span class="promo-badge"><i class="fa-solid fa-fire"></i> PROMO BESAR • DISKON ${p.discountPct}%</span><h3 class="product-title">${esc(p.title)}</h3><div class="product-cat">${esc(p.category||'Premium Studihome')}</div><p class="product-desc">${esc(p.description||'')}</p><div class="pricing"><div class="old">Rp ${money(p.price_original)}</div><div class="new">Rp ${money(p.price)}</div><div class="saving">Hemat Rp ${money(saved)}</div></div><button class="buy" type="button" data-product-id="${esc(p.id)}">Beli Produk</button></div></article>`;}).join('');
-    document.querySelectorAll('.buy').forEach(btn=>btn.addEventListener('click',()=>openCheckout(btn.dataset.productId)));
-  }
-  async function loadProducts(){ const client=db();if(!client){$('#products').innerHTML='<div class="card empty">Katalog promo belum tersambung.</div>';return;} try{const {data,error}=await client.from('products').select('id,title,description,price,price_original,category,image_url,is_free,is_active,updated_at').eq('is_active',true).eq('is_free',false).gt('price',0).order('updated_at',{ascending:false});if(error)throw error;renderProducts(Array.isArray(data)?data:[]);}catch(error){console.error('[kamar-creator]',error);$('#products').innerHTML='<div class="card empty">Produk promo belum bisa dimuat. Silakan coba lagi sebentar.</div>';}}
-  document.addEventListener('DOMContentLoaded',()=>{ $('#close-checkout')?.addEventListener('click',closeCheckout);window.addEventListener('beforeunload',stopPolls);loadProducts(); });
-})();
-</script>
+  <iframe id="lobby-app" src="/?creator=1" title="Studihome"></iframe>
+  <script>
+    (() => {
+      const frame = document.getElementById('lobby-app');
+      const discount = p => {
+        const original = Number(p?.priceOriginal || 0);
+        const price = Number(p?.price || 0);
+        return original > price ? ((original - price) / original) * 100 : 0;
+      };
+
+      function renderCreatorView() {
+        try {
+          const win = frame.contentWindow;
+          const doc = frame.contentDocument;
+          if (!win || !doc || !win.App || !win.App.state) return false;
+
+          const main = doc.getElementById('main-content');
+          const data = win.App.state.publicData;
+          if (!main || !data?.products) return false;
+
+          const premiumPromo = (data.products || [])
+            .filter(p => p && p.isFree !== true && Number(p.priceOriginal || 0) > Number(p.price || 0))
+            .sort((a,b) => discount(b) - discount(a) || Number(a.price || 0) - Number(b.price || 0))
+            .slice(0, 3);
+
+          main.innerHTML = `
+            <div class="max-w-7xl mx-auto px-3 sm:px-6 py-7 sm:py-10">
+              <section class="mb-7 sm:mb-9">
+                <div class="text-[10px] font-black uppercase tracking-[.12em] text-amber-600">JADI CREATOR STUDIHOME</div>
+                <h1 class="text-2xl sm:text-4xl font-black text-[#151c75] mt-2 leading-tight">Punya skill yang layak dibagikan?</h1>
+                <p class="text-xs sm:text-sm text-slate-600 leading-relaxed mt-2 max-w-2xl">Untuk membuka Dapur Creator, cukup miliki minimal satu produk Premium Studihome yang aktif. Setelah itu, kamu bisa menyiapkan profil, layanan, dan portfolio untuk ditinjau sebelum tampil ke publik.</p>
+                <p class="text-[11px] sm:text-xs text-slate-500 leading-relaxed mt-2 max-w-2xl">Santai, nggak perlu ribet. Mulai dari satu produk Premium yang memang kamu butuhkan, lalu lanjutkan perjalananmu dari Kamar.</p>
+              </section>
+
+              <section>
+                <div class="mb-4">
+                  <div class="text-[10px] font-black uppercase tracking-[.12em] text-amber-600">PROMO PREMIUM</div>
+                  <h2 class="text-lg sm:text-2xl font-black text-[#151c75] mt-1">Yang lagi paling menarik di Lobi</h2>
+                  <p class="text-xs text-slate-500 mt-1">Produk ini diambil langsung dari katalog Lobi. Tampilan, tombol, dan alur belinya tetap milik Lobi.</p>
+                </div>
+                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
+                  ${premiumPromo.length
+                    ? premiumPromo.map(p => win.App.products.renderCardHTML(p)).join('')
+                    : `<div class="card-3d-inset p-6 rounded-2xl text-center text-xs text-slate-500 sm:col-span-2 lg:col-span-3">Belum ada produk Premium yang sedang diskon.</div>`}
+                </div>
+              </section>
+            </div>
+          `;
+
+          return true;
+        } catch (_) {
+          return false;
+        }
+      }
+
+      function boot() {
+        if (renderCreatorView()) return;
+        setTimeout(boot, 250);
+      }
+
+      frame.addEventListener('load', boot);
+      setTimeout(boot, 500);
+    })();
+  </script>
 </body>
 </html>
