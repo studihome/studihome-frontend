@@ -1,173 +1,69 @@
-(() => {
+(()=>{
   'use strict';
 
   /**
-   * Canonical Kamar -> Dapur CTA synchronizer.
-   *
-   * Workspace URL is always /dapur. A Creator username is a public slug,
-   * never the private workspace route. Supabase RPC/RLS remains the security boundary.
+   * Canonical Kamar -> Dapur CTA.
+   * /dapur is the private Creator workspace for every eligible Premium member.
+   * Public Creator URLs use /{username}; Kamar never builds a workspace URL.
+   * Supabase RPC/RLS remains the security boundary.
    */
 
-  const SELECTOR = '#kamar-creator-entry';
-  const BUTTON_SELECTOR = `${SELECTOR} button`;
-  const LEGACY_LABELS = new Set(['Mulai di Dapur', 'Buka Dapur', 'Buat Dapur Gratis']);
-  const SLUG_RE = /^[a-z0-9](?:[a-z0-9-]{1,38}[a-z0-9])?$/i;
-  const CHECK_DELAY = 180;
+  const SELECTOR='#kamar-creator-entry';
+  const BUTTON_SELECTOR=`${SELECTOR} button`;
+  const LEGACY_LABELS=new Set(['Mulai di Dapur','Buka Dapur','Buat Dapur Gratis','Mulai Membuat Dapur','Kelola Dapur Kamu','Kelola Dapurku']);
+  const CHECK_DELAY=150;
+  let timer=0,inFlight=false,observer=null,authSubscription=null;
+  const db=()=>window.supabaseClient||null;
+  const sleep=ms=>new Promise(r=>setTimeout(r,ms));
 
-  let timer = 0;
-  let inFlight = false;
-  let observer = null;
-  let authSubscription = null;
+  function findButton(){return document.querySelector(BUTTON_SELECTOR)}
+  function normalize(){const b=findButton();if(!b)return;const label=String(b.textContent||'').trim();if(LEGACY_LABELS.has(label)){b.textContent='Memuat Dapur...';b.disabled=true;b.setAttribute('aria-busy','true')}}
 
-  const db = () => window.supabaseClient || null;
-  const sleep = (ms) => new Promise(resolve => setTimeout(resolve, ms));
-
-  function safePublicPath(username) {
-    const slug = String(username || '').trim().toLowerCase();
-    return SLUG_RE.test(slug) ? `/${encodeURIComponent(slug)}` : null;
+  async function resolve(){
+    const c=db();
+    if(!c?.auth)return null;
+    const {data,error}=await c.auth.getUser();
+    if(error)throw error;
+    if(!data?.user?.id)return {label:'Masuk / Daftar',path:'/kamar?next=%2Fdapur&intent=creator'};
+    const {data:access,error:accessError}=await c.rpc('has_creator_workspace_access');
+    if(accessError)throw accessError;
+    return access===true
+      ? {label:'Kelola Dapur',path:'/dapur'}
+      : {label:'Lihat Produk Premium',path:'/'};
   }
 
-  function findButton() {
-    return document.querySelector(BUTTON_SELECTOR);
+  function apply(state){
+    const b=findButton();if(!b||!state)return;
+    b.removeAttribute('onclick');
+    b.type='button';
+    b.textContent=state.label;
+    b.disabled=false;
+    b.removeAttribute('aria-busy');
+    b.removeAttribute('aria-disabled');
+    b.dataset.dapurCtaManaged='1';
+    b.dataset.dapurTarget=state.path;
+    if(b.dataset.dapurListenerBound==='1')return;
+    b.addEventListener('click',e=>{e.preventDefault();const target=b.dataset.dapurTarget||'/dapur';if(target==='/dapur'||target==='/'||target.startsWith('/kamar?'))window.location.assign(target)},{passive:false});
+    b.dataset.dapurListenerBound='1';
   }
 
-  function normalizeLegacyState() {
-    const button = findButton();
-    if (!button) return;
-    const label = String(button.textContent || '').trim();
-    if (LEGACY_LABELS.has(label)) {
-      button.textContent = 'Memuat Dapur...';
-      button.disabled = true;
-      button.setAttribute('aria-busy', 'true');
-    }
+  async function sync(){
+    const b=findButton();if(!b||inFlight)return;
+    inFlight=true;
+    try{normalize();apply(await resolve())}
+    catch(e){console.warn('[Studihome Kamar -> Dapur]',e?.message||e);const current=findButton();if(current){current.textContent='Kelola Dapur';current.disabled=false;current.removeAttribute('aria-busy');current.dataset.dapurTarget='/dapur'}}
+    finally{inFlight=false}
   }
 
-  async function resolveTarget() {
-    const client = db();
-    if (!client?.auth) return null;
+  function schedule(){clearTimeout(timer);timer=window.setTimeout(()=>void sync(),CHECK_DELAY)}
 
-    const { data: userData, error: userError } = await client.auth.getUser();
-    if (userError) throw userError;
-    const user = userData?.user;
-    if (!user?.id) return null;
-
-    const { data: access, error: accessError } = await client.rpc('has_creator_workspace_access');
-    if (accessError) throw accessError;
-    if (access !== true) return null;
-
-    const { data: creator, error: creatorError } = await client
-      .from('creator_profiles')
-      .select('username')
-      .eq('user_id', user.id)
-      .order('updated_at', { ascending: false })
-      .limit(1)
-      .maybeSingle();
-
-    if (creatorError) throw creatorError;
-
-    const publicPath = safePublicPath(creator?.username);
-    return {
-      label: publicPath ? 'Kelola Dapur Kamu' : 'Mulai Membuat Dapur',
-      path: '/dapur',
-      publicPath
-    };
-  }
-
-  function ensurePublicLink(publicPath) {
-    const button = findButton();
-    if (!button || !publicPath) return;
-    const host = button.parentElement;
-    if (!host) return;
-    let link = host.querySelector('[data-kamar-public-dapur]');
-    if (!link) {
-      link = document.createElement('a');
-      link.dataset.kamarPublicDapur = '1';
-      link.className = 'text-[10px] sm:text-xs font-extrabold text-[#151c75] hover:underline';
-      link.target = '_blank';
-      link.rel = 'noopener noreferrer';
-      link.textContent = 'Lihat Dapur Publik ↗';
-      host.appendChild(link);
-    }
-    link.href = publicPath;
-  }
-
-  function applyTarget(target) {
-    const button = findButton();
-    if (!button || !target) return false;
-
-    button.removeAttribute('onclick');
-    button.type = 'button';
-    button.textContent = target.label;
-    button.disabled = false;
-    button.removeAttribute('aria-busy');
-    button.removeAttribute('aria-disabled');
-    button.dataset.dapurCtaManaged = '1';
-    button.dataset.dapurTarget = '/dapur';
-
-    ensurePublicLink(target.publicPath);
-
-    if (button.dataset.dapurListenerBound !== '1') {
-      button.addEventListener('click', (event) => {
-        event.preventDefault();
-        window.location.assign('/dapur');
-      }, { passive: false });
-      button.dataset.dapurListenerBound = '1';
-    }
-    return true;
-  }
-
-  async function sync() {
-    const button = findButton();
-    if (!button || inFlight) return;
-    inFlight = true;
-    try {
-      normalizeLegacyState();
-      const target = await resolveTarget();
-      if (target) applyTarget(target);
-    } catch (error) {
-      console.warn('[Studihome Dapur CTA]', error?.message || error);
-      const current = findButton();
-      if (current) {
-        current.textContent = 'Mulai Membuat Dapur';
-        current.disabled = false;
-        current.removeAttribute('aria-busy');
-        current.dataset.dapurTarget = '/dapur';
-      }
-    } finally {
-      inFlight = false;
-    }
-  }
-
-  function schedule() {
-    clearTimeout(timer);
-    timer = window.setTimeout(() => void sync(), CHECK_DELAY);
-  }
-
-  async function boot() {
-    for (let i = 0; i < 120; i += 1) {
-      if (db()?.auth) break;
-      await sleep(50);
-    }
-    if (!db()?.auth) return;
-
+  async function boot(){
+    for(let i=0;i<120;i++){if(db()?.auth)break;await sleep(50)}
+    if(!db()?.auth)return;
     schedule();
-
-    if (!observer && document.body) {
-      observer = new MutationObserver(() => {
-        if (document.querySelector(SELECTOR)) schedule();
-      });
-      observer.observe(document.body, { childList: true, subtree: true });
-    }
-
-    if (!authSubscription) {
-      const { data } = db().auth.onAuthStateChange(() => schedule());
-      authSubscription = data?.subscription || null;
-    }
+    if(!observer&&document.body){observer=new MutationObserver(()=>{if(document.querySelector(SELECTOR))schedule()});observer.observe(document.body,{childList:true,subtree:true})}
+    if(!authSubscription){const {data}=db().auth.onAuthStateChange(()=>schedule());authSubscription=data?.subscription||null}
   }
 
-  if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', () => void boot(), { once: true });
-  } else {
-    void boot();
-  }
+  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',()=>void boot(),{once:true});else void boot();
 })();
