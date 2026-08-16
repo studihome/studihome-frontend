@@ -3,14 +3,20 @@
 
   /**
    * Canonical Kamar -> Dapur CTA.
-   * /dapur is the private Creator workspace for every eligible Premium member.
+   * /dapur is the private Creator workspace.
    * Public Creator URLs use /{username}; Kamar never builds a workspace URL.
    * Supabase RPC/RLS remains the security boundary.
    */
-
   const SELECTOR='#kamar-creator-entry';
   const BUTTON_SELECTOR=`${SELECTOR} button`;
-  const LEGACY_LABELS=new Set(['Mulai di Dapur','Buka Dapur','Buat Dapur Gratis','Mulai Membuat Dapur','Kelola Dapur Kamu','Kelola Dapurku']);
+  const LEGACY_LABELS=new Set([
+    'Mulai di Dapur',
+    'Buka Dapur',
+    'Buat Dapur Gratis',
+    'Kelola Dapur',
+    'Kelola Dapurku',
+    'Mulai Membuat Dapur'
+  ]);
   const CHECK_DELAY=150;
   let timer=0,inFlight=false,observer=null,authSubscription=null;
   const db=()=>window.supabaseClient||null;
@@ -25,11 +31,24 @@
     const {data,error}=await c.auth.getUser();
     if(error)throw error;
     if(!data?.user?.id)return {label:'Masuk / Daftar',path:'/kamar?next=%2Fdapur&intent=creator'};
+
     const {data:access,error:accessError}=await c.rpc('has_creator_workspace_access');
     if(accessError)throw accessError;
-    return access===true
-      ? {label:'Kelola Dapur',path:'/dapur'}
-      : {label:'Lihat Produk Premium',path:'/'};
+
+    if(access===true){
+      const {data:creator,error:creatorError}=await c
+        .from('creator_profiles')
+        .select('id')
+        .eq('user_id',data.user.id)
+        .limit(1)
+        .maybeSingle();
+      if(creatorError)throw creatorError;
+      return creator
+        ? {label:'Kelola Dapur Kamu',path:'/dapur'}
+        : {label:'Mulai Membuat Dapur',path:'/dapur'};
+    }
+
+    return {label:'Lihat Produk Premium',path:'/'};
   }
 
   function apply(state){
@@ -43,7 +62,11 @@
     b.dataset.dapurCtaManaged='1';
     b.dataset.dapurTarget=state.path;
     if(b.dataset.dapurListenerBound==='1')return;
-    b.addEventListener('click',e=>{e.preventDefault();const target=b.dataset.dapurTarget||'/dapur';if(target==='/dapur'||target==='/'||target.startsWith('/kamar?'))window.location.assign(target)},{passive:false});
+    b.addEventListener('click',e=>{
+      e.preventDefault();
+      const target=b.dataset.dapurTarget||'/dapur';
+      if(target==='/dapur'||target==='/'||target.startsWith('/kamar?'))window.location.assign(target);
+    },{passive:false});
     b.dataset.dapurListenerBound='1';
   }
 
@@ -51,8 +74,16 @@
     const b=findButton();if(!b||inFlight)return;
     inFlight=true;
     try{normalize();apply(await resolve())}
-    catch(e){console.warn('[Studihome Kamar -> Dapur]',e?.message||e);const current=findButton();if(current){current.textContent='Kelola Dapur';current.disabled=false;current.removeAttribute('aria-busy');current.dataset.dapurTarget='/dapur'}}
-    finally{inFlight=false}
+    catch(e){
+      console.warn('[Studihome Kamar -> Dapur]',e?.message||e);
+      const current=findButton();
+      if(current){
+        current.textContent='Mulai Membuat Dapur';
+        current.disabled=false;
+        current.removeAttribute('aria-busy');
+        current.dataset.dapurTarget='/dapur';
+      }
+    }finally{inFlight=false}
   }
 
   function schedule(){clearTimeout(timer);timer=window.setTimeout(()=>void sync(),CHECK_DELAY)}
