@@ -1,7 +1,7 @@
 {
   "$schema": "https://openapi.vercel.sh/vercel.json",
   "rewrites": [
-    { "source": "/kamar", "has": [{ "type": "query", "key": "intent", "value": "creator" }], "destination": "/kamar-creator.html" },
+    { "source": "/kamar", "has": [{ "type": "query", "key": "intent", "value": "creator" }], "destination": "/dapur?intent=creator&next=/dapur" },
     { "source": "/studio-ai", "destination": "/index.html" },
     { "source": "/products", "destination": "/index.html" },
     { "source": "/kamar", "destination": "/index.html" },
