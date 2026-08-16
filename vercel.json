@@ -17,5 +17,13 @@
     { "source": "/ai-untuk-guru", "destination": "/index.html" },
     { "source": "/ai-untuk-umkm", "destination": "/index.html" },
     { "source": "/:username", "destination": "/index.html" }
+  ],
+  "headers": [
+    {
+      "source": "/dapur-button.js",
+      "headers": [
+        { "key": "Cache-Control", "value": "no-store, no-cache, must-revalidate, proxy-revalidate, max-age=0" }
+      ]
+    }
   ]
 }
