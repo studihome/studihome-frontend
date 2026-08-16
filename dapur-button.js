@@ -1,7 +1,6 @@
 (()=>{
   'use strict';
 
-  /** Canonical Kamar -> Dapur CTA. Single writer, single label contract. */
   const SELECTOR='#kamar-creator-entry';
   const BUTTON_SELECTOR=`${SELECTOR} button`;
   const LEGACY_LABELS=new Set([
@@ -9,56 +8,46 @@
     'Kelola Dapurku','Kelola Dapur Kamu','Kelola Dapur Creator',
     'Mulai Membuat Dapur'
   ]);
-  const CREATOR_LABEL='Kelola Dapur';
+  const CREATOR_LABEL='Kelola Dapur Kamu';
   const CREATE_LABEL='Mulai Membuat Dapur';
-  const CHECK_DELAY=100;
+  const PREMIUM_LABEL='Lihat Produk Premium';
+  const LOGIN_LABEL='Masuk / Daftar';
   const SLUG_RE=/^[a-z0-9](?:[a-z0-9-]{1,38}[a-z0-9])?$/i;
-  let timer=0,inFlight=false,observer=null,authSubscription=null;
+
+  let bodyObserver=null;
+  let hostObserver=null;
+  let authSubscription=null;
+  let timer=0;
+  let inFlight=false;
+  let cachedState=null;
   const db=()=>window.supabaseClient||null;
   const sleep=ms=>new Promise(r=>setTimeout(r,ms));
+
+  function host(){return document.querySelector(SELECTOR)}
   function findButton(){return document.querySelector(BUTTON_SELECTOR)}
-  function normalize(){
-    const b=findButton();
-    if(!b)return;
-    const label=String(b.textContent||'').trim();
-    if(LEGACY_LABELS.has(label)){
-      b.textContent='Memuat Dapur...';
-      b.disabled=true;
-      b.setAttribute('aria-busy','true');
-    }
-  }
   function safeWorkspace(username){
     const slug=String(username||'').trim().toLowerCase();
     return SLUG_RE.test(slug)?`/dapur/${encodeURIComponent(slug)}`:null;
   }
-  async function resolve(){
-    const c=db();
-    if(!c?.auth)return null;
-    const {data,error}=await c.auth.getUser();
-    if(error)throw error;
-    const currentUser=data?.user;
-    if(!currentUser?.id)return{label:'Masuk / Daftar',path:'/kamar?next=%2Fdapur&intent=creator'};
+  function keyFor(userId,username,access){return `${userId||'public'}|${access?'1':'0'}|${username||''}`}
 
-    const {data:access,error:accessError}=await c.rpc('has_creator_workspace_access');
-    if(accessError)throw accessError;
-    if(access!==true)return{label:'Lihat Produk Premium',path:'/'};
-
-    const {data:creator,error:creatorError}=await c.from('creator_profiles')
-      .select('username')
-      .eq('user_id',currentUser.id)
-      .order('updated_at',{ascending:false})
-      .limit(1)
-      .maybeSingle();
-    if(creatorError)throw creatorError;
-
-    const workspace=safeWorkspace(creator?.username);
-    return workspace
-      ? {label:CREATOR_LABEL,path:workspace}
-      : {label:CREATE_LABEL,path:'/dapur',provision:true};
-  }
-  function apply(state){
+  function setPending(){
+    const h=host();
+    if(!h)return;
+    h.style.visibility='hidden';
     const b=findButton();
-    if(!b||!state)return;
+    if(!b)return;
+    b.removeAttribute('onclick');
+    b.disabled=true;
+    b.setAttribute('aria-busy','true');
+  }
+
+  function apply(state){
+    const h=host();
+    const b=findButton();
+    if(!h||!b||!state)return;
+
+    h.style.visibility='hidden';
     b.removeAttribute('onclick');
     b.type='button';
     b.textContent=state.label;
@@ -68,25 +57,75 @@
     b.dataset.dapurCtaManaged='1';
     b.dataset.dapurTarget=state.path;
     if(state.provision)b.dataset.dapurProvision='1';else delete b.dataset.dapurProvision;
-    if(b.dataset.dapurListenerBound==='1')return;
-    b.addEventListener('click',e=>{
-      e.preventDefault();
-      const target=b.dataset.dapurTarget||'/dapur';
-      if(target==='/dapur'&&b.dataset.dapurProvision==='1'){
-        try{sessionStorage.setItem('studihome_creator_provision','1')}catch{}
-      }
-      if(target==='/dapur'||target==='/'||target.startsWith('/kamar?')||safeWorkspace(target.replace(/^\/dapur\//,'')))
-        window.location.assign(target);
-    },{passive:false});
-    b.dataset.dapurListenerBound='1';
+
+    if(b.dataset.dapurListenerBound!=='1'){
+      b.addEventListener('click',e=>{
+        e.preventDefault();
+        const target=b.dataset.dapurTarget||'/dapur';
+        if(target==='/dapur'&&b.dataset.dapurProvision==='1'){
+          try{sessionStorage.setItem('studihome_creator_provision','1')}catch{}
+        }
+        if(target==='/dapur'||target==='/'||target.startsWith('/kamar?')||safeWorkspace(target.replace(/^\/dapur\//,''))){
+          window.location.assign(target);
+        }
+      },{passive:false});
+      b.dataset.dapurListenerBound='1';
+    }
+
+    h.classList.remove('hidden');
+    h.style.visibility='visible';
   }
-  async function sync(){
+
+  async function resolve(){
+    const c=db();
+    if(!c?.auth)return null;
+    const {data,error}=await c.auth.getUser();
+    if(error)throw error;
+    const currentUser=data?.user;
+    if(!currentUser?.id){
+      return {label:LOGIN_LABEL,path:'/kamar?next=%2Fdapur&intent=creator'};
+    }
+
+    const {data:access,error:accessError}=await c.rpc('has_creator_workspace_access');
+    if(accessError)throw accessError;
+    if(access!==true)return{label:PREMIUM_LABEL,path:'/'};
+
+    const {data:creator,error:creatorError}=await c.from('creator_profiles')
+      .select('username,managed_by_studihome')
+      .eq('user_id',currentUser.id)
+      .eq('managed_by_studihome',false)
+      .order('updated_at',{ascending:false})
+      .limit(1)
+      .maybeSingle();
+    if(creatorError)throw creatorError;
+
+    const workspace=safeWorkspace(creator?.username);
+    const state=workspace
+      ? {label:CREATOR_LABEL,path:workspace}
+      : {label:CREATE_LABEL,path:'/dapur',provision:true};
+    state.cacheKey=keyFor(currentUser.id,creator?.username||'',true);
+    return state;
+  }
+
+  async function sync(force=false){
     const b=findButton();
     if(!b||inFlight)return;
+
+    if(!force&&cachedState){
+      apply(cachedState);
+      return;
+    }
+
     inFlight=true;
-    try{normalize();apply(await resolve())}
-    catch(e){
+    setPending();
+    try{
+      const state=await resolve();
+      if(!state)return;
+      cachedState=state;
+      apply(state);
+    }catch(e){
       console.warn('[Studihome Kamar -> Dapur]',e?.message||e);
+      const h=host();
       const current=findButton();
       if(current){
         current.textContent='Coba Lagi';
@@ -94,30 +133,60 @@
         current.removeAttribute('aria-busy');
         current.dataset.dapurTarget='/kamar';
       }
+      if(h){h.classList.remove('hidden');h.style.visibility='visible'}
     }finally{inFlight=false}
   }
-  function schedule(){
+
+  function schedule(force=false){
     clearTimeout(timer);
-    timer=window.setTimeout(()=>void sync(),CHECK_DELAY);
+    timer=window.setTimeout(()=>void sync(force),force?0:0);
   }
+
+  function observeHost(){
+    const h=host();
+    if(!h||hostObserver)return;
+    setPending();
+    hostObserver=new MutationObserver(()=>{
+      if(inFlight)return;
+      schedule(false);
+    });
+    hostObserver.observe(h,{childList:true,subtree:true});
+  }
+
+  function observeBodyUntilHost(){
+    if(bodyObserver||host())return;
+    bodyObserver=new MutationObserver(()=>{
+      const h=host();
+      if(!h)return;
+      bodyObserver.disconnect();
+      bodyObserver=null;
+      observeHost();
+      schedule(true);
+    });
+    bodyObserver.observe(document.body,{childList:true,subtree:true});
+  }
+
   async function boot(){
     for(let i=0;i<120;i++){
       if(db()?.auth)break;
       await sleep(50);
     }
     if(!db()?.auth)return;
-    schedule();
-    if(!observer&&document.body){
-      observer=new MutationObserver(()=>{
-        if(document.querySelector(SELECTOR))schedule();
-      });
-      observer.observe(document.body,{childList:true,subtree:true});
-    }
+
+    observeHost();
+    observeBodyUntilHost();
+    schedule(true);
+
     if(!authSubscription){
-      const {data}=db().auth.onAuthStateChange(()=>schedule());
+      const {data}=db().auth.onAuthStateChange(()=>{
+        cachedState=null;
+        setPending();
+        schedule(true);
+      });
       authSubscription=data?.subscription||null;
     }
   }
+
   if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',()=>void boot(),{once:true});
   else void boot();
 })();
