@@ -4,9 +4,9 @@
   /**
    * Kamar → Dapur CTA controller.
    *
-   * Additive-only integration: this file owns only the optional
-   * #kamar-creator-entry CTA and never changes the existing Kamar flow.
-   * Authorization remains server-side in the Creator access gate / RLS.
+   * Additive-only integration: only owns #kamar-creator-entry.
+   * UI state comes from the canonical Kamar member entitlement/profile data.
+   * Security remains server-side in Dapur access gate + RLS.
    */
 
   const SELECTOR = '#kamar-creator-entry';
@@ -18,6 +18,7 @@
   let inFlight = false;
 
   const app = () => window.App || null;
+  const db = () => window.supabaseClient || null;
   const wait = (ms) => new Promise(resolve => setTimeout(resolve, ms));
 
   function safeCreatorPath(username) {
@@ -25,17 +26,44 @@
     return SLUG_RE.test(slug) ? `/dapur/${encodeURIComponent(slug)}` : null;
   }
 
+  function hasPremiumEntitlement() {
+    const A = app();
+    const products = Array.isArray(A?.state?.memberData?.verifiedProducts)
+      ? A.state.memberData.verifiedProducts
+      : [];
+    return products.some(product => product && product.isFree === false);
+  }
+
+  async function getOwnCreator(userId) {
+    const client = db();
+    if (!client || !userId) return null;
+
+    const { data, error } = await client
+      .from('creator_profiles')
+      .select('username')
+      .eq('user_id', userId)
+      .order('updated_at', { ascending: false })
+      .limit(1);
+
+    if (error) throw error;
+
+    const username = data?.[0]?.username || '';
+    return safeCreatorPath(username);
+  }
+
   async function resolveTarget() {
     const A = app();
     const user = A?.state?.user;
-    if (!user?.id || typeof A?.api?.post !== 'function') return null;
+    if (!user?.id) return null;
 
-    // Reuse the canonical server-backed Creator eligibility/profile contract.
-    // Do not infer authorization from client-side product metadata.
-    const studio = await A.api.post('GET_CREATOR_STUDIO');
-    if (!studio?.eligible && String(user.role || '').toLowerCase() !== 'admin') return null;
+    // The Kamar panel itself is only surfaced for Premium users. Re-check the
+    // entitlement here so the CTA cannot accidentally expose Creator to others.
+    const premium = hasPremiumEntitlement();
+    const isAdmin = String(user.role || '').toLowerCase() === 'admin';
+    if (!premium && !isAdmin) return null;
 
-    const creatorPath = safeCreatorPath(studio?.profile?.username);
+    const creatorPath = await getOwnCreator(user.id);
+
     return {
       label: creatorPath ? 'Kelola Dapur Kamu' : 'Mulai Membuat Dapur',
       path: creatorPath || '/dapur'
@@ -46,18 +74,17 @@
     const button = document.querySelector(BUTTON_SELECTOR);
     if (!button) return false;
 
-    // Remove the legacy inline router action before attaching the canonical route.
     button.removeAttribute('onclick');
     button.type = 'button';
     button.textContent = target.label;
     button.dataset.dapurCtaManaged = '1';
     button.dataset.dapurTarget = target.path;
 
-    // Kamar may rerender this panel; do not stack click handlers on the same node.
     if (button.dataset.dapurListenerBound === '1') return true;
 
     button.addEventListener('click', (event) => {
       event.preventDefault();
+
       const targetPath = button.dataset.dapurTarget || '/dapur';
       const safePath = targetPath === '/dapur'
         ? '/dapur'
@@ -79,7 +106,6 @@
       const target = await resolveTarget();
       if (target) applyTarget(target);
     } catch (error) {
-      // Preserve the existing Kamar experience when the optional lookup fails.
       console.warn('[Studihome Dapur CTA]', error?.message || error);
     } finally {
       inFlight = false;
@@ -92,20 +118,18 @@
   }
 
   async function boot() {
-    // Wait for the canonical Kamar bootstrap so App.api and App.state are ready.
     for (let i = 0; i < 80; i += 1) {
-      if (app()?.state && typeof app()?.api?.post === 'function') break;
+      if (app()?.state && db()?.auth) break;
       await wait(50);
     }
 
-    if (!app()?.state || typeof app()?.api?.post !== 'function') return;
+    if (!app()?.state || !db()?.auth) return;
 
     scheduleRefresh();
 
     const main = document.getElementById('main-content');
     if (!main || observer) return;
 
-    // The Kamar panel is rendered asynchronously. Observe only its content root.
     observer = new MutationObserver(() => scheduleRefresh());
     observer.observe(main, { childList: true, subtree: true });
   }
