@@ -1,7 +1,6 @@
 {
   "$schema": "https://openapi.vercel.sh/vercel.json",
   "rewrites": [
-    { "source": "/kamar", "has": [{ "type": "query", "key": "intent", "value": "creator" }], "destination": "/dapur?intent=creator&next=/dapur" },
     { "source": "/studio-ai", "destination": "/index.html" },
     { "source": "/products", "destination": "/index.html" },
     { "source": "/kamar", "destination": "/index.html" },
@@ -28,12 +27,6 @@
     },
     {
       "source": "/dapur-button.js",
-      "headers": [
-        { "key": "Cache-Control", "value": "no-store, no-cache, must-revalidate, proxy-revalidate, max-age=0" }
-      ]
-    },
-    {
-      "source": "/dapur-access-gate.js",
       "headers": [
         { "key": "Cache-Control", "value": "no-store, no-cache, must-revalidate, proxy-revalidate, max-age=0" }
       ]
