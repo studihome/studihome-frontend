@@ -66,6 +66,16 @@
     }
 
     /* Root copy refinement: keep canonical renderer unchanged while presenting final copy. */
+    .creator-kicker {
+      font-size: 0 !important;
+    }
+    .creator-kicker::after {
+      content: 'Creator sedang tayang';
+      font-size: 11px;
+      font-weight: 900;
+      letter-spacing: .12em;
+      color: #f8d56f;
+    }
     .creator-title {
       font-size: 0 !important;
     }
@@ -133,13 +143,38 @@
       .brand .mark { font-size: 27px !important; }
       .brand { font-size: 23px !important; }
       .eyebrow::after { font-size: 11px; }
+      .creator-kicker::after { font-size: 10px; letter-spacing: .09em; }
       .creator-title::after { font-size: 24px; }
-      #homepage-footer { padding: 20px 12px 26px; }
-      .homepage-footer-inner { flex-direction: column; text-align: center; gap: 14px; }
+      #homepage-footer { padding: 12px 10px; }
+      .homepage-footer-inner {
+        width: 100%;
+        flex-direction: row;
+        justify-content: space-between;
+        align-items: center;
+        gap: 8px;
+        flex-wrap: nowrap;
+        white-space: nowrap;
+        overflow: hidden;
+      }
       .homepage-footer-brand,
-      .homepage-footer-links { justify-content: center; flex-wrap: wrap; }
-      .homepage-footer-brand { text-align: center; }
-      .homepage-footer-links { gap: 14px; }
+      .homepage-footer-links {
+        justify-content: flex-start;
+        flex-wrap: nowrap;
+        flex: 0 0 auto;
+      }
+      .homepage-footer-brand {
+        text-align: left;
+        gap: 0;
+      }
+      .homepage-footer-star,
+      .homepage-footer-copy { display: none; }
+      .homepage-footer-brand strong { font-size: 12px; }
+      .homepage-footer-links { gap: 10px; font-size: 10px; }
+      .homepage-footer-links .help {
+        min-height: 28px;
+        padding: 5px 9px;
+        border-radius: 9px;
+      }
     }
   </style>
 
@@ -164,6 +199,6 @@
     </div>
   </footer>
 
-  <script src="/dapur-entry.js?v=20260816marquee3" defer></script>
+  <script src="/dapur-entry.js?v=20260816marquee4" defer></script>
 </body>
 </html>
