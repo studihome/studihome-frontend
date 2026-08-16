@@ -52,9 +52,70 @@
       font-size: 30px !important;
       font-weight: 900 !important;
     }
+
+    /* Header quick navigation: applies to /dapur and /dapur/{username}. */
+    .dapur-quick-nav {
+      position: fixed;
+      top: 10px;
+      right: max(14px, calc((100vw - 1180px) / 2 + 14px));
+      z-index: 60;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 4px;
+      border: 1px solid rgba(227, 232, 243, .88);
+      border-radius: 14px;
+      background: rgba(255,255,255,.92);
+      box-shadow: 0 8px 24px rgba(15,23,42,.08);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+    }
+    .dapur-quick-nav a {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 36px;
+      padding: 8px 12px;
+      border: 1px solid transparent;
+      border-radius: 10px;
+      color: #151c75;
+      background: transparent;
+      text-decoration: none;
+      font-family: 'Inter', sans-serif;
+      font-size: 12px;
+      font-weight: 800;
+      line-height: 1;
+      white-space: nowrap;
+      transition: transform .18s ease, background-color .18s ease, box-shadow .18s ease;
+    }
+    .dapur-quick-nav a:hover {
+      background: #eef3ff;
+      box-shadow: 0 4px 10px rgba(21,28,117,.08);
+      transform: translateY(-1px);
+    }
+    .dapur-quick-nav a.dapur-nav-primary {
+      color: #fff;
+      background: linear-gradient(135deg,#151c75,#3546b8);
+      box-shadow: 0 5px 12px rgba(21,28,117,.15);
+    }
+    .dapur-quick-nav a.dapur-nav-primary:hover {
+      background: linear-gradient(135deg,#10165f,#2f3ea4);
+    }
     @media (max-width: 680px) {
       .brand .mark { font-size: 27px !important; }
       .brand { font-size: 23px !important; }
+      .dapur-quick-nav {
+        top: 8px;
+        right: 8px;
+        gap: 4px;
+        padding: 3px;
+        border-radius: 12px;
+      }
+      .dapur-quick-nav a {
+        min-height: 34px;
+        padding: 8px 9px;
+        font-size: 11px;
+      }
     }
   </style>
 
@@ -62,6 +123,11 @@
   <script src="/supabase-config.js?v=20260815r1" defer></script>
 </head>
 <body>
+  <nav class="dapur-quick-nav" aria-label="Navigasi utama Dapur">
+    <a href="/" title="Kembali ke Teras">Teras</a>
+    <a href="/kamar" title="Buka Kamar">Kamar</a>
+    <a href="/admin" class="dapur-nav-primary" title="Buka Admin">Admin</a>
+  </nav>
   <main id="app" aria-live="polite"></main>
   <script src="/dapur-entry.js?v=20260816brand3" defer></script>
 </body>
