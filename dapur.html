@@ -65,10 +65,81 @@
       color: #151c75;
     }
 
+    /* Root copy refinement: keep canonical renderer unchanged while presenting final copy. */
+    .creator-title {
+      font-size: 0 !important;
+    }
+    .creator-title::after {
+      content: 'Creator yang sedang menyalakan kompor..';
+      display: block;
+      font-size: clamp(24px, 3vw, 34px);
+      line-height: 1.08;
+      letter-spacing: -.03em;
+      color: #fff;
+    }
+
+    /* Homepage footer visual contract — only visible on root /dapur. */
+    #homepage-footer {
+      display: none;
+      margin-top: 0;
+      border-top: 1px solid #e2e8f0;
+      background: linear-gradient(135deg, #151c75 0%, #3f48bf 100%);
+      color: #fff;
+      padding: 24px 16px 32px;
+      box-shadow: inset 0 1px 0 rgba(255,255,255,.08);
+    }
+    body:has(.creator-title) #homepage-footer { display: block; }
+    .homepage-footer-inner {
+      width: min(1280px, 100%);
+      margin: 0 auto;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      font-size: 12px;
+      font-weight: 500;
+    }
+    .homepage-footer-brand,
+    .homepage-footer-links {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    .homepage-footer-brand { text-align: left; }
+    .homepage-footer-brand strong { color: #fff; font-size: 14px; font-weight: 900; }
+    .homepage-footer-star { color: #FACC15; font-weight: 900; }
+    .homepage-footer-copy { color: #dbeafe; }
+    .homepage-footer-links { gap: 18px; }
+    .homepage-footer-links a {
+      color: #dbeafe;
+      text-decoration: none;
+      transition: color .18s ease;
+    }
+    .homepage-footer-links a:hover { color: #fff; }
+    .homepage-footer-links .help {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 32px;
+      padding: 7px 14px;
+      border-radius: 12px;
+      background: linear-gradient(135deg, #EAB308 0%, #F59E0B 100%);
+      color: #0f172a;
+      font-weight: 900;
+      box-shadow: 0 4px 14px rgba(234,179,8,.22);
+    }
+
     @media (max-width: 680px) {
       .brand .mark { font-size: 27px !important; }
       .brand { font-size: 23px !important; }
       .eyebrow::after { font-size: 11px; }
+      .creator-title::after { font-size: 24px; }
+      #homepage-footer { padding: 20px 12px 26px; }
+      .homepage-footer-inner { flex-direction: column; text-align: center; gap: 14px; }
+      .homepage-footer-brand,
+      .homepage-footer-links { justify-content: center; flex-wrap: wrap; }
+      .homepage-footer-brand { text-align: center; }
+      .homepage-footer-links { gap: 14px; }
     }
   </style>
 
@@ -77,6 +148,22 @@
 </head>
 <body>
   <main id="app" aria-live="polite"></main>
-  <script src="/dapur-entry.js?v=20260816marquee2" defer></script>
+
+  <footer id="homepage-footer" class="site-footer" aria-label="Footer Studihome">
+    <div class="homepage-footer-inner">
+      <div class="homepage-footer-brand">
+        <strong>Studihome</strong>
+        <span class="homepage-footer-star">✦</span>
+        <span class="homepage-footer-copy">2026 &copy; All Rights Reserved.</span>
+      </div>
+      <div class="homepage-footer-links">
+        <a href="#privacy" onclick="window.App?.ui?.toast?.('Tenang, data kamu kami kelola dengan aman dan seperlunya.', 'info'); return false;">Privasi</a>
+        <a href="#terms" onclick="window.App?.ui?.toast?.('Syaratnya simpel: gunakan layanan dengan wajar dan sesuai ketentuan Studihome.', 'info'); return false;">Ketentuan</a>
+        <a class="help" href="https://wa.me/6285111581115" target="_blank" rel="noopener noreferrer">Bantuan</a>
+      </div>
+    </div>
+  </footer>
+
+  <script src="/dapur-entry.js?v=20260816marquee3" defer></script>
 </body>
 </html>
