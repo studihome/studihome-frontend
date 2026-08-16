@@ -17,86 +17,50 @@
   <meta name="twitter:title" content="Dapur Creator Studihome — Creator Workspace">
   <meta name="twitter:description" content="Satu alamat publik untuk membantu pelanggan menemukan keahlian Creator.">
 
-  <!-- LOCKED TERAS BRAND FAVICON: same visual contract as index.html -->
   <link id="studihome-favicon-locked" rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Cdefs%3E%3ClinearGradient id='g' x1='0%25' y1='0%25' x2='100%25' y2='100%25'%3E%3Cstop offset='0%25' stop-color='%23151c75'/%3E%3Cstop offset='100%25' stop-color='%233f48bf'/%3E%3C/linearGradient%3E%3C/defs%3E%3Ctext x='50' y='51' text-anchor='middle' dominant-baseline='central' font-family='Arial,sans-serif' font-size='112' font-weight='700' fill='url(%23g)'%3E%E2%9C%A6%3C/text%3E%3C/svg%3E">
-
-  <!-- TERAS TYPOGRAPHY CONTRACT: exact Inter family/weights used by index.html -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
 
-  <!-- TERAS BRAND HEADER CONTRACT: yellow mark + blue wordmark -->
   <style id="studihome-brand-header-contract">
-    .brand,
-    .brand * { font-family: 'Inter', sans-serif !important; }
-    .brand { color: #151c75 !important; font-weight: 900 !important; letter-spacing: -0.045em !important; }
-    .brand .mark {
-      width: auto !important; height: auto !important; display: inline-block !important; flex: 0 0 auto !important;
-      border-radius: 0 !important; background: linear-gradient(135deg, #EAB308 0%, #F59E0B 100%) !important;
-      -webkit-background-clip: text !important; background-clip: text !important; -webkit-text-fill-color: transparent !important;
-      color: transparent !important; box-shadow: none !important; line-height: 1 !important; font-size: 30px !important; font-weight: 900 !important;
-    }
-    .eyebrow { font-size: 0 !important; }
-    .eyebrow::after { content: 'Dapur Creator'; font-size: 12px; font-weight: 900; letter-spacing: .08em; color: #151c75; }
-
-    .creator-kicker { font-size: 0 !important; }
-    .creator-kicker::after { content: 'Creator sedang tayang'; font-size: 11px; font-weight: 900; letter-spacing: .12em; color: #f8d56f; }
-    .creator-title { font-size: 0 !important; }
-    .creator-title::after { content: 'Creator yang sedang menyalakan kompor..'; display: block; font-size: clamp(24px, 3vw, 34px); line-height: 1.08; letter-spacing: -.03em; color: #fff; }
-    .creator-note { font-size: 0 !important; }
-    .creator-note::after { content: 'Creator lagi menerima pesanan...'; font-size: 13px; line-height: 1.6; color: #dbe4ff; }
-    .creator-link { font-size: 0 !important; }
-    .creator-link::after { content: 'Lihat'; font-size: 11px; font-weight: 900; line-height: 1.1; }
-
-    /* Homepage footer visual contract — only visible on root /dapur. */
-    #homepage-footer {
-      display: none; margin-top: 0; border-top: 1px solid #e2e8f0;
-      background: linear-gradient(135deg, #151c75 0%, #3f48bf 100%); color: #fff;
-      padding: 24px 16px 32px; box-shadow: inset 0 1px 0 rgba(255,255,255,.08);
-    }
-    body:has(.creator-title) #homepage-footer { display: block; }
-    .homepage-footer-inner { width: min(1280px, 100%); margin: 0 auto; display: flex; align-items: center; justify-content: space-between; gap: 16px; font-size: 12px; font-weight: 500; }
-    .homepage-footer-brand, .homepage-footer-links { display: flex; align-items: center; gap: 12px; }
-    .homepage-footer-brand { text-align: left; }
-    .homepage-footer-brand strong { color: #fff; font-size: 14px; font-weight: 900; }
-    .homepage-footer-star { color: #FACC15; font-weight: 900; }
-    .homepage-footer-copy { color: #dbeafe; }
-    .homepage-footer-links { gap: 18px; }
-    .homepage-footer-links a { color: #dbeafe; text-decoration: none; transition: color .18s ease; }
-    .homepage-footer-links a:hover { color: #fff; }
-    .homepage-footer-links .help { display: inline-flex; align-items: center; justify-content: center; min-height: 32px; padding: 7px 14px; border-radius: 12px; background: linear-gradient(135deg, #EAB308 0%, #F59E0B 100%); color: #0f172a; font-weight: 900; box-shadow: 0 4px 14px rgba(234,179,8,.22); }
-
-    @media (max-width: 680px) {
-      .brand .mark { font-size: 27px !important; }
-      .brand { font-size: 23px !important; }
-      .eyebrow::after { font-size: 11px; }
-      .creator-kicker::after { font-size: 10px; letter-spacing: .09em; }
-      .creator-title::after { font-size: 24px; }
-      .creator-note::after { font-size: 12px; }
-      .creator-link::after { font-size: 10px; }
-      #homepage-footer { padding: 12px 10px; }
-      .homepage-footer-inner { width: 100%; flex-direction: row; justify-content: space-between; align-items: center; gap: 8px; flex-wrap: nowrap; white-space: nowrap; overflow: hidden; }
-      .homepage-footer-brand, .homepage-footer-links { justify-content: flex-start; flex-wrap: nowrap; flex: 0 0 auto; }
-      .homepage-footer-brand { text-align: left; gap: 0; }
-      .homepage-footer-star, .homepage-footer-copy { display: none; }
-      .homepage-footer-brand strong { font-size: 12px; }
-      .homepage-footer-links { gap: 10px; font-size: 10px; }
-      .homepage-footer-links .help { min-height: 28px; padding: 5px 9px; border-radius: 9px; }
-    }
+    .brand,.brand *{font-family:'Inter',sans-serif!important}
+    .brand{color:#151c75!important;font-weight:900!important;letter-spacing:-.045em!important}
+    .brand .mark{width:auto!important;height:auto!important;display:inline-block!important;flex:0 0 auto!important;border-radius:0!important;background:linear-gradient(135deg,#EAB308 0%,#F59E0B 100%)!important;-webkit-background-clip:text!important;background-clip:text!important;-webkit-text-fill-color:transparent!important;color:transparent!important;box-shadow:none!important;line-height:1!important;font-size:30px!important;font-weight:900!important}
+    .eyebrow{font-size:0!important}.eyebrow::after{content:'Dapur Creator';font-size:12px;font-weight:900;letter-spacing:.08em;color:#151c75}
+    #creator-intent-info{display:none}
+    body.creator-intent #creator-intent-info{display:block}
+    .creator-intent-wrap{width:min(760px,calc(100% - 28px));margin:14px auto 0}
+    .creator-intent-card{padding:16px 18px;border:1px solid #dbe5f5;border-radius:20px;background:linear-gradient(135deg,#fff,#f8faff);box-shadow:0 10px 28px rgba(21,28,117,.05)}
+    .creator-intent-kicker{font-size:10px;font-weight:900;letter-spacing:.12em;text-transform:uppercase;color:#b45309}
+    .creator-intent-title{margin:5px 0 0;color:#151c75;font-size:19px;line-height:1.15;font-weight:900;letter-spacing:-.025em}
+    .creator-intent-copy{margin:6px 0 0;color:#5f6d82;font-size:12px;line-height:1.65}
+    .creator-intent-points{display:flex;flex-wrap:wrap;gap:6px;margin-top:9px}
+    .creator-intent-points span{padding:6px 9px;border-radius:999px;background:#eef3ff;color:#151c75;font-size:10px;font-weight:800}
+    #homepage-footer{display:none;margin-top:0;border-top:1px solid #e2e8f0;background:linear-gradient(135deg,#151c75 0%,#3f48bf 100%);color:#fff;padding:24px 16px 32px;box-shadow:inset 0 1px 0 rgba(255,255,255,.08)}
+    body:has(.creator-title) #homepage-footer{display:block}
+    .homepage-footer-inner{width:min(1280px,100%);margin:0 auto;display:flex;align-items:center;justify-content:space-between;gap:16px;font-size:12px;font-weight:500}
+    .homepage-footer-brand,.homepage-footer-links{display:flex;align-items:center;gap:12px}.homepage-footer-brand{text-align:left}.homepage-footer-brand strong{color:#fff;font-size:14px;font-weight:900}.homepage-footer-star{color:#FACC15;font-weight:900}.homepage-footer-copy{color:#dbeafe}.homepage-footer-links{gap:18px}.homepage-footer-links a{color:#dbeafe;text-decoration:none;transition:color .18s ease}.homepage-footer-links a:hover{color:#fff}.homepage-footer-links .help{display:inline-flex;align-items:center;justify-content:center;min-height:32px;padding:7px 14px;border-radius:12px;background:linear-gradient(135deg,#EAB308 0%,#F59E0B 100%);color:#0f172a;font-weight:900;box-shadow:0 4px 14px rgba(234,179,8,.22)}
+    @media(max-width:680px){.brand .mark{font-size:27px!important}.brand{font-size:23px!important}.eyebrow::after{font-size:11px}.creator-intent-wrap{width:calc(100% - 20px);margin-top:10px}.creator-intent-card{padding:14px}.creator-intent-title{font-size:17px}.creator-intent-copy{font-size:11px}.creator-intent-points span{font-size:9px}.#homepage-footer{padding:12px 10px}.homepage-footer-inner{width:100%;flex-direction:row;justify-content:space-between;align-items:center;gap:8px;flex-wrap:nowrap;white-space:nowrap;overflow:hidden}.homepage-footer-brand,.homepage-footer-links{justify-content:flex-start;flex-wrap:nowrap;flex:0 0 auto}.homepage-footer-brand{gap:0}.homepage-footer-star,.homepage-footer-copy{display:none}.homepage-footer-brand strong{font-size:12px}.homepage-footer-links{gap:10px;font-size:10px}.homepage-footer-links .help{min-height:28px;padding:5px 9px;border-radius:9px}}
   </style>
 
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2" crossorigin="anonymous"></script>
   <script src="/supabase-config.js?v=20260815r1" defer></script>
 </head>
 <body>
+  <div id="creator-intent-info" class="creator-intent-wrap" aria-live="polite">
+    <section class="creator-intent-card" aria-label="Ketentuan menjadi Creator Studihome">
+      <div class="creator-intent-kicker">Jadi Creator Studihome</div>
+      <h1 class="creator-intent-title">Punya skill? Bikin pelanggan lebih mudah menemukan kamu.</h1>
+      <p class="creator-intent-copy">Cukup punya minimal satu produk Premium yang aktif. Setelah login, lengkapi profil, layanan, dan karya kamu. Profil Creator akan ditinjau sebelum ditayangkan ke publik.</p>
+      <div class="creator-intent-points">
+        <span>Premium aktif</span><span>Profil lengkap</span><span>Karya & layanan jelas</span><span>Review sebelum tayang</span>
+      </div>
+    </section>
+  </div>
   <main id="app" aria-live="polite"></main>
   <footer id="homepage-footer" class="site-footer" aria-label="Footer Studihome">
     <div class="homepage-footer-inner">
-      <div class="homepage-footer-brand">
-        <strong>Studihome</strong>
-        <span class="homepage-footer-star">✦</span>
-        <span class="homepage-footer-copy">2026 &copy; All Rights Reserved.</span>
-      </div>
+      <div class="homepage-footer-brand"><strong>Studihome</strong><span class="homepage-footer-star">✦</span><span class="homepage-footer-copy">2026 &copy; All Rights Reserved.</span></div>
       <div class="homepage-footer-links">
         <a href="#privacy" onclick="window.App?.ui?.toast?.('Tenang, data kamu kami kelola dengan aman dan seperlunya.', 'info'); return false;">Privasi</a>
         <a href="#terms" onclick="window.App?.ui?.toast?.('Syaratnya simpel: gunakan layanan dengan wajar dan sesuai ketentuan Studihome.', 'info'); return false;">Ketentuan</a>
@@ -104,7 +68,13 @@
       </div>
     </div>
   </footer>
-  <script src="/dapur-access-gate.js?v=20260816access1" defer></script>
-  <script src="/dapur-workspace.js?v=20260816workspace1" defer></script>
+  <script>
+    (()=>{
+      const q=new URLSearchParams(location.search);
+      if(q.get('intent')==='creator') document.body.classList.add('creator-intent');
+    })();
+  </script>
+  <script src="/dapur-access-gate.js?v=20260816access3" defer></script>
+  <script src="/dapur-workspace.js?v=20260816workspace2" defer></script>
 </body>
 </html>
