@@ -172,30 +172,33 @@ Sebelum mengubah apa pun:
 12. baru declare selesai.
 
 ## 13. RELEASE VERIFICATION — CURRENT BASELINE
-Current application commit sebelum dokumentasi berikut diperbarui:
-`a476d9efa7af207c871ad446af03e9520ff5811d`
+Current application commit:
+`77b86d44f9d442fb3913bef5b6a392994d6bfedd`
 
-Perubahan commit tersebut:
-- restore locked blue homepage hero;
-- menambahkan `autocomplete="username"` pada login email;
-- temporary repair workflow sudah dihapus kembali setelah self-apply.
+Production deployment:
+`dpl_CbPjWtFHn9djpWqyUr4jjHy8URy6`
 
-Production deployment untuk commit tersebut:
-- deployment: `dpl_3B8o7xXgjXPXshYH8Qr3Spta8rFU`;
-- state: `READY`;
-- target: `production`;
-- commit metadata: `a476d9efa7af207c871ad446af03e9520ff5811d`.
+Production state:
+`READY`
 
-Verified baseline:
-- `index.html` tidak menggunakan `cdn.tailwindcss.com`;
-- `/tailwind-compiled.css?v=20260817r1` dipakai sebagai utility layer;
-- hero guard static CSS mengunci gradient biru tanpa redesign;
-- login email menggunakan `autocomplete="username"`;
-- login password menggunakan `autocomplete="current-password"`;
-- `/dapur` dan `/dapur/{username}` tetap canonical;
-- canonical Dapur tidak menggunakan global MutationObserver/decorator/access-gate.
+Target:
+`production`
 
-Catatan: commit dokumentasi ini akan memicu deployment baru. Setelah itu current Production SHA harus diperbarui lagi sebelum release gate final dinyatakan PASS.
+Deployment commit metadata:
+`77b86d44f9d442fb3913bef5b6a392994d6bfedd`
+
+The source immediately before these final documentation updates contained the locked blue hero recovery and login-email accessibility fix. The documentation commits now make the handoff and constitution part of the same final release lineage.
+
+Verified baseline before/at final release:
+- Vercel build completed successfully;
+- latest Production deployment is `READY` and matches the current commit SHA;
+- `index.html` no longer references `cdn.tailwindcss.com`;
+- `/tailwind-compiled.css?v=20260817r1` is the production utility layer;
+- homepage hero has the canonical blue gradient guard without markup/layout redesign;
+- `login-email` uses `autocomplete="username"`;
+- `login-password` uses `autocomplete="current-password"`;
+- `/dapur` and `/dapur/{username}` remain canonical routes;
+- canonical Dapur does not use global MutationObserver, second-stage decorator, or legacy access-gate runtime.
 
 ## 14. E2E LIMITATION
 Source/runtime verification bukan pengganti authenticated browser E2E. Browser test nyata masih diperlukan untuk membuktikan:
