@@ -173,10 +173,10 @@ Sebelum mengubah apa pun:
 
 ## 13. RELEASE VERIFICATION — CURRENT BASELINE
 Current application commit:
-`77b86d44f9d442fb3913bef5b6a392994d6bfedd`
+`9f27388690e984278b3d4ca4fcd16f1bb01c6288`
 
 Production deployment:
-`dpl_CbPjWtFHn9djpWqyUr4jjHy8URy6`
+`dpl_GfX5GYb1tKeCWHNtpbFjSfrqfZ9T`
 
 Production state:
 `READY`
@@ -185,7 +185,7 @@ Target:
 `production`
 
 Deployment commit metadata:
-`77b86d44f9d442fb3913bef5b6a392994d6bfedd`
+`9f27388690e984278b3d4ca4fcd16f1bb01c6288`
 
 The source immediately before these final documentation updates contained the locked blue hero recovery and login-email accessibility fix. The documentation commits now make the handoff and constitution part of the same final release lineage.
 
@@ -193,7 +193,7 @@ Verified baseline before/at final release:
 - Vercel build completed successfully;
 - latest Production deployment is `READY` and matches the current commit SHA;
 - `index.html` no longer references `cdn.tailwindcss.com`;
-- `/tailwind-compiled.css?v=20260817r1` is the production utility layer;
+- `/tailwind-compiled.css?v=20260817r2` is the production utility layer;
 - homepage hero has the canonical blue gradient guard without markup/layout redesign;
 - `login-email` uses `autocomplete="username"`;
 - `login-password` uses `autocomplete="current-password"`;

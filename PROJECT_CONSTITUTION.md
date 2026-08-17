@@ -203,11 +203,11 @@ Tidak boleh menyatakan `selesai`, `live`, atau `production ready` jika:
 - legacy request belum diperiksa.
 
 ## Article XV — Current Release State
-The final source immediately before this documentation commit is:
-`a476d9efa7af207c871ad446af03e9520ff5811d`
+The final verified production source is:
+`9f27388690e984278b3d4ca4fcd16f1bb01c6288`
 
 That source was deployed successfully to Production as:
-`dpl_3B8o7xXgjXPXshYH8Qr3Spta8rFU`
+`dpl_GfX5GYb1tKeCWHNtpbFjSfrqfZ9T`
 with state `READY`.
 
 This documentation update creates a new commit and therefore requires a fresh final deployment verification before declaring release complete.
@@ -259,3 +259,10 @@ Setiap laporan engineering wajib mencantumkan:
 - limitation.
 
 Pesan ChatGPT `Anda telah mencapai panjang maksimum untuk percakapan ini...` adalah notifikasi UI ChatGPT dan bukan error aplikasi Studihome. Jangan mengubah frontend untuk pesan tersebut.
+
+
+## Article XIX — Current Production CSS & Auth Accessibility
+- Production homepage uses compiled Tailwind CSS; CDN runtime is prohibited.
+- Tailwind compilation preserves the base/preflight layer to maintain visual parity with the previously locked homepage.
+- Login email uses `autocomplete="username"`; password and registration fields use semantic autocomplete tokens.
+- Homepage hero visual contract remains locked; technical fixes must not redesign its markup or composition.
