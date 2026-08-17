@@ -2,52 +2,41 @@
 
 ## Tujuan
 
-Modul Under Construction adalah mode maintenance terisolasi untuk homepage Studihome. Mode ini memungkinkan admin menutup halaman publik sementara tanpa mematikan akses Admin.
+Modul Under Construction adalah mode maintenance terisolasi untuk homepage Studihome. Mode ini dibuat untuk memungkinkan admin menutup halaman publik sementara, tanpa mematikan akses Admin.
 
 ## Prinsip operasional
 
-1. **Default OFF.** Website tetap normal setelah deploy baru.
+1. **Default OFF.** Website harus tetap normal setelah deploy baru.
 2. **Admin bypass.** Route `/admin` tetap dapat diakses ketika mode aktif.
-3. **Gudang sebagai lokasi pengelolaan.** Kontrol Under Construction berada di dalam menu **Gudang**, bukan menu Admin tingkat atas.
-4. **Database sebagai source of truth.** Status dan konten disimpan pada `site_settings.under_construction`.
-5. **RLS sebagai otoritas.** Perubahan konfigurasi harus tetap ditolak database kecuali memenuhi policy admin yang ada.
-6. **Storage least privilege.** Upload/delete media dibatasi ke bucket `site-media`, folder `under-construction`, dan user admin.
-7. **Preview tidak mengubah halaman Gudang/Admin.** Preview dirender pada window/document terpisah.
-8. **Jangan menyimpan secret.** Jangan memasukkan API key, service-role key, password, atau kredensial ke field Under Construction.
-9. **Satu perubahan, satu verifikasi.** Setelah mengubah konten, lakukan Preview lalu uji homepage.
+3. **Database sebagai source of truth.** Status dan konten disimpan pada `site_settings.under_construction`.
+4. **RLS sebagai otoritas.** Perubahan konfigurasi harus ditolak database kecuali memenuhi policy admin yang sudah ada.
+5. **Storage least privilege.** Upload/delete media dibatasi ke bucket `site-media`, folder `under-construction`, dan user admin.
+6. **Preview tidak mengubah halaman Admin.** Preview dirender pada window/document terpisah.
+7. **Jangan menyimpan secret.** Jangan memasukkan API key, service-role key, password, atau kredensial ke field Under Construction.
+8. **Satu perubahan, satu verifikasi.** Setelah mengaktifkan/mengubah konten, lakukan Preview lalu uji homepage pada mobile dan desktop.
 
 ## Cara mengelola dari Admin
 
 ### 1. Membuka panel
 
-Masuk ke `/admin`, pilih menu **Gudang**. Di dalam panel Gudang tersedia bagian **Under Construction**.
-
-Klik **Buka Pengaturan** untuk membuka kontrol lengkap.
+Masuk ke `/admin`, buka menu **Gudang**, lalu gunakan kartu **Under Construction** di dalam area Gudang.
 
 ### 2. Mengaktifkan maintenance
 
-Di panel Under Construction:
-
-1. Atur judul, deskripsi, ucapan, gambar, dan WhatsApp.
-2. Klik **Preview Halaman** untuk memeriksa hasil.
-3. Klik **Simpan Perubahan**.
-4. Aktifkan **Mode Under Construction**.
-5. Klik **Simpan Perubahan** lagi jika toggle diubah setelah konten tersimpan.
+Buka **Under Construction → Buka Pengaturan**, isi konten yang diperlukan, lalu klik **Simpan Perubahan** dan aktifkan toggle.
 
 Setelah aktif:
 
 - Homepage `/` menampilkan halaman Under Construction.
-- Admin tetap dapat diakses.
-- Isi halaman dibaca dari `site_settings.under_construction`.
-- Tombol WhatsApp hanya muncul jika nomor tersedia.
+- Admin tetap bisa diakses.
+- Isi halaman diambil dari database.
+- Tombol WhatsApp hanya muncul jika nomor valid/tersedia.
 
 ### 3. Menonaktifkan maintenance
 
-Buka `/admin` → **Gudang** → **Under Construction**.
+Buka **Gudang → Under Construction**, matikan toggle, lalu **Simpan Perubahan**.
 
-Matikan toggle **Mode Under Construction**, lalu simpan.
-
-Homepage kembali ke halaman normal. Verifikasi dengan refresh hard-cache atau sesi incognito.
+Homepage kembali menggunakan halaman normal. Disarankan melakukan refresh hard-cache atau membuka incognito untuk verifikasi.
 
 ### 4. Mengubah konten
 
@@ -79,34 +68,34 @@ Media berada di folder `under-construction` pada bucket `site-media`.
 
 ## Alur kerja yang direkomendasikan
 
-**Gudang → Under Construction → Edit → Preview → Simpan → ON/OFF → cek homepage → cek Admin → cek WhatsApp → selesai.**
+**Gudang → Under Construction → Edit → Preview → Save → ON/OFF → cek homepage → cek Admin → cek WhatsApp.**
 
-Untuk perubahan besar, verifikasi dulu melalui Vercel Preview sebelum mengaktifkan maintenance production.
+Untuk perubahan besar, jangan langsung menyalakan maintenance di production. Verifikasi dulu melalui Vercel Preview.
 
 ## Safety checklist sebelum ON
 
 - Konten sudah final.
 - Gambar berhasil dimuat.
 - Nomor WhatsApp benar.
-- Preview sesuai.
+- Preview sesuai tampilan yang diinginkan.
 - Login Admin masih berfungsi.
-- Menu Gudang masih membuka panel normal.
 - Tidak ada perubahan pada route lain.
-- Deployment yang akan dipakai berstatus `READY`.
+- Production deployment yang akan dipakai sudah `READY`.
 
 ## Safety checklist setelah ON
 
 1. Buka `/` pada browser biasa.
 2. Pastikan Under Construction tampil.
-3. Buka `/admin` → **Gudang** dan pastikan panel tetap dapat dibuka.
-4. Uji tombol WhatsApp.
-5. Uji tampilan mobile.
-6. Pantau runtime/deployment logs.
+3. Buka `/admin` → **Gudang** dan pastikan kartu Under Construction tersedia.
+4. Pastikan panel pengaturan dapat dibuka.
+5. Uji tombol WhatsApp.
+6. Uji tampilan mobile.
+7. Pantau runtime/deployment logs.
 
 ## Safety checklist sebelum OFF
 
 - Pastikan homepage normal sudah siap.
-- Pastikan pekerjaan maintenance selesai.
+- Pastikan tidak ada pekerjaan maintenance yang masih berjalan.
 - Matikan toggle dan simpan.
 - Refresh homepage dalam sesi incognito.
 - Pastikan halaman normal kembali.
@@ -125,20 +114,19 @@ Perubahan Admin harus tetap dilindungi RLS/authorization. Jangan mengganti model
 
 Jika modul bermasalah:
 
-1. Matikan **Mode Under Construction** dari `/admin` → **Gudang** bila masih dapat diakses.
+1. Matikan **Mode Under Construction** dari **Gudang** bila masih dapat diakses.
 2. Bila deployment bermasalah, rollback Vercel ke deployment stabil sebelumnya.
 3. Jangan menghapus bucket atau tabel production untuk menyelesaikan error frontend.
 4. Jangan merge PR yang belum melewati verification gate.
 
 ## Status implementasi saat ini
 
-- Module: implemented on feature branch.
+- Public module: implemented on feature branch.
+- Gudang entry point: implemented in source; browser verification still required.
 - Default: OFF.
 - Admin bypass: implemented.
-- Gudang integration: implemented on feature branch.
 - Admin content controls: implemented.
 - Image upload/delete: implemented.
 - WhatsApp CTA: implemented.
 - Isolated preview: implemented.
-- Preview Vercel: verify after latest commit.
-- Production merge: intentionally blocked until authenticated E2E verification passes.
+- Production merge: blocked until browser verification passes.
