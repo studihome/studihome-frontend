@@ -206,8 +206,11 @@ Tidak boleh menyatakan `selesai`, `live`, atau `production ready` jika:
 The final verified production source is:
 `9f27388690e984278b3d4ca4fcd16f1bb01c6288`
 
-That source was deployed successfully to Production as:
+That functional source was deployed successfully to Production as:
 `dpl_GfX5GYb1tKeCWHNtpbFjSfrqfZ9T`
+
+Latest Production deployment, including documentation-only lineage updates:
+`dpl_5goqrmzUamPSjEnHHRXTpsXqSzBd`
 with state `READY`.
 
 This documentation update creates a new commit and therefore requires a fresh final deployment verification before declaring release complete.

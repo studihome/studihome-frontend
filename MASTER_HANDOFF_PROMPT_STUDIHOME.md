@@ -175,8 +175,8 @@ Sebelum mengubah apa pun:
 Current application commit:
 `9f27388690e984278b3d4ca4fcd16f1bb01c6288`
 
-Production deployment:
-`dpl_GfX5GYb1tKeCWHNtpbFjSfrqfZ9T`
+Latest Production deployment (documentation-lineage commit):
+`dpl_5goqrmzUamPSjEnHHRXTpsXqSzBd`
 
 Production state:
 `READY`
