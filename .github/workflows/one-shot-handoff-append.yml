@@ -1,0 +1,82 @@
+name: one-shot-handoff-append
+
+on:
+  push:
+    branches: [main]
+
+permissions:
+  contents: write
+
+jobs:
+  sync:
+    if: ${{ github.actor != 'github-actions[bot]' }}
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Append current release override
+        shell: bash
+        run: |
+          cat >> MASTER_HANDOFF_PROMPT_STUDIHOME.md <<'EOF'
+
+## CURRENT RELEASE OVERRIDE — 2026-08-17
+
+This section supersedes stale deployment metadata above.
+
+Production verified:
+- commit: `b9f1d117be2a5f67e68f4fb31f278ea2d888f600`
+- deployment: `dpl_CGXbrFMZ4Re2CkTZc6zrg7QospkT`
+- state: `READY`
+
+Latest verified repairs:
+- homepage hero is locked to the previously agreed blue visual; no redesign;
+- Tailwind CDN removed from production shell and replaced with compiled utility CSS;
+- auth autocomplete warnings fixed, including `login-email` → `autocomplete="username"`;
+- Dapur canonical runtime remains `dapur.html → dapur-entry.js`;
+- legacy Dapur runtime decorators/injectors remain removed;
+- public Creator RLS reads are separated from authenticated-only authorization functions;
+- no runtime errors found in the latest Production check for `/`, `/kamar`, `/admin`, `/dapur`.
+
+Release gate note:
+- server-side/runtime verification is PASS;
+- final browser E2E still requires a real authenticated test session for the full member/Premium/Creator lifecycle.
+EOF
+
+          cat >> PROJECT_CONSTITUTION.md <<'EOF'
+
+## CURRENT RELEASE OVERRIDE — 2026-08-17
+
+The latest verified Production release is authoritative over the older snapshot in Article XIV:
+
+- Production commit: `b9f1d117be2a5f67e68f4fb31f278ea2d888f600`
+- Deployment: `dpl_CGXbrFMZ4Re2CkTZc6zrg7QospkT`
+- State: `READY`
+
+Current verified conditions:
+- homepage hero visual restored to the agreed blue presentation without redesign;
+- Tailwind CDN warning removed from Production;
+- authentication autocomplete warning fixed;
+- canonical Dapur runtime unchanged and stable;
+- latest Production runtime error check: no errors on main routes;
+- browser authenticated E2E remains the final manual release gate.
+EOF
+
+      - name: Verify append
+        shell: bash
+        run: |
+          grep -q 'CURRENT RELEASE OVERRIDE — 2026-08-17' MASTER_HANDOFF_PROMPT_STUDIHOME.md
+          grep -q 'b9f1d117be2a5f67e68f4fb31f278ea2d888f600' MASTER_HANDOFF_PROMPT_STUDIHOME.md
+          grep -q 'CURRENT RELEASE OVERRIDE — 2026-08-17' PROJECT_CONSTITUTION.md
+          grep -q 'b9f1d117be2a5f67e68f4fb31f278ea2d888f600' PROJECT_CONSTITUTION.md
+
+      - name: Commit and self-delete
+        shell: bash
+        run: |
+          rm -f .github/workflows/one-shot-handoff-append.yml
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add MASTER_HANDOFF_PROMPT_STUDIHOME.md PROJECT_CONSTITUTION.md .github/workflows/one-shot-handoff-append.yml
+          git commit -m 'docs: append current verified release handoff' || exit 0
+          git push origin main
