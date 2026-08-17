@@ -102,24 +102,21 @@ Isi:
 
 Workflow one-shot yang dipakai untuk codemod sudah self-delete dan **tidak boleh kembali ke repository**.
 
-## 11. PRODUCTION DEPLOYMENT FINAL
-Deployment yang menggunakan fix final:
-- Vercel deployment: `dpl_517inXipdvZGQfxGgtrRy6caxUvF`
+## 11. PRODUCTION DEPLOYMENT FINAL APLIKASI
+Deployment yang menggunakan fix visual/auth:
+- Vercel: `dpl_517inXipdvZGQfxGgtrRy6caxUvF`
 - URL: `studihome-frontend-a30ey09fo-studihome.vercel.app`
 - state: `READY`
 - target: `production`
 - commit SHA: `ad6e138b597eca67e7324e747c3d116f283c2255`
 
-Deployment berikutnya hanya membawa update handoff documentation:
-- deployment: `dpl_wyp5XJ73Nf7TyGjt6X5VAza8exS1`
-- commit: `2a70306dc9fa42e53d53a073235d7e3fd0a49f6a`
-- state: `READY`
+Commit dokumentasi setelahnya tidak mengubah aplikasi selain handoff markdown.
 
 ## 12. CURRENT HEAD
-Repository `main` saat handoff ini diperbarui terakhir berada pada commit berikut setelah release fix:
-`REPLACE_ON_FINAL_UPDATE`
+Commit dokumentasi handoff final:
+`1d4104dd51c3e58e8bf27893f94c3ad1f31e6f0c`
 
-Catatan: bila ada commit dokumentasi setelah release fix, jangan menganggapnya sebagai perubahan aplikasi tanpa memeriksa file diff.
+Perbedaan antara commit ini dan `ad6e138b...` hanya dokumentasi `MASTER_HANDOFF_PROMPT_STUDIHOME.md`; tidak ada perubahan terhadap UI/runtime aplikasi pada commit finalisasi handoff ini.
 
 ## 13. GUARDRAILS
 Jangan:
@@ -162,7 +159,7 @@ Setiap perubahan wajib:
 
 ## 16. RELEASE GATE HOMEPAGE
 - production deployment `READY`;
-- deployment SHA sama dengan commit final aplikasi;
+- deployment aplikasi final menggunakan `ad6e138b...` sudah terverifikasi `READY`;
 - homepage HTTP 200;
 - tidak ada `cdn.tailwindcss.com` pada production HTML;
 - hero menggunakan canonical markup dan static CSS yang memulihkan parity baseline;
@@ -170,7 +167,7 @@ Setiap perubahan wajib:
 - login password memiliki `autocomplete="current-password"`;
 - registration password memakai `new-password`;
 - public page tetap memakai canonical homepage visual;
-- tidak ada error runtime yang baru.
+- tidak ada error runtime yang baru dari fix ini.
 
 ## 17. RELEASE GATE DAPUR
 - `/dapur` HTTP 200;
@@ -197,7 +194,7 @@ Ini adalah **notifikasi UI ChatGPT**, bukan error aplikasi Studihome, bukan erro
 ## 20. NEXT-CHAT STARTER PROMPT
 Mulai chat baru dengan:
 
-> Lanjutkan Studihome dari `MASTER_HANDOFF_PROMPT_STUDIHOME.md` di branch `main`. Jangan redesign. Release fix terakhir adalah `ad6e138b597eca67e7324e747c3d116f283c2255` dan production deployment terkait adalah `dpl_517inXipdvZGQfxGgtrRy6caxUvF`. Hero wajib parity dengan baseline `7406c1fdb8e614e0e3907f2c082bf94811a4beef`. Production tetap tanpa Tailwind CDN. Autocomplete auth harus semantic. Sebelum mengubah apa pun, verifikasi current HEAD, Vercel deployment SHA, homepage HTTP 200, `/dapur`, `/dapur/{username}`, runtime/build errors, dan browser console.
+> Lanjutkan Studihome dari `MASTER_HANDOFF_PROMPT_STUDIHOME.md` di branch `main`. Jangan redesign. Release fix aplikasi terakhir adalah `ad6e138b597eca67e7324e747c3d116f283c2255` dan production deployment terkait adalah `dpl_517inXipdvZGQfxGgtrRy6caxUvF`. Hero wajib parity dengan baseline `7406c1fdb8e614e0e3907f2c082bf94811a4beef`. Production tetap tanpa Tailwind CDN. Autocomplete auth harus semantic. Sebelum mengubah apa pun, verifikasi current HEAD, Vercel deployment SHA, homepage HTTP 200, `/dapur`, `/dapur/{username}`, runtime/build errors, dan browser console.
 
 ## 21. SUCCESS CRITERIA FINAL
 **fungsi tetap bekerja + desain hero kembali ke kontrak sebelumnya + production tidak memakai Tailwind CDN + auth autocomplete benar + public/admin/member tidak mendapat regression baru + deployment final terverifikasi.**
