@@ -175,9 +175,6 @@ Sebelum mengubah apa pun:
 Current application commit:
 `9f27388690e984278b3d4ca4fcd16f1bb01c6288`
 
-Latest Production deployment (documentation-lineage commit):
-`dpl_5goqrmzUamPSjEnHHRXTpsXqSzBd`
-
 Production state:
 `READY`
 
@@ -191,7 +188,7 @@ The source immediately before these final documentation updates contained the lo
 
 Verified baseline before/at final release:
 - Vercel build completed successfully;
-- latest Production deployment is `READY` and matches the current commit SHA;
+- functional application deployment is `READY` and matches the functional application SHA; documentation-only commits may create additional READY deployments without changing runtime application code;
 - `index.html` no longer references `cdn.tailwindcss.com`;
 - `/tailwind-compiled.css?v=20260817r2` is the production utility layer;
 - homepage hero has the canonical blue gradient guard without markup/layout redesign;

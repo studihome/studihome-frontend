@@ -208,9 +208,6 @@ The final verified production source is:
 
 That functional source was deployed successfully to Production as:
 `dpl_GfX5GYb1tKeCWHNtpbFjSfrqfZ9T`
-
-Latest Production deployment, including documentation-only lineage updates:
-`dpl_5goqrmzUamPSjEnHHRXTpsXqSzBd`
 with state `READY`.
 
 This documentation update creates a new commit and therefore requires a fresh final deployment verification before declaring release complete.
