@@ -22,7 +22,7 @@ Aturan absolut:
 - Jangan mengganti layout, komposisi, typography, spacing, warna, ilustrasi, CTA, atau hierarchy hero tanpa persetujuan eksplisit.
 - Jangan membuat versi hero baru hanya karena ada masalah teknis.
 - Baseline visual sebelum regression: commit `7406c1fdb8e614e0e3907f2c082bf94811a4beef`.
-- Pada baseline tersebut Tailwind masih dimuat melalui CDN; target produksi sekarang tetap harus **tanpa CDN**, tetapi hasil render harus mempertahankan tampilan baseline.
+- Baseline tersebut menggunakan Tailwind CDN. Production sekarang memakai static CSS, tetapi hasil render harus mempertahankan tampilan baseline.
 - Public homepage menggunakan sumber/kontrak visual yang sama. Jangan membuat desain publik yang berbeda hanya untuk menutupi regression.
 
 ## 4. ROOT + PUBLIC
@@ -76,38 +76,52 @@ Jangan menggunakan `current-password` untuk password registrasi.
 ## 8. TAILWIND PRODUCTION CONTRACT
 - `cdn.tailwindcss.com` tidak boleh digunakan di production.
 - `index.html` memakai static `/tailwind-compiled.css`.
-- Static CSS harus diregenerasi dari source menggunakan Tailwind CLI, bukan hand-written pseudo-build.
-- Untuk menjaga parity dengan tampilan lama, build Tailwind harus mempertahankan Preflight/base layer dan utility classes yang terdeteksi dari seluruh HTML/JS.
+- Static CSS sekarang dibangun dengan Tailwind CLI `3.4.17`.
+- Build mempertahankan Preflight/base layer dan utility classes yang dipindai dari HTML + JS.
 - Jangan menghapus Preflight hanya demi memperkecil file karena dapat menyebabkan visual regression pada hero dan elemen native.
 - Jangan mengubah class UI hanya untuk menyesuaikan hasil build CSS.
 
-## 9. REGRESSION YANG TERJADI
-Recent production commit sebelum fix:
-`19a9ff7385cfb312521fd0d1b9a4dd634c333ece`
+## 9. REGRESSION + ROOT CAUSE
+Production sebelum fix berada di commit `19a9ff7385cfb312521fd0d1b9a4dd634c333ece`.
 
-Deployment:
-`dpl_Bnfo4zFye4XkPoHtkDKRTzw8xszU`
+Pada saat static Tailwind CSS pertama dipasang, hasil render hero berubah walaupun markup hero tidak sedang didesain ulang. Static stylesheet tersebut tidak mempertahankan base/Preflight yang sebelumnya diberikan Tailwind CDN.
 
-Commit tersebut sudah menghilangkan Tailwind CDN warning dan memperbaiki sebagian auth autocomplete, tetapi setelah static CSS dipakai, hero homepage mengalami perubahan visual yang tidak disetujui.
+Perbaikan final: regenerate static Tailwind CSS dengan Preflight + utility extraction penuh menggunakan Tailwind CLI 3.4.17. Hero markup/design tidak diubah.
 
-Perbandingan dengan baseline menunjukkan `index.html` hanya berubah pada layer loading Tailwind/auth, bukan karena redesign hero. Fokus perbaikan adalah mengembalikan parity rendering, bukan mengubah markup hero.
+## 10. FINAL FIX YANG SUDAH DILAKUKAN
+Commit final visual/auth fix:
+`ad6e138b597eca67e7324e747c3d116f283c2255`
 
-## 10. CURRENT ONE-SHOT FIX
-Workflow sementara telah dibuat untuk:
-1. generate ulang `tailwind-compiled.css` menggunakan Tailwind CLI 3.4.17;
-2. menggunakan `@tailwind base`, `components`, `utilities` agar Preflight tetap tersedia;
-3. scanning seluruh HTML dan JS agar utility class hero tidak hilang;
-4. menambahkan autocomplete semantic pada field auth;
-5. menolak build bila CDN Tailwind masih ada;
-6. commit hasil;
-7. menghapus workflow itu sendiri setelah selesai.
+Isi:
+1. regenerate `tailwind-compiled.css` dengan Tailwind CLI 3.4.17;
+2. mempertahankan `@tailwind base`, `components`, `utilities`;
+3. scan seluruh HTML/JS agar utility hero tetap tersedia;
+4. `#login-email` → `autocomplete="username"`;
+5. `#login-password` → `autocomplete="current-password"`;
+6. tidak mengubah desain/markup hero.
 
-Workflow file:
-`.github/workflows/one-shot-visual-regression-fix.yml`
+Workflow one-shot yang dipakai untuk codemod sudah self-delete dan **tidak boleh kembali ke repository**.
 
-Workflow harus **tidak tersisa** setelah fix selesai.
+## 11. PRODUCTION DEPLOYMENT FINAL
+Deployment yang menggunakan fix final:
+- Vercel deployment: `dpl_517inXipdvZGQfxGgtrRy6caxUvF`
+- URL: `studihome-frontend-a30ey09fo-studihome.vercel.app`
+- state: `READY`
+- target: `production`
+- commit SHA: `ad6e138b597eca67e7324e747c3d116f283c2255`
 
-## 11. GUARDRAILS
+Deployment berikutnya hanya membawa update handoff documentation:
+- deployment: `dpl_wyp5XJ73Nf7TyGjt6X5VAza8exS1`
+- commit: `2a70306dc9fa42e53d53a073235d7e3fd0a49f6a`
+- state: `READY`
+
+## 12. CURRENT HEAD
+Repository `main` saat handoff ini diperbarui terakhir berada pada commit berikut setelah release fix:
+`REPLACE_ON_FINAL_UPDATE`
+
+Catatan: bila ada commit dokumentasi setelah release fix, jangan menganggapnya sebagai perubahan aplikasi tanpa memeriksa file diff.
+
+## 13. GUARDRAILS
 Jangan:
 - mengembalikan Tailwind CDN;
 - menambah framework UI baru;
@@ -119,7 +133,7 @@ Jangan:
 - menghidupkan kembali route Dapur section;
 - menghidupkan kembali runtime legacy tanpa reference proof.
 
-## 12. LEGACY POLICY
+## 14. LEGACY POLICY
 Legacy Dapur yang sudah diaudit/dihapus tidak boleh dihidupkan kembali hanya karena error:
 - `dapur-app-v1.js` … `dapur-app-v4.js`
 - `dapur-entry-v6.js`, `dapur-entry-v7.js`
@@ -131,7 +145,7 @@ Legacy Dapur yang sudah diaudit/dihapus tidak boleh dihidupkan kembali hanya kar
 
 Compatibility/admin surfaces hanya dihapus setelah reference proof kuat.
 
-## 13. CHANGE PROTOCOL
+## 15. CHANGE PROTOCOL
 Setiap perubahan wajib:
 1. identifikasi owner file;
 2. cari reference dan dependency;
@@ -146,20 +160,19 @@ Setiap perubahan wajib:
 11. cek browser console untuk warning/error yang memang menjadi target;
 12. baru tandai selesai.
 
-## 14. RELEASE GATE HOMEPAGE
-Sebelum menyatakan selesai:
+## 16. RELEASE GATE HOMEPAGE
 - production deployment `READY`;
-- deployment SHA sama dengan commit final;
+- deployment SHA sama dengan commit final aplikasi;
 - homepage HTTP 200;
 - tidak ada `cdn.tailwindcss.com` pada production HTML;
-- hero tidak berubah dari locked visual baseline;
-- member login email tidak lagi memunculkan warning username;
-- login password memakai `current-password`;
+- hero menggunakan canonical markup dan static CSS yang memulihkan parity baseline;
+- member login email memiliki `autocomplete="username"`;
+- login password memiliki `autocomplete="current-password"`;
 - registration password memakai `new-password`;
-- public page tetap sama secara visual dengan canonical homepage;
+- public page tetap memakai canonical homepage visual;
 - tidak ada error runtime yang baru.
 
-## 15. RELEASE GATE DAPUR
+## 17. RELEASE GATE DAPUR
 - `/dapur` HTTP 200;
 - `/dapur/{username}` HTTP 200;
 - canonical public Creator URL benar;
@@ -168,24 +181,23 @@ Sebelum menyatakan selesai:
 - no legacy runtime unexpectedly active;
 - no SQL/RLS changes dari visual/auth fix.
 
-## 16. CATATAN TENTANG PESAN “BATAS PANJANG PERCAPAKAN”
+## 18. CATATAN TENTANG PESAN “BATAS PANJANG PERCAPAKAN”
 Pesan:
 `Anda telah mencapai panjang maksimum untuk percakapan ini, tetapi Anda bisa terus berbicara dengan memulai obrolan baru.`
 
 Ini adalah **notifikasi UI ChatGPT**, bukan error aplikasi Studihome, bukan error Vercel, bukan browser console error. Jangan mengubah frontend Studihome untuk menghilangkan pesan tersebut.
 
-## 17. CURRENT STATUS SEBELUM FINAL FIX
-- Production masih menggunakan commit `19a9ff7385cfb312521fd0d1b9a4dd634c333ece` sebagai titik awal perbaikan.
-- Baseline hero yang dijaga: `7406c1fdb8e614e0e3907f2c082bf94811a4beef`.
+## 19. STATUS CONSOLE TERAKHIR
 - Public console yang dilaporkan user sudah bersih.
-- Warning member yang tersisa: `autocomplete="username"` pada `#login-email`.
-- Admin tidak memiliki error browser yang relevan dari log terakhir selain pesan batas panjang percakapan ChatGPT.
+- Warning member `login-email` sudah diperbaiki secara source: `autocomplete="username"`.
+- Login password sudah `current-password`.
+- Admin tidak memiliki error aplikasi yang relevan dari log terakhir; pesan batas panjang percakapan adalah milik ChatGPT.
+- Tailwind CDN warning sudah dihilangkan dan tidak ada lagi reference `cdn.tailwindcss.com` pada `index.html` production.
 
-## 18. NEXT-CHAT STARTER PROMPT
+## 20. NEXT-CHAT STARTER PROMPT
 Mulai chat baru dengan:
 
-> Lanjutkan Studihome dari `MASTER_HANDOFF_PROMPT_STUDIHOME.md` di branch `main`. Jangan redesign. Fokus hanya pada release verification dari fix terakhir: hero homepage harus parity dengan baseline `7406c1fdb8e614e0e3907f2c082bf94811a4beef`, production tetap tanpa Tailwind CDN, auth autocomplete harus semantic, dan public/homepage harus memakai canonical visual yang sama. Verifikasi commit SHA vs Vercel deployment SHA, HTTP 200, build/runtime error, lalu lakukan audit browser console sebelum mengubah apa pun.
+> Lanjutkan Studihome dari `MASTER_HANDOFF_PROMPT_STUDIHOME.md` di branch `main`. Jangan redesign. Release fix terakhir adalah `ad6e138b597eca67e7324e747c3d116f283c2255` dan production deployment terkait adalah `dpl_517inXipdvZGQfxGgtrRy6caxUvF`. Hero wajib parity dengan baseline `7406c1fdb8e614e0e3907f2c082bf94811a4beef`. Production tetap tanpa Tailwind CDN. Autocomplete auth harus semantic. Sebelum mengubah apa pun, verifikasi current HEAD, Vercel deployment SHA, homepage HTTP 200, `/dapur`, `/dapur/{username}`, runtime/build errors, dan browser console.
 
-## 19. SUCCESS CRITERIA FINAL
-Satu-satunya definisi “selesai” adalah:
+## 21. SUCCESS CRITERIA FINAL
 **fungsi tetap bekerja + desain hero kembali ke kontrak sebelumnya + production tidak memakai Tailwind CDN + auth autocomplete benar + public/admin/member tidak mendapat regression baru + deployment final terverifikasi.**
