@@ -17,26 +17,26 @@ Aturan kerja: jangan reset proyek, jangan redesign tanpa permintaan eksplisit, j
 - Legacy file tidak dianggap aktif hanya karena masih tersimpan. Cari reference dan runtime owner sebelum delete.
 
 ## 3. HOMEPAGE VISUAL CONTRACT — LOCKED
-Homepage/Teras adalah visual contract yang tidak boleh berubah tanpa instruksi eksplisit.
+Homepage `/` adalah visual contract yang tidak boleh berubah tanpa instruksi eksplisit.
 
-Hero:
-- pertahankan markup, layout, typography, spacing, hierarchy, CTA, warna, dan visual yang sudah disepakati;
-- gradient utama hero: `#151c75` → `#3f48bf`;
-- heading/subheading tetap menggunakan kontras putih sesuai baseline;
-- amber/yellow menjadi emphasis/CTA;
-- jangan mengganti desain hanya karena ada masalah CSS/build;
-- baseline visual historis yang dikunci: `7406c1fdb8e614e0e3907f2c082bf94811a4beef`.
+Hero wajib mempertahankan baseline yang sudah disepakati:
+- background gradient: `#151c75` → `#3f48bf`;
+- heading/subheading memakai kontras putih;
+- amber/yellow untuk emphasis/CTA;
+- markup, layout, typography, spacing, hierarchy, CTA, dan komposisi tidak boleh didesain ulang untuk menyelesaikan bug teknis;
+- baseline visual historis: `7406c1fdb8e614e0e3907f2c082bf94811a4beef`.
 
-Regression yang baru diselesaikan:
-- migrasi Tailwind CDN → static compiled CSS sempat membuat hero putih karena `.card-3d { background:#fff }` mengalahkan utility gradient;
-- perbaikannya hanya memperbaiki cascade/static CSS, bukan mengubah desain hero;
-- current production static CSS memuat guard khusus gradient hero agar parity visual tetap terjaga.
+Regression yang sudah diperbaiki:
+- migrasi Tailwind CDN → compiled CSS sempat membuat hero putih karena `.card-3d { background:#fff }` mengalahkan utility gradient;
+- solusi yang dipilih hanya memperbaiki cascade pada static CSS;
+- guard canonical hero sekarang mengunci `background: linear-gradient(135deg,#151c75 0%,#3f48bf 100%)` untuk kombinasi class hero yang tepat;
+- tidak ada perubahan markup, spacing, typography, atau CTA hero.
 
 ## 4. PRODUCTION CSS CONTRACT
 - `cdn.tailwindcss.com` dilarang di production.
 - `index.html` memakai `/tailwind-compiled.css` sebagai utility layer canonical.
-- CSS dibangun dari source HTML/JS menggunakan Tailwind CLI.
-- Jangan menghapus base/Preflight secara sembarangan karena dapat memunculkan visual regression pada homepage.
+- CSS dibangun secara reproducible dari source HTML/JS menggunakan Tailwind CLI.
+- Jangan menghapus base/Preflight secara sembarangan.
 - Jangan mengganti seluruh CSS framework sebagai respons terhadap satu warning.
 
 ## 5. AUTH ACCESSIBILITY CONTRACT
@@ -69,7 +69,7 @@ Canonical Vercel rewrites:
 - `/:username/portfolio/:slug*` → `/index.html`
 - `/:username` → `/index.html`
 
-Jangan memakai inline regex parameter pada `rewrites.source`; pernah menyebabkan `Invalid vercel.json file provided`.
+Jangan memakai inline regex parameter pada `rewrites.source`; konfigurasi tersebut pernah menyebabkan `Invalid vercel.json file provided`.
 
 ## 7. DAPUR PUBLIC + MEMBER CONTRACT
 `/dapur` adalah landing/entry Creator.
@@ -78,20 +78,21 @@ Public:
 - tampil shell Dapur yang sama;
 - informasi singkat syarat menjadi Creator;
 - hanya CTA `Masuk / Daftar` yang membuka popup auth canonical;
-- produk Flash Sale boleh tampil sebagai public offer jika berasal dari catalog aktif, tetapi checkout tetap memakai existing Lobi flow.
+- satu produk Flash Sale boleh tampil bila berasal dari katalog aktif dengan diskon terbesar;
+- checkout Flash Sale tetap memakai existing Lobi/order flow, bukan mesin order baru.
 
-Member tanpa Creator + Premium:
+Member Premium tanpa Creator:
 - CTA `Mulai Membuat Dapur`;
 - target `/dapur` lalu provisioning backend;
 - setelah draft tersedia → `/dapur/{username}`.
 
-Member dengan Creator + Premium:
-- CTA `Kelola Dapur Kamu` / `Kelola Dapurku` sesuai copy canonical saat ini;
+Member Premium dengan Creator:
+- CTA `Kelola Dapur Kamu` / copy canonical yang sedang aktif;
 - target `/dapur/{username}`.
 
 Non-Premium:
 - tidak boleh membuka workspace hanya dengan URL;
-- akses ditentukan backend/RLS.
+- entitlement dan authorization diputuskan backend/RLS.
 
 ## 8. CANONICAL DAPUR RUNTIME
 Runtime owner tunggal:
@@ -114,12 +115,12 @@ Dilarang:
 - Hidangan: layanan, harga, manfaat, estimasi.
 - Ambalan: karya/bukti kerja.
 
-Editor progresif, mobile-first, mudah untuk pengguna awam, dengan helper/error/success/empty state yang manusiawi.
+Editor progresif, mobile-first, mudah untuk pengguna awam, dengan helper/error/success/empty state manusiawi.
 
 Canonical public link Creator:
 `https://studihome.id/{username}`
 
-Aksi wajib pada workspace:
+Aksi workspace:
 - `Salin`;
 - `Bagikan`.
 
@@ -131,11 +132,11 @@ Aksi wajib pada workspace:
 - Service-role key tidak boleh berada di frontend.
 - Jangan mengubah RLS/SQL untuk masalah UI/router sebelum audit table + policy + RPC + grants + caller.
 
-Public Creator read policies harus memungkinkan anonymous SELECT hanya pada data yang memang public/published/active. Anonymous tidak boleh mempunyai write access ke tabel Creator.
+Public Creator read policies hanya boleh membuka data yang memang public/published/active. Anonymous tidak boleh mempunyai write access ke tabel Creator.
 
 Authorization-only functions seperti `is_admin`, `has_creator_workspace_access`, `has_premium_creator_access`, `is_creator_eligible`, `can_publish_creator` tidak boleh dieksekusi oleh `anon`.
 
-`validate_creator_username(text)` harus memiliki `search_path` aman dan dipanggil hanya oleh `authenticated`.
+`validate_creator_username(text)` harus memiliki `search_path` aman dan dibatasi ke `authenticated`.
 
 ## 11. LEGACY POLICY
 Generasi lama Dapur yang telah diaudit dan dihapus tidak boleh dihidupkan kembali:
@@ -170,38 +171,42 @@ Sebelum mengubah apa pun:
 11. cek browser console sesuai target perubahan;
 12. baru declare selesai.
 
-## 13. RELEASE VERIFICATION — CURRENT
-Current application commit:
-`0e1a53ed1fc9931f0fa5c3e3cff64e40ec96a59b`
+## 13. RELEASE VERIFICATION — CURRENT BASELINE
+Current application commit sebelum dokumentasi berikut diperbarui:
+`a476d9efa7af207c871ad446af03e9520ff5811d`
 
-Production deployment:
-`dpl_DUGyQFVJduxWgbNU7snFerQKGRLr`
+Perubahan commit tersebut:
+- restore locked blue homepage hero;
+- menambahkan `autocomplete="username"` pada login email;
+- temporary repair workflow sudah dihapus kembali setelah self-apply.
 
-Production state:
-`READY`
+Production deployment untuk commit tersebut:
+- deployment: `dpl_3B8o7xXgjXPXshYH8Qr3Spta8rFU`;
+- state: `READY`;
+- target: `production`;
+- commit metadata: `a476d9efa7af207c871ad446af03e9520ff5811d`.
 
-Deployment commit metadata:
-`0e1a53ed1fc9931f0fa5c3e3cff64e40ec96a59b`
+Verified baseline:
+- `index.html` tidak menggunakan `cdn.tailwindcss.com`;
+- `/tailwind-compiled.css?v=20260817r1` dipakai sebagai utility layer;
+- hero guard static CSS mengunci gradient biru tanpa redesign;
+- login email menggunakan `autocomplete="username"`;
+- login password menggunakan `autocomplete="current-password"`;
+- `/dapur` dan `/dapur/{username}` tetap canonical;
+- canonical Dapur tidak menggunakan global MutationObserver/decorator/access-gate.
 
-Verified:
-- Vercel build completed successfully;
-- production runtime error/fatal/warning query for the latest verification window returned no logs;
-- `/tailwind-compiled.css?v=20260817r1` returns HTTP 200;
-- production CSS contains the canonical hero gradient guard;
-- `index.html` no longer references `cdn.tailwindcss.com`;
-- `login-email` uses `autocomplete="username"`;
-- `login-password` uses `autocomplete="current-password"`.
+Catatan: commit dokumentasi ini akan memicu deployment baru. Setelah itu current Production SHA harus diperbarui lagi sebelum release gate final dinyatakan PASS.
 
 ## 14. E2E LIMITATION
-Source/runtime verification is not a substitute for authenticated browser E2E. A full member test still requires a real authenticated session covering:
-- Premium without Creator → create Dapur;
-- Premium with Creator → manage Dapur;
-- edit username;
+Source/runtime verification bukan pengganti authenticated browser E2E. Browser test nyata masih diperlukan untuk membuktikan:
+- Premium tanpa Creator → create Dapur;
+- Premium dengan Creator → manage Dapur;
+- edit username dan duplicate protection;
 - owner isolation;
 - logout → workspace denied;
-- public popup auth → successful login/register.
+- public popup auth → login/register.
 
-Do not claim those flows PASS unless actually executed in a browser session.
+Jangan menyebut skenario tersebut PASS jika belum benar-benar dieksekusi menggunakan sesi nyata.
 
 ## 15. DO NOT REGRESS
 Do not:
@@ -220,7 +225,7 @@ Do not:
 Pesan:
 `Anda telah mencapai panjang maksimum untuk percakapan ini, tetapi Anda bisa terus berbicara dengan memulai obrolan baru.`
 
-adalah notifikasi antarmuka ChatGPT, bukan error Studihome. Jangan mengubah aplikasi untuk menghapus pesan tersebut.
+adalah notifikasi antarmuka ChatGPT, bukan error Studihome. Jangan mengubah aplikasi untuk pesan tersebut.
 
 ## 17. NEXT-CHAT STARTER
-> Lanjutkan Studihome dari `MASTER_HANDOFF_PROMPT_STUDIHOME.md` dan `PROJECT_CONSTITUTION.md` pada branch `main`. Jangan reset dan jangan redesign. Verifikasi current HEAD + Vercel Production SHA + `/` + `/dapur` + `/dapur/{username}` + runtime/build/console sebelum perubahan. Pertahankan homepage hero sebagai locked visual contract dan gunakan static Tailwind CSS, bukan CDN.
+> Lanjutkan Studihome dari `MASTER_HANDOFF_PROMPT_STUDIHOME.md` dan `PROJECT_CONSTITUTION.md` pada branch `main`. Jangan reset dan jangan redesign. Verifikasi current HEAD + Vercel Production SHA + `/` + `/dapur` + `/dapur/{username}` + runtime/build/console sebelum perubahan. Pertahankan homepage hero sebagai locked blue visual contract dan gunakan static Tailwind CSS, bukan CDN.
