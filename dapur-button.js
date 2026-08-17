@@ -163,7 +163,29 @@
     bodyObserver.observe(document.body,{childList:true,subtree:true});
   }
 
+  function loadUnderConstruction(){
+    if(document.getElementById('studihome-under-construction-js'))return;
+    const s=document.createElement('script');
+    s.id='studihome-under-construction-js';
+    s.src='/under-construction.js?v=4';
+    s.defer=true;
+    s.onerror=()=>console.warn('[Studihome Under Construction] module failed to load');
+    document.head.appendChild(s);
+  }
+
+  function loadUnderConstructionGudang(){
+    if(document.getElementById('studihome-under-construction-gudang-js'))return;
+    const s=document.createElement('script');
+    s.id='studihome-under-construction-gudang-js';
+    s.src='/under-construction-gudang.js?v=4';
+    s.defer=true;
+    s.onerror=()=>console.warn('[Studihome Under Construction] Gudang integration failed to load');
+    document.head.appendChild(s);
+  }
+
   async function boot(){
+    loadUnderConstruction();
+    loadUnderConstructionGudang();
     for(let i=0;i<120;i++){
       if(db()?.auth)break;
       await sleep(50);
