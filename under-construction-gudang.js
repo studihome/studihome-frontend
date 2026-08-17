@@ -4,19 +4,23 @@
   const ADMIN = (location.pathname || '/').replace(/\/+$/, '') === '/admin';
   if (!ADMIN) return;
 
-  const sleep = ms => new Promise(resolve => setTimeout(resolve, ms));
+  const MENU_ID = 'studihome-under-construction-menu';
+  const PANEL_ID = 'studihome-under-construction-admin-root';
+  const SHARED_ID = 'studihome-under-construction-js';
   let sharedPromise = null;
-  let mountTimer = 0;
-  let mounting = false;
+  let observer = null;
+  let renderInFlight = false;
+
+  const sleep = ms => new Promise(resolve => setTimeout(resolve, ms));
 
   function loadSharedModule() {
     if (window.StudihomeUnderConstruction) return Promise.resolve(window.StudihomeUnderConstruction);
     if (sharedPromise) return sharedPromise;
 
-    const existing = document.getElementById('studihome-under-construction-js');
+    const existing = document.getElementById(SHARED_ID);
     if (!existing) {
       const script = document.createElement('script');
-      script.id = 'studihome-under-construction-js';
+      script.id = SHARED_ID;
       script.src = '/under-construction.js?v=3';
       script.defer = true;
       script.onerror = () => console.warn('[Studihome Under Construction] shared module failed to load');
@@ -30,90 +34,142 @@
       }
       return null;
     })();
+
     return sharedPromise;
   }
 
-  function statusClass(enabled) {
-    return enabled
-      ? 'rounded-full px-2 py-1 text-[8px] font-black uppercase tracking-[.08em] bg-emerald-50 text-emerald-700'
-      : 'rounded-full px-2 py-1 text-[8px] font-black uppercase tracking-[.08em] bg-slate-100 text-slate-500';
+  function normalizeText(value) {
+    return String(value || '').replace(/\s+/g, ' ').trim().toLowerCase();
   }
 
-  async function mount() {
-    if (mounting) return;
-    const root = document.getElementById('admin-content-area');
-    const gudang = document.getElementById('admin-gudang-v2');
-    if (!root || !gudang || root.querySelector('[data-uc-gudang-slot]')) return;
+  function isNavigationContainer(el) {
+    if (!(el instanceof HTMLElement)) return false;
+    const tag = el.tagName.toLowerCase();
+    if (!['nav', 'aside'].includes(tag) && !el.matches('[role="navigation"]')) return false;
+    const controls = el.querySelectorAll('a,button,[role="button"]').length;
+    return controls >= 2;
+  }
 
-    mounting = true;
+  function navigationScore(el) {
+    if (!isNavigationContainer(el)) return -1;
+    const text = normalizeText(el.innerText);
+    let score = 0;
+    if (text.includes('gudang')) score += 8;
+    if (text.includes('dashboard')) score += 5;
+    if (text.includes('produk')) score += 3;
+    if (text.includes('pengguna')) score += 3;
+    if (text.includes('transaksi')) score += 3;
+    return score + Math.min(controlsCount(el), 12) * 0.1;
+  }
+
+  function controlsCount(el) {
+    return el.querySelectorAll('a,button,[role="button"]').length;
+  }
+
+  function findNavigationContainer() {
+    const candidates = Array.from(document.querySelectorAll('aside, nav, [role="navigation"]'));
+    return candidates
+      .map(el => ({ el, score: navigationScore(el) }))
+      .filter(item => item.score >= 0)
+      .sort((a, b) => b.score - a.score)[0]?.el || null;
+  }
+
+  function findGudangControl(container) {
+    if (!container) return null;
+    const controls = Array.from(container.querySelectorAll('a,button,[role="button"]'));
+    return controls.find(el => {
+      const text = normalizeText(el.textContent || el.getAttribute('aria-label'));
+      return text === 'gudang' || text.includes(' gudang') || text.startsWith('gudang ');
+    }) || null;
+  }
+
+  function buildMenuButton() {
+    const button = document.createElement('button');
+    button.id = MENU_ID;
+    button.type = 'button';
+    button.setAttribute('aria-label', 'Under Construction');
+    button.innerHTML = `
+      <span class="inline-flex items-center justify-center w-8 h-8 rounded-xl bg-amber-50 text-amber-600">
+        <i class="fa-solid fa-person-digging text-[12px]" aria-hidden="true"></i>
+      </span>
+      <span class="min-w-0 flex-1 text-left">
+        <span class="block text-[10px] font-extrabold truncate">Under Construction</span>
+        <span class="block text-[8px] text-slate-400 truncate">Kontrol maintenance</span>
+      </span>`;
+    button.className = 'w-full flex items-center gap-2.5 rounded-2xl px-3 py-2.5 text-slate-600 hover:bg-amber-50 hover:text-amber-800 transition';
+    button.addEventListener('click', () => { void openAdminPanel(button); });
+    return button;
+  }
+
+  function insertAfterReference(container, menu) {
+    const gudang = findGudangControl(container);
+    if (gudang?.parentElement) {
+      gudang.parentElement.insertAdjacentElement('afterend', menu);
+      return true;
+    }
+    container.appendChild(menu);
+    return true;
+  }
+
+  function ensureMenu() {
+    if (!ADMIN || document.getElementById(MENU_ID)) return true;
+    const container = findNavigationContainer();
+    if (!container) return false;
+    const menu = buildMenuButton();
+    insertAfterReference(container, menu);
+    return !!document.getElementById(MENU_ID);
+  }
+
+  function setMenuActive(active) {
+    const button = document.getElementById(MENU_ID);
+    if (!button) return;
+    button.classList.toggle('bg-[#151c75]', active);
+    button.classList.toggle('text-white', active);
+    button.classList.toggle('hover:bg-amber-50', !active);
+    button.classList.toggle('hover:text-amber-800', !active);
+  }
+
+  function getContentArea() {
+    return document.getElementById('admin-content-area');
+  }
+
+  async function openAdminPanel(menuButton) {
+    if (renderInFlight) return;
+    const area = getContentArea();
+    if (!area) return;
+
+    renderInFlight = true;
+    setMenuActive(true);
     try {
       const api = await loadSharedModule();
-      const liveRoot = document.getElementById('admin-content-area');
-      const liveGudang = document.getElementById('admin-gudang-v2');
-      if (!api || !liveRoot || !liveGudang || liveRoot.querySelector('[data-uc-gudang-slot]')) return;
+      if (!api?.renderAdmin) throw new Error('Modul Under Construction belum siap.');
 
-      const slot = document.createElement('section');
-      slot.dataset.ucGudangSlot = '1';
-      slot.className = 'rounded-3xl border border-amber-100 bg-white p-4 sm:p-5 shadow-sm';
-      slot.innerHTML = `
-        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-          <div class="min-w-0">
-            <div class="text-[9px] font-black uppercase tracking-[.12em] text-amber-600">SITE CONTROL</div>
-            <div class="mt-1 flex flex-wrap items-center gap-2">
-              <h3 class="text-sm font-black text-[#151c75]">Under Construction</h3>
-              <span data-uc-status class="${statusClass(false)}">Memuat status…</span>
-            </div>
-            <p class="mt-1 text-[10px] text-slate-500">Mode maintenance homepage dikendalikan dari satu panel dan tidak mengubah akses Admin.</p>
-          </div>
-          <button type="button" data-uc-gudang-open class="shrink-0 rounded-xl bg-[#151c75] px-4 py-2.5 text-[10px] font-extrabold text-white">Buka Pengaturan</button>
+      area.innerHTML = `<section id="${PANEL_ID}" class="space-y-4">
+        <div class="rounded-3xl border border-amber-100 bg-white p-5 shadow-sm">
+          <div class="text-[9px] font-black uppercase tracking-[.12em] text-amber-600">SITE CONTROL</div>
+          <h2 class="mt-1 text-lg sm:text-xl font-black text-[#151c75]">Under Construction</h2>
+          <p class="mt-1 text-[10px] sm:text-xs text-slate-500">Kelola mode maintenance homepage dari menu Admin khusus ini.</p>
         </div>
-        <div data-uc-gudang-panel class="mt-4 hidden"></div>`;
+        <div id="${PANEL_ID}-body" class="rounded-3xl border border-slate-100 bg-white p-5 shadow-sm">
+          <div class="py-10 text-center text-[10px] text-slate-500">Memuat pengaturan…</div>
+        </div>
+      </section>`;
 
-      const workspace = liveRoot.querySelector('#gudang-workspace-area');
-      if (workspace) liveRoot.insertBefore(slot, workspace);
-      else liveRoot.appendChild(slot);
-
-      const status = slot.querySelector('[data-uc-status]');
-      try {
-        const settings = await api.getSettings();
-        status.textContent = settings.enabled ? 'AKTIF' : 'NONAKTIF';
-        status.className = statusClass(settings.enabled);
-      } catch (error) {
-        status.textContent = 'STATUS TIDAK TERBACA';
-        status.className = 'rounded-full px-2 py-1 text-[8px] font-black uppercase tracking-[.08em] bg-red-50 text-red-700';
-        console.warn('[Studihome Under Construction] status read failed', error?.message || error);
-      }
-
-      slot.querySelector('[data-uc-gudang-open]')?.addEventListener('click', async () => {
-        const target = slot.querySelector('[data-uc-gudang-panel]');
-        if (!target) return;
-        target.classList.remove('hidden');
-        target.innerHTML = '<div class="rounded-2xl border border-blue-100 bg-blue-50/60 p-4 text-[10px] text-slate-500">Memuat pengaturan Under Construction...</div>';
-        try {
-          const session = await window.supabaseClient?.auth?.getUser?.();
-          if (session?.error) throw session.error;
-          if (!session?.data?.user) throw new Error('Sesi Admin belum siap.');
-          await api.renderAdmin(target);
-        } catch (error) {
-          target.innerHTML = `<div class="rounded-2xl border border-red-100 bg-red-50 p-4 text-[10px] text-red-700">Panel gagal dimuat: ${String(error?.message || 'Kesalahan tidak diketahui')}</div>`;
-        }
-      });
+      const target = document.getElementById(`${PANEL_ID}-body`);
+      await api.renderAdmin(target);
+      target?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    } catch (error) {
+      area.innerHTML = `<section id="${PANEL_ID}" class="rounded-3xl border border-red-100 bg-red-50 p-5 text-xs text-red-700">Under Construction gagal dimuat: ${String(error?.message || 'Kesalahan tidak diketahui')}</section>`;
     } finally {
-      mounting = false;
+      renderInFlight = false;
     }
   }
 
-  function scheduleMount() {
-    clearTimeout(mountTimer);
-    mountTimer = window.setTimeout(() => { void mount(); }, 0);
-  }
-
   function boot() {
-    scheduleMount();
-    const observer = new MutationObserver(() => {
-      const root = document.getElementById('admin-content-area');
-      if (!root) return;
-      if (document.getElementById('admin-gudang-v2') && !root.querySelector('[data-uc-gudang-slot]')) scheduleMount();
+    ensureMenu();
+    if (observer) return;
+    observer = new MutationObserver(() => {
+      if (!document.getElementById(MENU_ID)) ensureMenu();
     });
     observer.observe(document.body, { childList: true, subtree: true });
   }
