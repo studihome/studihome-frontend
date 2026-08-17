@@ -3,7 +3,7 @@ window.STUDIHOME_SUPABASE_URL =
 
 // Public browser key. Keep service_role keys out of the frontend permanently.
 window.STUDIHOME_SUPABASE_ANON_KEY =
-  "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImhiZm1od3d4YmdpZHNubGp1cGNhIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODY0NjQ4NTAsImV4cCI6MjEwMjA0MDg1MH0.-yvhEk9TxbqWGCQZvP_VZt9iax-bADY1ZprzXokmrCU";
+  "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImhiZm1od3d4YmdpZHNubGp1cGNhIiwiaWF0IjoxNzg2NDY0ODUwLCJleHAiOjIxMDIwNDA4NTB9.-yvhEk9TxbqWGCQZvP_VZt9iax-bADY1ZprzXokmrCU";
 
 // Canonical Supabase singleton. This file must have one job only:
 // bootstrap the shared client before application feature runtimes load.
@@ -27,4 +27,10 @@ window.STUDIHOME_SUPABASE_ANON_KEY =
   } catch (error) {
     console.error('[Studihome] Supabase singleton bootstrap failed:', error);
   }
+
+  const gate = document.createElement('script');
+  gate.src = '/maintenance-gate.js?v=1';
+  gate.async = true;
+  gate.onerror = () => console.warn('[Studihome] Maintenance gate failed to load.');
+  document.head.appendChild(gate);
 })();
