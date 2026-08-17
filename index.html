@@ -75,8 +75,8 @@
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2" crossorigin="anonymous"></script>
     <script src="/supabase-config.js?v=boot4"></script>
 
-    <!-- Tailwind CSS CDN -->
-    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Tailwind CSS: compiled production utility layer -->
+    <link rel="stylesheet" href="/tailwind-compiled.css?v=20260817r1">
     <!-- FontAwesome Icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <!-- Google Fonts Inter -->
@@ -943,7 +943,7 @@
                 </div>
                 <div>
                     <label class="block text-xs sm:text-sm font-bold text-slate-700 mb-1">Kata Sandi</label>
-                    <input type="password" id="login-password" required placeholder="••••••••" class="w-full card-3d-inset px-3.5 py-2.5 sm:py-3 rounded-xl text-xs sm:text-sm outline-none focus:ring-2 focus:ring-[#151c75]">
+                    <input type="password" id="login-password" autocomplete="current-password" required placeholder="••••••••" class="w-full card-3d-inset px-3.5 py-2.5 sm:py-3 rounded-xl text-xs sm:text-sm outline-none focus:ring-2 focus:ring-[#151c75]">
                 </div>
                 <button type="submit" class="w-full btn-brand-gradient py-3 sm:py-3.5 rounded-xl text-xs sm:text-sm font-extrabold transition-all shadow-md mt-2">
                     Masuk Sekarang
@@ -960,19 +960,19 @@
             <form id="register-form" onsubmit="App.auth.handleRegister(event)" class="space-y-3.5 hidden">
                 <div>
                     <label class="block text-xs sm:text-sm font-bold text-slate-700 mb-1">Nama Lengkap <span class="text-red-500">*</span></label>
-                    <input type="text" id="reg-name" required placeholder="Budi Santoso" class="w-full card-3d-inset px-3.5 py-2.5 sm:py-3 rounded-xl text-xs sm:text-sm outline-none focus:ring-2 focus:ring-[#151c75]">
+                    <input type="text" id="reg-name" autocomplete="name" required placeholder="Budi Santoso" class="w-full card-3d-inset px-3.5 py-2.5 sm:py-3 rounded-xl text-xs sm:text-sm outline-none focus:ring-2 focus:ring-[#151c75]">
                 </div>
                 <div>
                     <label class="block text-xs sm:text-sm font-bold text-slate-700 mb-1">Alamat Email <span class="text-red-500">*</span></label>
-                    <input type="email" id="reg-email" required placeholder="nama@email.com" class="w-full card-3d-inset px-3.5 py-2.5 sm:py-3 rounded-xl text-xs sm:text-sm outline-none focus:ring-2 focus:ring-[#151c75]">
+                    <input type="email" id="reg-email" autocomplete="email" required placeholder="nama@email.com" class="w-full card-3d-inset px-3.5 py-2.5 sm:py-3 rounded-xl text-xs sm:text-sm outline-none focus:ring-2 focus:ring-[#151c75]">
                 </div>
                 <div>
                     <label class="block text-xs sm:text-sm font-bold text-slate-700 mb-1">WhatsApp <span class="text-red-500">*</span></label>
-                    <input type="tel" id="reg-phone" required placeholder="081234567890" class="w-full card-3d-inset px-3.5 py-2.5 sm:py-3 rounded-xl text-xs sm:text-sm outline-none focus:ring-2 focus:ring-[#151c75]">
+                    <input type="tel" id="reg-phone" autocomplete="tel" required placeholder="081234567890" class="w-full card-3d-inset px-3.5 py-2.5 sm:py-3 rounded-xl text-xs sm:text-sm outline-none focus:ring-2 focus:ring-[#151c75]">
                 </div>
                 <div>
                     <label class="block text-xs sm:text-sm font-bold text-slate-700 mb-1">Kata Sandi <span class="text-red-500">*</span></label>
-                    <input type="password" id="reg-password" required placeholder="••••••••" class="w-full card-3d-inset px-3.5 py-2.5 sm:py-3 rounded-xl text-xs sm:text-sm outline-none focus:ring-2 focus:ring-[#151c75]">
+                    <input type="password" id="reg-password" autocomplete="new-password" required placeholder="••••••••" class="w-full card-3d-inset px-3.5 py-2.5 sm:py-3 rounded-xl text-xs sm:text-sm outline-none focus:ring-2 focus:ring-[#151c75]">
                 </div>
                 <button type="submit" class="w-full btn-brand-amber py-3 sm:py-3.5 rounded-xl text-xs sm:text-sm font-extrabold transition-all shadow-md mt-2">
                     Buat Akun Sekarang
