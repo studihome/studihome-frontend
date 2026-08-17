@@ -1,15 +1,17 @@
 (() => {
   'use strict';
 
-  const ADMIN = (location.pathname || '/').replace(/\/+$/, '') === '/admin';
-  if (!ADMIN) return;
+  const IS_ADMIN = (location.pathname || '/').replace(/\/+$/, '') === '/admin';
+  if (!IS_ADMIN) return;
 
+  const VERSION = '4';
   const MENU_ID = 'studihome-under-construction-menu';
   const PANEL_ID = 'studihome-under-construction-admin-root';
-  const SHARED_ID = 'studihome-under-construction-js';
+  const SHARED_ID = `studihome-under-construction-js-v${VERSION}`;
   let sharedPromise = null;
   let observer = null;
   let renderInFlight = false;
+  let lastNavigationContainer = null;
 
   const sleep = ms => new Promise(resolve => setTimeout(resolve, ms));
 
@@ -17,11 +19,12 @@
     if (window.StudihomeUnderConstruction) return Promise.resolve(window.StudihomeUnderConstruction);
     if (sharedPromise) return sharedPromise;
 
-    const existing = document.getElementById(SHARED_ID);
-    if (!existing) {
-      const script = document.createElement('script');
+    let script = document.getElementById(SHARED_ID);
+    if (!script) {
+      script = document.createElement('script');
       script.id = SHARED_ID;
-      script.src = '/under-construction.js?v=3';
+      script.src = `/under-construction.js?v=${VERSION}`;
+      script.async = false;
       script.defer = true;
       script.onerror = () => console.warn('[Studihome Under Construction] shared module failed to load');
       document.head.appendChild(script);
@@ -42,28 +45,27 @@
     return String(value || '').replace(/\s+/g, ' ').trim().toLowerCase();
   }
 
+  function controlsCount(el) {
+    return el.querySelectorAll('a,button,[role="button"]').length;
+  }
+
   function isNavigationContainer(el) {
     if (!(el instanceof HTMLElement)) return false;
     const tag = el.tagName.toLowerCase();
     if (!['nav', 'aside'].includes(tag) && !el.matches('[role="navigation"]')) return false;
-    const controls = el.querySelectorAll('a,button,[role="button"]').length;
-    return controls >= 2;
+    return controlsCount(el) >= 2;
   }
 
   function navigationScore(el) {
     if (!isNavigationContainer(el)) return -1;
     const text = normalizeText(el.innerText);
-    let score = 0;
+    let score = Math.min(controlsCount(el), 20) * 0.1;
     if (text.includes('gudang')) score += 8;
     if (text.includes('dashboard')) score += 5;
     if (text.includes('produk')) score += 3;
     if (text.includes('pengguna')) score += 3;
     if (text.includes('transaksi')) score += 3;
-    return score + Math.min(controlsCount(el), 12) * 0.1;
-  }
-
-  function controlsCount(el) {
-    return el.querySelectorAll('a,button,[role="button"]').length;
+    return score;
   }
 
   function findNavigationContainer() {
@@ -75,9 +77,8 @@
   }
 
   function findGudangControl(container) {
-    if (!container) return null;
-    const controls = Array.from(container.querySelectorAll('a,button,[role="button"]'));
-    return controls.find(el => {
+    if (!container?.isConnected) return null;
+    return Array.from(container.querySelectorAll('a,button,[role="button"]')).find(el => {
       const text = normalizeText(el.textContent || el.getAttribute('aria-label'));
       return text === 'gudang' || text.includes(' gudang') || text.startsWith('gudang ');
     }) || null;
@@ -101,23 +102,36 @@
     return button;
   }
 
-  function insertAfterReference(container, menu) {
-    const gudang = findGudangControl(container);
-    if (gudang?.parentElement) {
-      gudang.parentElement.insertAdjacentElement('afterend', menu);
-      return true;
-    }
-    container.appendChild(menu);
-    return true;
-  }
-
   function ensureMenu() {
-    if (!ADMIN || document.getElementById(MENU_ID)) return true;
+    const existing = document.getElementById(MENU_ID);
     const container = findNavigationContainer();
-    if (!container) return false;
+
+    if (!container?.isConnected) {
+      lastNavigationContainer = null;
+      return false;
+    }
+
+    if (existing?.isConnected) {
+      if (existing.parentElement === container) {
+        lastNavigationContainer = container;
+        return true;
+      }
+      existing.remove();
+    }
+
     const menu = buildMenuButton();
-    insertAfterReference(container, menu);
-    return !!document.getElementById(MENU_ID);
+    const gudang = findGudangControl(container);
+
+    // Never use insertBefore/insertAdjacentElement here. The admin shell is
+    // reactive and may replace navigation nodes between observer callbacks.
+    if (gudang?.parentElement === container && gudang.isConnected) {
+      container.appendChild(menu);
+    } else {
+      container.appendChild(menu);
+    }
+
+    lastNavigationContainer = container;
+    return menu.isConnected;
   }
 
   function setMenuActive(active) {
@@ -130,7 +144,21 @@
   }
 
   function getContentArea() {
-    return document.getElementById('admin-content-area');
+    const area = document.getElementById('admin-content-area');
+    return area?.isConnected ? area : null;
+  }
+
+  function cleanFooterWhitespace() {
+    const footer = document.querySelector('footer');
+    const parent = footer?.parentNode;
+    if (!footer || !parent) return;
+
+    let node = footer.nextSibling;
+    while (node && node.nodeType === Node.TEXT_NODE && !node.nodeValue?.trim()) {
+      const next = node.nextSibling;
+      node.remove();
+      node = next;
+    }
   }
 
   async function openAdminPanel(menuButton) {
@@ -140,6 +168,7 @@
 
     renderInFlight = true;
     setMenuActive(true);
+
     try {
       const api = await loadSharedModule();
       if (!api?.renderAdmin) throw new Error('Modul Under Construction belum siap.');
@@ -156,24 +185,47 @@
       </section>`;
 
       const target = document.getElementById(`${PANEL_ID}-body`);
+      if (!target?.isConnected) throw new Error('Area panel tidak tersedia.');
       await api.renderAdmin(target);
-      target?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      if (target.isConnected) target.scrollIntoView({ behavior: 'smooth', block: 'start' });
     } catch (error) {
-      area.innerHTML = `<section id="${PANEL_ID}" class="rounded-3xl border border-red-100 bg-red-50 p-5 text-xs text-red-700">Under Construction gagal dimuat: ${String(error?.message || 'Kesalahan tidak diketahui')}</section>`;
+      const safeMessage = String(error?.message || 'Kesalahan tidak diketahui')
+        .replace(/[<>]/g, '');
+      area.innerHTML = `<section id="${PANEL_ID}" class="rounded-3xl border border-red-100 bg-red-50 p-5 text-xs text-red-700">Under Construction gagal dimuat: ${safeMessage}</section>`;
     } finally {
       renderInFlight = false;
     }
   }
 
+  function reconcile() {
+    const container = findNavigationContainer();
+    const menu = document.getElementById(MENU_ID);
+
+    if (container !== lastNavigationContainer || !menu?.isConnected) {
+      ensureMenu();
+    }
+
+    cleanFooterWhitespace();
+  }
+
   function boot() {
-    ensureMenu();
+    reconcile();
     if (observer) return;
+
     observer = new MutationObserver(() => {
-      if (!document.getElementById(MENU_ID)) ensureMenu();
+      // Clock updates and unrelated text mutations can fire this observer.
+      // Reconcile only when the navigation/menu identity actually changed.
+      const container = findNavigationContainer();
+      const menu = document.getElementById(MENU_ID);
+      if (container !== lastNavigationContainer || !menu?.isConnected) reconcile();
     });
+
     observer.observe(document.body, { childList: true, subtree: true });
   }
 
-  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', boot, { once: true });
-  else boot();
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', boot, { once: true });
+  } else {
+    boot();
+  }
 })();
