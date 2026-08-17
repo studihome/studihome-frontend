@@ -136,7 +136,7 @@ Public Creator read policies hanya boleh membuka data yang memang public/publish
 
 Authorization-only functions seperti `is_admin`, `has_creator_workspace_access`, `has_premium_creator_access`, `is_creator_eligible`, `can_publish_creator` tidak boleh dieksekusi oleh `anon`.
 
-`validate_creator_username(text)` harus memiliki `search_path` aman dan dibatasi ke `authenticated`.
+`validate_creator_username(text)` harus memiliki `search_path` aman dan dibatasi ke authenticated.
 
 ## 11. LEGACY POLICY
 Generasi lama Dapur yang telah diaudit dan dihapus tidak boleh dihidupkan kembali:
@@ -172,8 +172,11 @@ Sebelum mengubah apa pun:
 12. baru declare selesai.
 
 ## 13. RELEASE VERIFICATION — CURRENT BASELINE
-Current application commit:
-`9f27388690e984278b3d4ca4fcd16f1bb01c6288`
+Functional application source SHA:
+`b9f1d117be2a5f67e68f4fb31f278ea2d888f600`
+
+Production deployment:
+`dpl_CGXbrFMZ4Re2CkTZc6zrg7QospkT`
 
 Production state:
 `READY`
@@ -181,21 +184,20 @@ Production state:
 Target:
 `production`
 
-Deployment commit metadata:
-`9f27388690e984278b3d4ca4fcd16f1bb01c6288`
-
-The source immediately before these final documentation updates contained the locked blue hero recovery and login-email accessibility fix. The documentation commits now make the handoff and constitution part of the same final release lineage.
-
-Verified baseline before/at final release:
+Verified baseline:
 - Vercel build completed successfully;
-- functional application deployment is `READY` and matches the functional application SHA; documentation-only commits may create additional READY deployments without changing runtime application code;
+- Production functional deployment matches the functional source SHA above;
 - `index.html` no longer references `cdn.tailwindcss.com`;
 - `/tailwind-compiled.css?v=20260817r2` is the production utility layer;
 - homepage hero has the canonical blue gradient guard without markup/layout redesign;
 - `login-email` uses `autocomplete="username"`;
 - `login-password` uses `autocomplete="current-password"`;
+- register semantic autocomplete tokens are present;
 - `/dapur` and `/dapur/{username}` remain canonical routes;
-- canonical Dapur does not use global MutationObserver, second-stage decorator, or legacy access-gate runtime.
+- canonical Dapur does not use global MutationObserver, second-stage decorator, or legacy access-gate runtime;
+- latest Production runtime error check for `/`, `/kamar`, `/admin`, `/dapur` found no runtime errors.
+
+Documentation-only commits may create additional Vercel deployments while leaving the functional application source unchanged. For release decisions, track the functional source SHA and the latest Production deployment together.
 
 ## 14. E2E LIMITATION
 Source/runtime verification bukan pengganti authenticated browser E2E. Browser test nyata masih diperlukan untuk membuktikan:
@@ -225,7 +227,7 @@ Do not:
 Pesan:
 `Anda telah mencapai panjang maksimum untuk percakapan ini, tetapi Anda bisa terus berbicara dengan memulai obrolan baru.`
 
-adalah notifikasi antarmuka ChatGPT, bukan error Studihome. Jangan mengubah aplikasi untuk pesan tersebut.
+adalah notifikasi antarmuka ChatGPT, bukan error Studihome. Jangan mengubah frontend untuk pesan tersebut.
 
 ## 17. NEXT-CHAT STARTER
 > Lanjutkan Studihome dari `MASTER_HANDOFF_PROMPT_STUDIHOME.md` dan `PROJECT_CONSTITUTION.md` pada branch `main`. Jangan reset dan jangan redesign. Verifikasi current HEAD + Vercel Production SHA + `/` + `/dapur` + `/dapur/{username}` + runtime/build/console sebelum perubahan. Pertahankan homepage hero sebagai locked blue visual contract dan gunakan static Tailwind CSS, bukan CDN.
