@@ -22,22 +22,27 @@ Satu source of truth untuk route, auth/authorization, data, branding/UI contract
 
 YAGNI berlaku. Jangan membuat layer, loader, observer, renderer, atau abstraction baru jika source canonical sudah cukup.
 
-## Article III — Homepage Visual Contract
-Homepage `/` memiliki visual contract yang locked.
+## Article III — Homepage Visual Contract — LOCKED
+Homepage `/` memiliki visual contract yang locked dan tidak boleh berubah tanpa instruksi eksplisit.
 
-Peraturan:
-- tidak redesign tanpa instruksi eksplisit;
-- jangan mengubah hero layout, typography, spacing, hierarchy, CTA, atau warna hanya untuk menyelesaikan bug teknis;
-- hero wajib mempertahankan gradient Studihome `#151c75 → #3f48bf`, text putih, amber/yellow emphasis, dan komposisi baseline;
-- baseline visual historis: `7406c1fdb8e614e0e3907f2c082bf94811a4beef`;
-- jika CSS build menyebabkan regression, perbaiki cascade/build source, bukan membuat hero baru.
+Hero wajib mempertahankan:
+- gradient `#151c75 → #3f48bf`;
+- text putih pada hero;
+- amber/yellow untuk emphasis dan CTA;
+- markup, layout, spacing, typography, hierarchy, dan CTA baseline;
+- baseline visual historis `7406c1fdb8e614e0e3907f2c082bf94811a4beef`.
+
+Bug CSS/build harus diperbaiki pada cascade/build source, bukan dengan mendesain ulang hero.
+
+Regression terbaru yang sudah diperbaiki:
+`.card-3d { background:#fff }` mengalahkan utility gradient setelah migrasi ke compiled Tailwind CSS. Solusi canonical adalah static CSS guard yang mengunci gradient hero tanpa mengubah markup maupun layout.
 
 ## Article IV — Production CSS Contract
 - `cdn.tailwindcss.com` dilarang di production.
 - Production memakai `/tailwind-compiled.css`.
 - Utility CSS dibangun secara reproducible dari source HTML/JS.
 - Jangan menghapus base/Preflight sembarangan.
-- Jangan mengubah markup hanya untuk mengakali hasil compiled CSS.
+- Jangan mengganti CSS framework hanya untuk menghilangkan warning.
 
 ## Article V — Canonical Routes
 ### Public homepage
@@ -60,7 +65,7 @@ Vercel canonical:
 - `/:username/portfolio/:slug*` → `/index.html`
 - `/:username` → `/index.html`
 
-Jangan gunakan inline regex parameter seperti `/:username([a-z0-9]...)` pada `rewrites.source`.
+Jangan menggunakan inline regex parameter seperti `/:username([a-z0-9]...)` pada `rewrites.source`.
 
 ## Article VI — Role Boundaries
 ### Public
@@ -106,7 +111,7 @@ Dilarang memperbaiki renderer dengan membuat renderer kedua.
 - keyboard accessible;
 - `prefers-reduced-motion` dihormati;
 - hierarchy visual jelas;
-- tidak memerlukan pengetahuan developer untuk menyelesaikan tugas utama.
+- pengguna awam dapat menyelesaikan tugas utama tanpa pengetahuan developer.
 
 ## Article IX — Dapur Information Architecture
 1. Foyer — identitas, bio, kontak, publikasi.
@@ -144,7 +149,7 @@ Sebelum perubahan RLS:
 
 Service-role key tidak pernah di frontend.
 
-Anonymous public-read harus hanya membaca data yang memang public/published/active. Anonymous write terhadap Creator data dilarang.
+Anonymous public-read hanya boleh membaca data yang memang public/published/active. Anonymous write terhadap Creator data dilarang.
 
 Authorization-only RPC seperti `is_admin`, `has_creator_workspace_access`, `has_premium_creator_access`, `is_creator_eligible`, dan `can_publish_creator` tidak boleh memiliki EXECUTE untuk `anon`.
 
@@ -198,20 +203,14 @@ Tidak boleh menyatakan `selesai`, `live`, atau `production ready` jika:
 - legacy request belum diperiksa.
 
 ## Article XV — Current Release State
-Current application release verified:
-- commit `0e1a53ed1fc9931f0fa5c3e3cff64e40ec96a59b`;
-- Vercel deployment `dpl_DUGyQFVJduxWgbNU7snFerQKGRLr`;
-- target `production`;
-- state `READY`.
+The final source immediately before this documentation commit is:
+`a476d9efa7af207c871ad446af03e9520ff5811d`
 
-Current verification:
-- Vercel build error log: tidak ada build error;
-- Vercel runtime error/warning/fatal query pada verification window: tidak ada log;
-- production static CSS endpoint HTTP 200;
-- Tailwind CDN reference pada `index.html`: sudah dihapus;
-- auth login email autocomplete: sudah `username`;
-- login password autocomplete: sudah `current-password`;
-- homepage hero cascade fix sudah berada di production.
+That source was deployed successfully to Production as:
+`dpl_3B8o7xXgjXPXshYH8Qr3Spta8rFU`
+with state `READY`.
+
+This documentation update creates a new commit and therefore requires a fresh final deployment verification before declaring release complete.
 
 ## Article XVI — E2E Boundary
 Authenticated browser E2E tidak boleh dianggap PASS hanya dari source inspection.
