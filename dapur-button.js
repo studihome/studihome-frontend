@@ -163,7 +163,18 @@
     bodyObserver.observe(document.body,{childList:true,subtree:true});
   }
 
+  function loadUnderConstruction(){
+    if(document.getElementById('studihome-under-construction-js'))return;
+    const s=document.createElement('script');
+    s.id='studihome-under-construction-js';
+    s.src='/under-construction.js?v=1';
+    s.defer=true;
+    s.onerror=()=>console.warn('[Studihome Under Construction] module failed to load');
+    document.head.appendChild(s);
+  }
+
   async function boot(){
+    loadUnderConstruction();
     for(let i=0;i<120;i++){
       if(db()?.auth)break;
       await sleep(50);
