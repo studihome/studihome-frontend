@@ -17,7 +17,7 @@
   };
 
   const db = () => window.supabaseClient || null;
-  const esc = (v) => String(v ?? '').replace(/[&<>"']/g, c => ({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;' }[c]));
+  const esc = (v) => String(v ?? '').replace(/[&<>\"']/g, c => ({ '&':'&amp;','<':'&lt;','>':'&gt;','\"':'&quot;',"'":'&#39;' }[c]));
   const toast = (m, t = 'info') => window.App?.ui?.toast?.(m, t);
 
   async function getSettings() {
@@ -132,25 +132,45 @@
     </div>`;
   }
 
-  async function renderAdmin() {
-    const area=document.getElementById('admin-content-area'); if(!area)return;
-    let settings=await getSettings(); area.innerHTML=adminMarkup(settings);
-    document.getElementById('uc-save')?.addEventListener('click',async()=>{try{settings=await saveSettings(readForm(settings));await renderAdmin();toast('Pengaturan berhasil disimpan.','success')}catch(e){toast(e.message||'Pengaturan belum tersimpan. Silakan coba lagi.','error')}});
-    document.getElementById('uc-preview')?.addEventListener('click',()=>{
+  async function renderAdmin(target = document.getElementById('admin-content-area')) {
+    if(!target)return;
+    let settings=await getSettings();
+    target.innerHTML=adminMarkup(settings);
+    target.querySelector('#uc-save')?.addEventListener('click',async()=>{
+      try{settings=await saveSettings(readForm(settings));await renderAdmin(target);toast('Pengaturan berhasil disimpan.','success')}
+      catch(e){toast(e.message||'Pengaturan belum tersimpan. Silakan coba lagi.','error')}
+    });
+    target.querySelector('#uc-preview')?.addEventListener('click',()=>{
       const preview=readForm(settings); const w=window.open('', '_blank', 'noopener,noreferrer');
       if(!w){toast('Popup preview diblokir browser. Izinkan popup untuk melihat preview.','error');return;}
       w.document.open(); w.document.write('<!doctype html><html lang="id"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Preview Under Construction</title></head><body></body></html>'); w.document.close(); renderPublic(w.document,preview);
     });
-    document.getElementById('uc-upload')?.addEventListener('click',async()=>{const file=document.getElementById('uc-image-file')?.files?.[0];try{settings=await saveSettings({image_url:await uploadImage(file)});await renderAdmin();toast('Gambar berhasil diunggah.','success')}catch(e){toast(e.message||'Upload gambar gagal.','error')}});
-    document.getElementById('uc-remove-image')?.addEventListener('click',async()=>{try{const old=settings.image_url;settings=await saveSettings({image_url:''});const path=objectPathFromPublicUrl(old);if(path)await db().storage.from('site-media').remove([path]);await renderAdmin();toast('Gambar dihapus.','success')}catch(e){toast(e.message||'Gambar belum bisa dihapus.','error')}});
+    target.querySelector('#uc-upload')?.addEventListener('click',async()=>{
+      const file=target.querySelector('#uc-image-file')?.files?.[0];
+      try{settings=await saveSettings({image_url:await uploadImage(file)});await renderAdmin(target);toast('Gambar berhasil diunggah.','success')}
+      catch(e){toast(e.message||'Upload gambar gagal.','error')}
+    });
+    target.querySelector('#uc-remove-image')?.addEventListener('click',async()=>{
+      try{
+        const old=settings.image_url;
+        settings=await saveSettings({image_url:''});
+        const path=objectPathFromPublicUrl(old);
+        if(path)await db().storage.from('site-media').remove([path]);
+        await renderAdmin(target);
+        toast('Gambar dihapus.','success')
+      }catch(e){toast(e.message||'Gambar belum bisa dihapus.','error')}
+    });
   }
 
-  function installAdminTab(){
-    if(!ADMIN)return;
-    const install=()=>{const nav=[...document.querySelectorAll('button')].find(b=>/Dapur Creator/.test(b.textContent||''))?.parentElement;if(!nav||nav.querySelector('[data-uc-admin-tab]'))return;const b=document.createElement('button');b.type='button';b.dataset.ucAdminTab='1';b.className='px-3.5 py-2 rounded-xl transition-all text-slate-700 hover:text-[#151c75]';b.innerHTML='<i class="fa-solid fa-person-digging mr-1"></i> Under Construction';b.addEventListener('click',()=>{b.classList.add('btn-brand-gradient','text-white');renderAdmin().catch(e=>toast(e.message||'Panel gagal dimuat.','error'))});nav.appendChild(b)};
-    install(); new MutationObserver(install).observe(document.body,{childList:true,subtree:true});
-  }
+  window.StudihomeUnderConstruction = Object.freeze({ getSettings, renderAdmin, renderPublic });
 
-  async function boot(){try{if(ADMIN){installAdminTab();return}if(!ROOT)return;const settings=await getSettings();if(settings.enabled)renderPublic(document,settings)}catch(e){console.warn('[Studihome Under Construction]',e?.message||e)}}
+  async function boot(){
+    try{
+      if(ADMIN)return;
+      if(!ROOT)return;
+      const settings=await getSettings();
+      if(settings.enabled)renderPublic(document,settings);
+    }catch(e){console.warn('[Studihome Under Construction]',e?.message||e)}
+  }
   if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',boot,{once:true});else boot();
 })();
