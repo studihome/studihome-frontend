@@ -1,0 +1,104 @@
+name: one-shot-handoff-sync
+
+on:
+  push:
+    branches: [main]
+
+permissions:
+  contents: write
+
+jobs:
+  sync:
+    if: ${{ github.actor != 'github-actions[bot]' }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Sync release state and contracts
+        shell: bash
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          import re
+
+          handoff = Path('MASTER_HANDOFF_PROMPT_STUDIHOME.md')
+          constitution = Path('PROJECT_CONSTITUTION.md')
+
+          h = handoff.read_text(encoding='utf-8')
+          c = constitution.read_text(encoding='utf-8')
+
+          h = re.sub(r'## 12\\. PRODUCTION VERIFICATION STATE[\\s\\S]*?## 13\\. RELEASE GATE', '''## 12. PRODUCTION VERIFICATION STATE
+Production terbaru yang terverifikasi:
+- commit: `b9f1d117be2a5f67e68f4fb31f278ea2d888f600`
+- deployment: `dpl_CGXbrFMZ4Re2CkTZc6zrg7QospkT`
+- state: `READY`
+- production branch: `main`
+
+Perubahan release terbaru:
+- homepage hero kembali memakai hero biru canonical yang telah disepakati;
+- visual tidak didesain ulang;
+- Tailwind CDN sudah diganti CSS compiled production;
+- auth form autocomplete diperbaiki, termasuk `login-email → username`;
+- tidak ada perubahan payment/order logic;
+- tidak ada perubahan UI/UX Dapur canonical pada patch ini.
+
+Runtime Production verification terakhir:
+- `/`, `/kamar`, `/admin`, `/dapur` tidak mempunyai runtime error pada pemeriksaan terakhir;
+- `/dapur` architecture tetap canonical `dapur.html → dapur-entry.js`;
+- public Creator API RLS sudah dipisahkan dari authorization-only functions;
+- anonymous write access tetap ditutup.
+
+Catatan browser:
+- warning Tailwind CDN ditutup;
+- warning autocomplete email/password ditutup pada source final;
+- browser console manual tetap menjadi verification layer terpisah dari server runtime log.
+
+## 13. RELEASE GATE''', h)
+
+          h = h.replace('## 14. CURRENT CODE STATE', '## 14. CURRENT CODE STATE') if '## 14. CURRENT CODE STATE' in h else h
+          h = h.replace('Saat handoff ini diperbarui, deployment production baru yang memakai `a01be667...` belum berhasil diverifikasi. Jangan mengklaim production sudah menggunakan commit tersebut sampai Vercel menunjukkan `READY` dengan SHA yang sama.', 'Status stale dari snapshot lama sudah ditutup. Production sekarang sudah terverifikasi memakai SHA final `b9f1d117...` dengan deployment `dpl_CGXbrFMZ4Re2CkTZc6zrg7QospkT`.')
+
+          c = re.sub(r'## Article XIV — Current Release State[\\s\\S]*?## Article XV — Communication Rule', '''## Article XIV — Current Release State
+Canonical Dapur refactor dan legacy runtime cleanup tetap menjadi baseline.
+
+Latest production:
+`b9f1d117be2a5f67e68f4fb31f278ea2d888f600`
+
+Deployment:
+`dpl_CGXbrFMZ4Re2CkTZc6zrg7QospkT`
+
+State:
+`READY`
+
+Latest production repair:
+- hero homepage dipulihkan ke latar biru canonical tanpa redesign;
+- Tailwind CDN warning ditutup dengan compiled utility CSS;
+- auth autocomplete email/password diperbaiki;
+- runtime production terakhir tidak menunjukkan error untuk route utama.
+
+## Article XV — Communication Rule''', c)
+
+          handoff.write_text(h, encoding='utf-8')
+          constitution.write_text(c, encoding='utf-8')
+          PY
+
+      - name: Verify docs
+        shell: bash
+        run: |
+          grep -q 'b9f1d117be2a5f67e68f4fb31f278ea2d888f600' MASTER_HANDOFF_PROMPT_STUDIHOME.md
+          grep -q 'dpl_CGXbrFMZ4Re2CkTZc6zrg7QospkT' MASTER_HANDOFF_PROMPT_STUDIHOME.md
+          grep -q 'b9f1d117be2a5f67e68f4fb31f278ea2d888f600' PROJECT_CONSTITUTION.md
+          grep -q 'dpl_CGXbrFMZ4Re2CkTZc6zrg7QospkT' PROJECT_CONSTITUTION.md
+
+      - name: Commit and remove workflow
+        shell: bash
+        run: |
+          rm -f .github/workflows/one-shot-handoff-sync.yml
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add MASTER_HANDOFF_PROMPT_STUDIHOME.md PROJECT_CONSTITUTION.md .github/workflows/one-shot-handoff-sync.yml
+          git commit -m 'docs: sync master handoff with verified production state' || exit 0
+          git push origin main
