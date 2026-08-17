@@ -1,0 +1,64 @@
+name: release-visual-contract-fix
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  fix:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Apply no-redesign production fixes
+        shell: bash
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+
+          css = Path('tailwind-compiled.css')
+          s = css.read_text(encoding='utf-8')
+          old = '.card-3d[class~="bg-gradient-to-br"][class~="from-[#151c75]"][class~="to-[#3f48bf"]]{background-image:linear-gradient(to bottom right,#151c75,#3f48bf)!important}'
+          new = '.card-3d[class~="bg-gradient-to-br"][class~="from-[#151c75]"][class~="to-[#3f48bf"]]{background:linear-gradient(135deg,#151c75 0%,#3f48bf 100%)!important;background-color:#151c75!important}'
+          if old in s:
+              s = s.replace(old, new, 1)
+          elif new not in s:
+              s += new
+          css.write_text(s, encoding='utf-8')
+
+          index = Path('index.html')
+          s = index.read_text(encoding='utf-8')
+          old = 'id="login-email" required'
+          new = 'id="login-email" autocomplete="username" required'
+          if old in s:
+              s = s.replace(old, new, 1)
+          elif 'id="login-email" autocomplete="username" required' not in s:
+              raise SystemExit('login-email marker not found')
+          index.write_text(s, encoding='utf-8')
+          PY
+
+          grep -q 'tailwind-compiled.css?v=20260817r1' index.html
+          ! grep -q 'cdn.tailwindcss.com' index.html
+          grep -q 'id="login-email" autocomplete="username" required' index.html
+          grep -q 'background:linear-gradient(135deg,#151c75 0%,#3f48bf 100%)!important' tailwind-compiled.css
+          grep -q 'dapur-entry.js' dapur.html
+          ! grep -q 'dapur-access-gate.js' dapur.html
+          ! grep -q 'dapur-workspace.js' dapur.html
+          ! grep -q 'MutationObserver' dapur-entry.js
+          ! grep -q 'intent=creator' vercel.json
+          ! grep -q 'next=%2Fdapur' vercel.json
+
+      - name: Commit and remove temporary workflow
+        shell: bash
+        run: |
+          rm -f .github/workflows/release_visual_contract_fix.yml
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add index.html tailwind-compiled.css .github/workflows/release_visual_contract_fix.yml
+          git commit -m 'fix: restore locked blue homepage hero and auth autocomplete'
+          git push origin main
