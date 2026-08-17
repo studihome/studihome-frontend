@@ -9,9 +9,7 @@
     enabled: false,
     title: 'Lagi kami upgrade ✦',
     description: 'Studihome lagi dirapikan biar makin nyaman. Santai dulu, sebentar lagi balik dengan pengalaman yang lebih fresh.',
-    independence_title: '🇮🇩 Merdeka, berkarya, terus melaju!',
-    independence_message: 'Kita lagi siapin Studihome yang lebih seru. Sampai ketemu lagi, Sobat Studihome ✦',
-    whatsapp_number: '',
+        whatsapp_number: '',
     whatsapp_message: 'Halo Studihome, saya ingin tahu update terbarunya.',
     whatsapp_label: 'Chat Studihome via WhatsApp'
   };
