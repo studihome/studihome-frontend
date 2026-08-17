@@ -14,6 +14,15 @@
 
   const routeNeedsGate = !PUBLIC_ENTRY && !AUTH_ENTRY.has(PATH);
 
+  function loadMaintenanceRenderer() {
+    if (document.querySelector('script[data-maintenance-renderer]')) return;
+    const script = document.createElement('script');
+    script.src = '/under-construction.js?v=6';
+    script.dataset.maintenanceRenderer = 'true';
+    script.defer = false;
+    document.head.appendChild(script);
+  }
+
   async function run() {
     try {
       const [{ data: settingsRow }, { data: userRow }] = await Promise.all([
@@ -22,15 +31,21 @@
       ]);
 
       const settings = settingsRow?.under_construction || {};
-      if (settings.enabled !== true || !routeNeedsGate) return;
+      if (settings.enabled !== true) return;
+
+      if (PUBLIC_ENTRY) {
+        // Root is the canonical public maintenance experience.
+        loadMaintenanceRenderer();
+        return;
+      }
+
+      if (AUTH_ENTRY.has(PATH)) return;
 
       // Authenticated users retain access to protected application routes.
-      // Anonymous visitors are sent to the public maintenance experience.
       if (userRow?.user) return;
 
-      if (location.pathname !== '/') {
-        location.replace('/');
-      }
+      // Anonymous/public visitors cannot enter application routes while maintenance is active.
+      location.replace('/');
     } catch (error) {
       // Fail open: a database/network failure must not lock users out of the app.
       console.warn('[Studihome] Maintenance gate unavailable; keeping current route.', error);
