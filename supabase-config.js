@@ -3,7 +3,7 @@ window.STUDIHOME_SUPABASE_URL =
 
 // Public browser key. Keep service_role keys out of the frontend permanently.
 window.STUDIHOME_SUPABASE_ANON_KEY =
-  "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImhiZm1od3d4YmdpZHNubGp1cGNhIiwiaWF0IjoxNzg2NDY0ODUwLCJleHAiOjIxMDIwNDA4NTB9.-yvhEk9TxbqWGCQZvP_VZt9iax-bADY1ZprzXokmrCU";
+  "sb_publishable_134slHOJ_kcw5-kxDQDVaw_y1jFO4Lv";
 
 // Canonical Supabase singleton. This file must have one job only:
 // bootstrap the shared client before application feature runtimes load.
