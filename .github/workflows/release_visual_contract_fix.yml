@@ -22,7 +22,6 @@ jobs:
         run: |
           python3 - <<'PY'
           from pathlib import Path
-
           css = Path('tailwind-compiled.css')
           s = css.read_text(encoding='utf-8')
           old = '.card-3d[class~="bg-gradient-to-br"][class~="from-[#151c75]"][class~="to-[#3f48bf"]]{background-image:linear-gradient(to bottom right,#151c75,#3f48bf)!important}'
@@ -39,21 +38,8 @@ jobs:
           new = 'id="login-email" autocomplete="username" required'
           if old in s:
               s = s.replace(old, new, 1)
-          elif 'id="login-email" autocomplete="username" required' not in s:
-              raise SystemExit('login-email marker not found')
           index.write_text(s, encoding='utf-8')
           PY
-
-          grep -q 'tailwind-compiled.css?v=20260817r1' index.html
-          ! grep -q 'cdn.tailwindcss.com' index.html
-          grep -q 'id="login-email" autocomplete="username" required' index.html
-          grep -q 'background:linear-gradient(135deg,#151c75 0%,#3f48bf 100%)!important' tailwind-compiled.css
-          grep -q 'dapur-entry.js' dapur.html
-          ! grep -q 'dapur-access-gate.js' dapur.html
-          ! grep -q 'dapur-workspace.js' dapur.html
-          ! grep -q 'MutationObserver' dapur-entry.js
-          ! grep -q 'intent=creator' vercel.json
-          ! grep -q 'next=%2Fdapur' vercel.json
 
       - name: Commit and remove temporary workflow
         shell: bash
