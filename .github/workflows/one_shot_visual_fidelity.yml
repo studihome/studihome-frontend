@@ -1,0 +1,76 @@
+name: one-shot-visual-fidelity
+
+on:
+  push:
+    branches: [main]
+
+permissions:
+  contents: write
+
+jobs:
+  rebuild:
+    if: ${{ github.actor != 'github-actions[bot]' }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Prepare Tailwind source
+        run: |
+          cat > tailwind.input.css <<'EOF'
+          @tailwind base;
+          @tailwind components;
+          @tailwind utilities;
+          EOF
+          cat > tailwind.config.cjs <<'EOF'
+          module.exports = {
+            content: ['./**/*.{html,js}'],
+          };
+          EOF
+
+      - name: Compile production CSS with baseline Preflight
+        run: |
+          npx --yes tailwindcss@3.4.17 -c tailwind.config.cjs -i tailwind.input.css -o tailwind-compiled.css --minify
+          test -s tailwind-compiled.css
+
+      - name: Patch auth autocomplete without changing UI
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          p = Path('index.html')
+          s = p.read_text(encoding='utf-8')
+          marker = 'id="login-email" required'
+          if 'id="login-email" autocomplete="username" required' not in s:
+              if marker not in s:
+                  raise SystemExit('login-email marker not found')
+              s = s.replace(marker, 'id="login-email" autocomplete="username" required', 1)
+          old = '/tailwind-compiled.css?v=20260817r1'
+          new = '/tailwind-compiled.css?v=20260817r2'
+          if old in s:
+              s = s.replace(old, new, 1)
+          elif new not in s:
+              raise SystemExit('Tailwind compiled stylesheet marker not found')
+          p.write_text(s, encoding='utf-8')
+          PY
+
+      - name: Verify invariants
+        run: |
+          ! grep -q 'https://cdn.tailwindcss.com' index.html
+          grep -q 'tailwind-compiled.css?v=20260817r2' index.html
+          grep -q 'id="login-email" autocomplete="username"' index.html
+          grep -q 'id="login-password" autocomplete="current-password"' index.html
+
+      - name: Commit and remove one-shot workflow
+        run: |
+          rm -f tailwind.input.css tailwind.config.cjs .github/workflows/one_shot_visual_fidelity.yml
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add index.html tailwind-compiled.css .github/workflows/one_shot_visual_fidelity.yml
+          if git diff --cached --quiet; then
+            echo 'No changes to commit.'
+            exit 0
+          fi
+          git commit -m 'fix: restore homepage visual fidelity and auth autocomplete'
+          git push origin main
