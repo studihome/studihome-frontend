@@ -1,5 +1,7 @@
 # PROJECT CONSTITUTION — STUDIHOME
 
+Tanggal pembaruan: 17 Agustus 2026
+
 ## Article I — Product Principle
 Studihome harus sederhana bagi pengguna dan disiplin secara teknis.
 
@@ -10,112 +12,128 @@ Prioritas:
 4. Accessibility
 5. Performance
 6. Maintainability
-7. Visual polish
+7. Visual fidelity
 8. Animation
 
 `Logic first, UI second.` Visual yang indah tetapi logic salah dianggap gagal.
 
 ## Article II — Single Source of Truth
-Satu source of truth untuk route, authentication/authorization, branding/UI contract, data, dan runtime renderer.
+Satu source of truth untuk route, auth/authorization, data, branding/UI contract, dan runtime renderer.
 
-YAGNI berlaku: jangan membuat layer, loader, observer, atau abstraction baru bila source canonical sudah cukup.
+YAGNI berlaku. Jangan membuat layer, loader, observer, renderer, atau abstraction baru jika source canonical sudah cukup.
 
-## Article III — Canonical Routes
+## Article III — Homepage Visual Contract
+Homepage `/` memiliki visual contract yang locked.
+
+Peraturan:
+- tidak redesign tanpa instruksi eksplisit;
+- jangan mengubah hero layout, typography, spacing, hierarchy, CTA, atau warna hanya untuk menyelesaikan bug teknis;
+- hero wajib mempertahankan gradient Studihome `#151c75 → #3f48bf`, text putih, amber/yellow emphasis, dan komposisi baseline;
+- baseline visual historis: `7406c1fdb8e614e0e3907f2c082bf94811a4beef`;
+- jika CSS build menyebabkan regression, perbaiki cascade/build source, bukan membuat hero baru.
+
+## Article IV — Production CSS Contract
+- `cdn.tailwindcss.com` dilarang di production.
+- Production memakai `/tailwind-compiled.css`.
+- Utility CSS dibangun secara reproducible dari source HTML/JS.
+- Jangan menghapus base/Preflight sembarangan.
+- Jangan mengubah markup hanya untuk mengakali hasil compiled CSS.
+
+## Article V — Canonical Routes
+### Public homepage
+`/`
+
 ### Public Creator profile
 `/{username}`
-
-### Creator workspace
-`/dapur/{username}`
 
 ### Dapur root
 `/dapur`
 
-Root adalah landing/entry program Dapur Studihome, bukan dashboard admin dan bukan Managed Creator Hub.
+### Creator workspace
+`/dapur/{username}`
 
 Foyer/Menu/Hidangan/Ambalan adalah section editor, bukan route.
 
-## Article IV — Role Boundaries
+Vercel canonical:
+- `/dapur` → `/dapur.html`
+- `/dapur/:username` → `/dapur.html`
+- `/:username/portfolio/:slug*` → `/index.html`
+- `/:username` → `/index.html`
+
+Jangan gunakan inline regex parameter seperti `/:username([a-z0-9]...)` pada `rewrites.source`.
+
+## Article VI — Role Boundaries
 ### Public
-Dapat melihat landing Dapur dan profil publik yang published.
+- melihat homepage;
+- melihat landing Dapur;
+- melihat Creator profile yang published.
 
 ### Member
-Dapat membuat dan mengelola Creator miliknya sendiri sesuai authority backend.
+- membuat/mengelola Creator sendiri sesuai backend authority;
+- Premium wajib untuk workspace Creator sesuai kontrak produk.
 
 ### Admin
-Dapat mengelola Creator sesuai otoritas Studihome.
+- mengelola Creator sesuai authority Studihome.
 
 Authorization sensitif wajib diputuskan Supabase/RLS/backend. Frontend hanya presentation/control surface.
 
-## Article V — Dapur Runtime Constitution
+## Article VII — Dapur Runtime Constitution
 Canonical runtime:
-- `dapur.html` = shell;
-- `dapur-entry.js` = satu renderer canonical;
+- `dapur.html` = minimal shell;
+- `dapur-entry.js` = satu renderer canonical + route/auth orchestration;
 - `dapur-editor.js` = editor standalone lazy-loaded;
 - `vercel.json` = route contract;
-- `supabase-config.js` = Supabase singleton.
+- `supabase-config.js` = singleton.
 
 Wajib:
-- satu canonical render path;
 - deterministic boot order;
-- singleton `window.supabaseClient`;
-- no global MutationObserver;
-- no post-render workspace decorator;
-- no legacy script injector untuk Dapur;
-- no Tailwind CDN/FontAwesome dependency untuk shell/editor canonical.
+- satu canonical render path;
+- no global MutationObserver pada canonical Dapur runtime;
+- no post-render decorator;
+- no legacy script injector;
+- no Tailwind CDN/FontAwesome dependency untuk canonical Dapur shell/editor;
+- auth re-render hanya melalui canonical entry.
 
-Dilarang menyelesaikan bug renderer dengan membuat renderer kedua.
+Dilarang memperbaiki renderer dengan membuat renderer kedua.
 
-## Article VI — UX Constitution
-Setiap halaman Dapur wajib:
+## Article VIII — Dapur UX Constitution
 - mobile-first;
 - responsive desktop/tablet/mobile;
 - tap target nyaman;
 - body text mudah dibaca;
-- input form minimal 16px di mobile;
-- helper text singkat;
-- actionable empty state;
-- loading state jelas;
-- error state manusiawi;
-- success state informatif;
+- input minimal 16px di mobile;
+- helper/loading/error/success/empty state manusiawi;
 - keyboard accessible;
-- menghormati `prefers-reduced-motion`.
+- `prefers-reduced-motion` dihormati;
+- hierarchy visual jelas;
+- tidak memerlukan pengetahuan developer untuk menyelesaikan tugas utama.
 
-Animasi hanya digunakan untuk feedback/hierarchy.
-
-## Article VII — Dapur Design System
-Gaya:
-- clean;
-- premium namun ringan;
-- whitespace cukup;
-- navy Studihome sebagai anchor;
-- biru untuk action;
-- amber untuk emphasis;
-- border lembut;
-- shadow ringan;
-- radius konsisten;
-- typography hierarchy tegas.
-
-`/dapur` menggunakan hero visual kuat dan CTA jelas.
-`/dapur/{username}` menggunakan dashboard/editor minimal yang mempercepat pekerjaan.
-
-## Article VIII — Dapur Information Architecture
+## Article IX — Dapur Information Architecture
 1. Foyer — identitas, bio, kontak, publikasi.
 2. Menu — kategori/fokus keahlian.
 3. Hidangan — layanan, harga, manfaat, estimasi.
 4. Ambalan — portofolio/bukti kerja.
 
-Editor bersifat progresif; jangan menampilkan form panjang sekaligus tanpa kebutuhan.
+Editor progresif; jangan menampilkan form panjang sekaligus tanpa kebutuhan.
 
-Canonical public link:
+Canonical public Creator link:
 `https://studihome.id/{username}`
 
-Posisi link: setelah `Tips cepat cari customer`.
-Aksi wajib: `Salin` + `Bagikan`.
+Wajib tersedia pada workspace:
+- `Salin`;
+- `Bagikan`.
 
-## Article IX — Data & Backend
-Supabase adalah source of truth auth + data Creator.
+## Article X — Authentication Accessibility
+Semantic autocomplete wajib digunakan tanpa mengubah desain:
+- login email → `username`;
+- login password → `current-password`;
+- registration email → `email`;
+- registration name → `name`;
+- registration phone → `tel`;
+- registration password → `new-password`.
 
-Jangan mengubah database untuk masalah UI/router.
+## Article XI — Data & Backend Security
+Supabase adalah source of truth auth + Creator data.
 
 Sebelum perubahan RLS:
 - audit table;
@@ -124,121 +142,121 @@ Sebelum perubahan RLS:
 - execute grants;
 - frontend callers.
 
-Service-role key tidak pernah berada di frontend.
+Service-role key tidak pernah di frontend.
 
-Refactor canonical Dapur dan cleanup legacy runtime tidak mengubah SQL/RLS.
+Anonymous public-read harus hanya membaca data yang memang public/published/active. Anonymous write terhadap Creator data dilarang.
 
-## Article X — Routing Contract
-`vercel.json` menjaga route Dapur canonical:
-- `/dapur` → `dapur.html`
-- `/dapur/:username` → `dapur.html`
-- `/:username/portfolio/:slug*` → `index.html`
-- `/:username` → `index.html`
+Authorization-only RPC seperti `is_admin`, `has_creator_workspace_access`, `has_premium_creator_access`, `is_creator_eligible`, dan `can_publish_creator` tidak boleh memiliki EXECUTE untuk `anon`.
 
-Username divalidasi lagi di runtime.
+`validate_creator_username(text)` harus memakai `search_path` aman dan dibatasi ke authenticated.
 
-Jangan menggunakan inline regex parameter seperti `/:username([a-z0-9]...)` di `rewrites.source`; konfigurasi tersebut telah terbukti menyebabkan deployment Vercel `Invalid vercel.json file provided`.
+Jangan ubah SQL/RLS untuk masalah yang sebenarnya hanya UI/router.
 
-Jangan membuat route section:
-- `/dapur/foyer`
-- `/dapur/menu`
-- `/dapur/hidangan`
-- `/dapur/ambalan`
+## Article XII — Legacy Policy
+Legacy tidak dihapus hanya karena terlihat tua.
 
-## Article XI — Legacy Policy
-Kode lama tidak dihapus karena terlihat tua.
-
-Generasi superseded Dapur yang sudah aman dihapus:
-- `dapur-app-v1.js` … `dapur-app-v4.js`
-- `dapur-entry-v6.js`, `dapur-entry-v7.js`
-- `dapur-runtime-v4.js`
-- `dapur-workspace-v2.js`, `dapur-workspace-v3.js`
-- `dapur-cta-v1.js`
-- `dapur-design-v2.js`
-- `dapur-enhancements-v1.js`
+Generasi Dapur yang sudah aman dihapus:
+- `dapur-app-v1.js` … `dapur-app-v4.js`;
+- `dapur-entry-v6.js`, `dapur-entry-v7.js`;
+- `dapur-runtime-v4.js`;
+- `dapur-workspace-v2.js`, `dapur-workspace-v3.js`;
+- `dapur-cta-v1.js`;
+- `dapur-design-v2.js`;
+- `dapur-enhancements-v1.js`;
+- `dapur-access-gate.js`;
+- `dapur-workspace.js`.
 
 Compatibility/admin surfaces yang masih ditahan:
-- `dapur-admin-user-route-v1.js`
-- `dapur-button.js`
-- `admin-dapur-creator-v5.js`
-- `admin-dapur-ui-v2.js`
+- `dapur-admin-user-route-v1.js`;
+- `dapur-button.js`;
+- `admin-dapur-creator-v5.js`;
+- `admin-dapur-ui-v2.js`.
 
-Sebelum delete berikutnya:
-1. cari seluruh references;
-2. tentukan runtime owner;
-3. pastikan replacement canonical sudah live;
-4. pahami rollback;
-5. pastikan tidak ada consumer aktif.
+Delete hanya setelah reference proof, runtime owner, replacement live, rollback path, dan consumer audit lulus.
 
-## Article XII — Change Protocol
+## Article XIII — Change Protocol
 1. identifikasi owner;
 2. audit references;
 3. audit boot order;
 4. ubah canonical source;
-5. validasi syntax/config;
-6. deploy;
-7. cocokkan commit SHA dengan deployment SHA;
-8. fetch production route;
-9. cek runtime/console errors;
-10. verifikasi browser pada route utama;
-11. baru declare done.
+5. minimalkan blast radius;
+6. validasi syntax/config;
+7. deploy;
+8. cocokkan commit SHA dengan deployment SHA;
+9. fetch route production;
+10. cek build/runtime errors;
+11. cek browser console sesuai target;
+12. baru declare done.
 
-## Article XIII — Deployment Discipline
-Tidak boleh menyebut `selesai`, `live`, atau `production ready` bila:
-- deployment final belum `READY`;
+## Article XIV — Deployment Discipline
+Tidak boleh menyatakan `selesai`, `live`, atau `production ready` jika:
+- deployment final belum READY;
 - deployment bukan commit final;
-- `/dapur` belum diuji;
-- `/dapur/{username}` belum diuji;
-- error runtime/console belum diperiksa;
-- legacy resource request belum diperiksa.
+- route utama belum diuji;
+- runtime/build error belum diperiksa;
+- target console warning/error belum diverifikasi;
+- legacy request belum diperiksa.
 
-## Article XIV — Current Release State
-Canonical Dapur refactor dan legacy runtime cleanup sudah merge ke `main`.
+## Article XV — Current Release State
+Current application release verified:
+- commit `0e1a53ed1fc9931f0fa5c3e3cff64e40ec96a59b`;
+- Vercel deployment `dpl_DUGyQFVJduxWgbNU7snFerQKGRLr`;
+- target `production`;
+- state `READY`.
 
-Cleanup merge:
-`319ec74889389d7af385b812273a518d9af2afc5`
+Current verification:
+- Vercel build error log: tidak ada build error;
+- Vercel runtime error/warning/fatal query pada verification window: tidak ada log;
+- production static CSS endpoint HTTP 200;
+- Tailwind CDN reference pada `index.html`: sudah dihapus;
+- auth login email autocomplete: sudah `username`;
+- login password autocomplete: sudah `current-password`;
+- homepage hero cascade fix sudah berada di production.
 
-Vercel routing fix:
-`a01be6678281c5835e026d9217f15a7057ca6891`
+## Article XVI — E2E Boundary
+Authenticated browser E2E tidak boleh dianggap PASS hanya dari source inspection.
 
-Handoff documentation update:
-`232fea140208c394aa4edfae4438450a755cb0bb`
+E2E wajib menggunakan sesi nyata untuk membuktikan:
+- Premium tanpa Creator → create Dapur;
+- Premium dengan Creator → manage Dapur;
+- username validation;
+- owner isolation;
+- logout → workspace deny;
+- public popup auth → login/register.
 
-Production aktif yang terakhir terverifikasi masih:
-`53659423b83d3fb9fed8fbc0f97701871c392159`
-
-Artinya: `merged` belum sama dengan `production verified`.
-
-## Article XV — Communication Rule
-Setiap laporan perubahan wajib menyebut:
-- apa yang berubah;
-- alasan perubahan;
-- file/runtime utama;
-- status backend bila relevan;
-- commit SHA;
-- deployment SHA bila tersedia;
-- hasil verification;
-- keterbatasan verification.
-
-Jangan mengklaim sesuatu sudah diverifikasi bila belum benar-benar diuji.
-
-## Article XVI — Freeze Rules
-Tanpa alasan eksplisit, jangan ubah:
-- global header structure;
+## Article XVII — Freeze Rules
+Tanpa alasan eksplisit jangan ubah:
+- global homepage/header visual contract;
+- homepage hero;
 - canonical public Creator URL `/{username}`;
 - arti `/dapur`;
 - arti `/dapur/{username}`;
 - role boundaries;
-- RLS/security contracts;
-- payment/order logic yang sudah PASS.
+- payment/order logic yang sudah PASS;
+- security contracts yang sudah PASS.
 
-## Article XVII — Definition of Done
-Fitur Dapur dianggap selesai hanya bila:
-- pengguna awam dapat menyelesaikan tugas utama tanpa bantuan developer;
+## Article XVIII — Definition of Done
+Fitur/perbaikan dianggap selesai hanya bila:
+- logic benar;
 - data tersimpan benar;
 - authorization benar;
 - route canonical benar;
-- tampilan responsive;
+- UI tetap sesuai visual contract;
+- responsive;
 - accessibility dasar terpenuhi;
 - production memakai commit final;
-- browser/console dan runtime production sudah diverifikasi.
+- build/runtime/console production diperiksa;
+- keterbatasan E2E dinyatakan secara jujur bila belum dilakukan.
+
+## Article XIX — Communication Rule
+Setiap laporan engineering wajib mencantumkan:
+- perubahan;
+- alasan;
+- runtime/file utama;
+- backend/security impact bila ada;
+- commit SHA;
+- deployment SHA jika tersedia;
+- verification result;
+- limitation.
+
+Pesan ChatGPT `Anda telah mencapai panjang maksimum untuk percakapan ini...` adalah notifikasi UI ChatGPT dan bukan error aplikasi Studihome. Jangan mengubah frontend untuk pesan tersebut.
