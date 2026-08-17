@@ -203,14 +203,28 @@ Tidak boleh menyatakan `selesai`, `live`, atau `production ready` jika:
 - legacy request belum diperiksa.
 
 ## Article XV — Current Release State
-The final verified production source is:
-`9f27388690e984278b3d4ca4fcd16f1bb01c6288`
+Functional application source terbaru yang terverifikasi:
+`b9f1d117be2a5f67e68f4fb31f278ea2d888f600`
 
-That functional source was deployed successfully to Production as:
-`dpl_GfX5GYb1tKeCWHNtpbFjSfrqfZ9T`
-with state `READY`.
+Production deployment:
+`dpl_CGXbrFMZ4Re2CkTZc6zrg7QospkT`
 
-This documentation update creates a new commit and therefore requires a fresh final deployment verification before declaring release complete.
+State:
+`READY`
+
+Verified conditions:
+- homepage hero kembali pada baseline blue visual contract tanpa redesign;
+- Tailwind CDN sudah dihapus dari production shell;
+- `tailwind-compiled.css` menjadi utility layer canonical;
+- `login-email` memakai `autocomplete="username"`;
+- password dan registration fields memakai semantic autocomplete yang benar;
+- Dapur tetap memakai runtime canonical `dapur.html → dapur-entry.js`;
+- tidak ada global MutationObserver / second-stage decorator / legacy Dapur access-gate runtime;
+- public Creator RLS read path dipisahkan dari authorization-only functions;
+- anonymous write access terhadap Creator data tetap ditutup;
+- latest Production runtime check untuk `/`, `/kamar`, `/admin`, `/dapur` tidak menemukan runtime errors.
+
+Catatan: commit dokumentasi dapat membuat deployment Vercel tambahan tanpa mengubah functional application source. Untuk release decision, gunakan functional source SHA + deployment SHA yang terverifikasi bersama.
 
 ## Article XVI — E2E Boundary
 Authenticated browser E2E tidak boleh dianggap PASS hanya dari source inspection.
@@ -259,10 +273,3 @@ Setiap laporan engineering wajib mencantumkan:
 - limitation.
 
 Pesan ChatGPT `Anda telah mencapai panjang maksimum untuk percakapan ini...` adalah notifikasi UI ChatGPT dan bukan error aplikasi Studihome. Jangan mengubah frontend untuk pesan tersebut.
-
-
-## Article XIX — Current Production CSS & Auth Accessibility
-- Production homepage uses compiled Tailwind CSS; CDN runtime is prohibited.
-- Tailwind compilation preserves the base/preflight layer to maintain visual parity with the previously locked homepage.
-- Login email uses `autocomplete="username"`; password and registration fields use semantic autocomplete tokens.
-- Homepage hero visual contract remains locked; technical fixes must not redesign its markup or composition.
