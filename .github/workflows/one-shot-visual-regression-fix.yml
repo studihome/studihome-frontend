@@ -1,0 +1,78 @@
+name: One-shot visual regression fix
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  fix:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Rebuild Tailwind production CSS to match CDN rendering
+        shell: bash
+        run: |
+          mkdir -p .codemod
+          cat > .codemod/tailwind.config.cjs <<'EOF'
+          module.exports = {
+            content: ['./**/*.html', './**/*.js'],
+            theme: { extend: {} },
+            plugins: [],
+          };
+          EOF
+          cat > .codemod/input.css <<'EOF'
+          @tailwind base;
+          @tailwind components;
+          @tailwind utilities;
+          EOF
+          npx --yes tailwindcss@3.4.17 -c .codemod/tailwind.config.cjs -i .codemod/input.css -o tailwind-compiled.css --minify
+
+      - name: Harden auth autocomplete without changing UI
+        shell: bash
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          p = Path('index.html')
+          s = p.read_text(encoding='utf-8')
+          replacements = {
+              'id="login-email" required': 'id="login-email" autocomplete="username" required',
+              'id="login-password" autocomplete="current-password" required': 'id="login-password" autocomplete="current-password" required',
+              'id="reg-email" required': 'id="reg-email" autocomplete="email" required',
+              'id="reg-password" required': 'id="reg-password" autocomplete="new-password" required',
+          }
+          for old, new in replacements.items():
+              s = s.replace(old, new)
+          p.write_text(s, encoding='utf-8')
+          PY
+          rm -rf .codemod
+
+      - name: Guardrails
+        shell: bash
+        run: |
+          ! grep -R "cdn.tailwindcss.com" -n --include='*.html' .
+          grep -n 'id="login-email".*autocomplete="username"' index.html
+          grep -n 'id="login-password".*autocomplete="current-password"' index.html
+
+      - name: Commit production fix and remove one-shot workflow
+        shell: bash
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          rm -f .github/workflows/one-shot-visual-regression-fix.yml
+          git add index.html tailwind-compiled.css .github/workflows/one-shot-visual-regression-fix.yml
+          git diff --cached --quiet && { echo 'No changes to commit'; exit 0; }
+          git commit -m 'fix: restore canonical hero rendering and auth autocomplete'
+          git push origin HEAD:main
