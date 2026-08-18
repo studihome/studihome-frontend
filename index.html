@@ -865,9 +865,9 @@
         </div>
     </div>
 
-    <!-- STUDIO AI SMART DISCOVERY MODAL -->
-    <div id="studio-smart-brief-modal" class="fixed inset-0 z-[91] hidden bg-slate-900/60 backdrop-blur-sm items-center justify-center p-4">
-        <div class="studio-smart-modal-card card-3d w-full max-w-2xl rounded-3xl bg-white p-5 sm:p-6 relative">
+    <!-- STUDIO AI SMART DISCOVERY MODAL (Responsif Layar Penuh di HP) -->
+    <div id="studio-smart-brief-modal" class="fixed inset-0 z-[91] hidden bg-slate-900/60 backdrop-blur-sm items-center justify-center p-0 sm:p-4">
+        <div class="studio-smart-modal-card card-3d w-full h-full sm:h-auto max-h-full sm:max-h-[90vh] sm:max-w-2xl rounded-none sm:rounded-3xl bg-white p-5 sm:p-6 relative overflow-y-auto">
             <button type="button" onclick="App.studioAI.closeSmartBrief()" aria-label="Tutup pencarian kebutuhan" class="modal-close-btn absolute top-4 right-4 w-8 h-8 rounded-full flex items-center justify-center font-extrabold shadow-md">
                 <i class="fa-solid fa-xmark"></i>
             </button>
@@ -2944,15 +2944,15 @@ App.router.bindCanonicalLinkGuard();
                                         <button type="button" aria-label="Cari di Studio AI" onclick="App.studioAI.applySearch()" class="btn-brand-amber px-3.5 py-2.5 rounded-xl text-[11px] sm:text-xs font-extrabold shrink-0">Cari</button>
                                     </div>
                                 </div>
-                                <!-- Baris Tombol Utama Responsif (HP & Desktop) -->
-                                <div class="mt-3 flex flex-wrap items-center gap-2">
-                                    <button type="button" onclick="App.studioAI.openSmartBrief()" class="studio-smart-brief-btn inline-flex items-center justify-center gap-2 px-3.5 py-2.5 rounded-xl text-xs font-extrabold w-full sm:w-auto">
-                                        <i class="fa-solid fa-sparkles text-amber-300"></i> Ceritakan kebutuhanmu
+                                <!-- Baris 3 Tombol Utama Proporsional dengan Icon (HP & Desktop) -->
+                                <div class="mt-3.5 flex flex-col sm:flex-row items-stretch sm:items-center gap-2 sm:gap-3">
+                                    <button type="button" onclick="App.studioAI.openSmartBrief()" class="studio-smart-brief-btn inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl text-xs sm:text-sm font-extrabold">
+                                        <i class="fa-solid fa-wand-magic-sparkles text-amber-300"></i> Ceritakan kebutuhanmu
                                     </button>
-                                    <button type="button" onclick="App.studioAI.toggleSection('studio-ai-category-section')" class="studio-smart-brief-btn inline-flex items-center justify-center gap-2 px-3.5 py-2.5 rounded-xl text-xs font-extrabold flex-1 sm:flex-none">
+                                    <button type="button" onclick="App.studioAI.showCategoriesOnly()" class="studio-smart-brief-btn inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl text-xs sm:text-sm font-extrabold">
                                         <i class="fa-solid fa-layer-group text-amber-300"></i> Kategori
                                     </button>
-                                    <button type="button" onclick="App.studioAI.openAllCreators()" class="studio-smart-brief-btn inline-flex items-center justify-center gap-2 px-3.5 py-2.5 rounded-xl text-xs font-extrabold flex-1 sm:flex-none">
+                                    <button type="button" onclick="App.studioAI.showCreatorsOnly()" class="studio-smart-brief-btn inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl text-xs sm:text-sm font-extrabold">
                                         <i class="fa-solid fa-users text-amber-300"></i> Creator
                                     </button>
                                 </div>
@@ -3036,37 +3036,58 @@ App.router.bindCanonicalLinkGuard();
                         if (grid) grid.innerHTML = `<div class="card-3d p-8 rounded-2xl text-center text-xs text-slate-500 md:col-span-2 xl:col-span-3">Studio AI sedang menyiapkan data. Coba muat ulang beberapa saat lagi.</div>`;
                     }
                 },
-               _creatorDisplayLimit: 6, // Jumlah awal Creator yang ditampilkan (Praktik Terbaik)
+               _creatorDisplayLimit: 6,
 
-                toggleSection: (sectionId) => {
-                    const el = document.getElementById(sectionId);
-                    if (!el) return;
-                    const isHidden = el.classList.contains('hidden');
-                    if (isHidden) {
-                        el.classList.remove('hidden');
-                        el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                // 1. Menampilkan HANYA Kategori (Menutup Creator)
+                showCategoriesOnly: () => {
+                    const catSec = document.getElementById('studio-ai-category-section');
+                    const creatorSec = document.getElementById('studio-ai-creator-section');
+
+                    if (!catSec) return;
+                    const isCatHidden = catSec.classList.contains('hidden');
+
+                    if (isCatHidden) {
+                        catSec.classList.remove('hidden');
+                        if (creatorSec) creatorSec.classList.add('hidden');
+                        setTimeout(() => {
+                            catSec.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                        }, 50);
                     } else {
-                        el.classList.add('hidden');
+                        catSec.classList.add('hidden');
                     }
                 },
 
-                // Menampilkan SEMUA Creator tanpa tersaring pencarian/kategori lama
+                // 2. Menampilkan HANYA Creator (Menutup Kategori & Reset Pencarian)
+                showCreatorsOnly: () => {
+                    const catSec = document.getElementById('studio-ai-category-section');
+                    const creatorSec = document.getElementById('studio-ai-creator-section');
+
+                    if (!creatorSec) return;
+                    const isCreatorHidden = creatorSec.classList.contains('hidden');
+
+                    if (isCreatorHidden) {
+                        App.studioAI._query = '';
+                        App.studioAI._category = '';
+                        App.studioAI._creatorDisplayLimit = 6;
+                        const input = document.getElementById('studio-ai-search-input');
+                        if (input) input.value = '';
+
+                        creatorSec.classList.remove('hidden');
+                        if (catSec) catSec.classList.add('hidden');
+
+                        App.studioAI.renderCreators();
+                        setTimeout(() => {
+                            creatorSec.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                        }, 50);
+                    } else {
+                        creatorSec.classList.add('hidden');
+                    }
+                },
+
                 openAllCreators: () => {
-                    App.studioAI._query = '';
-                    App.studioAI._category = '';
-                    App.studioAI._creatorDisplayLimit = 6; // Reset batasan ke 6 pertama
-                    const input = document.getElementById('studio-ai-search-input');
-                    if (input) input.value = '';
-                    
-                    const sec = document.getElementById('studio-ai-creator-section');
-                    if (sec) {
-                        sec.classList.remove('hidden');
-                        sec.scrollIntoView({ behavior: 'smooth', block: 'start' });
-                    }
-                    App.studioAI.renderCreators();
+                    App.studioAI.showCreatorsOnly();
                 },
 
-                // Fungsi untuk menambah tampilan jika tombol "Lihat Lebih Banyak" ditekan
                 showMoreCreators: () => {
                     App.studioAI._creatorDisplayLimit += 6;
                     App.studioAI.renderCreators();
@@ -3080,20 +3101,38 @@ App.router.bindCanonicalLinkGuard();
                     if (sec) sec.classList.remove('hidden');
                     App.studioAI.renderCreators();
                 },
+
                 setCategory: (slug) => {
                     App.studioAI._category = slug || '';
                     App.studioAI.renderCategories();
                     App.studioAI.renderCreators();
                 },
+
+                // 3. Ketika memilih 1 Kategori: Tutup Kategori, Buka Creator & Scroll Halus
                 openCategory: (slug) => {
                     const clean = String(slug || '').toLowerCase().replace(/[^a-z0-9-]/g, '');
                     if (!clean) return;
+
                     window.history.pushState({}, '', '/' + clean);
                     App.state.routeType = 'studio-ai';
                     App.state.studioAICategory = clean;
-                    App.ui.renderNavigation();
-                    App.studioAI.render(clean);
-                    window.scrollTo({ top: 0, behavior: 'smooth' });
+                    App.studioAI._category = clean;
+                    App.studioAI._creatorDisplayLimit = 6;
+
+                    // Tutup Kategori, Buka Creator
+                    const catSec = document.getElementById('studio-ai-category-section');
+                    const creatorSec = document.getElementById('studio-ai-creator-section');
+
+                    if (catSec) catSec.classList.add('hidden');
+                    if (creatorSec) creatorSec.classList.remove('hidden');
+
+                    App.studioAI.renderCategories();
+                    App.studioAI.renderCreators();
+
+                    // Scroll halus ke daftar Creator
+                    setTimeout(() => {
+                        if (creatorSec) creatorSec.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                    }, 100);
                 },
                 /* Step 38 — SMART Learning Loop: session-only, privacy-first interaction signals */
                 _smartLearningKey: 'studihome-smart-learning-v1',
@@ -4165,6 +4204,13 @@ App.router.bindCanonicalLinkGuard();
                     }
                 },
                 runSmartDiscovery: () => {
+                    // Otomatis tutup Pop-up & buka area hasil Creator
+                    App.studioAI.closeSmartBrief();
+                    const catSec = document.getElementById('studio-ai-category-section');
+                    const creatorSec = document.getElementById('studio-ai-creator-section');
+                    if (catSec) catSec.classList.add('hidden');
+                    if (creatorSec) creatorSec.classList.remove('hidden');
+
                     App.studioAI._loadSmartContext();
                     App.studioAI._loadSmartLearning();
                     App.studioAI._loadSmartFeedback();
@@ -7801,20 +7847,6 @@ window.addEventListener('DOMContentLoaded', App.init);
         };
         window.App.router.__creatorGrowthHooked=true;
     }
-})();
-
-
-(function(){
-    function addPublicQualityHint(){
-        const root=document.querySelector('.studio-ai-hero') || document.querySelector('[data-studio-ai-root]');
-        if(!root || document.getElementById('studio-ai-quality-principles')) return;
-        const box=document.createElement('div');
-        box.id='studio-ai-quality-principles';
-        box.className='platform-governance-note mt-3';
-        box.innerHTML='<i class="fa-solid fa-shield-heart"></i><div><strong class="text-[#151c75]">SMART tetap fokus pada kecocokan.</strong> Popularitas, rating, dan profil dipakai sebagai sinyal pendukung—bukan pengganti relevansi.</div>';
-        root.appendChild(box);
-    }
-    document.addEventListener('DOMContentLoaded',()=>setTimeout(addPublicQualityHint,700));
 })();
 
 
