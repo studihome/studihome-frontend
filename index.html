@@ -419,7 +419,6 @@
             to { transform: rotate(360deg); }
         }
 
-
         /* Step 23 — Creator Trust Controls */
         .creator-trust-adjustment{border:1px solid #dbe7ff;background:linear-gradient(180deg,#fff 0%,#f8fbff 100%);box-shadow:0 8px 24px rgba(21,28,117,.07)}
         .creator-trust-adjustment input,.creator-trust-adjustment textarea,.creator-trust-adjustment select{outline:none;transition:box-shadow .18s ease,border-color .18s ease}
@@ -577,8 +576,6 @@
             .studio-ai-card, .studio-ai-search-wrap { transition:none !important; }
         }
 
-
-
         /* Step 19 — unified room UX, scoped to new/additive areas only */
         .studio-ai-hero, .creator-profile-hero, .room-workspace {
             scroll-margin-top: 5.5rem;
@@ -615,7 +612,6 @@
                 content-visibility: visible;
             }
         }
-
 
         /* Studio AI data readiness — additive only */
         .studio-ai-empty {
@@ -660,7 +656,6 @@
         .admin-trust-card .metric{font-weight:900;color:#151c75}
         .admin-trust-badge{display:inline-flex;align-items:center;gap:.35rem;padding:.28rem .52rem;border-radius:.65rem;font-size:10px;font-weight:800;background:#eff6ff;color:#151c75;border:1px solid #dbeafe}
 
-
         /* RC24 — Admin control-center layout */
         .admin-studio-ai-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:1rem;align-items:start}
         .admin-governance-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:1rem;align-items:start}
@@ -692,7 +687,6 @@
         .studio-smart-conversation-chip:hover { transform: translateY(-1px); box-shadow: 0 6px 14px rgba(21,28,117,.08); }
         .studio-smart-conversation-chip:focus-visible { outline: 3px solid rgba(250,204,21,.85); outline-offset: 2px; }
         @media (prefers-reduced-motion: reduce) { .studio-smart-conversation-chip { transition:none !important; } }
-
 
         /* Milestone D — SMART Fair Discovery */
         .studio-smart-fair-badge{display:inline-flex;align-items:center;gap:.4rem;border-radius:9999px;white-space:nowrap}
@@ -732,7 +726,6 @@
 @media (prefers-reduced-motion: reduce){.smart-zero-result{animation:none!important}}
 </style>
 
-
 <style id="smart-creator-growth-css">
 /* Milestone G — SMART Creator Quality & Growth — additive only */
 .smart-creator-coach{background:linear-gradient(135deg,rgba(239,246,255,.98),rgba(255,255,255,.98));border:1px solid #dbe7ff;box-shadow:0 12px 28px rgba(21,28,117,.08)}
@@ -745,7 +738,6 @@
 .smart-creator-progress>span{display:block;height:100%;border-radius:999px;background:linear-gradient(90deg,#151c75,#3f48bf,#EAB308)}
 @media (prefers-reduced-motion: reduce){.smart-creator-tip button{transition:none!important}}
 </style>
-
 
     <!-- LOCKED VISUAL CONTRACT — RC3 FINAL AUTHORITY. Do not override without explicit design change. -->
     <style id="studihome-visual-lock-rc3">
@@ -933,7 +925,6 @@
             </div>
         </div>
     </footer>
-
     <!-- AUTHENTICATION MODAL -->
     <div id="auth-modal" class="fixed inset-0 z-50 hidden bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-3 sm:p-4">
         <div class="card-3d w-full max-w-md p-5 sm:p-7 rounded-3xl relative bg-white my-auto">
@@ -1193,7 +1184,6 @@ const App = {
                 };
             }
         },
-
 
             state: {
                 user: null,
@@ -3044,22 +3034,27 @@ App.router.bindCanonicalLinkGuard();
 
                 _creatorDisplayLimit: 6,
 
-                // Submit Pop-up Brief: Menjalankan pencarian, Menutup Pop-Up, Buka Creator & Scroll Halus
+                // Submit Pop-up Brief: Ambil keyword, jalankan pencarian, tutup pop-up, dan scroll ke hasil
                 submitSmartBrief: () => {
+                    const input = document.getElementById('studio-smart-brief-input');
+                    if (input) {
+                        App.studioAI._query = String(input.value || '').trim();
+                    }
+                    
                     App.studioAI.runSmartDiscovery();
                     App.studioAI.closeSmartBrief();
-                    
+
                     const catSec = document.getElementById('studio-ai-category-section');
                     const creatorSec = document.getElementById('studio-ai-creator-section');
-                    
+
                     if (catSec) catSec.classList.add('hidden');
                     if (creatorSec) creatorSec.classList.remove('hidden');
-                    
+
                     setTimeout(() => {
                         if (creatorSec) {
                             creatorSec.scrollIntoView({ behavior: 'smooth', block: 'start' });
                         }
-                    }, 120);
+                    }, 100);
                 },
                 // 1. Menampilkan HANYA Kategori (Menutup Creator)
                 showCategoriesOnly: () => {
@@ -4517,7 +4512,6 @@ App.router.bindCanonicalLinkGuard();
                     }).join('');
                 }
             },
-
 
             creator: {
                 _slugify: (value) => String(value || '').toLowerCase().trim().normalize('NFKD').replace(/[\u0300-\u036f]/g, '').replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '').slice(0, 120),
@@ -7630,7 +7624,6 @@ window.addEventListener('DOMContentLoaded', App.init);
 @media(max-width:640px){#toast-container .toast-bubble{max-width:calc(100vw - 1.25rem) !important;}}
 @media(prefers-reduced-motion:reduce){#toast-container .toast-bubble{animation:none !important;transform:none !important;opacity:1 !important;}}
 
-
 /* Milestone AC — Callout Outline & Hero-Tone Favicon */
 #toast-container .toast-bubble{border:1px solid rgba(191,219,254,.98) !important;box-shadow:0 0 0 1px rgba(191,219,254,.55),0 18px 42px rgba(21,28,117,.13),0 7px 18px rgba(15,23,42,.07) !important;}
 #toast-container .toast-bubble::before{content:none !important;display:none !important;}
@@ -7870,7 +7863,6 @@ window.addEventListener('DOMContentLoaded', App.init);
     }
 })();
 
-
 window.StudihomeProductionGuard = {
     run: () => {
         try {
@@ -7917,7 +7909,6 @@ try{
 window.StudihomeVisualNavigationGuard = {expectedMenuLabel:'Lobi',expectedFaviconGlyph:'✦',noticePosition:'center-below-header',popupScrollbar:'hidden-visual-only'};
 window.StudihomeQALock = {version:'RC4',callout:'blue-outline-no-rail-no-tail',favicon:'✦-hero-gradient',navigation:'canonical-routes'};
 </script>
-
 
 <script id="studihome-visual-contract-guard">
 window.StudihomeVisualContract = {
@@ -8100,7 +8091,6 @@ window.StudihomeProductionPilotSimulation = {
   }
 };
 </script>
-
 
 <!-- REAL-DATA SAFETY GATE — RC9
      Read-only release contract. No DB writes, no UI mutations, no auth mutations.
@@ -8495,7 +8485,6 @@ window.StudihomeProductionPilotSimulation = {
 })();
 </script>
 
-
 <!-- RC14 — FINAL DATABASE LOCK & LEAST-PRIVILEGE GATE
      Read-only in application. Documents one concrete DB hardening item discovered from live evidence.
      No DB mutation is executed by this file. -->
@@ -8543,7 +8532,6 @@ window.StudihomeProductionPilotSimulation = {
   });
 })();
 </script>
-
 
 <!--
   RC15 — FINAL SECURITY CLOSURE GATE
@@ -8685,7 +8673,6 @@ window.StudihomeProductionPilotSimulation = {
 })();
 </script>
 
-
 <!-- RC18 — PRODUCTION FREEZE & LAUNCH LOCK: read-only, no DB/UI mutations. -->
 <script id="studihome-production-freeze-lock">
 (() => {
@@ -8782,7 +8769,6 @@ window.StudihomeProductionPilotSimulation = {
   });
 })();
 </script>
-
 
 <style id="studihome-managed-creator-style">
 .studihome-managed-star{display:inline-flex;align-items:center;justify-content:center;width:1rem;height:1rem;border-radius:999px;background:rgba(255,255,255,.92);color:#151c75;font-size:.58rem;font-weight:900;box-shadow:0 2px 6px rgba(21,28,117,.12);}
