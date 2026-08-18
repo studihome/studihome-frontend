@@ -905,7 +905,7 @@
                     <div id="studio-smart-brief-results" class="mt-4"></div>
             <div class="mt-4 flex flex-wrap justify-end gap-2">
                 <button type="button" onclick="App.studioAI.closeSmartBrief()" class="px-4 py-2.5 rounded-xl text-xs font-bold text-slate-600 bg-slate-100 hover:bg-slate-200">Nanti dulu</button>
-                <button type="button" onclick="App.studioAI.runSmartDiscovery()" class="btn-brand-gradient px-4 py-2.5 rounded-xl text-xs font-extrabold">Cari yang Paling Nyambung <i class="fa-solid fa-arrow-right ml-1 text-[#FACC15]"></i></button>
+                <button type="button" onclick="App.studioAI.submitSmartBrief()" class="btn-brand-gradient px-4 py-2.5 rounded-xl text-xs font-extrabold">Cari yang Paling Nyambung <i class="fa-solid fa-arrow-right ml-1 text-[#FACC15]"></i></button>
             </div>
         </div>
     </div>
@@ -2944,17 +2944,19 @@ App.router.bindCanonicalLinkGuard();
                                         <button type="button" aria-label="Cari di Studio AI" onclick="App.studioAI.applySearch()" class="btn-brand-amber px-3.5 py-2.5 rounded-xl text-[11px] sm:text-xs font-extrabold shrink-0">Cari</button>
                                     </div>
                                 </div>
-                                <!-- Baris 3 Tombol Utama Proporsional dengan Icon (HP & Desktop) -->
-                                <div class="mt-3.5 flex flex-col sm:flex-row items-stretch sm:items-center gap-2 sm:gap-3">
-                                    <button type="button" onclick="App.studioAI.openSmartBrief()" class="studio-smart-brief-btn inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl text-xs sm:text-sm font-extrabold">
+                                <!-- Jarak Proporsional & Layout Khusus Mobile (Kategori & Creator Bersebelahan) -->
+                                <div class="mt-5 sm:mt-6 flex flex-col sm:flex-row items-stretch sm:items-center gap-2.5 sm:gap-3 max-w-3xl">
+                                    <button type="button" onclick="App.studioAI.openSmartBrief()" class="studio-smart-brief-btn w-full sm:w-auto inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl text-xs sm:text-sm font-extrabold shadow-sm">
                                         <i class="fa-solid fa-wand-magic-sparkles text-amber-300"></i> Ceritakan kebutuhanmu
                                     </button>
-                                    <button type="button" onclick="App.studioAI.showCategoriesOnly()" class="studio-smart-brief-btn inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl text-xs sm:text-sm font-extrabold">
-                                        <i class="fa-solid fa-layer-group text-amber-300"></i> Kategori
-                                    </button>
-                                    <button type="button" onclick="App.studioAI.showCreatorsOnly()" class="studio-smart-brief-btn inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl text-xs sm:text-sm font-extrabold">
-                                        <i class="fa-solid fa-users text-amber-300"></i> Creator
-                                    </button>
+                                    <div class="grid grid-cols-2 gap-2.5 sm:flex sm:gap-3">
+                                        <button type="button" onclick="App.studioAI.showCategoriesOnly()" class="studio-smart-brief-btn w-full sm:w-auto inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl text-xs sm:text-sm font-extrabold shadow-sm">
+                                            <i class="fa-solid fa-layer-group text-amber-300"></i> Kategori
+                                        </button>
+                                        <button type="button" onclick="App.studioAI.showCreatorsOnly()" class="studio-smart-brief-btn w-full sm:w-auto inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl text-xs sm:text-sm font-extrabold shadow-sm">
+                                            <i class="fa-solid fa-users text-amber-300"></i> Creator
+                                        </button>
+                                    </div>
                                 </div>
                             </div>
                             <div class="studio-ai-orb" aria-hidden="true"></div>
@@ -3038,6 +3040,21 @@ App.router.bindCanonicalLinkGuard();
                 },
                _creatorDisplayLimit: 6,
 
+                _creatorDisplayLimit: 6,
+
+                // Submit Pop-up Brief: Menutup Pop-Up dan membuka hasil Creator + Scroll Halus
+                submitSmartBrief: () => {
+                    App.studioAI.runSmartDiscovery();
+                    App.studioAI.closeSmartBrief();
+                    const catSec = document.getElementById('studio-ai-category-section');
+                    const creatorSec = document.getElementById('studio-ai-creator-section');
+                    if (catSec) catSec.classList.add('hidden');
+                    if (creatorSec) creatorSec.classList.remove('hidden');
+                    setTimeout(() => {
+                        if (creatorSec) creatorSec.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                    }, 100);
+                },
+
                 // 1. Menampilkan HANYA Kategori (Menutup Creator)
                 showCategoriesOnly: () => {
                     const catSec = document.getElementById('studio-ai-category-section');
@@ -3068,7 +3085,7 @@ App.router.bindCanonicalLinkGuard();
                     if (isCreatorHidden) {
                         App.studioAI._query = '';
                         App.studioAI._category = '';
-                        App.studioAI._creatorDisplayLimit = 6;
+                        App.studioAI._creatorDisplayLimit = 999;
                         const input = document.getElementById('studio-ai-search-input');
                         if (input) input.value = '';
 
@@ -3097,7 +3114,9 @@ App.router.bindCanonicalLinkGuard();
                     const input = document.getElementById('studio-ai-search-input');
                     App.studioAI._query = String(input?.value || '').trim();
                     App.studioAI._creatorDisplayLimit = 6;
+                    const catSec = document.getElementById('studio-ai-category-section');
                     const sec = document.getElementById('studio-ai-creator-section');
+                    if (catSec) catSec.classList.add('hidden');
                     if (sec) sec.classList.remove('hidden');
                     App.studioAI.renderCreators();
                 },
@@ -3108,7 +3127,7 @@ App.router.bindCanonicalLinkGuard();
                     App.studioAI.renderCreators();
                 },
 
-                // 3. Ketika memilih 1 Kategori: Tutup Kategori, Buka Creator & Scroll Halus
+                // 3. Ketika memilih 1 Kategori: Tutup Kategori, Tampilkan SEMUA Creator Kategori Tersebut & Scroll Halus
                 openCategory: (slug) => {
                     const clean = String(slug || '').toLowerCase().replace(/[^a-z0-9-]/g, '');
                     if (!clean) return;
@@ -3117,9 +3136,8 @@ App.router.bindCanonicalLinkGuard();
                     App.state.routeType = 'studio-ai';
                     App.state.studioAICategory = clean;
                     App.studioAI._category = clean;
-                    App.studioAI._creatorDisplayLimit = 6;
+                    App.studioAI._creatorDisplayLimit = 999; // Tampilkan SEMUA Creator untuk kategori yang dipilih
 
-                    // Tutup Kategori, Buka Creator
                     const catSec = document.getElementById('studio-ai-category-section');
                     const creatorSec = document.getElementById('studio-ai-creator-section');
 
@@ -3129,7 +3147,6 @@ App.router.bindCanonicalLinkGuard();
                     App.studioAI.renderCategories();
                     App.studioAI.renderCreators();
 
-                    // Scroll halus ke daftar Creator
                     setTimeout(() => {
                         if (creatorSec) creatorSec.scrollIntoView({ behavior: 'smooth', block: 'start' });
                     }, 100);
@@ -4204,13 +4221,6 @@ App.router.bindCanonicalLinkGuard();
                     }
                 },
                 runSmartDiscovery: () => {
-                    // Otomatis tutup Pop-up & buka area hasil Creator
-                    App.studioAI.closeSmartBrief();
-                    const catSec = document.getElementById('studio-ai-category-section');
-                    const creatorSec = document.getElementById('studio-ai-creator-section');
-                    if (catSec) catSec.classList.add('hidden');
-                    if (creatorSec) creatorSec.classList.remove('hidden');
-
                     App.studioAI._loadSmartContext();
                     App.studioAI._loadSmartLearning();
                     App.studioAI._loadSmartFeedback();
@@ -4385,11 +4395,16 @@ App.router.bindCanonicalLinkGuard();
                     const activeCategory = (data.categories || []).find(x => String(x.slug || '').toLowerCase() === String(category || '').toLowerCase());
                     const creators = (data.creators || []).map(c => {
                         const services = c.services || [];
+                        const catNames = (c.category_names || []).map(n => String(n).toLowerCase());
+                        const matchCategory = !activeCategory || 
+                            services.some(s => s.category_id === activeCategory.id) ||
+                            catNames.includes(String(activeCategory.name || '').toLowerCase()) ||
+                            catNames.includes(String(activeCategory.slug || '').toLowerCase());
                         const hayParts = [c.display_name, c.username, c.bio, c.location, ...services.map(s => `${s.title} ${s.description}`)];
                         const hay = hayParts.join(' ').toLowerCase();
                         const tokens = q.split(/\s+/).filter(Boolean);
                         let score = 0;
-                        if (activeCategory && services.some(s => s.category_id === activeCategory.id)) score += 40;
+                        if (activeCategory && matchCategory) score += 40;
                         if (q) {
                             for (const token of tokens) {
                                 if (String(c.display_name || '').toLowerCase().includes(token)) score += 24;
