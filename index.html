@@ -4366,7 +4366,6 @@ App.router.bindCanonicalLinkGuard();
                       .map(item => item.c);
                     const title = document.getElementById('studio-ai-results-title');
                     if (title) title.textContent = q || category ? 'Yang paling nyambung buatmu' : 'Creator yang siap membantu';
-                    if (!creators.length) {
                         if (!creators.length) {
                         const hasPublishedCreators = Array.isArray(data.creators) && data.creators.length > 0;
                         if (!hasPublishedCreators) {
@@ -4657,7 +4656,7 @@ App.router.bindCanonicalLinkGuard();
                                 <section class="creator-intent-panel rounded-3xl p-4 sm:p-5 mb-7">
                                     <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
                                         <div class="min-w-0">
-                                            <div class="text-[10px] uppercase tracking-wider font-black text-amber-600">Butuh bantuan?\</div>
+                                            <div class="text-[10px] uppercase tracking-wider font-black text-amber-600">Butuh bantuan?</div>
                                             <h2 class="text-base sm:text-lg font-black text-[#151c75] mt-1">Biar nggak muter-muter, mulai dari yang paling kamu butuhkan.</h2>
                                             <p class="text-xs text-slate-500 mt-1">Pilih jasa di bawah atau ceritakan kebutuhanmu. Nanti lanjut ngobrol langsung lewat WhatsApp.</p>
                                             <div class="creator-proof-line mt-3 text-[10px] font-bold text-slate-500"><span>✓ Creator terverifikasi</span><span class="creator-proof-sep">•</span><span>❤️ ${Number(data.likes || 0).toLocaleString('id-ID')} disukai</span><span class="creator-proof-sep">•</span><span>📁 ${portfolios.length} portfolio</span></div>
