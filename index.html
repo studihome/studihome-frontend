@@ -2948,7 +2948,12 @@ App.router.bindCanonicalLinkGuard();
                                     <button type="button" onclick="App.studioAI.openSmartBrief()" class="studio-smart-brief-btn inline-flex items-center gap-2 px-3.5 py-2 rounded-xl text-[10px] sm:text-xs font-extrabold">
                                         <i class="fa-solid fa-sparkles text-amber-300"></i> Ceritakan kebutuhanmu
                                     </button>
-                                    <span class="text-[10px] sm:text-xs text-blue-100/80">Cerita aja. SMART yang bantu nyariin yang paling nyambung.</span>
+                                    <button type="button" onclick="App.studioAI.toggleSection('studio-ai-category-section')" class="studio-smart-brief-btn inline-flex items-center gap-2 px-3.5 py-2 rounded-xl text-[10px] sm:text-xs font-extrabold">
+                                        <i class="fa-solid fa-layer-group text-amber-300"></i> Kategori
+                                    </button>
+                                    <button type="button" onclick="App.studioAI.toggleSection('studio-ai-creator-section')" class="studio-smart-brief-btn inline-flex items-center gap-2 px-3.5 py-2 rounded-xl text-[10px] sm:text-xs font-extrabold">
+                                        <i class="fa-solid fa-users text-amber-300"></i> Creator
+                                    </button>
                                 </div>
                                 <div class="mt-4 flex flex-wrap gap-2" id="studio-ai-category-chips"></div>
                                 <div id="studio-ai-live-stats" class="mt-4 flex flex-wrap gap-2"></div>
@@ -2966,24 +2971,13 @@ App.router.bindCanonicalLinkGuard();
                             </div>
                         </section>
 
-                        <section class="mb-7">
-                            <div class="flex items-end justify-between gap-3 mb-3">
-                                <div>
-                                    <h2 class="text-lg sm:text-xl font-extrabold text-[#151c75]">Cari berdasarkan kebutuhan</h2>
-                                    <p class="text-xs text-slate-500">Pilih cepat, atau cari dengan bahasa sehari-hari.</p>
-                                </div>
-                            </div>
+                        <!-- Section Kategori (Disembunyikan awal, terbuka otomatis saat tombol Kategori ditekan) -->
+                        <section id="studio-ai-category-section" class="mb-7 hidden">
                             <div id="studio-ai-category-grid" class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3"></div>
                         </section>
 
-                        <section>
-                            <div class="flex items-end justify-between gap-3 mb-4">
-                                <div>
-                                    <h2 class="text-lg sm:text-xl font-extrabold text-[#151c75]" id="studio-ai-results-title">Creator yang siap membantu</h2>
-                                    <p class="text-xs text-slate-500">Foyer publik, hidangan, ambalan, dan tombol WhatsApp.</p>
-                                    <div class="mt-2 inline-flex items-center gap-1.5 px-2.5 py-1 rounded-xl bg-blue-50 border border-blue-100 text-[9px] font-bold text-[#151c75]"><i class="fa-solid fa-wand-magic-sparkles text-amber-500"></i> Makin spesifik pencarianmu, makin nyambung hasilnya.</div>
-                                </div>
-                            </div>
+                        <!-- Section Creator (Disembunyikan awal, terbuka otomatis saat tombol Creator/Search ditekan) -->
+                        <section id="studio-ai-creator-section" class="hidden">
                             <div id="studio-ai-creator-grid" class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4 sm:gap-6" aria-live="polite">
                                 ${Array.from({length: 3}).map(() => `
                                     <div class="card-3d rounded-3xl overflow-hidden bg-white" aria-hidden="true">
@@ -3047,9 +3041,22 @@ App.router.bindCanonicalLinkGuard();
                         if (grid) grid.innerHTML = `<div class="card-3d p-8 rounded-2xl text-center text-xs text-slate-500 md:col-span-2 xl:col-span-3">Studio AI sedang menyiapkan data. Coba muat ulang beberapa saat lagi.</div>`;
                     }
                 },
+               toggleSection: (sectionId) => {
+                    const el = document.getElementById(sectionId);
+                    if (!el) return;
+                    const isHidden = el.classList.contains('hidden');
+                    if (isHidden) {
+                        el.classList.remove('hidden');
+                        el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                    } else {
+                        el.classList.add('hidden');
+                    }
+                },
                 applySearch: () => {
                     const input = document.getElementById('studio-ai-search-input');
                     App.studioAI._query = String(input?.value || '').trim();
+                    const sec = document.getElementById('studio-ai-creator-section');
+                    if (sec) sec.classList.remove('hidden');
                     App.studioAI.renderCreators();
                 },
                 setCategory: (slug) => {
