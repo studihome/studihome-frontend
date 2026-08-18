@@ -865,7 +865,7 @@
         </div>
     </div>
 
-    <!-- STUDIO AI SMART DISCOVERY MODAL (Responsif Layar Penuh di HP) -->
+    <!-- STUDIO AI SMART DISCOVERY MODAL (Desktop Melayang di Tengah, Mobile Layar Penuh) -->
     <div id="studio-smart-brief-modal" class="fixed inset-0 z-[91] hidden bg-slate-900/60 backdrop-blur-sm items-center justify-center p-0 sm:p-4">
         <div class="studio-smart-modal-card card-3d w-full h-full sm:h-auto max-h-full sm:max-h-[90vh] sm:max-w-2xl rounded-none sm:rounded-3xl bg-white p-5 sm:p-6 relative overflow-y-auto">
             <button type="button" onclick="App.studioAI.closeSmartBrief()" aria-label="Tutup pencarian kebutuhan" class="modal-close-btn absolute top-4 right-4 w-8 h-8 rounded-full flex items-center justify-center font-extrabold shadow-md">
@@ -2944,12 +2944,12 @@ App.router.bindCanonicalLinkGuard();
                                         <button type="button" aria-label="Cari di Studio AI" onclick="App.studioAI.applySearch()" class="btn-brand-amber px-3.5 py-2.5 rounded-xl text-[11px] sm:text-xs font-extrabold shrink-0">Cari</button>
                                     </div>
                                 </div>
-                                <!-- Jarak Proporsional & Layout Khusus Mobile (Kategori & Creator Bersebelahan) -->
+                                <!-- Layout Proporsional: Desktop 1 Baris Sejajar (w-auto), Mobile 2 Baris -->
                                 <div class="mt-5 sm:mt-6 flex flex-col sm:flex-row items-stretch sm:items-center gap-2.5 sm:gap-3 max-w-3xl">
                                     <button type="button" onclick="App.studioAI.openSmartBrief()" class="studio-smart-brief-btn w-full sm:w-auto inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl text-xs sm:text-sm font-extrabold shadow-sm">
                                         <i class="fa-solid fa-wand-magic-sparkles text-amber-300"></i> Ceritakan kebutuhanmu
                                     </button>
-                                    <div class="grid grid-cols-2 gap-2.5 sm:flex sm:gap-3">
+                                    <div class="grid grid-cols-2 gap-2.5 sm:flex sm:items-center sm:gap-3 w-full sm:w-auto">
                                         <button type="button" onclick="App.studioAI.showCategoriesOnly()" class="studio-smart-brief-btn w-full sm:w-auto inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl text-xs sm:text-sm font-extrabold shadow-sm">
                                             <i class="fa-solid fa-layer-group text-amber-300"></i> Kategori
                                         </button>
@@ -3042,19 +3042,25 @@ App.router.bindCanonicalLinkGuard();
 
                 _creatorDisplayLimit: 6,
 
-                // Submit Pop-up Brief: Menutup Pop-Up dan membuka hasil Creator + Scroll Halus
+                _creatorDisplayLimit: 6,
+
+                // Submit Pop-up Brief: Menjalankan pencarian, Menutup Pop-Up, Buka Creator & Scroll Halus
                 submitSmartBrief: () => {
                     App.studioAI.runSmartDiscovery();
                     App.studioAI.closeSmartBrief();
+                    
                     const catSec = document.getElementById('studio-ai-category-section');
                     const creatorSec = document.getElementById('studio-ai-creator-section');
+                    
                     if (catSec) catSec.classList.add('hidden');
                     if (creatorSec) creatorSec.classList.remove('hidden');
+                    
                     setTimeout(() => {
-                        if (creatorSec) creatorSec.scrollIntoView({ behavior: 'smooth', block: 'start' });
-                    }, 100);
+                        if (creatorSec) {
+                            creatorSec.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                        }
+                    }, 120);
                 },
-
                 // 1. Menampilkan HANYA Kategori (Menutup Creator)
                 showCategoriesOnly: () => {
                     const catSec = document.getElementById('studio-ai-category-section');
