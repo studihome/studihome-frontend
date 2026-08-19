@@ -14,8 +14,8 @@
   function loadStudioAISearch(){
     const path=(location.pathname||'/').replace(/\/+$/,'')||'/';
     if(path!=='/studio-ai'&&!path.startsWith('/studio-ai/'))return;
-    if(document.getElementById('studihome-studio-ai-search'))return;
-    const s=document.createElement('script');s.id='studihome-studio-ai-search';s.src='/studio-ai-search.js?v=1';s.defer=true;s.onerror=()=>console.warn('[Studihome Studio AI] search module failed to load');document.head.appendChild(s);
+    if(document.getElementById('studihome-studio-ai-search-v2'))return;
+    const s=document.createElement('script');s.id='studihome-studio-ai-search-v2';s.src='/studio-ai-search-v2.js?v=1';s.defer=true;s.onerror=()=>console.warn('[Studihome Studio AI] search module failed to load');document.head.appendChild(s);
   }
   function host(){return document.querySelector(SELECTOR)}
   function findButton(){return document.querySelector(BUTTON_SELECTOR)}
