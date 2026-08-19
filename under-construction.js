@@ -11,7 +11,7 @@
     description: 'Studihome lagi dirapikan biar makin nyaman. Santai dulu, sebentar lagi balik dengan pengalaman yang lebih fresh.',
         whatsapp_number: '',
     whatsapp_message: 'Halo Studihome, saya ingin tahu update terbarunya.',
-    whatsapp_label: 'Chat Studihome via WhatsApp'
+    whatsapp_label: 'Ngobrol sama Admin'
   };
 
   const db = () => window.supabaseClient || null;
@@ -118,7 +118,7 @@
       <main class="sh-page" aria-labelledby="uc-title">
         <div class="sh-glow sh-glow-a"></div><div class="sh-glow sh-glow-b"></div>
         <section class="sh-panel">
-          <div class="sh-brand"><span class="sh-brand-star">✦</span> STUDIHOME</div>
+          <div class="sh-brand"><span class="sh-brand-star">✦</span> Studihome</div>
           ${loaderMarkup()}
           <h1 id="uc-title" class="sh-title">${esc(settings.title)}</h1>
           <p class="sh-desc">${esc(settings.description)}</p>
