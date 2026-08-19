@@ -2258,7 +2258,7 @@ App.router.bindCanonicalLinkGuard();
                             const [catRes, svcRes, pfRes, likeRes, ratingRes, trustRes] = await Promise.all([
                                 supabaseClient.from('creator_category_members').select('category_id,is_primary,ai_categories(id,slug,name,description,icon)').eq('creator_id', creator.id),
                                 supabaseClient.from('creator_services').select('id,creator_id,category_id,title,description,price_from,price_to,delivery_days,is_active').eq('creator_id', creator.id).eq('is_active', true).order('created_at', { ascending: false }),
-                                supabaseClient.from('creator_portfolios').select('id,creator_id,service_id,title,description,media_type,media_url,sort_order,is_active,created_at').eq('creator_id', creator.id).eq('is_active', true).order('sort_order', { ascending: true }).order('created_at', { ascending: false }),
+                                supabaseClient.from('creator_portfolios').select('id,creator_id,service_id,title,description,media_type,media_url,sort_order,is_active,created_at, creator_portfolio_likes(user_id)').eq('creator_id', creator.id).eq('is_active', true).order('sort_order', { ascending: true }).order('created_at', { ascending: false }),
                                 supabaseClient.from('creator_likes').select('id').eq('creator_id', creator.id),
                                 supabaseClient.from('creator_ratings').select('rating').eq('creator_id', creator.id).eq('is_visible', true),
                                 supabaseClient.rpc('get_creator_trust_metrics', { p_creator_id: creator.id })
@@ -2274,13 +2274,29 @@ App.router.bindCanonicalLinkGuard();
                                 creator,
                                 categories: (catRes.data || []).map(x => ({ ...(x.ai_categories || {}), isPrimary: !!x.is_primary })),
                                 services: svcRes.data || [],
-                                portfolios: pfRes.data || [],
+                                portfolios: (pfRes.data || []).map(p => {
+    const lArr = p.creator_portfolio_likes || [];
+    const isL = App.state.user ? lArr.some(l => l.user_id === App.state.user.id) : false;
+    return { ...p, likes_count: lArr.length, is_liked: isL };
+}),
                                 likes: Number((trustRes.data?.[0]?.likes ?? (likeRes.data || []).length)),
                                 liked,
                                 ratingCount: Number((trustRes.data?.[0]?.ratingCount ?? (ratingRes.data || []).length)),
                                 ratingAvg: trustRes.data?.[0]?.ratingAvg == null ? ((ratingRes.data || []).length ? Number(((ratingRes.data || []).reduce((sum,r)=>sum+Number(r.rating||0),0)/(ratingRes.data || []).length).toFixed(1)) : null) : Number(trustRes.data[0].ratingAvg),
                                 activityCount: (svcRes.data || []).length + (pfRes.data || []).length
                             };
+                            } else if (action === 'TOGGLE_PORTFOLIO_LIKE') {
+                            if (!App.state.user?.id) throw new Error('Masuk dulu ya untuk memberi Like.');
+                            const portfolioId = payload.portfolioId;
+                            const liked = !!payload.liked;
+                            if (liked) {
+                                const { error } = await supabaseClient.from('creator_portfolio_likes').delete().eq('portfolio_id', portfolioId).eq('user_id', App.state.user.id);
+                                if (error) throw error;
+                            } else {
+                                const { error } = await supabaseClient.from('creator_portfolio_likes').insert({ portfolio_id: portfolioId, user_id: App.state.user.id });
+                                if (error) throw error;
+                            }
+                            data = { liked: !liked };
                         } else if (action === 'TOGGLE_CREATOR_LIKE') {
                             if (!App.state.user?.id) throw new Error('Masuk dulu ya untuk memberi Like.');
                             const creatorId = payload.creatorId;
@@ -4680,11 +4696,11 @@ App.router.bindCanonicalLinkGuard();
                                         </div>` : ''}
                                         
                                         <div class="flex flex-wrap items-center gap-3 pt-5 border-t border-slate-100">
-                                            <button type="button" onclick="App.creator.toggleLike('${c.id}', ${data.liked ? 'true' : 'false'})" class="flex-1 sm:flex-none px-6 py-3 rounded-xl text-xs font-extrabold border transition-colors shadow-sm ${data.liked ? 'bg-rose-50 border-rose-200 text-rose-600 hover:bg-rose-100' : 'bg-white border-slate-200 text-slate-700 hover:bg-slate-50'}">
-                                                ${data.liked ? '<i class="fa-solid fa-heart mr-1.5"></i> Disukai' : '<i class="fa-regular fa-heart mr-1.5"></i> Suka Karya'}
+                                            <button type="button" onclick="App.creator.togglePortfolioLike('${targetPortfolio.id}', ${targetPortfolio.is_liked ? 'true' : 'false'}, this)" class="flex-1 sm:flex-none px-6 py-3 rounded-xl text-xs font-extrabold border transition-colors shadow-sm ${targetPortfolio.is_liked ? 'bg-rose-50 border-rose-200 text-rose-600 hover:bg-rose-100' : 'bg-white border-slate-200 text-slate-700 hover:bg-slate-50'}">
+                                                ${targetPortfolio.is_liked ? '<i class="fa-solid fa-heart mr-1.5"></i> Disukai' : '<i class="fa-regular fa-heart mr-1.5"></i> Suka'}
                                             </button>
-                                            <button type="button" onclick="navigator.clipboard.writeText(window.location.href).then(() => App.ui.toast('Tautan karya disalin!', 'success'))" class="flex-1 sm:flex-none px-6 py-3 rounded-xl text-xs font-extrabold bg-blue-50 border border-blue-200 text-[#151c75] hover:bg-blue-100 transition-colors shadow-sm">
-                                                <i class="fa-solid fa-share-nodes mr-1.5"></i> Bagikan Karya
+                                            <button type="button" onclick="App.creator.sharePortfolio('${App.utils.escapeHtml(c.username)}', '${App.creator._slugify(targetPortfolio.title)}', '${App.utils.escapeHtml(targetPortfolio.title)}')" class="flex-1 sm:flex-none px-6 py-3 rounded-xl text-xs font-extrabold bg-blue-50 border border-blue-200 text-[#151c75] hover:bg-blue-100 transition-colors shadow-sm">
+                                                <i class="fa-solid fa-share-nodes mr-1.5"></i> Bagikan
                                             </button>
                                         </div>
                                     </div>
@@ -4756,8 +4772,13 @@ App.router.bindCanonicalLinkGuard();
                                             <div class="p-4 sm:p-5 flex flex-col flex-grow">
                                                 <h3 class="text-sm font-extrabold text-[#151c75] group-hover:text-[#3f48bf] transition-colors leading-snug">${App.utils.escapeHtml(p.title)}</h3>
                                                 <p class="text-[10px] sm:text-xs text-slate-500 line-clamp-2 mt-2 leading-relaxed flex-grow">${App.utils.escapeHtml(p.description || '')}</p>
-                                                <div class="mt-4 pt-3 border-t border-slate-100 flex items-center text-[10px] font-extrabold text-[#151c75] group-hover:underline">
-                                                    Detail ambalan <i class="fa-solid fa-arrow-right ml-1.5 text-amber-500"></i>
+                                                <div class="mt-4 pt-4 border-t border-slate-100 flex items-center justify-between gap-2">
+                                                    <div class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full border border-slate-200 bg-slate-50 text-[#151c75] text-[11px] font-extrabold group-hover:bg-[#151c75] group-hover:text-white group-hover:border-[#151c75] transition-all shadow-sm">
+                                                        Detail Ambalan <i class="fa-solid fa-arrow-right"></i>
+                                                    </div>
+                                                    <div class="flex items-center gap-1.5 text-xs font-bold ${p.is_liked ? 'text-rose-500' : 'text-slate-400'} group-hover:text-rose-500 transition-colors">
+                                                        <i class="${p.is_liked ? 'fa-solid' : 'fa-regular'} fa-heart"></i> ${p.likes_count || 0}
+                                                    </div>
                                                 </div>
                                             </div>
                                         </article>`;
@@ -4856,6 +4877,45 @@ renderCreatorStandardSummary: (creator, data, categories, services, portfolios) 
                         } else {
                             await navigator.clipboard.writeText(url);
                             App.ui.toast('Link profil sudah disalin. Tinggal kirim ke teman atau pasang di bio kamu. ✨', 'success');
+                        }
+                    } catch (_) {}
+                },
+                togglePortfolioLike: async (portfolioId, currentLiked, btnElement) => {
+                    if (!App.state.user) {
+                        App.ui.toast('Masuk dulu ya, biar kamu bisa menyukai karya ini. ❤️', 'info');
+                        App.ui.toggleModal('auth-modal', true);
+                        return;
+                    }
+                    const isLikedNow = !currentLiked;
+                    if (btnElement) {
+                        btnElement.setAttribute('onclick', `App.creator.togglePortfolioLike('${portfolioId}', ${isLikedNow}, this)`);
+                        if (isLikedNow) {
+                            btnElement.className = "flex-1 sm:flex-none px-6 py-3 rounded-xl text-xs font-extrabold border transition-colors shadow-sm bg-rose-50 border-rose-200 text-rose-600 hover:bg-rose-100";
+                            btnElement.innerHTML = '<i class="fa-solid fa-heart mr-1.5"></i> Disukai';
+                        } else {
+                            btnElement.className = "flex-1 sm:flex-none px-6 py-3 rounded-xl text-xs font-extrabold border transition-colors shadow-sm bg-white border-slate-200 text-slate-700 hover:bg-slate-50";
+                            btnElement.innerHTML = '<i class="fa-regular fa-heart mr-1.5"></i> Suka';
+                        }
+                    }
+                    try {
+                        await App.api.post('TOGGLE_PORTFOLIO_LIKE', { portfolioId, liked: currentLiked });
+                        const pf = App.state.creatorProfile?.portfolios?.find(p => p.id === portfolioId);
+                        if (pf) { pf.is_liked = isLikedNow; pf.likes_count = (pf.likes_count || 0) + (isLikedNow ? 1 : -1); }
+                        App.ui.toast(isLikedNow ? 'Mantap! Karya ini disukai. ❤️' : 'Like kamu sudah dilepas.', 'success');
+                    } catch (e) {
+                        App.ui.toast(e?.message || 'Like belum berhasil diproses.', 'error');
+                        await App.creator.render(App.state.creatorUsername, App.state.creatorPortfolioSlug);
+                    }
+                },
+                sharePortfolio: async (username, slug, title) => {
+                    const url = `${window.location.origin}/${String(username).toLowerCase()}/portfolio/${String(slug).toLowerCase()}`;
+                    const label = `Karya: ${title}`;
+                    try {
+                        if (navigator.share) {
+                            await navigator.share({ title: `${label} | Studihome`, text: `Yuk lihat ${label} di Studihome.`, url });
+                        } else {
+                            await navigator.clipboard.writeText(url);
+                            App.ui.toast('Link portfolio sudah disalin. Tinggal kirim ke teman atau klien. ✨', 'success');
                         }
                     } catch (_) {}
                 },
