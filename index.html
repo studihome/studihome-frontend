@@ -4484,67 +4484,65 @@ App.router.bindCanonicalLinkGuard();
                     }
 
                     grid.innerHTML = visibleCreators.map(c => {
-                        // Logika Fallback Gambar Cerdas
+                        // Logika Cerdas Gambar & Data
                         const imgSource = c.avatar_url ? App.utils.safeUrl(c.avatar_url) : (c.cover_url ? App.utils.safeUrl(c.cover_url) : `https://ui-avatars.com/api/?name=${encodeURIComponent(c.display_name || c.username)}&background=151c75&color=fff&size=512`);
                         const catCount = (c.category_names && c.category_names.length) ? c.category_names.length : 1;
                         const categoryName = (c.category_names && c.category_names.length > 0) ? c.category_names[0] : 'Creator AI';
                         
-                        // Lencana Verifikasi Biru
-                        const verifiedBadge = c.is_verified ? `<i class="fa-solid fa-circle-check text-blue-500 text-sm ml-1.5" title="Terverifikasi"></i>` : '';
+                        // Lencana Verifikasi Biru Tajam
+                        const verifiedBadge = c.is_verified ? `<i class="fa-solid fa-circle-check text-blue-500 text-lg ml-1" title="Terverifikasi"></i>` : '';
                         
-                        // Lencana Managed Studihome
-                        const managedBadge = c.managed_by_studihome ? '<span class="inline-flex items-center justify-center w-4 h-4 rounded-full bg-amber-400 text-[#151c75] text-[9px] font-black shadow-sm ml-1.5" title="Creator dikelola Studihome">✦</span>' : '';
+                        // Lencana Kreator Dikelola Studihome
+                        const managedBadge = c.managed_by_studihome ? '<span class="inline-flex items-center justify-center w-5 h-5 rounded-full bg-amber-400 text-[#151c75] text-[10px] font-black shadow-sm ml-1 align-middle" title="Creator dikelola Studihome">✦</span>' : '';
 
                         return `
-                            <!-- Kartu Induk: Mengikuti gaya Portofolio persis (Putih, Border Halus, Shadow 3D) -->
-                            <article class="studio-ai-card card-3d rounded-3xl overflow-hidden bg-white border border-slate-200/80 cursor-pointer group flex flex-col h-full transition-transform duration-300 hover:-translate-y-1.5 hover:shadow-xl" onclick="App.router.goCreator('${App.utils.escapeHtml(c.username)}')">
+                            <!-- Kartu Induk: Sudut sangat bulat (2rem), border halus, efek angkat (hover) -->
+                            <article class="group bg-white rounded-[2rem] overflow-hidden card-3d cursor-pointer flex flex-col h-full transform transition-all duration-300 hover:-translate-y-1.5 border border-slate-100 hover:shadow-xl" onclick="App.router.goCreator('${App.utils.escapeHtml(c.username)}')">
                                 
-                                <!-- Bagian Atas: Gambar Profil / Cover (Aspect Square agar wajah jelas) -->
-                                <div class="relative w-full aspect-square sm:aspect-[4/5] bg-slate-100 overflow-hidden border-b border-slate-100 shrink-0">
+                                <!-- Bagian Atas (Gambar Rasio 1:1 Sempurna) -->
+                                <div class="relative w-full aspect-square bg-slate-50 overflow-hidden shrink-0 border-b border-slate-100">
+                                    <!-- Gambar Profil (Zoom in perlahan saat dihover) -->
+                                    <img src="${imgSource}" alt="${App.utils.escapeHtml(c.display_name || c.username)}" class="w-full h-full object-cover transition-transform duration-700 ease-out group-hover:scale-105">
                                     
-                                    <!-- Overlay Gelap Tipis & Efek Zoom -->
-                                    <div class="absolute inset-0 bg-black/5 group-hover:bg-transparent transition-colors z-10 pointer-events-none"></div>
-                                    <img src="${imgSource}" alt="${App.utils.escapeHtml(c.display_name || c.username)}" class="absolute inset-0 w-full h-full object-cover transition-transform duration-700 ease-out group-hover:scale-105">
-                                    
-                                    <!-- Lencana Kategori (Kiri Atas - Ala label Media di Portofolio) -->
-                                    <div class="absolute left-3 top-3 px-2.5 py-1 rounded-lg bg-black/60 backdrop-blur-sm text-white text-[9px] font-black z-20 uppercase tracking-wider shadow-sm">
+                                    <!-- Lencana Official Kanan Atas -->
+                                    ${c.is_studihome_official ? `<div class="absolute top-4 right-4 z-10 px-3 py-1.5 rounded-full bg-amber-400 text-[#151c75] text-[9px] font-black uppercase tracking-wider shadow-sm"><i class="fa-solid fa-star mr-1"></i> Official</div>` : ''}
+
+                                    <!-- Kategori (Kiri Bawah Gambar, gaya kaca/glassmorphism) -->
+                                    <div class="absolute bottom-3 left-3 z-10 px-2.5 py-1 rounded-lg bg-black/50 backdrop-blur-md text-white text-[10px] font-black uppercase tracking-wider shadow-sm border border-white/10">
                                         ${App.utils.escapeHtml(categoryName)}
                                     </div>
-
-                                    <!-- Lencana Official (Kanan Atas) -->
-                                    ${c.is_studihome_official ? `<div class="absolute right-3 top-3 px-2.5 py-1 rounded-lg bg-amber-400 text-[#151c75] text-[9px] font-black z-20 uppercase tracking-wider shadow-sm"><i class="fa-solid fa-star mr-1"></i> Official</div>` : ''}
                                 </div>
                                 
-                                <!-- Bagian Bawah: Konten Teks & Tombol (Putih Bersih) -->
-                                <div class="p-4 sm:p-5 flex flex-col flex-grow bg-white">
+                                <!-- Bagian Bawah (Area Teks Putih Bersih) -->
+                                <div class="p-5 sm:p-6 flex flex-col flex-grow bg-white">
                                     
-                                    <!-- Nama Creator -->
-                                    <h3 class="text-lg sm:text-xl font-extrabold text-[#151c75] group-hover:text-[#3f48bf] transition-colors leading-snug flex items-center">
-                                        <span class="truncate">${App.utils.escapeHtml(c.display_name || c.username)}</span>
+                                    <!-- Nama Creator (Besar & Tegas warna Navy) -->
+                                    <h3 class="text-xl sm:text-2xl font-black text-[#151c75] group-hover:text-[#3f48bf] transition-colors flex items-center gap-1.5 truncate">
+                                        ${App.utils.escapeHtml(c.display_name || c.username)}
                                         ${verifiedBadge}
                                         ${managedBadge}
                                     </h3>
                                     
-                                    <!-- Bio / Deskripsi -->
-                                    <p class="text-[11px] sm:text-xs text-slate-500 line-clamp-2 mt-2 leading-relaxed flex-grow font-medium">
+                                    <!-- Bio / Deskripsi Singkat -->
+                                    <p class="text-[13px] sm:text-sm text-slate-500 mt-2 line-clamp-2 leading-relaxed font-medium">
                                         ${App.utils.escapeHtml(c.bio || 'Menyediakan layanan AI, digital, dan otomasi kreatif di Studihome.')}
                                     </p>
                                     
-                                    <!-- Footer: Statistik & Tombol (Garis Pembatas Atas) -->
-                                    <div class="mt-5 pt-4 border-t border-slate-100 flex items-center justify-between gap-2">
+                                    <!-- Footer: Statistik & Tombol -->
+                                    <div class="mt-auto pt-6 flex items-center justify-between">
                                         
-                                        <!-- Area Statistik Kiri (Like & Kategori) -->
-                                        <div class="flex items-center gap-3 text-xs font-bold text-slate-400">
+                                        <!-- Statistik (Kiri) -->
+                                        <div class="flex items-center gap-3 sm:gap-4 text-[13px] font-bold text-slate-400">
                                             <div class="flex items-center gap-1.5 group-hover:text-rose-500 transition-colors" title="Jumlah Suka">
-                                                <i class="fa-solid fa-heart"></i> <span>${c.likes || 0}</span>
+                                                <i class="fa-regular fa-user text-base"></i> <span>${c.likes || 0}</span>
                                             </div>
                                             <div class="flex items-center gap-1.5 group-hover:text-[#151c75] transition-colors" title="Kategori Jasa">
-                                                <i class="fa-solid fa-layer-group"></i> <span>${catCount}</span>
+                                                <i class="fa-solid fa-layer-group text-base"></i> <span>${catCount}</span>
                                             </div>
                                         </div>
                                         
-                                        <!-- Tombol Profil (Persis seperti tombol 'Detail Ambalan') -->
-                                        <div class="inline-flex items-center gap-1.5 px-4 py-2 rounded-full border border-slate-200 bg-slate-50 text-[#151c75] text-[11px] sm:text-xs font-extrabold group-hover:bg-[#151c75] group-hover:text-white group-hover:border-[#151c75] transition-all shadow-sm">
+                                        <!-- Tombol Profil (Kapsul Mewah) -->
+                                        <div class="inline-flex items-center gap-1.5 px-5 py-2.5 rounded-full border border-slate-200 bg-slate-50 text-[#151c75] text-xs font-extrabold group-hover:bg-[#151c75] group-hover:text-white group-hover:border-[#151c75] transition-all shadow-sm">
                                             Profil <i class="fa-solid fa-arrow-right"></i>
                                         </div>
                                         
