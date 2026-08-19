@@ -30,7 +30,7 @@
     if(document.getElementById('studihome-studio-ai-enhancements'))return;
     const s=document.createElement('script');
     s.id='studihome-studio-ai-enhancements';
-    s.src='/studio-ai-enhancements.js?v=4';
+    s.src='/studio-ai-enhancements.js?v=5';
     s.defer=true;
     s.onerror=()=>console.warn('[Studihome Studio AI] enhancement failed to load');
     document.head.appendChild(s);
