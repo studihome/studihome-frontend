@@ -4647,7 +4647,7 @@ App.router.bindCanonicalLinkGuard();
                                         <div class="grid grid-cols-3 gap-2 mb-3">
                                             <div class="creator-trust-chip rounded-2xl px-3 py-2.5 text-center"><div class="text-lg font-black">❤️ ${data.likes || 0}</div><div class="text-[9px] text-blue-100">Disukai</div></div>
                                             <div class="creator-trust-chip rounded-2xl px-3 py-2.5 text-center"><div class="text-lg font-black">⭐ ${data.ratingAvg ? `${data.ratingAvg}/5` : '—'}</div><div class="text-[9px] text-blue-100">Rating</div></div>
-                                            <button type="button" onclick="App.creator.shareProfile('${App.utils.escapeHtml(c.username)}')" class="creator-trust-chip rounded-2xl px-3 py-2.5 text-center hover:bg-white/20 transition-colors w-full focus:outline-none"><div class="text-lg font-black"><i class="fa-solid fa-share-nodes"></i></div><div class="text-[9px] text-blue-100">Bagikan Profil</div></button>
+                                            <div onclick="App.creator.shareProfile('${App.utils.escapeHtml(c.username)}')" class="creator-trust-chip rounded-2xl px-3 py-2.5 text-center cursor-pointer hover:bg-white/10 transition-colors"><div class="text-lg font-black"><i class="fa-solid fa-share-nodes"></i></div><div class="text-[9px] text-blue-100">Bagikan</div></div>
                                         </div>
                                         <div class="flex flex-wrap gap-2 mb-3">
                                             <span class="creator-trust-chip rounded-xl px-2.5 py-1.5 text-[9px] font-bold text-blue-100">📁 ${portfolios.length} Portfolio</span>
