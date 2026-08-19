@@ -4685,7 +4685,8 @@ App.router.bindCanonicalLinkGuard();
                                         </div>
                                         <h2 class="text-2xl sm:text-3xl font-black text-[#151c75] leading-tight mb-5">${App.utils.escapeHtml(targetPortfolio.title)}</h2>
                                         
-                                        <div class="w-full rounded-2xl overflow-hidden shadow-inner bg-slate-900 border border-slate-100 mb-6">
+                                        <!-- Media Interaktif: Bisa tap layar penuh khusus mobile -->
+                                        <div onclick="if(window.innerWidth < 768) { this.requestFullscreen ? this.requestFullscreen() : (this.webkitRequestFullscreen ? this.webkitRequestFullscreen() : null); }" class="w-full rounded-2xl overflow-hidden shadow-inner bg-slate-900 border border-slate-100 mb-6 cursor-pointer md:cursor-default" title="Tekan untuk layar penuh">
                                             ${App.creator._mediaHTML(targetPortfolio.media_type, targetPortfolio.media_url, targetPortfolio.title)}
                                         </div>
                                         
@@ -4695,12 +4696,13 @@ App.router.bindCanonicalLinkGuard();
                                             <p class="text-xs sm:text-sm text-slate-600 leading-relaxed whitespace-pre-wrap">${App.utils.escapeHtml(targetPortfolio.description)}</p>
                                         </div>` : ''}
                                         
-                                        <div class="flex flex-wrap items-center justify-start gap-3 sm:gap-4 pt-6 border-t border-slate-100">
-                                            <button type="button" onclick="App.creator.togglePortfolioLike('${targetPortfolio.id}', ${targetPortfolio.is_liked ? 'true' : 'false'}, this)" class="flex-1 sm:flex-none px-6 py-2.5 rounded-full text-xs font-extrabold border transition-colors shadow-sm flex items-center justify-center gap-2.5 ${targetPortfolio.is_liked ? 'bg-rose-50 border-rose-200 text-rose-600 hover:bg-rose-100' : 'bg-white border-slate-200 text-slate-700 hover:bg-slate-50'}">
+                                        <!-- Tombol Pil Rata Kiri, Menyesuaikan Lebar Teks, Jarak Ekstra dari Garis -->
+                                        <div class="flex flex-wrap items-center justify-start gap-3 sm:gap-4 mt-6 pt-6 border-t border-slate-100">
+                                            <button type="button" onclick="App.creator.togglePortfolioLike('${targetPortfolio.id}', ${targetPortfolio.is_liked ? 'true' : 'false'}, this)" class="w-fit inline-flex px-6 py-2.5 rounded-full text-xs font-extrabold border transition-colors shadow-sm items-center justify-center gap-2.5 ${targetPortfolio.is_liked ? 'bg-rose-50 border-rose-200 text-rose-600 hover:bg-rose-100' : 'bg-white border-slate-200 text-slate-700 hover:bg-slate-50'}">
                                                 ${targetPortfolio.is_liked ? '<i class="fa-solid fa-heart text-sm"></i> Disukai' : '<i class="fa-regular fa-heart text-sm"></i> Suka'}
                                             </button>
-                                            ${c.whatsapp ? `<a href="${App.creator._waUrl(c.whatsapp, c.display_name, 'Halo ' + (c.display_name || 'Creator') + ', saya sangat tertarik dengan karya Anda yang berjudul: ' + targetPortfolio.title + '. Bisa kita ngobrol lebih lanjut?')}" target="_blank" rel="noopener noreferrer" class="flex-1 sm:flex-none px-6 py-2.5 rounded-full text-xs font-extrabold bg-[#10b981] border border-[#059669] text-white hover:bg-[#059669] transition-colors shadow-sm flex items-center justify-center gap-2.5"><i class="fa-brands fa-whatsapp text-sm"></i> Ngobrol</a>` : ''}
-                                            <button type="button" onclick="App.creator.sharePortfolio('${App.utils.escapeHtml(c.username)}', '${App.creator._slugify(targetPortfolio.title)}', '${App.utils.escapeHtml(targetPortfolio.title)}')" class="flex-1 sm:flex-none px-6 py-2.5 rounded-full text-xs font-extrabold bg-blue-50 border border-blue-200 text-[#151c75] hover:bg-blue-100 transition-colors shadow-sm flex items-center justify-center gap-2.5">
+                                            ${c.whatsapp ? `<a href="${App.creator._waUrl(c.whatsapp, c.display_name, 'Halo ' + (c.display_name || 'Creator') + ', saya sangat tertarik dengan karya Anda yang berjudul: ' + targetPortfolio.title + '. Bisa kita ngobrol lebih lanjut?')}" target="_blank" rel="noopener noreferrer" class="w-fit inline-flex px-6 py-2.5 rounded-full bg-yellow-100/70 backdrop-blur-md border border-yellow-200/80 text-yellow-900 text-xs font-extrabold hover:bg-yellow-200/80 hover:border-yellow-300 transition-colors shadow-sm items-center justify-center gap-2.5"><i class="fa-brands fa-whatsapp text-sm text-emerald-600"></i> Ngobrol</a>` : ''}
+                                            <button type="button" onclick="App.creator.sharePortfolio('${App.utils.escapeHtml(c.username)}', '${App.creator._slugify(targetPortfolio.title)}', '${App.utils.escapeHtml(targetPortfolio.title)}')" class="w-fit inline-flex px-6 py-2.5 rounded-full text-xs font-extrabold bg-blue-50 border border-blue-200 text-[#151c75] hover:bg-blue-100 transition-colors shadow-sm items-center justify-center gap-2.5">
                                                 <i class="fa-solid fa-share-nodes text-sm"></i> Bagikan
                                             </button>
                                         </div>
@@ -4741,8 +4743,8 @@ App.router.bindCanonicalLinkGuard();
                                 </div>
                             </section>
 
-                            <section class="mt-16 sm:mt-24 pt-4">
-                                <div class="flex items-end justify-between gap-3 mb-6"><div><h2 class="text-xl sm:text-2xl font-black text-[#151c75]">Portfolio</h2><p class="text-xs sm:text-sm text-slate-500 mt-1">Lihat contoh karya dan solusi yang pernah dibuat.</p></div></div>
+                            <section class="mt-20 sm:mt-32 pt-8">
+                                <div class="flex items-end justify-between gap-3 mb-8"><div><h2 class="text-xl sm:text-2xl font-black text-[#151c75]">Portfolio</h2><p class="text-xs sm:text-sm text-slate-500 mt-1.5">Lihat contoh karya dan solusi yang pernah dibuat.</p></div></div>
                                 <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-5 items-stretch">
                                     ${portfolios.length ? portfolios.map(p => {
                                         let thumbHTML = '';
