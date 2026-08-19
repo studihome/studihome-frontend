@@ -857,9 +857,9 @@
         </div>
     </div>
 
-    <!-- STUDIO AI SMART DISCOVERY MODAL (Desktop Melayang di Tengah, Mobile Layar Penuh) -->
+    <!-- STUDIO AI SMART DISCOVERY MODAL (Desktop Ringkas di Tengah, Mobile Layar Penuh) -->
     <div id="studio-smart-brief-modal" class="fixed inset-0 z-[91] hidden bg-slate-900/60 backdrop-blur-sm items-center justify-center p-0 sm:p-4">
-        <div class="studio-smart-modal-card card-3d w-full h-full sm:h-auto max-h-full sm:max-h-[90vh] sm:max-w-2xl rounded-none sm:rounded-3xl bg-white p-5 sm:p-6 relative overflow-y-auto">
+        <div class="studio-smart-modal-card card-3d w-full h-full sm:h-auto max-h-full sm:max-h-[88vh] sm:max-w-xl rounded-none sm:rounded-3xl bg-white p-5 sm:p-6 my-auto mx-auto relative overflow-y-auto border border-blue-100 shadow-2xl">
             <button type="button" onclick="App.studioAI.closeSmartBrief()" aria-label="Tutup pencarian kebutuhan" class="modal-close-btn absolute top-4 right-4 w-8 h-8 rounded-full flex items-center justify-center font-extrabold shadow-md">
                 <i class="fa-solid fa-xmark"></i>
             </button>
@@ -872,32 +872,36 @@
                 <p class="mt-1 text-xs sm:text-sm text-slate-500 leading-relaxed">Nggak perlu pakai istilah ribet. Cerita aja pakai bahasa sehari-hari. Studio AI akan mencocokkan kebutuhanmu dengan Creator yang paling nyambung.</p>
             </div>
             <div class="mt-4 rounded-2xl border border-blue-100 bg-blue-50/70 p-4">
-                <textarea id="studio-smart-brief-input" rows="5" class="w-full rounded-xl bg-white border border-blue-100 px-3.5 py-3 text-xs sm:text-sm text-slate-700 outline-none focus:ring-2 focus:ring-[#151c75] resize-none" placeholder="Contoh: video iklan untuk UMKM. Atau cukup ketik: video iklan 😄"></textarea>
+                <textarea id="studio-smart-brief-input" rows="4" class="w-full rounded-xl bg-white border border-blue-100 px-3.5 py-3 text-xs sm:text-sm text-slate-700 outline-none focus:ring-2 focus:ring-[#151c75] resize-none" placeholder="Contoh: video iklan untuk UMKM. Atau cukup ketik: video iklan 😄"></textarea>
                 <div id="studio-smart-context" class="hidden mt-3"></div>
-                <div class="studio-smart-conversation-hint rounded-2xl p-3 mt-3">
+                
+                <!-- Opsi Otomatis Ngobrol Biasa dengan Teks Lebih Besar -->
+                <div class="studio-smart-conversation-hint rounded-2xl p-3.5 mt-3 bg-white/90 border border-blue-100 shadow-2xs">
                     <div class="flex items-start gap-2.5">
-                        <div class="w-8 h-8 rounded-xl bg-white border border-blue-100 text-[#151c75] flex items-center justify-center shrink-0 shadow-2xs"><i class="fa-solid fa-message"></i></div>
+                        <div class="w-8 h-8 rounded-xl bg-blue-50 text-[#151c75] border border-blue-100 flex items-center justify-center shrink-0"><i class="fa-solid fa-message text-sm"></i></div>
                         <div class="min-w-0 flex-1">
-                            <div class="text-[10px] font-extrabold text-[#151c75]">Ngobrol aja biasa 😄</div>
-                            <div class="text-[9px] leading-relaxed text-slate-500 mt-0.5">Setelah hasil keluar, kamu cukup bilang “yang lebih murah”, “khusus TikTok”, atau “yang bisa selesai 3 hari”. SMART bakal nyambungin dengan konteks sebelumnya.</div>
+                            <div class="text-xs sm:text-sm font-extrabold text-[#151c75]">Ngobrol aja biasa 😄</div>
+                            <div class="text-xs text-slate-500 leading-relaxed mt-0.5">Klik opsi cepat di bawah untuk menambahkan detail otomatis ke dalam teksmu:</div>
                         </div>
                     </div>
-                    <div class="mt-2 flex flex-wrap gap-2">
-                        <button type="button" class="studio-smart-conversation-chip px-2.5 py-1.5 rounded-full text-[9px] font-extrabold text-[#151c75] bg-white border border-blue-100" onclick="App.studioAI._applyConversationalRefinement('yang lebih murah')">yang lebih murah</button>
-                        <button type="button" class="studio-smart-conversation-chip px-2.5 py-1.5 rounded-full text-[9px] font-extrabold text-[#151c75] bg-white border border-blue-100" onclick="App.studioAI._applyConversationalRefinement('khusus TikTok')">khusus TikTok</button>
-                        <button type="button" class="studio-smart-conversation-chip px-2.5 py-1.5 rounded-full text-[9px] font-extrabold text-[#151c75] bg-white border border-blue-100" onclick="App.studioAI._applyConversationalRefinement('yang bisa selesai 3 hari')">selesai 3 hari</button>
+                    <div class="mt-3 flex flex-wrap gap-2">
+                        <button type="button" class="studio-smart-conversation-chip px-3 py-1.5 rounded-full text-xs font-extrabold text-[#151c75] bg-blue-50/80 border border-blue-200 hover:bg-blue-100 transition-all" onclick="App.studioAI._applyConversationalRefinement('yang lebih murah')">+ yang lebih murah</button>
+                        <button type="button" class="studio-smart-conversation-chip px-3 py-1.5 rounded-full text-xs font-extrabold text-[#151c75] bg-blue-50/80 border border-blue-200 hover:bg-blue-100 transition-all" onclick="App.studioAI._applyConversationalRefinement('khusus TikTok')">+ khusus TikTok</button>
+                        <button type="button" class="studio-smart-conversation-chip px-3 py-1.5 rounded-full text-xs font-extrabold text-[#151c75] bg-blue-50/80 border border-blue-200 hover:bg-blue-100 transition-all" onclick="App.studioAI._applyConversationalRefinement('selesai 3 hari')">+ selesai 3 hari</button>
                     </div>
                 </div>
+
                 <div class="mt-3 grid grid-cols-1 sm:grid-cols-2 gap-2">
-                    <input id="studio-smart-brief-budget" type="text" inputmode="numeric" class="w-full rounded-xl bg-white border border-blue-100 px-3 py-2.5 text-xs text-slate-700 outline-none focus:ring-2 focus:ring-[#151c75]" placeholder="Budget kira-kira (opsional)">
-                    <input id="studio-smart-brief-deadline" type="text" class="w-full rounded-xl bg-white border border-blue-100 px-3 py-2.5 text-xs text-slate-700 outline-none focus:ring-2 focus:ring-[#151c75]" placeholder="Target selesai (opsional)">
+                    <input id="studio-smart-brief-budget" type="text" inputmode="numeric" class="w-full rounded-xl bg-white border border-blue-100 px-3 py-2.5 text-xs sm:text-sm text-slate-700 outline-none focus:ring-2 focus:ring-[#151c75]" placeholder="Budget kira-kira (opsional)">
+                    <input id="studio-smart-brief-deadline" type="text" class="w-full rounded-xl bg-white border border-blue-100 px-3 py-2.5 text-xs sm:text-sm text-slate-700 outline-none focus:ring-2 focus:ring-[#151c75]" placeholder="Target selesai (opsional)">
                 </div>
             </div>
             <div id="studio-smart-shortlist" class="hidden"></div><div id="studio-smart-understanding" class="mt-4"></div><div id="studio-smart-team-solo"></div>
-                    <div id="studio-smart-brief-results" class="mt-4"></div>
-            <div class="mt-4 flex flex-wrap justify-end gap-2">
-                <button type="button" onclick="App.studioAI.closeSmartBrief()" class="px-4 py-2.5 rounded-xl text-xs font-bold text-slate-600 bg-slate-100 hover:bg-slate-200">Nanti dulu</button>
-                <button type="button" onclick="App.studioAI.submitSmartBrief()" class="btn-brand-gradient px-4 py-2.5 rounded-xl text-xs font-extrabold">Cari yang Paling Nyambung <i class="fa-solid fa-arrow-right ml-1 text-[#FACC15]"></i></button>
+            <div id="studio-smart-brief-results" class="mt-4"></div>
+            
+            <div class="mt-5 flex flex-wrap justify-end gap-2">
+                <button type="button" onclick="App.studioAI.closeSmartBrief()" class="px-4 py-2.5 rounded-xl text-xs font-bold text-slate-600 bg-slate-100 hover:bg-slate-200 transition-all">Nanti dulu</button>
+                <button type="button" onclick="App.studioAI.submitSmartBrief()" class="btn-brand-gradient px-5 py-2.5 rounded-xl text-xs sm:text-sm font-extrabold shadow-md">Cari yang Paling Nyambung <i class="fa-solid fa-arrow-right ml-1 text-[#FACC15]"></i></button>
             </div>
         </div>
     </div>
@@ -925,6 +929,7 @@
             </div>
         </div>
     </footer>
+    
     <!-- AUTHENTICATION MODAL -->
     <div id="auth-modal" class="fixed inset-0 z-50 hidden bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-3 sm:p-4">
         <div class="card-3d w-full max-w-md p-5 sm:p-7 rounded-3xl relative bg-white my-auto">
@@ -3037,24 +3042,38 @@ App.router.bindCanonicalLinkGuard();
                 // Submit Pop-up Brief: Ambil keyword, jalankan pencarian, tutup pop-up, dan scroll ke hasil
                 submitSmartBrief: () => {
                     const input = document.getElementById('studio-smart-brief-input');
-                    if (input) {
-                        App.studioAI._query = String(input.value || '').trim();
+                    const briefText = String(input?.value || '').trim();
+
+                    if (!briefText || briefText.length < 2) {
+                        App.ui.toast('Ceritakan sedikit kebutuhanmu dulu, meski cuma 1–2 kata 😄', 'info');
+                        input?.focus();
+                        return;
                     }
-                    
+
+                    // Terapkan keyword utama
+                    App.studioAI._query = briefText;
+
+                    // Jalankan pencarian SMART
                     App.studioAI.runSmartDiscovery();
+
+                    // Tutup Pop-Up modal
                     App.studioAI.closeSmartBrief();
 
+                    // Tampilkan area Creator dan sembunyikan area Kategori
                     const catSec = document.getElementById('studio-ai-category-section');
                     const creatorSec = document.getElementById('studio-ai-creator-section');
-
                     if (catSec) catSec.classList.add('hidden');
                     if (creatorSec) creatorSec.classList.remove('hidden');
 
+                    // Render ulang Creator
+                    App.studioAI.renderCreators();
+
+                    // Scroll ke hasil pencarian
                     setTimeout(() => {
                         if (creatorSec) {
                             creatorSec.scrollIntoView({ behavior: 'smooth', block: 'start' });
                         }
-                    }, 100);
+                    }, 120);
                 },
                 // 1. Menampilkan HANYA Kategori (Menutup Creator)
                 showCategoriesOnly: () => {
@@ -3472,19 +3491,27 @@ App.router.bindCanonicalLinkGuard();
                     const refinement = String(text || '').trim();
                     const input = document.getElementById('studio-smart-brief-input');
                     if (!input || !refinement) return;
-                    const ctx = App.studioAI._smartContext || App.studioAI._loadSmartContext();
+
                     const current = String(input.value || '').trim();
-                    const effectiveBase = current || ctx.query || '';
-                    const next = effectiveBase ? `${effectiveBase} ${refinement}`.trim() : refinement;
+                    if (current.toLowerCase().includes(refinement.toLowerCase())) {
+                        App.ui.toast(`Pilihan "${refinement}" sudah ada di dalam teks.`, 'info');
+                        return;
+                    }
+
+                    const next = current ? `${current} ${refinement}`.trim() : refinement;
                     input.value = next;
+
                     const lower = refinement.toLowerCase();
                     if (/selesai\s+\d+\s*(hari|minggu)/.test(lower)) {
                         const m = lower.match(/selesai\s+(\d+\s*(?:hari|minggu))/);
-                        if (m) document.getElementById('studio-smart-brief-deadline').value = m[1];
+                        if (m) {
+                            const deadlineInput = document.getElementById('studio-smart-brief-deadline');
+                            if (deadlineInput) deadlineInput.value = m[1];
+                        }
                     }
-                    if (/^budget\s*[:=]/i.test(refinement)) document.getElementById('studio-smart-brief-budget').value = refinement.replace(/^budget\s*[:=]/i,'').trim();
-                    if (/^target\s+waktu\s*[:=]/i.test(refinement)) document.getElementById('studio-smart-brief-deadline').value = refinement.replace(/^target\s+waktu\s*[:=]/i,'').trim();
-                    App.studioAI.runSmartDiscovery();
+
+                    App.ui.toast(`Opsi "${refinement}" ditambahkan ke dalam pesanmu. ✨`, 'info');
+                    input.focus();
                 },
                 _appendSmartRefinement: (text) => {
                     App.studioAI._applyConversationalRefinement(text);
