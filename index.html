@@ -4642,10 +4642,10 @@ App.router.bindCanonicalLinkGuard();
                                             ${categories.slice(0,6).map(x => `<span class="creator-trust-chip px-2.5 py-1 rounded-xl text-[9px] font-bold">${App.utils.escapeHtml(x.name)}</span>`).join('')}
                                         </div>
                                     </div>
-                                    <div class="w-full lg:w-auto">
+                                   <div class="w-full lg:w-auto">
                                         <div class="grid grid-cols-3 gap-2 mb-3">
-                                            <div class="creator-trust-chip rounded-2xl px-3 py-2.5 text-center"><div class="text-lg font-black">❤️ ${data.likes || 0}</div><div class="text-[9px] text-blue-100">Disukai</div></div>
-                                            <div class="creator-trust-chip rounded-2xl px-3 py-2.5 text-center"><div class="text-lg font-black">⭐ ${data.ratingAvg ? `${data.ratingAvg}/5` : '—'}</div><div class="text-[9px] text-blue-100">Rating</div></div>
+                                            <div onclick="App.creator.toggleLike('${c.id}', ${data.liked ? 'true' : 'false'})" class="creator-trust-chip rounded-2xl px-3 py-2.5 text-center cursor-pointer hover:bg-white/10 transition-colors"><div class="text-lg font-black">${data.liked ? '❤️' : '♡'} ${data.likes || 0}</div><div class="text-[9px] text-blue-100">Disukai</div></div>
+                                            <div onclick="App.creator.copyProfileLink('${App.utils.escapeHtml(c.username)}')" class="creator-trust-chip rounded-2xl px-3 py-2.5 text-center cursor-pointer hover:bg-white/10 transition-colors"><div class="text-lg font-black"><i class="fa-solid fa-link"></i></div><div class="text-[9px] text-blue-100">Salin Tautan</div></div>
                                             <div onclick="App.creator.shareProfile('${App.utils.escapeHtml(c.username)}')" class="creator-trust-chip rounded-2xl px-3 py-2.5 text-center cursor-pointer hover:bg-white/10 transition-colors"><div class="text-lg font-black"><i class="fa-solid fa-share-nodes"></i></div><div class="text-[9px] text-blue-100">Bagikan</div></div>
                                         </div>
                                         <div class="flex flex-wrap gap-2 mb-3">
@@ -4654,9 +4654,6 @@ App.router.bindCanonicalLinkGuard();
                                         </div>
                                         <div class="flex flex-col sm:flex-row lg:flex-col gap-2">
                                             ${c.whatsapp ? `<button type="button" onclick="App.creator.openBrief('${App.utils.escapeHtml(c.username)}','${App.utils.escapeHtml(c.display_name || c.username)}','', '${App.utils.escapeHtml(c.whatsapp)}')" class="w-full lg:min-w-48 btn-brand-amber text-slate-900 px-4 py-2.5 rounded-xl text-xs font-extrabold text-center"><i class="fa-solid fa-wand-magic-sparkles mr-1"></i> Ceritakan Kebutuhanmu</button>` : ''}
-                                            <button type="button" onclick="App.creator.toggleLike('${c.id}', ${data.liked ? 'true' : 'false'})" class="w-full lg:min-w-48 px-4 py-2.5 rounded-xl text-xs font-extrabold border border-white/25 bg-white/10 hover:bg-white/15 backdrop-blur-md text-white">
-                                                ${data.liked ? '❤️ Sudah Disukai' : '♡ Suka Profil'}
-                                            </button>
                                         </div>
                                     </div>
                                 </div>
