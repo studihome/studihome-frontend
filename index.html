@@ -929,20 +929,17 @@
             </div>
         </div>
     </footer>
-    
-    <!-- AUTHENTICATION MODAL -->
+        <!-- AUTHENTICATION MODAL -->
     <div id="auth-modal" class="fixed inset-0 z-50 hidden bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-3 sm:p-4">
         <div class="card-3d w-full max-w-md p-5 sm:p-7 rounded-3xl relative bg-white my-auto">
             <button onclick="App.ui.toggleModal('auth-modal', false)" class="modal-close-btn absolute top-4 right-4 w-8 h-8 rounded-full flex items-center justify-center transition-all shadow-md font-extrabold hover:brightness-110 z-10">
                 <i class="fa-solid fa-xmark"></i>
             </button>
-            
-            <div class="text-center mb-5 sm:mb-6">
+                        <div class="text-center mb-5 sm:mb-6">
                 <div class="text-[#EAB308] text-3xl sm:text-4xl font-black mb-1 animate-spin-slow inline-block">✦</div>
                 <h3 id="auth-modal-title" class="text-lg sm:text-xl font-extrabold text-[#151c75]">Masuk ke Studihome</h3>
                 <p class="text-xs text-slate-500 mt-1">Akses modul pembelajaran & otomasi AI Anda</p>
             </div>
-
             <!-- Login Form -->
             <form id="login-form" onsubmit="App.auth.handleLogin(event)" class="space-y-3.5">
                 <div>
@@ -963,7 +960,6 @@
                     </button>
                 </div>
             </form>
-
             <!-- Register Form -->
             <form id="register-form" onsubmit="App.auth.handleRegister(event)" class="space-y-3.5 hidden">
                 <div>
@@ -994,7 +990,6 @@
             </form>
         </div>
     </div>
-
     <!-- PRODUCT DETAIL VIEW MODAL -->
     <div id="product-detail-modal" class="fixed inset-0 z-50 hidden bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-3 sm:p-4">
         <div class="card-3d w-full max-w-xl p-5 sm:p-6 rounded-3xl relative bg-white max-h-[90vh] overflow-y-auto my-auto">
@@ -1007,7 +1002,6 @@
             </div>
         </div>
     </div>
-
     <!-- CHECKOUT MODAL -->
     <div id="checkout-modal" class="fixed inset-0 z-50 hidden bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-3 sm:p-4">
         <div class="card-3d w-full max-w-lg p-5 sm:p-6 rounded-3xl relative bg-white max-h-[90vh] overflow-y-auto my-auto">
@@ -1019,7 +1013,6 @@
             </div>
         </div>
     </div>
-
     <!-- MODULE PLAYER MODAL -->
     <div id="module-modal" class="fixed inset-0 z-50 hidden bg-slate-900/75 backdrop-blur-md flex items-center justify-center p-3 sm:p-4">
         <div class="card-3d w-full max-w-4xl p-5 sm:p-6 rounded-3xl relative max-h-[92vh] flex flex-col bg-white my-auto">
@@ -1031,7 +1024,6 @@
             </div>
         </div>
     </div>
-
     <!-- AI LINK EDIT MODAL (ADMIN) -->
     <div id="ai-link-modal" class="fixed inset-0 z-50 hidden bg-slate-900/50 backdrop-blur-sm flex items-center justify-center p-3 sm:p-4">
         <div class="card-3d w-full max-w-md p-5 sm:p-6 rounded-3xl relative bg-white my-auto">
@@ -1089,16 +1081,12 @@
             });
             return Promise.race([promise, timeout]).finally(() => clearTimeout(timer));
         }
-
         async function setupRealtime() {
             if (!supabaseClient || !window.App?.state?.user) return;
-
             await cleanupRealtime();
-
             const userId = window.App.state.user.id;
             const isAdmin = String(window.App.state.user.role || '').toLowerCase() === 'admin';
             const channel = supabaseClient.channel(`studihome-live-${userId}`);
-
             const refresh = () => {
                 clearTimeout(window.App.state.realtimeRefreshTimer);
                 window.App.state.realtimeRefreshTimer = setTimeout(async () => {
@@ -1118,7 +1106,6 @@
                     } catch (_) {}
                 }, 250);
             };
-
             if (isAdmin) {
                 channel.on('postgres_changes', { event: '*', schema: 'public', table: 'orders' }, refresh);
                 channel.on('postgres_changes', { event: '*', schema: 'public', table: 'entitlements' }, refresh);
@@ -1132,7 +1119,6 @@
             channel.subscribe();
             window.App.state.realtimeChannel = channel;
         }
-
         async function cleanupRealtime() {
             if (!window.App?.state) return;
             clearTimeout(window.App.state.realtimeRefreshTimer);
@@ -1144,7 +1130,6 @@
                 window.App.state.realtimeChannel = null;
             }
         }
-
         const IND_NOTICE_OVERRIDES = [
     [/^Email not confirmed$/i, 'Emailmu belum terverifikasi. Cek email verifikasi dulu, ya.'],
     [/^Invalid login credentials$/i, 'Email atau password belum cocok. Coba cek lagi, ya.'],
@@ -1156,7 +1141,6 @@
     [/^Failed to fetch$/i, 'Koneksi ke server belum tersambung. Coba lagi sebentar, ya.'],
     [/^new row .*$/i, 'Data belum bisa disimpan. Coba lagi, ya.']
 ];
-
 function indonesianNoticeMessage(message) {
     const raw = String(message || '').trim();
     for (const [pattern, friendly] of IND_NOTICE_OVERRIDES) {
@@ -1167,9 +1151,7 @@ function indonesianNoticeMessage(message) {
         .replace(/^Error:\s*/i, '')
         .replace(/^Failed:\s*/i, '') || 'Ada sedikit kendala. Coba lagi, ya.';
 }
-
 const App = {
-
         integrationGuard: {
             run: () => {
                 const checks = {
@@ -1189,7 +1171,6 @@ const App = {
                 };
             }
         },
-
             state: {
                 user: null,
                 publicData: null,
@@ -1258,13 +1239,11 @@ const App = {
                     }
                 }
             },
-
             init: async () => {
                 App.studioAI._loadSmartContext();
                 setInterval(App.utils.updateClock, 1000);
                 App.utils.updateClock();
                 App.ui.updateApiStatus('connecting');
-
                 try {
                     initSupabase();
                     App.api._requireConfig();
@@ -1294,10 +1273,8 @@ const App = {
                             throw e;
                         }
                     }
-
                     App.ui.renderTopAuth();
                     await App.home.load();
-
                     supabaseClient.auth.onAuthStateChange((_event, sessionNow) => {
                         void (async () => {
                             if (!sessionNow?.user) {
@@ -1326,7 +1303,6 @@ const App = {
                             }
                         })();
                     });
-
                     if (App.state.user) await setupRealtime();
                     App.ui.updateApiStatus('online');
                 } catch (e) {
@@ -1336,7 +1312,6 @@ const App = {
                     App.ui.renderTopAuth();
                     App.ui.showBackendError(e);
                 }
-
                 const initialPath = window.location.pathname.toLowerCase().replace(/\/$/, '') || '/';
                 if (!window.location.hash && initialPath !== '/') {
                     const knownPaths = ['/', '/products', '/kamar', '/dashboard', '/admin', '/studio-ai', '/dapur', '/ruang-kerja', '/creator-studio'];
@@ -2940,18 +2915,17 @@ App.router.bindCanonicalLinkGuard();
                                     </div>
                                 </div>
                                 <!-- Layout Proporsional: Desktop 1 Baris Sejajar (w-auto), Mobile 2 Baris -->
-                                <div class="mt-5 sm:mt-6 flex flex-col sm:flex-row items-stretch sm:items-center gap-2.5 sm:gap-3 max-w-3xl">
-                                    <button type="button" onclick="App.studioAI.openSmartBrief()" class="studio-smart-brief-btn w-full sm:w-auto inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl text-xs sm:text-sm font-extrabold shadow-sm">
+                                <!-- 3 Tombol Lebar Pas Tulisan (w-fit) & Rapat Kiri (justify-start) -->
+                                <div class="mt-5 sm:mt-6 flex flex-wrap items-center justify-start gap-2.5 sm:gap-3 max-w-3xl">
+                                    <button type="button" onclick="App.studioAI.openSmartBrief()" class="studio-smart-brief-btn w-fit inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl text-xs sm:text-sm font-extrabold shadow-sm">
                                         <i class="fa-solid fa-wand-magic-sparkles text-amber-300"></i> Ceritakan kebutuhanmu
                                     </button>
-                                    <div class="grid grid-cols-2 gap-2.5 sm:flex sm:items-center sm:gap-3 w-full sm:w-auto">
-                                        <button type="button" onclick="App.studioAI.showCategoriesOnly()" class="studio-smart-brief-btn w-full sm:w-auto inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl text-xs sm:text-sm font-extrabold shadow-sm">
-                                            <i class="fa-solid fa-layer-group text-amber-300"></i> Kategori
-                                        </button>
-                                        <button type="button" onclick="App.studioAI.showCreatorsOnly()" class="studio-smart-brief-btn w-full sm:w-auto inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl text-xs sm:text-sm font-extrabold shadow-sm">
-                                            <i class="fa-solid fa-users text-amber-300"></i> Creator
-                                        </button>
-                                    </div>
+                                    <button type="button" onclick="App.studioAI.showCategoriesOnly()" class="studio-smart-brief-btn w-fit inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl text-xs sm:text-sm font-extrabold shadow-sm">
+                                        <i class="fa-solid fa-layer-group text-amber-300"></i> Kategori
+                                    </button>
+                                    <button type="button" onclick="App.studioAI.showCreatorsOnly()" class="studio-smart-brief-btn w-fit inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl text-xs sm:text-sm font-extrabold shadow-sm">
+                                        <i class="fa-solid fa-users text-amber-300"></i> Creator
+                                    </button>
                                 </div>
                             </div>
                             <div class="studio-ai-orb" aria-hidden="true"></div>
