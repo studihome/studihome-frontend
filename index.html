@@ -4642,10 +4642,9 @@ App.router.bindCanonicalLinkGuard();
                                             ${categories.slice(0,6).map(x => `<span class="creator-trust-chip px-2.5 py-1 rounded-xl text-[9px] font-bold">${App.utils.escapeHtml(x.name)}</span>`).join('')}
                                         </div>
                                         <div class="creator-quick-actions">
-                                            ${defaultWa ? `<a href="${defaultWa}" target="_blank" rel="noopener noreferrer" class="creator-quick-action btn-brand-amber text-slate-900"><i class="fa-brands fa-whatsapp"></i> Ngobrol via WhatsApp</a>` : ''}
-                                            ${c.whatsapp ? `<button type="button" class="creator-quick-action creator-brief-trigger" onclick="App.creator.openBrief('${App.utils.escapeHtml(c.username)}','${App.utils.escapeHtml(c.display_name || c.username)}','', '${App.utils.escapeHtml(c.whatsapp)}')"><i class="fa-solid fa-wand-magic-sparkles"></i> Ceritakan Kebutuhan</button>` : ''}
-                                            <button type="button" class="creator-quick-action creator-share-btn" onclick="App.creator.shareProfile('${App.utils.escapeHtml(c.username)}')"><i class="fa-solid fa-share-nodes"></i> Bagikan Profil</button>
-                                        </div>
+    ${c.whatsapp ? `<button type="button" class="creator-quick-action creator-brief-trigger" onclick="App.creator.openBrief('${App.utils.escapeHtml(c.username)}','${App.utils.escapeHtml(c.display_name || c.username)}','', '${App.utils.escapeHtml(c.whatsapp)}')"><i class="fa-solid fa-wand-magic-sparkles"></i> Ceritakan Kebutuhan</button>` : ''}
+    <button type="button" class="creator-quick-action creator-share-btn" onclick="App.creator.shareProfile('${App.utils.escapeHtml(c.username)}')"><i class="fa-solid fa-share-nodes"></i> Bagikan Profil</button>
+</div>
                                     </div>
                                     <div class="w-full lg:w-auto">
                                         <div class="grid grid-cols-3 gap-2 mb-3">
