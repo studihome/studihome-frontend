@@ -4484,53 +4484,58 @@ App.router.bindCanonicalLinkGuard();
                     }
 
                     grid.innerHTML = visibleCreators.map(c => {
-                        // Logika Fallback Cerdas: Tarik foto profil, jika kosong pakai cover, jika kosong pakai inisial otomatis
-                        const imgSource = c.avatar_url ? App.utils.safeUrl(c.avatar_url) : (c.cover_url ? App.utils.safeUrl(c.cover_url) : `https://ui-avatars.com/api/?name=${encodeURIComponent(c.display_name || c.username)}&background=151c75&color=fff&size=512`);
-                        const categoryName = (c.category_names && c.category_names.length > 0) ? c.category_names[0] : 'Creator AI';
-                        const managedBadge = c.managed_by_studihome ? '<span class="inline-flex items-center justify-center w-5 h-5 rounded-full bg-white text-[#151c75] text-[10px] font-black shadow-sm ml-1.5 align-middle" title="Creator dikelola Studihome">✦</span>' : '';
+                        // Logika Cerdas Gambar & Data
+                        const imgSource = c.avatar_url ? App.utils.safeUrl(c.avatar_url) : (c.cover_url ? App.utils.safeUrl(c.cover_url) : `https://ui-avatars.com/api/?name=${encodeURIComponent(c.display_name || c.username)}&background=f1f5f9&color=0f172a&size=512`);
+                        const catCount = (c.category_names && c.category_names.length) ? c.category_names.length : 1;
+                        
+                        // Lencana Verifikasi Hijau Solid (Persis seperti di gambar)
+                        const verifiedBadge = c.is_verified ? `<svg class="w-5 h-5 text-[#10b981] flex-shrink-0" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" /></svg>` : '';
+                        
+                        const managedBadge = c.managed_by_studihome ? '<span class="inline-flex items-center justify-center w-4 h-4 rounded-full bg-[#151c75] text-white text-[8px] font-black shadow-sm ml-1" title="Creator dikelola Studihome">✦</span>' : '';
 
                         return `
-                            <article class="group relative aspect-square rounded-3xl overflow-hidden card-3d cursor-pointer flex flex-col justify-end transform transition-all duration-500 hover:-translate-y-2 hover:shadow-2xl" onclick="App.router.goCreator('${App.utils.escapeHtml(c.username)}')">
+                            <article class="group bg-white rounded-[2rem] overflow-hidden card-3d cursor-pointer flex flex-col h-full transform transition-all duration-300 hover:-translate-y-1.5 hover:shadow-xl border border-slate-100" onclick="App.router.goCreator('${App.utils.escapeHtml(c.username)}')">
                                 
-                                <!-- Gambar Profil (Memenuhi Seluruh Kartu dengan Cinematic Zoom) -->
-                                <img src="${imgSource}" alt="${App.utils.escapeHtml(c.display_name || c.username)}" class="absolute inset-0 w-full h-full object-cover transition-transform duration-700 ease-out group-hover:scale-110">
+                                <!-- Gambar Profil (Area Atas) -->
+                                <div class="relative w-full aspect-[4/5] sm:aspect-square md:aspect-[4/5] bg-slate-50 overflow-hidden shrink-0">
+                                    <img src="${imgSource}" alt="${App.utils.escapeHtml(c.display_name || c.username)}" class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105">
+                                    ${c.is_studihome_official ? `<div class="absolute top-4 left-4 z-10 px-2.5 py-1 rounded-xl bg-amber-400 text-[#151c75] text-[9px] font-black uppercase tracking-wider shadow-sm">Official</div>` : ''}
+                                </div>
                                 
-                                <!-- Gradient Pelindung Bawah (Navy Studihome agar teks selalu kontras) -->
-                                <div class="absolute inset-0 bg-gradient-to-t from-[#151c75] via-[#151c75]/40 to-transparent opacity-80 group-hover:opacity-100 transition-opacity duration-500 z-10 pointer-events-none"></div>
-                                
-                                <!-- Wadah Teks Bawah (Meluncur naik 96px saat di-hover) -->
-                                <div class="relative z-20 p-5 sm:p-6 mt-auto w-full flex flex-col transform transition-transform duration-500 ease-out translate-y-24 group-hover:translate-y-0">
+                                <!-- Area Teks & Info (Area Bawah Putih Bersih) -->
+                                <div class="p-5 sm:p-6 flex flex-col flex-grow bg-white">
                                     
-                                    <!-- Kategori & Likes -->
-                                    <div class="flex items-center justify-between gap-3 mb-1.5 opacity-90 group-hover:opacity-100 transition-opacity duration-500">
-                                        <div class="flex items-center gap-2 truncate">
-                                            ${c.is_studihome_official ? `<span class="px-2 py-0.5 rounded-md bg-amber-400 text-[#151c75] text-[9px] font-black uppercase tracking-widest shadow-sm shrink-0">Official</span>` : ''}
-                                            <span class="text-[10px] sm:text-xs font-black uppercase tracking-widest text-amber-400 drop-shadow-md truncate">
-                                                ${App.utils.escapeHtml(categoryName)}
-                                            </span>
-                                        </div>
-                                        <div class="px-2.5 py-1 rounded-full bg-white/20 backdrop-blur-md border border-white/30 text-white text-[10px] font-extrabold flex items-center gap-1.5 shadow-sm shrink-0">
-                                            <i class="fa-solid fa-heart text-rose-400"></i> ${c.likes || 0}
-                                        </div>
-                                    </div>
-                                    
-                                    <!-- Nama Creator (Satu-satunya Teks Besar) -->
-                                    <h3 class="text-3xl sm:text-4xl font-black text-white leading-none drop-shadow-2xl truncate mb-4">
+                                    <!-- Nama Creator & Verifikasi -->
+                                    <h3 class="text-xl sm:text-2xl font-black text-slate-900 flex items-center gap-1.5 truncate">
                                         ${App.utils.escapeHtml(c.display_name || c.username)}
-                                        ${c.is_verified ? '<i class="fa-solid fa-circle-check text-sky-400 text-xl ml-1 align-middle" title="Terverifikasi"></i>' : ''}
+                                        ${verifiedBadge}
                                         ${managedBadge}
                                     </h3>
                                     
-                                    <!-- Deskripsi & Tombol (Disembunyikan di bawah batas kartu, muncul meluncur saat hover) -->
-                                    <div class="flex flex-col gap-4 opacity-0 group-hover:opacity-100 transition-opacity duration-500 delay-100">
-                                        <p class="text-[11px] sm:text-xs text-blue-50/90 line-clamp-2 leading-relaxed font-medium">
-                                            ${App.utils.escapeHtml(c.bio || 'Menyediakan layanan AI, digital, dan otomasi kreatif di Studihome.')}
-                                        </p>
+                                    <!-- Bio / Deskripsi Singkat -->
+                                    <p class="text-[13px] sm:text-sm text-slate-500 mt-2 line-clamp-2 leading-relaxed font-medium">
+                                        ${App.utils.escapeHtml(c.bio || 'Menyediakan layanan AI, digital, dan otomasi kreatif di Studihome.')}
+                                    </p>
+                                    
+                                    <!-- Footer: Statistik & Tombol -->
+                                    <div class="mt-auto pt-6 flex items-center justify-between">
+                                        <div class="flex items-center gap-4 text-sm font-bold text-slate-700">
+                                            <!-- Ikon User = Jumlah Like -->
+                                            <div class="flex items-center gap-1.5" title="Jumlah Suka">
+                                                <i class="fa-regular fa-user text-slate-400 text-base"></i> <span>${c.likes || 0}</span>
+                                            </div>
+                                            <!-- Ikon Kategori = Jumlah Kategori -->
+                                            <div class="flex items-center gap-1.5" title="Kategori Jasa">
+                                                <i class="fa-regular fa-images text-slate-400 text-base"></i> <span>${catCount}</span>
+                                            </div>
+                                        </div>
                                         
-                                        <button type="button" class="w-full h-11 rounded-full bg-white text-[#151c75] text-xs font-black transition-all duration-300 flex items-center justify-center gap-2 hover:bg-amber-400 hover:shadow-[0_0_15px_rgba(251,191,36,0.5)]">
-                                            Profil <i class="fa-solid fa-arrow-right transition-transform duration-300 group-hover:translate-x-1"></i>
+                                        <!-- Tombol Profil (Menggantikan Follow) -->
+                                        <button type="button" class="px-5 py-2.5 bg-slate-100 group-hover:bg-[#151c75] text-slate-900 group-hover:text-white font-bold rounded-full transition-colors duration-300 text-sm whitespace-nowrap">
+                                            Profil <span class="font-normal text-slate-500 group-hover:text-blue-200">+</span>
                                         </button>
                                     </div>
+                                    
                                 </div>
                             </article>`;
                     }).join('');
