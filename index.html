@@ -4545,7 +4545,7 @@ App.router.bindCanonicalLinkGuard();
                     const lower = value.toLowerCase();
                     if (mediaType === 'youtube' || /(?:youtube\.com|youtu\.be)/i.test(value)) {
                         const m = value.match(/(?:youtube\.com\/(?:watch\?v=|shorts\/|live\/)|youtu\.be\/)([A-Za-z0-9_-]{6,})/i);
-                        if (m) return `<div class="aspect-video rounded-2xl overflow-hidden bg-black"><iframe src="https://www.youtube.com/embed/${m[1]}" title="${App.utils.escapeHtml(title || 'Portfolio')}" class="w-full h-full" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen></iframe></div>`;
+                        if (m) return `<div class="aspect-video rounded-2xl overflow-hidden bg-black"><iframe src="https://www.youtube-nocookie.com/embed/${m[1]}?rel=0" title="${App.utils.escapeHtml(title || 'Portfolio')}" class="w-full h-full" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen></iframe></div>`;
                     }
                     if (mediaType === 'drive' || /(^|\.)drive\.google\.com$/i.test((()=>{ try{return new URL(value).hostname}catch{return ''} })())) {
                         const m = value.match(/[-\w]{25,}/); if (m) return `<div class="aspect-video rounded-2xl overflow-hidden bg-slate-900"><iframe src="https://drive.google.com/file/d/${m[0]}/preview" title="${App.utils.escapeHtml(title || 'Portfolio')}" class="w-full h-full" frameborder="0" allow="autoplay; fullscreen; picture-in-picture" allowfullscreen></iframe></div>`;
@@ -4686,9 +4686,16 @@ App.router.bindCanonicalLinkGuard();
                                         <h2 class="text-2xl sm:text-3xl font-black text-[#151c75] leading-tight mb-5">${App.utils.escapeHtml(targetPortfolio.title)}</h2>
                                         
                                         <!-- Media Interaktif: Bisa tap layar penuh khusus mobile -->
-                                        <div onclick="if(window.innerWidth < 768) { this.requestFullscreen ? this.requestFullscreen() : (this.webkitRequestFullscreen ? this.webkitRequestFullscreen() : null); }" class="w-full rounded-2xl overflow-hidden shadow-inner bg-slate-900 border border-slate-100 mb-6 cursor-pointer md:cursor-default" title="Tekan untuk layar penuh">
-                                            ${App.creator._mediaHTML(targetPortfolio.media_type, targetPortfolio.media_url, targetPortfolio.title)}
-                                        </div>
+                                        <style>
+    .fs-close-btn { display: none; }
+    :fullscreen .fs-close-btn, :-webkit-full-screen .fs-close-btn { display: flex !important; }
+</style>
+<div onclick="if(window.innerWidth < 768) { this.requestFullscreen ? this.requestFullscreen() : (this.webkitRequestFullscreen ? this.webkitRequestFullscreen() : null); }" class="w-full rounded-2xl overflow-hidden shadow-inner bg-slate-900 border border-slate-100 mb-6 cursor-pointer md:cursor-default relative" title="Tekan untuk layar penuh">
+    <button type="button" onclick="event.stopPropagation(); document.exitFullscreen ? document.exitFullscreen() : (document.webkitExitFullscreen ? document.webkitExitFullscreen() : null);" class="fs-close-btn absolute top-4 right-4 z-[9999] w-10 h-10 rounded-full bg-black/60 text-white items-center justify-center backdrop-blur-md shadow-lg border border-white/20 hover:bg-black/80">
+        <i class="fa-solid fa-xmark text-lg"></i>
+    </button>
+    ${App.creator._mediaHTML(targetPortfolio.media_type, targetPortfolio.media_url, targetPortfolio.title)}
+</div>
                                         
                                         ${targetPortfolio.description ? `
                                         <div class="mb-8">
