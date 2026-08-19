@@ -25,11 +25,12 @@
   const sleep=ms=>new Promise(r=>setTimeout(r,ms));
 
   function loadStudioAIEnhancements(){
-    if((location.pathname||'/').replace(/\/+$/,'')!=='/studio-ai')return;
+    const path=(location.pathname||'/').replace(/\/+$/,'')||'/';
+    if(path!=='/studio-ai'&&!path.startsWith('/studio-ai/'))return;
     if(document.getElementById('studihome-studio-ai-enhancements'))return;
     const s=document.createElement('script');
     s.id='studihome-studio-ai-enhancements';
-    s.src='/studio-ai-enhancements.js?v=3';
+    s.src='/studio-ai-enhancements.js?v=4';
     s.defer=true;
     s.onerror=()=>console.warn('[Studihome Studio AI] enhancement failed to load');
     document.head.appendChild(s);
