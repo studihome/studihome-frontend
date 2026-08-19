@@ -24,6 +24,17 @@
   const db=()=>window.supabaseClient||null;
   const sleep=ms=>new Promise(r=>setTimeout(r,ms));
 
+  function loadStudioAIEnhancements(){
+    if((location.pathname||'/').replace(/\/+$/,'')!=='/studio-ai')return;
+    if(document.getElementById('studihome-studio-ai-enhancements'))return;
+    const s=document.createElement('script');
+    s.id='studihome-studio-ai-enhancements';
+    s.src='/studio-ai-enhancements.js?v=1';
+    s.defer=true;
+    s.onerror=()=>console.warn('[Studihome Studio AI] enhancement failed to load');
+    document.head.appendChild(s);
+  }
+
   function host(){return document.querySelector(SELECTOR)}
   function findButton(){return document.querySelector(BUTTON_SELECTOR)}
   function safeWorkspace(username){
@@ -184,6 +195,7 @@
   }
 
   async function boot(){
+    loadStudioAIEnhancements();
     loadUnderConstruction();
     loadUnderConstructionGudang();
     for(let i=0;i<120;i++){
