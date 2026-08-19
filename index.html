@@ -2355,6 +2355,7 @@ App.router.bindCanonicalLinkGuard();
                         } else if (action === 'CREATOR_SAVE_PORTFOLIO') {
                             const user = await App.api._profile(); if (!user) throw new Error('Sesi login tidak ditemukan.');
                             const { data: profile, error: pErr } = await supabaseClient.from('creator_profiles').select('id').eq('user_id', user.id).eq('managed_by_studihome', false).order('updated_at', { ascending: false }).limit(1).maybeSingle(); if (pErr) throw pErr;
+                            if (!payload.mediaUrl || !String(payload.mediaUrl).trim()) throw new Error('Tautan gambar atau video wajib diisi untuk menyimpan portfolio.');
                             const row = { creator_id: profile.id, service_id: payload.serviceId || null, title: payload.title, description: payload.description || '', media_type: payload.mediaType || 'image', media_url: payload.mediaUrl, sort_order: Number(payload.sortOrder || 0), is_active: payload.isActive !== false };
                             const res = payload.id
                                 ? await supabaseClient.from('creator_portfolios').update(row).eq('id', payload.id).eq('creator_id', profile.id).select().single()
@@ -4659,12 +4660,33 @@ App.router.bindCanonicalLinkGuard();
                                 </div>
                             </section>
                             ${targetPortfolio ? `
-                                <section class="mb-8">
-                                    <button onclick="App.router.goCreator('${App.utils.escapeHtml(c.username)}')" class="text-xs font-bold text-[#151c75] mb-3 hover:underline">← Kembali ke profil</button>
-                                    <div class="card-3d p-4 sm:p-6 rounded-3xl bg-white">
-                                        <div class="flex items-start justify-between gap-3 mb-4"><div><div class="text-[10px] uppercase tracking-wider font-extrabold text-amber-600">PORTFOLIO</div><h2 class="text-lg sm:text-xl font-black text-[#151c75] mt-1">${App.utils.escapeHtml(targetPortfolio.title)}</h2></div></div>
-                                        ${App.creator._mediaHTML(targetPortfolio.media_type, targetPortfolio.media_url, targetPortfolio.title)}
-                                        ${targetPortfolio.description ? `<p class="text-xs sm:text-sm text-slate-600 leading-relaxed mt-4">${App.utils.escapeHtml(targetPortfolio.description)}</p>` : ''}
+                                <section class="mb-10 animate-fade-in" id="portfolio-detail-view">
+                                    <button onclick="App.router.goCreator('${App.utils.escapeHtml(c.username)}')" class="inline-flex items-center gap-2 text-xs font-bold text-slate-500 mb-4 hover:text-[#151c75] transition-colors"><i class="fa-solid fa-arrow-left"></i> Kembali ke profil</button>
+                                    <div class="card-3d p-5 sm:p-8 rounded-3xl bg-white border border-slate-200/80">
+                                        <div class="flex items-center gap-2 mb-4">
+                                            <span class="px-2.5 py-1 rounded-lg bg-amber-50 border border-amber-100 text-[9px] font-black uppercase tracking-wider text-amber-600">PORTFOLIO</span>
+                                            <span class="px-2.5 py-1 rounded-lg bg-blue-50 border border-blue-100 text-[9px] font-black uppercase tracking-wider text-[#151c75]">${App.utils.escapeHtml(targetPortfolio.media_type || 'Media')}</span>
+                                        </div>
+                                        <h2 class="text-2xl sm:text-3xl font-black text-[#151c75] leading-tight mb-5">${App.utils.escapeHtml(targetPortfolio.title)}</h2>
+                                        
+                                        <div class="w-full rounded-2xl overflow-hidden shadow-inner bg-slate-900 border border-slate-100 mb-6">
+                                            ${App.creator._mediaHTML(targetPortfolio.media_type, targetPortfolio.media_url, targetPortfolio.title)}
+                                        </div>
+                                        
+                                        ${targetPortfolio.description ? `
+                                        <div class="mb-7">
+                                            <h3 class="text-sm font-extrabold text-slate-800 mb-2">Tentang Karya Ini</h3>
+                                            <p class="text-xs sm:text-sm text-slate-600 leading-relaxed whitespace-pre-wrap">${App.utils.escapeHtml(targetPortfolio.description)}</p>
+                                        </div>` : ''}
+                                        
+                                        <div class="flex flex-wrap items-center gap-3 pt-5 border-t border-slate-100">
+                                            <button type="button" onclick="App.creator.toggleLike('${c.id}', ${data.liked ? 'true' : 'false'})" class="flex-1 sm:flex-none px-6 py-3 rounded-xl text-xs font-extrabold border transition-colors shadow-sm ${data.liked ? 'bg-rose-50 border-rose-200 text-rose-600 hover:bg-rose-100' : 'bg-white border-slate-200 text-slate-700 hover:bg-slate-50'}">
+                                                ${data.liked ? '<i class="fa-solid fa-heart mr-1.5"></i> Disukai' : '<i class="fa-regular fa-heart mr-1.5"></i> Suka Karya'}
+                                            </button>
+                                            <button type="button" onclick="navigator.clipboard.writeText(window.location.href).then(() => App.ui.toast('Tautan karya disalin!', 'success'))" class="flex-1 sm:flex-none px-6 py-3 rounded-xl text-xs font-extrabold bg-blue-50 border border-blue-200 text-[#151c75] hover:bg-blue-100 transition-colors shadow-sm">
+                                                <i class="fa-solid fa-share-nodes mr-1.5"></i> Bagikan Karya
+                                            </button>
+                                        </div>
                                     </div>
                                 </section>
                             ` : ''}
@@ -4703,8 +4725,43 @@ App.router.bindCanonicalLinkGuard();
                             </section>
                            <section class="mt-12 sm:mt-16 pt-2">
                                 <div class="flex items-end justify-between gap-3 mb-6"><div><h2 class="text-xl sm:text-2xl font-black text-[#151c75]">Portfolio</h2><p class="text-xs sm:text-sm text-slate-500 mt-1">Lihat contoh karya dan solusi yang pernah dibuat.</p></div></div>
-                                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-                                    ${portfolios.length ? portfolios.map(p => `<article class="creator-portfolio-card card-3d rounded-2xl overflow-hidden bg-white border border-slate-200/80"><div class="relative"><div class="portfolio-overlay absolute inset-0 pointer-events-none"></div><div class="aspect-video rounded-2xl overflow-hidden bg-slate-950 flex items-center justify-center"><button type="button" onclick="App.creator.openMediaPreview('${App.utils.escapeHtml(p.media_type||'link')}','${App.utils.escapeHtml(p.media_url||'')}','${App.utils.escapeHtml(p.title||'Portfolio')}')" class="w-full h-full flex items-center justify-center text-white"><span class="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-white/10 border border-white/20 backdrop-blur text-xs font-extrabold"><i class="fa-solid fa-play"></i> Buka ${App.utils.escapeHtml(p.media_type||'media')}</span></button></div><div class="absolute left-3 top-3 px-2 py-1 rounded-lg bg-black/55 text-white text-[9px] font-bold">${App.utils.escapeHtml(p.media_type || 'media')}</div></div><div class="p-3.5"><h3 class="text-xs font-extrabold text-[#151c75]">${App.utils.escapeHtml(p.title)}</h3><p class="text-[10px] text-slate-500 line-clamp-2 mt-1">${App.utils.escapeHtml(p.description || '')}</p><a href="/${App.utils.escapeHtml(c.username)}/portfolio/${App.creator._slugify(p.title)}" onclick="event.stopPropagation()" class="inline-flex mt-3 text-[10px] font-extrabold text-[#151c75]">Detail ambalan →</a></div></article>`).join('') : `<div class="card-3d-inset p-6 rounded-2xl text-xs text-slate-500 sm:col-span-2 lg:col-span-3">Portfolio belum tersedia.</div>`}
+                                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-5 items-stretch">
+                                    ${portfolios.length ? portfolios.map(p => {
+                                        let thumbHTML = '';
+                                        const url = App.utils.safeUrl(p.media_url || '', '#');
+                                        const type = (p.media_type || 'link').toLowerCase();
+                                        let isVid = type === 'youtube' || type === 'video' || url.includes('youtube') || url.includes('youtu.be') || url.endsWith('.mp4');
+                                        
+                                        if (type === 'youtube' || url.includes('youtube.com') || url.includes('youtu.be')) {
+                                            const m = url.match(/(?:youtube\.com\/(?:watch\?v=|shorts\/|live\/)|youtu\.be\/)([A-Za-z0-9_-]{6,})/i);
+                                            if (m) thumbHTML = `<img src="https://img.youtube.com/vi/${m[1]}/hqdefault.jpg" alt="${App.utils.escapeHtml(p.title)}" class="w-full h-full object-cover">`;
+                                        } else if (type === 'image' || /\.(png|jpe?g|gif|webp|svg)(\?.*)?$/i.test(url)) {
+                                            thumbHTML = `<img src="${url}" alt="${App.utils.escapeHtml(p.title)}" class="w-full h-full object-cover">`;
+                                            isVid = false;
+                                        } else if (type === 'video' || /\.(mp4|webm|ogg)(\?.*)?$/i.test(url)) {
+                                            thumbHTML = `<video src="${url}" class="w-full h-full object-cover" preload="metadata" muted></video>`;
+                                        } else {
+                                            thumbHTML = `<div class="w-full h-full bg-slate-100 flex items-center justify-center text-slate-400"><i class="fa-solid fa-link text-3xl"></i></div>`;
+                                        }
+
+                                        return `<article class="creator-portfolio-card card-3d rounded-3xl overflow-hidden bg-white border border-slate-200/80 cursor-pointer group flex flex-col h-full transition-transform hover:-translate-y-1" onclick="App.router.goCreator('${App.utils.escapeHtml(c.username)}', '${App.creator._slugify(p.title)}')">
+                                            <div class="relative">
+                                                <div class="portfolio-overlay absolute inset-0 bg-black/10 group-hover:bg-transparent transition-colors z-10"></div>
+                                                <div class="aspect-video overflow-hidden bg-slate-950 flex items-center justify-center relative border-b border-slate-100">
+                                                    ${thumbHTML}
+                                                    ${isVid ? `<div class="absolute inset-0 flex items-center justify-center z-20"><div class="w-12 h-12 rounded-full bg-white/95 text-[#151c75] flex items-center justify-center shadow-lg transform group-hover:scale-110 transition-transform"><i class="fa-solid fa-play ml-1 text-lg"></i></div></div>` : ''}
+                                                </div>
+                                                <div class="absolute left-3 top-3 px-2.5 py-1 rounded-lg bg-black/60 backdrop-blur-sm text-white text-[9px] font-black z-20 uppercase tracking-wider shadow-sm">${App.utils.escapeHtml(type)}</div>
+                                            </div>
+                                            <div class="p-4 sm:p-5 flex flex-col flex-grow">
+                                                <h3 class="text-sm font-extrabold text-[#151c75] group-hover:text-[#3f48bf] transition-colors leading-snug">${App.utils.escapeHtml(p.title)}</h3>
+                                                <p class="text-[10px] sm:text-xs text-slate-500 line-clamp-2 mt-2 leading-relaxed flex-grow">${App.utils.escapeHtml(p.description || '')}</p>
+                                                <div class="mt-4 pt-3 border-t border-slate-100 flex items-center text-[10px] font-extrabold text-[#151c75] group-hover:underline">
+                                                    Detail ambalan <i class="fa-solid fa-arrow-right ml-1.5 text-amber-500"></i>
+                                                </div>
+                                            </div>
+                                        </article>`;
+                                    }).join('') : `<div class="card-3d-inset p-8 rounded-3xl text-sm text-slate-500 sm:col-span-2 lg:col-span-3 text-center font-bold">Portfolio belum tersedia.</div>`}
                                 </div>
                             </section>
                         `;
