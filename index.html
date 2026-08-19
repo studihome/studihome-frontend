@@ -2,7 +2,8 @@
 <html lang="id" class="h-full bg-[#EBF3FF]">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" 
+        content="width=device-width, initial-scale=1.0">
     <title>Studihome - Platform Pembelajaran Digital, Otomasi dan Agentic AI</title>
     <meta name="title" content="Studihome - Platform Pembelajaran Digital, Otomasi dan Agentic AI">
     <meta name="description" content="Studihome adalah platform produk digital, modul pembelajaran, serta penyedia layanan Agentic AI & otomasi bisnis terdepan untuk guru, profesional, kreator, dan UMKM di Indonesia.">
@@ -4704,14 +4705,14 @@ App.router.bindCanonicalLinkGuard();
                                         </div>` : ''}
                                         
                                         <!-- Tombol Pil Rata Kiri, Menyesuaikan Lebar Teks, Satu Baris Responsif -->
-                                        <div class="flex flex-row flex-nowrap items-center justify-start gap-2 sm:gap-3 mt-8 pt-6 border-t border-slate-100">
-                                            <button type="button" onclick="App.creator.togglePortfolioLike('${targetPortfolio.id}', ${targetPortfolio.is_liked ? 'true' : 'false'}, this)" class="h-11 w-fit inline-flex px-4 sm:px-5 rounded-full text-[11px] sm:text-xs font-extrabold border transition-colors shadow-sm items-center justify-center gap-2 whitespace-nowrap overflow-hidden ${targetPortfolio.is_liked ? 'bg-rose-50 border-rose-200 text-rose-600 hover:bg-rose-100' : 'bg-white border-slate-200 text-slate-700 hover:bg-slate-50'}">
+                                        <div class="flex flex-row items-center w-full gap-2 sm:gap-3 mt-6 pt-6 border-t border-slate-100">
+                                            <button type="button" onclick="App.creator.togglePortfolioLike('${targetPortfolio.id}', ${targetPortfolio.is_liked ? 'true' : 'false'}, this)" class="flex-1 py-2.5 rounded-full text-[11px] sm:text-xs font-extrabold border transition-all shadow-sm flex items-center justify-center gap-1.5 sm:gap-2 whitespace-nowrap overflow-hidden px-3 ${targetPortfolio.is_liked ? 'bg-rose-50 border-rose-200 text-rose-600 hover:bg-rose-100' : 'bg-white border-slate-200 text-slate-700 hover:bg-slate-50'}">
                                                 ${targetPortfolio.is_liked ? '<i class="fa-solid fa-heart text-sm shrink-0"></i> <span class="truncate">Disukai</span>' : '<i class="fa-regular fa-heart text-sm shrink-0"></i> <span class="truncate">Suka</span>'}
                                             </button>
                                             
-                                            ${c.whatsapp ? `<a href="${App.creator._waUrl(c.whatsapp, c.display_name, 'Halo ' + (c.display_name || 'Creator') + ', saya sangat tertarik dengan karya Anda yang berjudul: ' + targetPortfolio.title + '. Bisa kita ngobrol lebih lanjut?')}" target="_blank" rel="noopener noreferrer" class="h-11 w-fit inline-flex px-4 sm:px-5 rounded-full bg-yellow-100/70 backdrop-blur-md border border-yellow-200/80 text-yellow-900 text-[11px] sm:text-xs font-extrabold hover:bg-yellow-200/80 hover:border-yellow-300 transition-colors shadow-sm items-center justify-center gap-2 whitespace-nowrap overflow-hidden"><i class="fa-brands fa-whatsapp text-sm sm:text-base text-emerald-600 shrink-0"></i> <span class="truncate">Ngobrol</span></a>` : ''}
+                                            ${c.whatsapp ? `<a href="${App.creator._waUrl(c.whatsapp, c.display_name, 'Halo ' + (c.display_name || 'Creator') + ', saya sangat tertarik dengan karya Anda yang berjudul: ' + targetPortfolio.title + '. Bisa kita ngobrol lebih lanjut?')}" target="_blank" rel="noopener noreferrer" class="flex-1 py-2.5 rounded-full bg-yellow-100/70 backdrop-blur-md border border-yellow-200/80 text-yellow-900 text-[11px] sm:text-xs font-extrabold hover:bg-yellow-200/80 hover:border-yellow-300 transition-all shadow-sm flex items-center justify-center gap-1.5 sm:gap-2 whitespace-nowrap overflow-hidden px-3"><i class="fa-brands fa-whatsapp text-sm sm:text-base text-emerald-600 shrink-0"></i> <span class="truncate">Ngobrol</span></a>` : ''}
                                             
-                                            <button type="button" onclick="App.creator.sharePortfolio('${App.utils.escapeHtml(c.username)}', '${App.creator._slugify(targetPortfolio.title)}', '${App.utils.escapeHtml(targetPortfolio.title)}')" class="h-11 w-11 sm:w-fit sm:px-5 shrink-0 rounded-full text-xs font-extrabold bg-blue-50 border border-blue-200 text-[#151c75] hover:bg-blue-100 transition-colors shadow-sm flex items-center justify-center gap-2">
+                                            <button type="button" onclick="App.creator.sharePortfolio('${App.utils.escapeHtml(c.username)}', '${App.creator._slugify(targetPortfolio.title)}', '${App.utils.escapeHtml(targetPortfolio.title)}')" class="py-2.5 px-3.5 sm:px-6 shrink-0 rounded-full text-[11px] sm:text-xs font-extrabold bg-blue-50 border border-blue-200 text-[#151c75] hover:bg-blue-100 transition-all shadow-sm flex items-center justify-center gap-1.5 sm:gap-2">
                                                 <i class="fa-solid fa-share-nodes text-sm shrink-0"></i> <span class="hidden sm:inline truncate">Bagikan</span>
                                             </button>
                                         </div>
@@ -4753,7 +4754,7 @@ App.router.bindCanonicalLinkGuard();
                             </section>
 
                             <!-- Menggunakan CSS Native agar jarak ke bawah langsung bekerja -->
-                            <section class="pt-4" style="margin-top: 5rem;">
+                            <section class="pt-4" style="margin-top: 2.5rem;">
                                 <div class="flex items-end justify-between gap-3 mb-8"><div><h2 class="text-xl sm:text-2xl font-black text-[#151c75]">Portfolio</h2><p class="text-xs sm:text-sm text-slate-500 mt-1.5">Lihat contoh karya dan solusi yang pernah dibuat.</p></div></div>
                                 <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-5 items-stretch">
                                     ${portfolios.length ? portfolios.map(p => {
@@ -4905,10 +4906,10 @@ renderCreatorStandardSummary: (creator, data, categories, services, portfolios) 
                     if (btnElement) {
                         btnElement.setAttribute('onclick', `App.creator.togglePortfolioLike('${portfolioId}', ${isLikedNow}, this)`);
                         if (isLikedNow) {
-                            btnElement.className = "h-11 w-fit inline-flex px-4 sm:px-5 rounded-full text-[11px] sm:text-xs font-extrabold border transition-colors shadow-sm items-center justify-center gap-2 whitespace-nowrap overflow-hidden bg-rose-50 border-rose-200 text-rose-600 hover:bg-rose-100";
+                            btnElement.className = "flex-1 py-2.5 rounded-full text-[11px] sm:text-xs font-extrabold border transition-all shadow-sm flex items-center justify-center gap-1.5 sm:gap-2 whitespace-nowrap overflow-hidden px-3 bg-rose-50 border-rose-200 text-rose-600 hover:bg-rose-100";
                             btnElement.innerHTML = '<i class="fa-solid fa-heart text-sm shrink-0"></i> <span class="truncate">Disukai</span>';
                         } else {
-                            btnElement.className = "h-11 w-fit inline-flex px-4 sm:px-5 rounded-full text-[11px] sm:text-xs font-extrabold border transition-colors shadow-sm items-center justify-center gap-2 whitespace-nowrap overflow-hidden bg-white border-slate-200 text-slate-700 hover:bg-slate-50";
+                            btnElement.className = "flex-1 py-2.5 rounded-full text-[11px] sm:text-xs font-extrabold border transition-all shadow-sm flex items-center justify-center gap-1.5 sm:gap-2 whitespace-nowrap overflow-hidden px-3 bg-white border-slate-200 text-slate-700 hover:bg-slate-50";
                             btnElement.innerHTML = '<i class="fa-regular fa-heart text-sm shrink-0"></i> <span class="truncate">Suka</span>';
                         }
                     }
