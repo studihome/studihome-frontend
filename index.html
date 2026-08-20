@@ -4501,6 +4501,7 @@ App.router.bindCanonicalLinkGuard();
                     const category = App.studioAI._category;
                     const activeCategory = (data.categories || []).find(x => String(x.slug || '').toLowerCase() === String(category || '').toLowerCase());
                     
+                    // --- MULAI LOGIKA PENCARIAN SUPER AKURAT ---
                     const creators = (data.creators || []).map(c => {
                         const services = c.services || [];
                         const portfolios = c.portfolios || [];
@@ -4559,6 +4560,7 @@ App.router.bindCanonicalLinkGuard();
                         return true;
                     }).sort((a, b) => b.score - a.score || String(a.c.display_name || '').localeCompare(String(b.c.display_name || '')))
                       .map(item => item.c);
+                    // --- AKHIR LOGIKA PENCARIAN SUPER AKURAT ---
 
                     const title = document.getElementById('studio-ai-results-title');
                     if (title) title.textContent = q || category ? 'Yang paling nyambung buatmu' : 'Creator yang siap membantu';
@@ -4648,6 +4650,7 @@ App.router.bindCanonicalLinkGuard();
                             </article>`;
                     }).join('');
                 },
+
             creator: {
                 _slugify: (value) => String(value || '').toLowerCase().trim().normalize('NFKD').replace(/[\u0300-\u036f]/g, '').replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '').slice(0, 120),
                 _waUrl: (rawPhone, displayName, customMessage = '') => {
