@@ -4644,11 +4644,13 @@ App.router.bindCanonicalLinkGuard();
                                         </div>
                                     </div>
                                     ${service ? `<div class="mt-2 text-[10px] font-extrabold text-amber-600">Mulai Rp ${Number(service.price_from || 0).toLocaleString('id-ID')}</div>` : ''}
-                                </div>
-                            </article>`;
-                   }).join('');
-                },
-            creator: {
+                               </div>
+                        </article>`;
+                }).join('');
+            }
+        },
+
+        creator: {
                 _slugify: (value) => String(value || '').toLowerCase().trim().normalize('NFKD').replace(/[\u0300-\u036f]/g, '').replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '').slice(0, 120),
                 _waUrl: (rawPhone, displayName, customMessage = '') => {
                     const phone = String(rawPhone || '').replace(/\D/g, '').replace(/^0/, '62');
