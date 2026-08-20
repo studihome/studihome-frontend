@@ -72,8 +72,10 @@
     }
     </script>
     <!-- CANONICAL SUPABASE BOOT: SDK + config before all feature runtimes -->
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2" crossorigin="anonymous"></script>
-    <script src="/supabase-config.js?v=boot4"></script>
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; connect-src 'self' https://*.supabase.co wss://*.supabase.co https://api.frankfurter.app; script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' https://cdnjs.cloudflare.com https://fonts.googleapis.com; font-src 'self' https://cdnjs.cloudflare.com https://fonts.gstatic.com; img-src 'self' data: https:; frame-src 'self' https://www.youtube.com https://www.youtube-nocookie.com https://drive.google.com;">
+
+    <script defer src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2" crossorigin="anonymous"></script>
+    <script defer src="/supabase-config.js?v=boot4"></script>
     <!-- Tailwind CSS: compiled production utility layer -->
     <link rel="stylesheet" href="/tailwind-compiled.css?v=20260817r2">
     <!-- FontAwesome Icons -->
@@ -899,7 +901,7 @@
 
             <div class="mt-5 flex flex-wrap justify-end gap-2">
                 <button type="button" onclick="App.studioAI.closeSmartBrief()" class="px-4 py-2.5 rounded-xl text-xs font-bold text-slate-600 bg-slate-100 hover:bg-slate-200 transition-all">Nanti dulu</button>
-                <button type="button" onclick="App.studioAI.submitSmartBrief()" class="btn-brand-gradient px-5 py-2.5 rounded-xl text-xs sm:text-sm font-extrabold shadow-md">Cari yang Paling Nyambung <i class="fa-solid fa-arrow-right ml-1 text-[#FACC15]"></i></button>
+                <button type="button" onclick="App.studioAI.submitSmartBrief(this)" class="btn-brand-gradient px-5 py-2.5 rounded-xl text-xs sm:text-sm font-extrabold shadow-md transition-all">Cari yang Paling Nyambung <i class="fa-solid fa-arrow-right ml-1 text-[#FACC15]"></i></button>
             </div>
         </div>
     </div>
@@ -3029,7 +3031,7 @@ App.router.bindCanonicalLinkGuard();
                 _creatorDisplayLimit: 6,
 
                 // Submit Pop-up Brief: Ambil keyword, jalankan pencarian, tutup pop-up, dan scroll ke hasil
-                submitSmartBrief: () => {
+                submitSmartBrief: (btnElement = null) => {
                     const input = document.getElementById('studio-smart-brief-input');
                     const briefText = String(input?.value || '').trim();
 
@@ -3037,6 +3039,18 @@ App.router.bindCanonicalLinkGuard();
                         App.ui.toast('Ceritakan sedikit kebutuhanmu dulu, meski cuma 1–2 kata 😄', 'info');
                         input?.focus();
                         return;
+                    }
+
+                    // Pencegahan Double-Submit (Spam-Click)
+                    if (btnElement) {
+                        if (btnElement.disabled) return;
+                        btnElement.disabled = true;
+                        const originalHtml = btnElement.innerHTML;
+                        btnElement.innerHTML = '<i class="fa-solid fa-spinner animate-spin"></i> Mencari...';
+                        setTimeout(() => {
+                            btnElement.disabled = false;
+                            btnElement.innerHTML = originalHtml;
+                        }, 1000);
                     }
 
                     // Terapkan keyword utama
