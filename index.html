@@ -74,6 +74,9 @@
     <!-- CANONICAL SUPABASE BOOT: SDK + config before all feature runtimes -->
     <meta http-equiv="Content-Security-Policy" content="default-src 'self'; connect-src 'self' https://*.supabase.co wss://*.supabase.co https://api.frankfurter.app; script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' https://cdnjs.cloudflare.com https://fonts.googleapis.com; font-src 'self' https://cdnjs.cloudflare.com https://fonts.gstatic.com; img-src 'self' data: https:; frame-src 'self' https://www.youtube.com https://www.youtube-nocookie.com https://drive.google.com;">
 
+    <link rel="dns-prefetch" href="https://cdn.jsdelivr.net">
+    <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
+
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2" crossorigin="anonymous"></script>
     <script src="/supabase-config.js?v=boot4"></script>
     <!-- Tailwind CSS: compiled production utility layer -->
@@ -3041,15 +3044,17 @@ App.router.bindCanonicalLinkGuard();
                         return;
                     }
 
-                    // Pencegahan Double-Submit (Spam-Click)
+                    // Proteksi Double-Submit (Spam-Click Guard)
                     if (btnElement) {
                         if (btnElement.disabled) return;
                         btnElement.disabled = true;
                         const originalHtml = btnElement.innerHTML;
-                        btnElement.innerHTML = '<i class="fa-solid fa-spinner animate-spin"></i> Mencari...';
+                        btnElement.innerHTML = '<i class="fa-solid fa-spinner animate-spin mr-1.5"></i> Memproses...';
                         setTimeout(() => {
-                            btnElement.disabled = false;
-                            btnElement.innerHTML = originalHtml;
+                            if (btnElement) {
+                                btnElement.disabled = false;
+                                btnElement.innerHTML = originalHtml;
+                            }
                         }, 1000);
                     }
 
@@ -3071,7 +3076,7 @@ App.router.bindCanonicalLinkGuard();
                     // Render ulang Creator
                     App.studioAI.renderCreators();
 
-                    // Scroll ke hasil pencarian
+                    // Scroll halus ke hasil pencarian
                     setTimeout(() => {
                         if (creatorSec) {
                             creatorSec.scrollIntoView({ behavior: 'smooth', block: 'start' });
