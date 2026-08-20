@@ -2,7 +2,7 @@
 <html lang="id" class="h-full bg-[#EBF3FF]">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" 
+    <meta name="viewport"
         content="width=device-width, initial-scale=1.0">
     <title>Studihome - Platform Pembelajaran Digital, Otomasi dan Agentic AI</title>
     <meta name="title" content="Studihome - Platform Pembelajaran Digital, Otomasi dan Agentic AI">
@@ -82,13 +82,13 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <!-- Google Fonts Inter -->
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
-    
+
     <style>
         * {
             font-family: 'Inter', sans-serif;
             -webkit-tap-highlight-color: transparent;
         }
-        
+
         :root {
             --bg-app: #EBF3FF;
             --brand-hero-start: #151c75;
@@ -708,7 +708,7 @@
         ::-webkit-scrollbar-thumb:hover {
             background: #151c75;
         }
-    
+
         /* SMART Decision Flow — additive only */
         .smart-decision-card { background: linear-gradient(135deg, rgba(235,243,255,.96), rgba(255,255,255,.98)); border: 1px solid #dbe7ff; box-shadow: 0 14px 32px rgba(21,28,117,.09); }
         .smart-decision-badge { background: linear-gradient(135deg,#151c75,#3f48bf); color:#fff; box-shadow:0 5px 14px rgba(21,28,117,.18); }
@@ -782,7 +782,7 @@
     <!-- TOP NAVIGATION BAR -->
     <header class="sticky top-0 z-40 bg-white/95 backdrop-blur-md border-b border-blue-100 px-3 sm:px-6 py-3 shadow-xs">
         <div class="max-w-7xl mx-auto flex items-center justify-between gap-2 sm:gap-4">
-            
+
             <!-- Brand Logo: Clean icon & Studihome without subtext -->
             <div class="flex items-center gap-2 cursor-pointer select-none" onclick="App.router.navigate('home')">
                 <span class="text-[#EAB308] font-black text-2xl sm:text-3xl animate-spin-slow leading-none flex items-center justify-center">✦</span>
@@ -811,7 +811,7 @@
                 <div id="api-status-badge" class="hidden sm:flex items-center justify-center w-4 h-4 cursor-help server-status-tooltip border-0 bg-transparent shadow-none" data-status="connecting" data-tooltip="Sedang menghubungkan ke Supabase" aria-label="Status koneksi Studihome" tabindex="0">
                     <span id="api-status-dot" class="block w-2.5 h-2.5 rounded-full bg-sky-500 animate-pulse" aria-hidden="true"></span>
                 </div>
-                
+
                 <!-- Global Search — Mobile Icon -->
                 <button type="button" onclick="App.search.openModal()" aria-label="Buka pencarian" title="Cari produk" class="flex sm:hidden w-9 h-9 items-center justify-center rounded-xl text-[#151c75] hover:bg-blue-50 transition-all">
                     <i class="fa-solid fa-magnifying-glass text-sm"></i>
@@ -875,7 +875,7 @@
             <div class="mt-4 rounded-2xl border border-blue-100 bg-blue-50/70 p-4">
                 <textarea id="studio-smart-brief-input" rows="4" class="w-full rounded-xl bg-white border border-blue-100 px-3.5 py-3 text-xs sm:text-sm text-slate-700 outline-none focus:ring-2 focus:ring-[#151c75] resize-none" placeholder="Contoh: video iklan untuk UMKM. Atau cukup ketik: video iklan 😄"></textarea>
                 <div id="studio-smart-context" class="hidden mt-3"></div>
-                
+
                 <!-- Opsi Otomatis Ngobrol Biasa dengan Teks Lebih Besar -->
                 <div class="studio-smart-conversation-hint rounded-2xl p-3.5 mt-3 bg-white/90 border border-blue-100 shadow-2xs">
                     <div class="flex items-start gap-2.5">
@@ -899,7 +899,7 @@
             </div>
             <div id="studio-smart-shortlist" class="hidden"></div><div id="studio-smart-understanding" class="mt-4"></div><div id="studio-smart-team-solo"></div>
             <div id="studio-smart-brief-results" class="mt-4"></div>
-            
+
             <div class="mt-5 flex flex-wrap justify-end gap-2">
                 <button type="button" onclick="App.studioAI.closeSmartBrief()" class="px-4 py-2.5 rounded-xl text-xs font-bold text-slate-600 bg-slate-100 hover:bg-slate-200 transition-all">Nanti dulu</button>
                 <button type="button" onclick="App.studioAI.submitSmartBrief()" class="btn-brand-gradient px-5 py-2.5 rounded-xl text-xs sm:text-sm font-extrabold shadow-md">Cari yang Paling Nyambung <i class="fa-solid fa-arrow-right ml-1 text-[#FACC15]"></i></button>
@@ -1624,7 +1624,7 @@ App.router.bindCanonicalLinkGuard();
                 renderNavigation: () => {
                     const nav = document.getElementById('top-nav-links');
                     const mNav = document.getElementById('mobile-nav-links');
-                    
+
                     const user = App.state.user;
                     const hash = App.state.routeType === 'studio-ai' ? 'studio-ai' : (App.state.routeType === 'creator' ? 'studio-ai' : (App.state.routeType === 'dapur' ? 'dapur' : (App.state.activeTab || 'home')));
 
@@ -1645,8 +1645,8 @@ App.router.bindCanonicalLinkGuard();
                     if (nav) {
                         nav.innerHTML = items.map(item => `
                             <button onclick="App.router.navigate('${item.key}')" class="px-3.5 py-1.5 rounded-xl transition-all flex items-center gap-1.5 ${
-                                hash === item.key 
-                                    ? 'btn-brand-gradient font-extrabold shadow-2xs' 
+                                hash === item.key
+                                    ? 'btn-brand-gradient font-extrabold shadow-2xs'
                                     : 'text-slate-700 hover:text-[#151c75] font-bold'
                             }">
                                 <i class="fa-solid ${item.icon} text-xs"></i>
@@ -1670,7 +1670,7 @@ App.router.bindCanonicalLinkGuard();
                 renderTopAuth: () => {
                     const area = document.getElementById('top-auth-area');
                     App.ui.renderNavigation();
-                    
+
                     if (App.state.user) {
                         area.innerHTML = `
                             <div class="flex items-center gap-2">
@@ -2610,7 +2610,7 @@ App.router.bindCanonicalLinkGuard();
                     try {
                         const res = await App.api.post('AUTH_LOGIN', { email, password });
                         const userData = res.user || res;
-                        
+
                         App.state.user = userData;
                         App.state.memberData = await App.api.post('GET_MEMBER_DASHBOARD');
 
@@ -2852,7 +2852,7 @@ App.router.bindCanonicalLinkGuard();
                             <div class="animate-marquee-ltr whitespace-nowrap flex items-center gap-8 sm:gap-12 font-extrabold text-slate-800 text-xs sm:text-sm tracking-wide">
                                 ${aiLinks.concat(aiLinks).map(a => `
                                     <span class="inline-flex items-center gap-2 bg-white/90 px-3 py-1.5 rounded-xl border border-blue-100 shadow-2xs">
-                                        <i class="${a.icon} text-sm"></i> 
+                                        <i class="${a.icon} text-sm"></i>
                                         <span class="text-[#151c75] font-extrabold">${App.utils.escapeHtml(a.name)}</span>
                                     </span>
                                 `).join('')}
@@ -4416,7 +4416,7 @@ App.router.bindCanonicalLinkGuard();
                     const creators = (data.creators || []).map(c => {
                         const services = c.services || [];
                         const catNames = (c.category_names || []).map(n => String(n).toLowerCase());
-                        const matchCategory = !activeCategory || 
+                        const matchCategory = !activeCategory ||
                             services.some(s => s.category_id === activeCategory.id) ||
                             catNames.includes(String(activeCategory.name || '').toLowerCase()) ||
                             catNames.includes(String(activeCategory.slug || '').toLowerCase());
@@ -4473,7 +4473,7 @@ App.router.bindCanonicalLinkGuard();
                     // --- LOGIKA BARU UNTUK TAMPILKAN 6 CREATOR PERTAMA & TOMBOL LOAD MORE ---
                     const limit = App.studioAI._creatorDisplayLimit || 6;
                     const visibleCreators = creators.slice(0, limit);
-                    
+
                     const loadMoreWrap = document.getElementById('studio-ai-load-more-wrap');
                     if (loadMoreWrap) {
                         if (creators.length > limit) {
@@ -4683,7 +4683,7 @@ App.router.bindCanonicalLinkGuard();
                                             <span class="px-2.5 py-1 rounded-lg bg-blue-50 border border-blue-100 text-[9px] font-black uppercase tracking-wider text-[#151c75]">${App.utils.escapeHtml(targetPortfolio.media_type || 'Media')}</span>
                                         </div>
                                         <h2 class="text-2xl sm:text-3xl font-black text-[#151c75] leading-tight mb-5">${App.utils.escapeHtml(targetPortfolio.title)}</h2>
-                                        
+
                                         <!-- Media Interaktif: Bisa tap layar penuh khusus mobile -->
                                         <style>
     .fs-close-btn { display: none; }
@@ -4695,21 +4695,21 @@ App.router.bindCanonicalLinkGuard();
     </button>
     ${App.creator._mediaHTML(targetPortfolio.media_type, targetPortfolio.media_url, targetPortfolio.title)}
 </div>
-                                        
+
                                         ${targetPortfolio.description ? `
                                         <div class="mb-8">
                                             <h3 class="text-sm font-extrabold text-slate-800 mb-2">Tentang Karya Ini</h3>
                                             <p class="text-xs sm:text-sm text-slate-600 leading-relaxed whitespace-pre-wrap">${App.utils.escapeHtml(targetPortfolio.description)}</p>
                                         </div>` : ''}
-                                        
+
                                         <!-- Tombol Pil Rata Kiri, Lebar Menyesuaikan Teks di Desktop, Tanpa Garis Atas -->
                                         <div class="flex flex-row items-center justify-start w-full gap-2 sm:gap-3 mt-6">
                                             <button type="button" onclick="App.creator.togglePortfolioLike('${targetPortfolio.id}', ${targetPortfolio.is_liked ? 'true' : 'false'}, this)" class="flex-1 sm:flex-none sm:w-fit py-2.5 px-3 sm:px-6 rounded-full text-[11px] sm:text-xs font-extrabold border transition-all shadow-sm flex items-center justify-center gap-1.5 sm:gap-2 whitespace-nowrap overflow-hidden ${targetPortfolio.is_liked ? 'bg-rose-50 border-rose-200 text-rose-600 hover:bg-rose-100' : 'bg-white border-slate-200 text-slate-700 hover:bg-slate-50'}">
                                                 ${targetPortfolio.is_liked ? '<i class="fa-solid fa-heart text-sm shrink-0"></i> <span class="truncate">Disukai</span>' : '<i class="fa-regular fa-heart text-sm shrink-0"></i> <span class="truncate">Suka</span>'}
                                             </button>
-                                            
+
                                             ${c.whatsapp ? `<a href="${App.creator._waUrl(c.whatsapp, c.display_name, 'Halo ' + (c.display_name || 'Creator') + ', saya sangat tertarik dengan karya Anda yang berjudul: ' + targetPortfolio.title + '. Bisa kita ngobrol lebih lanjut?')}" target="_blank" rel="noopener noreferrer" class="flex-1 sm:flex-none sm:w-fit py-2.5 px-3 sm:px-6 rounded-full bg-yellow-100/70 backdrop-blur-md border border-yellow-200/80 text-yellow-900 text-[11px] sm:text-xs font-extrabold hover:bg-yellow-200/80 hover:border-yellow-300 transition-all shadow-sm flex items-center justify-center gap-1.5 sm:gap-2 whitespace-nowrap overflow-hidden"><i class="fa-brands fa-whatsapp text-sm sm:text-base text-emerald-600 shrink-0"></i> <span class="truncate">Ngobrol</span></a>` : ''}
-                                            
+
                                             <button type="button" onclick="App.creator.sharePortfolio('${App.utils.escapeHtml(c.username)}', '${App.creator._slugify(targetPortfolio.title)}', '${App.utils.escapeHtml(targetPortfolio.title)}')" class="shrink-0 sm:flex-none sm:w-fit py-2.5 px-3.5 sm:px-6 rounded-full text-[11px] sm:text-xs font-extrabold bg-blue-50 border border-blue-200 text-[#151c75] hover:bg-blue-100 transition-all shadow-sm flex items-center justify-center gap-1.5 sm:gap-2">
                                                 <i class="fa-solid fa-share-nodes text-sm shrink-0"></i> <span class="hidden sm:inline truncate">Bagikan</span>
                                             </button>
@@ -4732,12 +4732,12 @@ App.router.bindCanonicalLinkGuard();
                                         <article class="creator-service-card card-3d p-5 sm:p-6 rounded-3xl bg-white border border-slate-200/80 flex flex-col h-full transition-transform hover:-translate-y-1">
                                             <h3 class="font-extrabold text-base sm:text-lg text-[#151c75] mb-2 leading-snug">${App.utils.escapeHtml(s.title)}</h3>
                                             <p class="text-xs sm:text-sm text-slate-600 leading-relaxed mb-6 flex-grow">${App.utils.escapeHtml(s.description || '')}</p>
-                                            
+
                                             <div class="flex flex-wrap items-center gap-2 mb-6">
                                                 <span class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-blue-50 text-[#151c75] text-[10px] sm:text-xs font-extrabold border border-blue-100"><i class="fa-regular fa-clock"></i>Estimasi ${Number(s.delivery_days || 1)} Hari Selesai</span>
                                                 ${s.category_name ? `<span class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-slate-50 text-slate-600 text-[10px] sm:text-xs font-extrabold border border-slate-100"><i class="fa-solid fa-tag"></i>${App.utils.escapeHtml(s.category_name)}</span>` : ''}
                                             </div>
-                                            
+
                                             <div class="mt-auto flex flex-wrap items-center justify-between gap-3">
                                                 <div>
                                                     <div class="text-[9px] sm:text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-0.5">Harga Layanan</div>
@@ -4760,7 +4760,7 @@ App.router.bindCanonicalLinkGuard();
                                         const url = App.utils.safeUrl(p.media_url || '', '#');
                                         const type = (p.media_type || 'link').toLowerCase();
                                         let isVid = type === 'youtube' || type === 'video' || url.includes('youtube') || url.includes('youtu.be') || url.endsWith('.mp4');
-                                        
+
                                         if (type === 'youtube' || url.includes('youtube.com') || url.includes('youtu.be')) {
                                             const m = url.match(/(?:youtube\.com\/(?:watch\?v=|shorts\/|live\/)|youtu\.be\/)([A-Za-z0-9_-]{6,})/i);
                                             if (m) thumbHTML = `<img src="https://img.youtube.com/vi/${m[1]}/hqdefault.jpg" alt="${App.utils.escapeHtml(p.title)}" class="w-full h-full object-cover">`;
@@ -4785,7 +4785,7 @@ App.router.bindCanonicalLinkGuard();
                                             <div class="p-4 sm:p-5 flex flex-col flex-grow">
                                                 <h3 class="text-sm font-extrabold text-[#151c75] group-hover:text-[#3f48bf] transition-colors leading-snug">${App.utils.escapeHtml(p.title)}</h3>
                                                 <p class="text-[10px] sm:text-xs text-slate-500 line-clamp-2 mt-2 leading-relaxed flex-grow">${App.utils.escapeHtml(p.description || '')}</p>
-                                                
+
                                                 <div class="mt-5 flex items-center justify-between gap-2">
                                                     <div class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full border border-slate-200 bg-slate-50 text-[#151c75] text-[11px] font-extrabold group-hover:bg-[#151c75] group-hover:text-white group-hover:border-[#151c75] transition-all shadow-sm">
                                                         Detail Ambalan <i class="fa-solid fa-arrow-right"></i>
@@ -5064,7 +5064,7 @@ renderCreatorStandardSummary: (creator, data, categories, services, portfolios) 
                     const maxVisible = 3;
                     const visibleFeatures = rawFeatures.slice(0, maxVisible);
                     const extraCount = rawFeatures.length - maxVisible;
-                    
+
                     const status = App.products.getUserProductStatus(p.id);
 
                     let actionBtnHTML = '';
@@ -5138,7 +5138,7 @@ renderCreatorStandardSummary: (creator, data, categories, services, portfolios) 
                                             ${p.isFree ? 'Rp 0' : 'Rp ' + Number(p.price).toLocaleString('id-ID')}
                                         </span>
                                     </div>
-                                    
+
                                     <div class="flex items-center gap-1.5">
                                         <!-- Clean Info Icon without border -->
                                         <button onclick="App.products.openDetailModal('${p.id}')" aria-label="Detail Produk" title="Detail Produk" class="text-[#151c75] hover:text-[#3f48bf] p-1.5 transition-colors shrink-0">
@@ -5246,7 +5246,7 @@ renderCreatorStandardSummary: (creator, data, categories, services, portfolios) 
                     try {
                         const dashData = await App.api.post('GET_MEMBER_DASHBOARD');
                         const container = document.getElementById('owned-products-container');
-                        
+
                         const verifiedProducts = dashData.verifiedProducts || [];
                         const userOrders = dashData.userOrders || [];
 
@@ -5463,7 +5463,7 @@ renderCreatorStandardSummary: (creator, data, categories, services, portfolios) 
                                 ${modules.map((m) => `
                                     <div class="card-3d-inset p-4 sm:p-5 rounded-2xl space-y-3.5">
                                         <h3 class="font-bold text-sm text-[#151c75]">${App.utils.escapeHtml(m.title)}</h3>
-                                        
+
                                         ${m.yt_url ? App.dashboard.renderModuleMedia(m.yt_url, m.title) : ''}
 
                                         <div class="card-3d p-4 rounded-xl text-xs sm:text-sm text-slate-700 whitespace-pre-line leading-relaxed bg-white">
@@ -5923,7 +5923,7 @@ ${(() => { const rs=String(p.review_status||'DRAFT').toUpperCase(); const map={D
                 openCreatorPortfolios: async (id) => { try { const {data,error}=await supabaseClient.from('creator_portfolios').select('id,title,media_type,is_active,created_at').eq('creator_id',id).order('created_at',{ascending:false}); if(error)throw error; const html=(data||[]).map(p=>`<div class="flex items-center justify-between gap-2 p-2.5 border border-slate-200 rounded-xl"><div class="min-w-0"><div class="text-[10px] font-bold text-[#151c75] truncate">${App.utils.escapeHtml(p.title)}</div><div class="text-[9px] text-slate-400">${App.utils.escapeHtml(p.media_type||'media')} · ${p.is_active?'Tayang':'Disembunyikan'}</div></div><button onclick="App.admin.toggleCreatorPortfolio('${p.id}',${p.is_active?'false':'true'},'${id}')" class="text-[10px] font-bold ${p.is_active?'text-red-700 bg-red-50':'text-emerald-700 bg-emerald-50'} px-2.5 py-1.5 rounded-lg">${p.is_active?'Sembunyikan':'Tampilkan'}</button></div>`).join('') || '<div class="text-xs text-slate-500">Belum ada portfolio.</div>'; const box=document.getElementById('creator-trust-admin-area');if(box)box.innerHTML=`<div class="card-3d p-4 rounded-2xl bg-white"><div class="flex items-center justify-between mb-3"><h4 class="text-sm font-extrabold text-[#151c75]">Moderasi Portfolio</h4><button onclick="App.admin.renderSubTab()" class="text-xs font-bold text-[#151c75]">Kembali</button></div><div class="space-y-2">${html}</div></div>`;}catch(e){App.ui.toast(e.message||'Portfolio belum bisa dimuat.','error');}},
                 toggleCreatorPortfolio: async (id, active, creatorId) => { try{await App.api.post('ADMIN_MODERATE_CREATOR_PORTFOLIO',{portfolioId:id,active});App.ui.toast(active?'Portfolio ditampilkan.':'Portfolio disembunyikan.','success');await App.admin.openCreatorPortfolios(creatorId);}catch(e){App.ui.toast(e.message||'Portfolio belum bisa diubah.','error');}},
 
-                
+
                 renderGovernance: async () => {
                     const area = document.getElementById('admin-content-area');
                     if (!area) return;
@@ -6291,7 +6291,7 @@ renderStudioAiControl: async () => {
                             area.innerHTML = `
                                 <div class="space-y-6">
                                     <h3 class="font-bold text-sm text-[#151c75]">Kelola Modul Pembelajaran</h3>
-                                    
+
                                     <div>
                                         <label class="block text-xs font-bold text-slate-700 mb-1">Pilih Produk Ditujukan:</label>
                                         <select id="admin-module-prod-select" onchange="App.admin.loadProductModulesForAdmin(this.value)" class="w-full card-3d-inset px-3.5 py-2.5 rounded-xl text-xs font-bold text-[#151c75] outline-none">
@@ -6314,7 +6314,7 @@ renderStudioAiControl: async () => {
                             area.innerHTML = `
                                 <div class="space-y-6 sm:space-y-8">
                                     <h3 class="font-bold text-sm text-[#151c75]">Master Data Terpadu</h3>
-                                    
+
                                     <!-- HERO SECTION MANAGEMENT WITH 4 CTA INPUT FIELDS -->
                                     <div class="card-3d-inset p-4 sm:p-5 rounded-2xl space-y-3">
                                         <h4 class="font-bold text-xs text-[#151c75] uppercase tracking-wider"><i class="fa-solid fa-heading mr-1 text-amber-500"></i> Kelola Tampilan Hero Teras</h4>
@@ -6598,7 +6598,7 @@ renderStudioAiControl: async () => {
                                 <label class="block text-[10px] font-bold text-slate-600 mb-1">Deskripsi Singkat</label>
                                 <textarea id="p-desc" required placeholder="Deskripsi Singkat" class="w-full card-3d px-3 py-2 rounded-xl text-xs bg-white">${App.utils.escapeHtml(p.desc)}</textarea>
                             </div>
-                            
+
                             <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
                                 <div>
                                     <label class="block text-[10px] font-bold text-slate-600 mb-1">Harga Diskon / Saat Ini (Rp)</label>
@@ -6831,7 +6831,7 @@ renderStudioAiControl: async () => {
                 openAiLinkModal: (index = -1) => {
                     const aiLinks = App.state.demo.aiLinks || [];
                     document.getElementById('ai-link-index').value = index;
-                    
+
                     if (index >= 0 && aiLinks[index]) {
                         document.getElementById('ai-link-modal-title').textContent = "Edit Tautan AI";
                         document.getElementById('ai-link-name').value = aiLinks[index].name;
@@ -7281,7 +7281,7 @@ renderStudioAiControl: async () => {
             }
         };
 
-        
+
 (function(){
   function ensureSmartDemandNote(){
     if(document.getElementById('smart-demand-note')) return;
