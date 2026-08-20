@@ -1,0 +1,425 @@
+name: Refine Studio AI card and Dapur UX
+on:
+  push:
+    branches: [feat/studio-ai-creator-card-dapur-profile-v2]
+  workflow_dispatch:
+permissions:
+  contents: write
+jobs:
+  refine:
+    if: github.actor != 'github-actions[bot]'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Apply scoped UI and UX refinements
+        shell: python
+        run: |
+          from pathlib import Path
+          import re
+
+          root = Path('.')
+
+          studio = root / 'studio-ai-creator-card.js'
+          studio.write_text(r'''(()=>{
+          'use strict';
+          if(window.__STUDIO_AI_CREATOR_CARD_V2__) return;
+          window.__STUDIO_AI_CREATOR_CARD_V2__=true;
+
+          const esc=v=>window.App?.utils?.escapeHtml
+            ? window.App.utils.escapeHtml(v)
+            : String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[c]));
+          const norm=v=>String(v||'').trim().toLowerCase();
+          const route=()=>location.pathname.replace(/\/+$/,'')||'/';
+          const onStudio=()=>route()==='/studio-ai';
+          let lastSignature='';
+          let renderTimer=null;
+
+          const css=`
+          .studio-premium-grid .studio-premium-card,
+          #studio-ai-creators-grid .studio-premium-card{overflow:hidden;border:1px solid #e5e7eb;border-radius:30px;background:#fff;box-shadow:0 14px 34px rgba(15,23,42,.07);transition:transform .28s ease,box-shadow .28s ease,border-color .28s ease;isolation:isolate}
+          .studio-premium-card:hover{transform:translateY(-5px);box-shadow:0 26px 60px rgba(21,28,117,.14);border-color:#d8def8}
+          .studio-premium-media{position:relative;aspect-ratio:1/1;overflow:hidden;margin:12px;border-radius:23px;background:linear-gradient(135deg,#eef3ff,#f8fafc);box-shadow:inset 0 0 0 1px rgba(255,255,255,.55)}
+          .studio-premium-media:after{content:"";position:absolute;inset:0;background:linear-gradient(180deg,rgba(255,255,255,.08),transparent 45%,rgba(15,23,42,.06));pointer-events:none}
+          .studio-premium-media img{width:100%;height:100%;display:block;object-fit:cover;transition:transform .55s cubic-bezier(.2,.7,.2,1),filter .35s ease}
+          .studio-premium-card:hover .studio-premium-media img{transform:scale(1.045);filter:saturate(1.03)}
+          .studio-premium-badge{position:absolute;top:14px;left:14px;z-index:2;max-width:calc(100% - 62px);padding:8px 11px;border-radius:999px;background:rgba(255,255,255,.94);border:1px solid rgba(226,232,240,.96);color:#151c75;font-size:10px;font-weight:900;line-height:1;box-shadow:0 8px 22px rgba(15,23,42,.12);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;backdrop-filter:blur(8px)}
+          .studio-premium-check{position:absolute;top:14px;right:14px;z-index:3;width:36px;height:36px;display:grid;place-items:center;border-radius:50%;background:#fff;color:#2563eb;border:1px solid rgba(226,232,240,.96);box-shadow:0 8px 22px rgba(15,23,42,.14)}
+          .studio-premium-check i{font-size:14px}
+          .studio-premium-body{padding:4px 17px 17px}
+          .studio-premium-name{display:flex;align-items:center;gap:7px;color:#111827;font-size:18px;font-weight:900;letter-spacing:-.025em;text-decoration:none;line-height:1.2}
+          .studio-premium-name .studio-premium-name-check{color:#2563eb;font-size:13px;flex:none}
+          .studio-premium-desc{margin:8px 0 0;min-height:40px;color:#7a8798;font-size:12px;line-height:1.55;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+          .studio-premium-bottom{display:grid;grid-template-columns:minmax(0,1fr) auto;align-items:center;gap:10px;margin-top:16px}
+          .studio-premium-pricebox{display:flex;align-items:center;gap:10px;min-width:0}
+          .studio-premium-price{display:inline-flex;align-items:center;min-height:40px;padding:0 14px;border-radius:999px;background:#f3f4f6;color:#111827;font-size:18px;font-weight:900;white-space:nowrap;box-shadow:inset 0 1px 0 rgba(255,255,255,.85)}
+          .studio-premium-likes{display:inline-flex;align-items:center;gap:4px;color:#64748b;font-size:11px;font-weight:800;white-space:nowrap}
+          .studio-premium-likes i{color:#ef4444;font-size:10px}
+          .studio-premium-profile{display:inline-flex;align-items:center;justify-content:center;gap:7px;min-height:40px;padding:0 15px;border-radius:999px;color:#fff;background:#111827;border:1px solid #111827;text-decoration:none;font-size:12px;font-weight:900;box-shadow:0 8px 18px rgba(17,24,39,.15);transition:transform .2s ease,box-shadow .2s ease,background .2s ease}
+          .studio-premium-profile:hover{transform:translateY(-1px);box-shadow:0 12px 24px rgba(17,24,39,.2);background:#151c75;border-color:#151c75}
+          .studio-premium-avatar{width:100%;height:100%;display:grid;place-items:center;color:#151c75;font-size:34px;font-weight:900;background:radial-gradient(circle at 30% 20%,#fff,#e7edff 72%)}
+          @media(max-width:640px){.studio-premium-body{padding:3px 14px 14px}.studio-premium-bottom{grid-template-columns:1fr;gap:9px}.studio-premium-profile{width:100%}}
+          `;
+
+          function injectStyle(){
+            if(document.getElementById('studio-premium-card-style-v2')) return;
+            const el=document.createElement('style');
+            el.id='studio-premium-card-style-v2';
+            el.textContent=css;
+            document.head.appendChild(el);
+          }
+
+          async function getItems(){
+            const a=window.App?.studioAI;
+            const smart=a?._smartLastResults||a?._smartResults;
+            if(Array.isArray(smart)&&smart.length) return smart.slice(0,Number(a?._creatorDisplayLimit||12));
+            return [];
+          }
+
+          async function getPrimaryCategories(ids){
+            const map=new Map();
+            if(!ids.length||!window.supabaseClient) return map;
+            try{
+              const q=await window.supabaseClient.from('creator_category_members').select('creator_id,is_primary,ai_categories(name)').in('creator_id',ids);
+              for(const row of q.data||[]){
+                const name=row.ai_categories?.name;
+                if(!name) continue;
+                if(!map.has(row.creator_id)||row.is_primary===true) map.set(row.creator_id,name);
+              }
+            }catch(_){ }
+            return map;
+          }
+
+          async function render(){
+            if(!onStudio()) return;
+            const grid=document.getElementById('studio-ai-creators-grid');
+            if(!grid) return;
+            const items=await getItems();
+            if(!items.length) return;
+            injectStyle();
+            const cats=await getPrimaryCategories(items.map(x=>x.id).filter(Boolean));
+            const signature=items.map(x=>[x.id,x.username,x.avatar_url,x.is_verified,x.likes,x.price_from,x.bio,cats.get(x.id)||x.primary_category||'Creator'].join('|')).join('||');
+            if(signature===lastSignature && grid.querySelector('.studio-premium-card')) return;
+            lastSignature=signature;
+            grid.innerHTML=items.map(c=>{
+              const name=c.display_name||norm(c.username)||'Creator';
+              const username=norm(c.username);
+              const category=cats.get(c.id)||c.primary_category||'Creator';
+              const desc=c.bio||'Creator Studihome siap membantu kebutuhanmu.';
+              const price=Number(c.price_from||c.services?.[0]?.price_from||0);
+              const likes=Number(c.likes||0);
+              const href=username?`/${encodeURIComponent(username)}`:'#';
+              const image=c.avatar_url
+                ?`<img src="${esc(c.avatar_url)}" alt="Foto profil ${esc(name)}" loading="lazy" decoding="async">`
+                :`<div class="studio-premium-avatar" aria-hidden="true">${esc(name.charAt(0).toUpperCase())}</div>`;
+              const check=c.is_verified
+                ?`<span class="studio-premium-check" title="Creator terverifikasi" aria-label="Creator terverifikasi"><i class="fa-solid fa-check"></i></span>`
+                :'';
+              const verifiedName=c.is_verified
+                ?`<i class="studio-premium-name-check fa-solid fa-circle-check" aria-hidden="true"></i>`
+                :'';
+              return `<article class="studio-premium-card">
+                <a href="${href}" aria-label="Lihat profil ${esc(name)}">
+                  <div class="studio-premium-media">${image}<span class="studio-premium-badge">${esc(category)}</span>${check}</div>
+                </a>
+                <div class="studio-premium-body">
+                  <a class="studio-premium-name" href="${href}">${esc(name)}${verifiedName}</a>
+                  <p class="studio-premium-desc">${esc(desc)}</p>
+                  <div class="studio-premium-bottom">
+                    <div class="studio-premium-pricebox">
+                      <strong class="studio-premium-price">${price>0?'Rp '+price.toLocaleString('id-ID'):'Hubungi Creator'}</strong>
+                      <span class="studio-premium-likes"><i class="fa-solid fa-heart"></i>${likes.toLocaleString('id-ID')}</span>
+                    </div>
+                    <a class="studio-premium-profile" href="${href}"><span>Profil</span><i class="fa-solid fa-arrow-up-right-from-square" aria-hidden="true"></i></a>
+                  </div>
+                </div>
+              </article>`;
+            }).join('');
+          }
+
+          function schedule(){
+            clearTimeout(renderTimer);
+            renderTimer=setTimeout(()=>{render().catch(()=>{});},120);
+          }
+
+          function boot(){
+            injectStyle();
+            schedule();
+            const root=document.body||document.documentElement;
+            new MutationObserver(schedule).observe(root,{childList:true,subtree:true});
+            let attempts=0;
+            const timer=setInterval(()=>{
+              attempts+=1;
+              if(!onStudio()||attempts>40){clearInterval(timer);return;}
+              schedule();
+            },500);
+          }
+
+          window.StudioAICreatorCard={render};
+          document.readyState==='loading'
+            ?document.addEventListener('DOMContentLoaded',boot,{once:true})
+            :boot();
+          })();
+          ''', encoding='utf-8')
+
+          dpe = root / 'dapur-profile-enhancements.js'
+          dpe.write_text(r'''(()=>{
+          'use strict';
+          if(window.__DAPUR_PROFILE_ENHANCEMENTS_V2__) return;
+          window.__DAPUR_PROFILE_ENHANCEMENTS_V2__=true;
+
+          const db=()=>window.supabaseClient;
+          const esc=v=>window.App?.utils?.escapeHtml?window.App.utils.escapeHtml(v):String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[c]));
+          const toast=(m,k='info')=>window.App?.ui?.toast?window.App.ui.toast(m,k):alert(m);
+          const path=()=>location.pathname.replace(/\/+$/,'')||'/';
+          const onDapur=()=>/^\/dapur(?:\/[a-z0-9][a-z0-9-]{2,39})?$/i.test(path());
+          let uploadBusy=false;
+
+          const css=`
+          .dpe-overlay{position:fixed;inset:0;z-index:12000;display:flex;align-items:center;justify-content:center;padding:16px;background:rgba(15,23,42,.62);backdrop-filter:blur(12px)}
+          .dpe-modal{width:min(620px,100%);max-height:92dvh;overflow:auto;border:1px solid #dbe5f5;border-radius:30px;background:#fff;box-shadow:0 36px 100px rgba(15,23,42,.28);animation:dpeIn .24s ease}
+          @keyframes dpeIn{from{opacity:0;transform:translateY(10px) scale(.985)}to{opacity:1;transform:translateY(0) scale(1)}}
+          .dpe-head{padding:20px 22px 16px;border-bottom:1px solid #e8edf5;background:linear-gradient(145deg,#f7f9ff,#fff 70%)}
+          .dpe-kicker{color:#667eea;font-size:9px;font-weight:900;letter-spacing:.12em;text-transform:uppercase}
+          .dpe-title{margin:7px 0;color:#151c75;font-size:23px;font-weight:900;letter-spacing:-.03em}
+          .dpe-sub{color:#64748b;font-size:12px;line-height:1.6}
+          .dpe-body{padding:20px 22px}
+          .dpe-avatar{width:116px;height:116px;margin:0 auto 13px;border-radius:32px;overflow:hidden;background:#eef3ff;display:grid;place-items:center;color:#151c75;font-size:36px;font-weight:900;border:4px solid #fff;box-shadow:0 14px 30px rgba(21,28,117,.14)}
+          .dpe-avatar img{width:100%;height:100%;object-fit:cover}
+          .dpe-upload{display:inline-flex;gap:7px;align-items:center;padding:10px 14px;border-radius:13px;background:#151c75;color:#fff;font-size:11px;font-weight:900;cursor:pointer;box-shadow:0 8px 18px rgba(21,28,117,.16)}
+          .dpe-help{text-align:center;color:#94a3b8;font-size:10px;margin-top:7px;line-height:1.5}
+          .dpe-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:16px}
+          .dpe-field{min-width:0}
+          .dpe-field.full{grid-column:1/-1}
+          .dpe-label{display:block;color:#334155;font-size:11px;font-weight:900}
+          .dpe-input{width:100%;min-height:48px;margin-top:7px;padding:11px 13px;border:1px solid #d6dfef;border-radius:14px;color:#182238;background:#f8fafc;font-size:16px;outline:0;transition:.18s}
+          .dpe-input:focus{border-color:#667eea;box-shadow:0 0 0 3px rgba(102,126,234,.1);background:#fff}
+          .dpe-input:disabled{color:#64748b;cursor:not-allowed;background:#f1f5f9}
+          .dpe-note{margin-top:9px;padding:10px 12px;border-radius:14px;background:#fff8e7;border:1px solid #f6df9e;color:#72520a;font-size:10px;line-height:1.55}
+          .dpe-footer{display:flex;justify-content:flex-end;gap:9px;padding:14px 22px;border-top:1px solid #e8edf5;background:#f8fafc}
+          .dpe-btn{min-height:42px;padding:10px 15px;border:1px solid #dbe3ef;border-radius:13px;background:#fff;color:#334155;font-size:12px;font-weight:900;cursor:pointer}
+          .dpe-btn.primary{border:0;background:linear-gradient(135deg,#151c75,#3f48bf);color:#fff;box-shadow:0 8px 18px rgba(21,28,117,.15)}
+          .dpe-btn:disabled{opacity:.6;cursor:not-allowed}
+          @media(max-width:560px){.dpe-grid{grid-template-columns:1fr}.dpe-field.full{grid-column:auto}.dpe-footer .dpe-btn{flex:1}.dpe-modal{border-radius:24px}}
+          `;
+
+          function style(){
+            if(document.getElementById('dpe-style-v2')) return;
+            const s=document.createElement('style');s.id='dpe-style-v2';s.textContent=css;document.head.appendChild(s);
+          }
+
+          function normalize(v){
+            return String(v||'').trim().toLowerCase().replace(/[^a-z0-9-]/g,'-').replace(/-+/g,'-').replace(/^-|-$/g,'').slice(0,40);
+          }
+
+          function readImage(file){
+            if(window.createImageBitmap) return createImageBitmap(file,{imageOrientation:'from-image'});
+            return new Promise((resolve,reject)=>{
+              const fr=new FileReader();
+              fr.onload=()=>{const img=new Image();img.onload=()=>resolve(img);img.onerror=reject;img.src=fr.result};
+              fr.onerror=reject;fr.readAsDataURL(file);
+            });
+          }
+
+          async function optimizeAvatar(file){
+            if(!file||!/^image\/(jpeg|png|webp)$/i.test(file.type)) throw Error('Pakai foto JPG, PNG, atau WebP.');
+            if(file.size>8*1024*1024) throw Error('Foto maksimal 8 MB sebelum diproses.');
+            const img=await readImage(file);
+            const maxSide=640;
+            const srcW=img.width||img.naturalWidth,srcH=img.height||img.naturalHeight;
+            const scale=Math.min(1,maxSide/Math.max(srcW,srcH));
+            const canvas=document.createElement('canvas');
+            canvas.width=Math.max(1,Math.round(srcW*scale));
+            canvas.height=Math.max(1,Math.round(srcH*scale));
+            const ctx=canvas.getContext('2d',{alpha:false});
+            ctx.drawImage(img,0,0,canvas.width,canvas.height);
+            if(img.close) img.close();
+            for(const quality of [.82,.74,.66,.58,.5]){
+              const blob=await new Promise(resolve=>canvas.toBlob(resolve,'image/webp',quality));
+              if(blob&&blob.size<=400*1024) return new File([blob],'avatar.webp',{type:'image/webp'});
+            }
+            throw Error('Foto masih terlalu besar. Pilih foto yang lebih sederhana.');
+          }
+
+          async function open(){
+            style();
+            try{
+              const auth=await db().auth.getUser();
+              if(auth.error||!auth.data.user) throw Error('Silakan masuk terlebih dahulu.');
+              const id=auth.data.user.id;
+              const r=await db().from('creator_profiles').select('id,user_id,username,display_name,bio,avatar_url,username_changed_at').eq('user_id',id).maybeSingle();
+              if(r.error||!r.data) throw r.error||Error('Profil Creator belum tersedia.');
+              const x=r.data;
+              const locked=Boolean(x.username_changed_at);
+              let avatar=x.avatar_url||'';
+              const m=document.createElement('div');
+              m.className='dpe-overlay';
+              m.innerHTML=`<div class="dpe-modal" role="dialog" aria-modal="true" aria-labelledby="dpe-title">
+                <header class="dpe-head">
+                  <button id="dpe-x" type="button" style="float:right;width:38px;height:38px;border:1px solid #dbe3ef;border-radius:12px;background:#fff;color:#151c75;font-size:18px">×</button>
+                  <div class="dpe-kicker">Dapur Creator · Foyer</div>
+                  <h2 id="dpe-title" class="dpe-title">Rapikan profilmu ✨</h2>
+                  <p class="dpe-sub">Foto, nama, username, dan bio di sini akan tampil di profil publik Creator.</p>
+                </header>
+                <form class="dpe-body" id="dpe-f">
+                  <div class="dpe-avatar" id="dpe-a">${avatar?`<img src="${esc(avatar)}" alt="Foto profil">`:esc((x.display_name||x.username||'C').charAt(0).toUpperCase())}</div>
+                  <div style="text-align:center">
+                    <label class="dpe-upload" for="dpe-file"><i class="fa-solid fa-camera"></i> Ganti foto profil</label>
+                    <input id="dpe-file" type="file" accept="image/jpeg,image/png,image/webp" hidden>
+                    <div class="dpe-help">Otomatis diperkecil ke WebP ≤ 400 KB · satu file aktif per Creator.</div>
+                  </div>
+                  <div class="dpe-grid">
+                    <div class="dpe-field"><label class="dpe-label">Nama tampilan<input class="dpe-input" name="name" maxlength="80" value="${esc(x.display_name||'')}" required></label></div>
+                    <div class="dpe-field"><label class="dpe-label">Username publik<input class="dpe-input" name="user" maxlength="40" value="${esc(x.username||'')}" ${locked?'disabled':''} autocapitalize="none" autocomplete="off" spellcheck="false"></label><div class="dpe-note">${locked?'Username sudah dikunci permanen.':'Username hanya dapat diubah satu kali.'}</div></div>
+                    <div class="dpe-field full"><label class="dpe-label">Bio singkat<textarea class="dpe-input" name="bio" maxlength="500" rows="4">${esc(x.bio||'')}</textarea></label></div>
+                  </div>
+                </form>
+                <footer class="dpe-footer"><button class="dpe-btn" id="dpe-c" type="button">Batal</button><button class="dpe-btn primary" id="dpe-s" type="submit" form="dpe-f">Simpan perubahan</button></footer>
+              </div>`;
+              document.body.appendChild(m);
+              const form=m.querySelector('#dpe-f'),file=m.querySelector('#dpe-file'),box=m.querySelector('#dpe-a'),save=m.querySelector('#dpe-s');
+              const close=()=>m.remove();
+              m.querySelector('#dpe-x').onclick=close;
+              m.querySelector('#dpe-c').onclick=close;
+
+              file.onchange=async()=>{
+                if(uploadBusy) return;
+                const picked=file.files?.[0];
+                if(!picked) return;
+                uploadBusy=true;
+                file.disabled=true;
+                try{
+                  const optimized=await optimizeAvatar(picked);
+                  const storage=db().storage.from('creator-media');
+                  const path=`${id}/avatar.webp`;
+                  const up=await storage.upload(path,optimized,{contentType:'image/webp',cacheControl:'31536000',upsert:true});
+                  if(up.error) throw up.error;
+                  const base=storage.getPublicUrl(path).data.publicUrl;
+                  avatar=`${base}?v=${Date.now()}`;
+                  box.innerHTML=`<img src="${esc(avatar)}" alt="Foto profil baru">`;
+                  toast('Foto profil siap disimpan ✨','success');
+                }catch(err){
+                  toast(err?.message||'Foto belum bisa diunggah.','error');
+                }finally{
+                  file.disabled=false;uploadBusy=false;file.value='';
+                }
+              };
+
+              form.onsubmit=async ev=>{
+                ev.preventDefault();
+                save.disabled=true;
+                try{
+                  const oldUsername=x.username;
+                  const nextUsername=locked?oldUsername:normalize(form.user.value);
+                  if(nextUsername.length<3) throw Error('Username minimal 3 karakter.');
+                  if(!locked&&nextUsername!==oldUsername){
+                    const q=await db().rpc('change_creator_username_once',{p_username:nextUsername});
+                    if(q.error) throw q.error;
+                  }
+                  const q=await db().from('creator_profiles').update({display_name:form.name.value.trim(),bio:form.bio.value.trim(),avatar_url:avatar||null}).eq('id',x.id).eq('user_id',id);
+                  if(q.error) throw q.error;
+                  const changed=!locked&&nextUsername!==oldUsername;
+                  toast('Profil berhasil diperbarui. ✨','success');
+                  close();
+                  setTimeout(()=>{location.href=changed?`/dapur/${encodeURIComponent(nextUsername)}`:location.href},320);
+                }catch(err){
+                  const msg=String(err?.message||'');
+                  toast(msg.includes('USERNAME_ALREADY_CHANGED')?'Username sudah pernah diubah.':msg.includes('USERNAME_ALREADY_TAKEN')?'Username itu sudah digunakan.':msg||'Perubahan belum bisa disimpan.','error');
+                }finally{
+                  save.disabled=false;
+                }
+              };
+            }catch(err){toast(err?.message||'Profil belum bisa dibuka.','error')}
+          }
+
+          function boot(){
+            if(!onDapur()) return;
+            const holder=document.querySelector('.workhero .acts');
+            if(!holder||holder.querySelector('[data-dpe]')) return;
+            const b=document.createElement('button');
+            b.className='btn primary';
+            b.type='button';
+            b.dataset.dpe='1';
+            b.innerHTML='<i class="fa-solid fa-wand-magic-sparkles mr-1"></i> Edit Profil';
+            b.setAttribute('aria-label','Edit Profil / Foyer');
+            b.onclick=open;
+            holder.prepend(b);
+          }
+
+          new MutationObserver(boot).observe(document.body,{childList:true,subtree:true});
+          document.readyState==='loading'?document.addEventListener('DOMContentLoaded',boot,{once:true}):boot();
+          window.DapurProfileEnhancements={open};
+          })();
+          ''', encoding='utf-8')
+
+          entry = root / 'dapur-entry.js'
+          s=entry.read_text(encoding='utf-8')
+
+          old_sections="const sections=[['Foyer','Profil, bio, kontak, dan status tayang.'],['Menu','Kategori dan fokus keahlian.'],['Hidangan','Layanan, harga, manfaat, dan estimasi.'],['Ambalan','Portofolio dan bukti kerja.']];"
+          new_sections="const sections=[['Foyer','Profil utama & kontak.','Rapikan identitas Creator-mu.','fa-regular fa-user'],['Menu','Kategori & keahlian.','Pilih fokus yang paling kuat.','fa-solid fa-compass'],['Hidangan','Layanan & harga.','Tampilkan apa yang bisa kamu bantu.','fa-solid fa-utensils'],['Ambalan','Karya & bukti.','Pasang karya yang paling meyakinkan.','fa-solid fa-layer-group']];"
+          if old_sections not in s: raise SystemExit('sections contract not found')
+          s=s.replace(old_sections,new_sections,1)
+
+          old_css='.steps{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-top:16px}.step{width:100%;border:1px solid var(--line);border-radius:20px;background:#fff;padding:17px;text-align:left;cursor:pointer;transition:.18s}.step:hover{transform:translateY(-2px);border-color:#bcc8ef;box-shadow:0 12px 26px rgba(49,87,220,.08)}.step .sttop{display:flex;justify-content:space-between;gap:10px}.step i{display:grid;place-items:center;width:44px;height:44px;border-radius:14px;background:var(--soft);color:var(--ink);font-style:normal;font-weight:900}.step.done i{background:var(--okbg);color:var(--ok)}.state{font-size:11px;font-weight:900;text-transform:uppercase;color:var(--amber)}.step.done .state{color:var(--ok)}.step h3{margin:14px 0 0;color:var(--ink);font-size:16px}.step p{margin:6px 0 0;color:var(--muted);font-size:13px;line-height:1.55}.link{display:block;margin-top:13px;color:#4a54c7;font-size:13px;font-weight:900}'
+          new_css='.steps{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px;margin-top:16px}.step{position:relative;width:100%;min-height:184px;border:1px solid #e2e8f0;border-radius:24px;background:linear-gradient(145deg,#fff,#fbfcff);padding:18px;text-align:left;cursor:pointer;transition:transform .22s ease,box-shadow .22s ease,border-color .22s ease;box-shadow:0 10px 24px rgba(15,23,42,.045);overflow:hidden}.step:after{content:"";position:absolute;right:-24px;bottom:-34px;width:90px;height:90px;border-radius:50%;background:radial-gradient(circle,rgba(63,72,191,.08),transparent 70%);pointer-events:none}.step:hover{transform:translateY(-4px);border-color:#cfd7f5;box-shadow:0 18px 40px rgba(21,28,117,.09)}.step .sttop{display:flex;justify-content:space-between;align-items:flex-start;gap:10px}.step i{display:grid;place-items:center;width:46px;height:46px;border-radius:15px;background:var(--soft);color:var(--ink);font-style:normal;font-weight:900;box-shadow:inset 0 1px 0 rgba(255,255,255,.8)}.step i.icon{font-size:15px}.step.done i{background:var(--okbg);color:var(--ok)}.state{font-size:10px;font-weight:900;letter-spacing:.04em;text-transform:uppercase;color:var(--amber)}.step.done .state{color:var(--ok)}.step h3{margin:15px 0 0;color:var(--ink);font-size:17px;letter-spacing:-.02em}.step p{margin:6px 0 0;color:var(--muted);font-size:12px;line-height:1.55}.step .step-desc{margin-top:4px;color:#8a95a6}.link{display:flex;align-items:center;gap:5px;margin-top:15px;color:#4a54c7;font-size:12px;font-weight:900}.step:focus-visible{outline:3px solid rgba(102,126,234,.22);outline-offset:2px}@media(max-width:720px){.steps{grid-template-columns:1fr}}'
+          if old_css not in s: raise SystemExit('step css contract not found')
+          s=s.replace(old_css,new_css,1)
+
+          old_map='${sections.map((x,i)=>`<button type="button" class="step ${done[i]?\'done\':\'\'}" data-step="${i}"><div class="sttop"><i>${done[i]?\'✓\':String(i+1).padStart(2,\'0\')}</i><span class="state">${done[i]?\'Siap\':\'Perlu diisi\'}</span></div><h3>${x[0]}</h3><p>${x[1]}</p><span class="link">${done[i]?\'Edit bagian ini →\':\'Lengkapi sekarang →\'}</span></button>`).join(\'\')}'
+          new_map='${sections.map((x,i)=>`<button type="button" class="step ${done[i]?\'done\':\'\'}" data-step="${i}" aria-label="${x[0]}"><div class="sttop"><i class="icon">${done[i]?\'<i class="fa-solid fa-check"></i>\':`<i class="${x[3]}"></i>`}</i><span class="state">${done[i]?\'Siap\':\'Belum\'}</span></div><h3>${x[0]}</h3><p>${x[1]}</p><p class="step-desc">${x[2]}</p><span class="link">${done[i]?\'Edit lagi ↗\':\'Buka sekarang ↗\'}</span></button>`).join(\'\')}'
+          if old_map not in s: raise SystemExit('step map contract not found')
+          s=s.replace(old_map,new_map,1)
+
+          old_aside='<section class="aside"><section class="card section" style="margin-top:0"><div class="head"><div><h2>Tips cepat cari customer</h2><p>Gunakan Dapur sebagai halaman konversi sederhana.</p></div></div><div class="tip" style="margin-top:15px"><p><b>1.</b> Pilih satu layanan unggulan dulu.</p><p><b>2.</b> Tampilkan 1–3 karya paling kuat.</p><p><b>3.</b> Tempel link Dapur di bio, status WhatsApp, TikTok, Instagram, email, dan proposal.</p><p><b>4.</b> Arahkan customer ke satu aksi utama: chat, order, atau minta penawaran.</p></div></section><aside class="card tip" style="margin-top:0"><h3>Fokus hari ini</h3><p>Profil jelas + satu layanan + beberapa karya sudah cukup untuk mulai dibagikan.</p></aside></section>'
+          new_aside='<section class="card canonical" style="margin-top:16px"><div class="head"><div><h2>Link siap dibagikan</h2><p>Kirim link ini ke customer. Workspace kamu tetap aman di <span style="white-space:nowrap">/dapur/${esc(c.username)}</span>.</p></div></div><div class="url"><div class="urlbox">${esc(publicUrl)}</div><button id="copy" class="btn primary" type="button">Salin</button><button id="share" class="btn amber" type="button">Bagikan</button></div></section>'
+          if old_aside not in s: raise SystemExit('tips/fokus block not found')
+          s=s.replace(old_aside,new_aside,1)
+
+          s=s.replace('<section class="card section"><div class="head"><div><h2>Langkah utama</h2><p>Empat bagian inti yang membentuk profil Creator-mu.</p></div></div>', '<section class="card section"><div class="head"><div><h2>Rapikan Dapurmu</h2><p>4 bagian inti biar profilmu makin siap dilihat.</p></div></div>', 1)
+
+          old_canonical='<section class="card canonical"><div class="head"><div><h2>Link publik resmi</h2><p>Gunakan alamat publik ini untuk customer. Workspace tetap berada di /dapur/${esc(c.username)}.</p></div></div><div class="url"><div class="urlbox">${esc(publicUrl)}</div><button id="copy" class="btn primary" type="button">Salin</button><button id="share" class="btn amber" type="button">Bagikan</button></div></section>'
+          if old_canonical in s: s=s.replace(old_canonical,'',1)
+
+          entry.write_text(s,encoding='utf-8')
+
+          index=root/'index.html'
+          i=index.read_text(encoding='utf-8')
+          i=i.replace('/studio-ai-creator-card.js?v=1','/studio-ai-creator-card.js?v=2')
+          i=i.replace('/dapur-profile-enhancements.js?v=1','/dapur-profile-enhancements.js?v=2')
+          index.write_text(i,encoding='utf-8')
+
+          for required, text in [
+            ('studio','STUDIO AI'),
+            ('entry','Rapikan Dapurmu'),
+            ('profile','/dapur-profile-enhancements.js?v=2'),
+            ('index','/studio-ai-creator-card.js?v=2')
+          ]:
+            target={'studio':studio,'entry':entry,'profile':dpe,'index':index}[required]
+            if text not in target.read_text(encoding='utf-8'):
+              raise SystemExit(f'Missing validation marker: {required} -> {text}')
+          for forbidden in ['Tips cepat cari customer','Fokus hari ini','Link publik resmi','Empat bagian inti yang membentuk profil Creator-mu.']:
+            if forbidden in entry.read_text(encoding='utf-8'):
+              raise SystemExit(f'Forbidden legacy text remains: {forbidden}')
+
+      - name: Syntax and contract validation
+        shell: bash
+        run: |
+          set -euo pipefail
+          node --check studio-ai-creator-card.js
+          node --check dapur-profile-enhancements.js
+          node --check dapur-entry.js
+          grep -q 'Rapikan Dapurmu' dapur-entry.js
+          grep -q 'Link siap dibagikan' dapur-entry.js
+          grep -q 'Tips cepat cari customer' <(git show HEAD~1:dapur-entry.js) || true
+          git diff --check
+
+      - name: Commit changes and remove workflow
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git rm -f .github/workflows/refine-studio-dapur-ui.yml
+          git add index.html studio-ai-creator-card.js dapur-profile-enhancements.js dapur-entry.js
+          git diff --cached --check
+          git commit -m "feat: refine Studio AI creator card and Dapur UX"
+          git push
