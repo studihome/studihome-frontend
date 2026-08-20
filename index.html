@@ -8361,7 +8361,7 @@ window.StudihomeProductionPilotSimulation = {
     });
 })();
 </script>
-\n<!--\n  RC11 — DATABASE SECURITY AUDIT GATE\n  Read-only. No database writes.\n  Database SQL/RLS/RPC claims are only PASS when backed by actual schema/security artifacts.\n  If those artifacts are unavailable, the gate remains explicit and fail-closed.\n-->\n<script id="studihome-database-security-audit-gate">
+<!--  RC11 — DATABASE SECURITY AUDIT GATE\n  Read-only. No database writes.\n  Database SQL/RLS/RPC claims are only PASS when backed by actual schema/security artifacts.\n  If those artifacts are unavailable, the gate remains explicit and fail-closed.--><script id="studihome-database-security-audit-gate">
 (() => {
     'use strict';
     if (window.StudihomeDatabaseSecurityAuditGate) return;
@@ -8496,7 +8496,6 @@ window.StudihomeProductionPilotSimulation = {
   });
 })();
 </script>
-
 <!-- RC13 — LIVE DATABASE RECONCILIATION GATE
      Read-only release contract. Uses externally supplied live-query evidence when available.
      No database writes, no network calls, no UI mutations. -->
@@ -8561,7 +8560,6 @@ window.StudihomeProductionPilotSimulation = {
   });
 })();
 </script>
-
 <!-- RC14 — FINAL DATABASE LOCK & LEAST-PRIVILEGE GATE
      Read-only in application. Documents one concrete DB hardening item discovered from live evidence.
      No DB mutation is executed by this file. -->
@@ -8609,7 +8607,6 @@ window.StudihomeProductionPilotSimulation = {
   });
 })();
 </script>
-
 <!--
   RC15 — FINAL SECURITY CLOSURE GATE
   Read-only application-side contract. No database writes.
@@ -8661,7 +8658,6 @@ window.StudihomeProductionPilotSimulation = {
   });
 })();
 </script>
-
 <!--
   RC16 — FINAL RELEASE LOCK
   Immutable-style release fingerprint + live DB closure evidence.
@@ -8715,7 +8711,6 @@ window.StudihomeProductionPilotSimulation = {
   sha256Hex(prefix).then(buildReport).catch(() => buildReport(null));
 })();
 </script>
-
 <!--
   RC17 — PRODUCTION OPERATIONAL VALIDATION GATE
   Read-only. No DB writes. No UI mutation.
@@ -8749,7 +8744,6 @@ window.StudihomeProductionPilotSimulation = {
   window.StudihomeOperationalValidationGate=Object.freeze({version:report.version,run:()=>JSON.parse(JSON.stringify(report)),status:report.releaseStatus});
 })();
 </script>
-
 <!-- RC18 — PRODUCTION FREEZE & LAUNCH LOCK: read-only, no DB/UI mutations. -->
 <script id="studihome-production-freeze-lock">
 (() => {
@@ -8774,7 +8768,7 @@ window.StudihomeProductionPilotSimulation = {
   window.StudihomeProductionFreezeLock = Object.freeze({version:report.version, rc17Sha256:report.rc17Sha256, run:()=>JSON.parse(JSON.stringify(report)), status:report.status});
 })();
 </script>
-\n<!--
+<!--
   RC19 — OPERATIONAL HEALTH & OBSERVABILITY LOCK
   Read-only local diagnostics. No network calls, no DB writes, no UI mutations.
   Purpose: distinguish release drift, bootstrap/config issues, and missing contracts after deployment.
@@ -8846,7 +8840,6 @@ window.StudihomeProductionPilotSimulation = {
   });
 })();
 </script>
-
 <style id="studihome-managed-creator-style">
 .studihome-managed-star{display:inline-flex;align-items:center;justify-content:center;width:1rem;height:1rem;border-radius:999px;background:rgba(255,255,255,.92);color:#151c75;font-size:.58rem;font-weight:900;box-shadow:0 2px 6px rgba(21,28,117,.12);}
 .studihome-official-card{border-color:#f6d365!important;box-shadow:0 0 0 1px rgba(250,204,21,.18),0 16px 36px rgba(245,158,11,.12)!important;}
@@ -8878,7 +8871,6 @@ window.StudihomeProductionPilotSimulation = {
   #creator-media-modal iframe,#creator-media-modal video{height:100%;max-height:none}
 }
 </style>
-
 <script src="/dapur-button.js"></script>
 </body>
 </html>
