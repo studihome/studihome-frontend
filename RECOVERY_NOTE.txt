@@ -1,0 +1,1 @@
+Branch recovery checkpoint created after an accidental scoped index placeholder write. The branch must be restored from its base before further wiring.
