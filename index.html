@@ -71,7 +71,6 @@
       ]
     }
     </script>
-
     <!-- CANONICAL SUPABASE BOOT: SDK + config before all feature runtimes -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2" crossorigin="anonymous"></script>
     <script src="/supabase-config.js?v=boot4"></script>
@@ -7312,7 +7311,6 @@ renderStudioAiControl: async () => {
 window.addEventListener('DOMContentLoaded', App.init);
         document.addEventListener('keydown', (event) => { if (event.key === 'Escape') App.search.closeModal(); });
     </script>
-
 <script>
 /* STEP 47 — SMART TEAM vs SOLO (additive-only) */
 (function(){
@@ -7388,7 +7386,6 @@ window.addEventListener('DOMContentLoaded', App.init);
   injectStyle();
 })();
 </script>
-
 <script>
 /* MILESTONE F — SMART Benchmark & Guardrails v1.0 — additive only */
 (function(){
@@ -7590,7 +7587,6 @@ window.addEventListener('DOMContentLoaded', App.init);
   }
 })();
 </script>
-
 <script>
 /* MILESTONE G — SMART Creator Quality & Growth v1.0 — additive only */
 (function(){
@@ -7683,7 +7679,6 @@ window.addEventListener('DOMContentLoaded', App.init);
   }
 })();
 </script>
-
 <!-- MILESTONE I: SMART OPPORTUNITY INTELLIGENCE — ADDITIVE ONLY -->
 <style>
 .smart-opportunity-card{background:linear-gradient(135deg,#ffffff 0%,#f7faff 100%);border:1px solid #dbe7ff;box-shadow:0 14px 34px rgba(21,28,117,.08)}
@@ -7986,7 +7981,6 @@ try{
 window.StudihomeVisualNavigationGuard = {expectedMenuLabel:'Lobi',expectedFaviconGlyph:'✦',noticePosition:'center-below-header',popupScrollbar:'hidden-visual-only'};
 window.StudihomeQALock = {version:'RC4',callout:'blue-outline-no-rail-no-tail',favicon:'✦-hero-gradient',navigation:'canonical-routes'};
 </script>
-
 <script id="studihome-visual-contract-guard">
 window.StudihomeVisualContract = {
   version: 'RC3.1',
@@ -8007,7 +8001,6 @@ window.StudihomeVisualContract = {
   }
 };
 </script>
-
 <script id="studihome-production-acceptance-gate">
 /* RC5 — Read-only Production Acceptance Gate. No UI mutation, no API writes. */
 window.StudihomeProductionAcceptanceGate = {
@@ -8038,7 +8031,6 @@ window.StudihomeProductionAcceptanceGate = {
   }
 };
 </script>
-
 <script id="studihome-pilot-readiness-gate">
 /* RC6 — Pilot Readiness Gate. Read-only: no UI mutation, no API writes. */
 window.StudihomePilotReadinessGate = {
@@ -8071,7 +8063,6 @@ window.StudihomePilotReadinessGate = {
   }
 };
 </script>
-
 <script id="studihome-production-pilot-simulation-gate">
 /* RC7 — Production Pilot Simulation Gate.
  * Read-only deterministic simulation. No UI mutation, no network calls, no database writes.
@@ -8168,7 +8159,6 @@ window.StudihomeProductionPilotSimulation = {
   }
 };
 </script>
-
 <!-- REAL-DATA SAFETY GATE — RC9
      Read-only release contract. No DB writes, no UI mutations, no auth mutations.
      Purpose: detect accidental regression in server-authoritative boundaries.
@@ -8254,7 +8244,6 @@ window.StudihomeProductionPilotSimulation = {
     });
 })();
 </script>
-
 <!--
   RC10 — SECURITY & DATA INTEGRITY GATE
   Read-only release contract. No DB writes, no UI mutations, no auth mutations.
@@ -8361,7 +8350,7 @@ window.StudihomeProductionPilotSimulation = {
     });
 })();
 </script>
-<!--  RC11 — DATABASE SECURITY AUDIT GATE\n  Read-only. No database writes.\n  Database SQL/RLS/RPC claims are only PASS when backed by actual schema/security artifacts.\n  If those artifacts are unavailable, the gate remains explicit and fail-closed.--><script id="studihome-database-security-audit-gate">
+<!--  RC11 — DATABASE SECURITY AUDIT GATE  Read-only. No database writes.  Database SQL/RLS/RPC claims are only PASS when backed by actual schema/security artifacts. If those artifacts are unavailable, the gate remains explicit and fail-closed.--><script id="studihome-database-security-audit-gate">
 (() => {
     'use strict';
     if (window.StudihomeDatabaseSecurityAuditGate) return;
