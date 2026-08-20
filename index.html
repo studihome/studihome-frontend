@@ -2221,10 +2221,14 @@ App.router.bindCanonicalLinkGuard();
                                 ...c,
                                 creatorCount: Number(categoryCounts[c.id] || 0)
                             }));
-                            const portfolioRes = await supabaseClient.from('creator_portfolios').select('creator_id').eq('is_active', true).limit(1000);
+                            const portfolioRes = await supabaseClient.from('creator_portfolios').select('creator_id, title, description').eq('is_active', true).limit(1000);
                             if (portfolioRes.error) throw portfolioRes.error;
                             const portfolioCounts = {};
-                            (portfolioRes.data || []).forEach(x => portfolioCounts[x.creator_id] = (portfolioCounts[x.creator_id] || 0) + 1);
+                            const portfoliosByCreator = {};
+                            (portfolioRes.data || []).forEach(x => {
+                                portfolioCounts[x.creator_id] = (portfolioCounts[x.creator_id] || 0) + 1;
+                                (portfoliosByCreator[x.creator_id] ||= []).push(x);
+                            });
                             const categoryNamesByCreator = {};
                             (memberRes.data || []).forEach(m => {
                                 const cat = (catRes.data || []).find(x => x.id === m.category_id);
@@ -2236,6 +2240,7 @@ App.router.bindCanonicalLinkGuard();
                                 ratingCount: (ratingBuckets[c.id] || []).length,
                                 ratingAvg: (ratingBuckets[c.id] || []).length ? Number((ratingBuckets[c.id].reduce((a,b)=>a+b,0) / ratingBuckets[c.id].length).toFixed(1)) : null,
                                 services: servicesByCreator[c.id] || [],
+                                portfolios: portfoliosByCreator[c.id] || [],
                                 portfolio_count: Number(portfolioCounts[c.id] || 0),
                                 category_names: categoryNamesByCreator[c.id] || []
                             }));
@@ -2936,15 +2941,14 @@ App.router.bindCanonicalLinkGuard();
                                 </div>
                                 <!-- Layout Proporsional: Desktop 1 Baris Sejajar (w-auto), Mobile 2 Baris -->
                                 <!-- 3 Tombol Lebar Pas Tulisan (w-fit) & Rapat Kiri (justify-start) -->
-                                <div class="mt-5 sm:mt-6 flex flex-wrap items-center justify-start gap-2.5 sm:gap-3 max-w-3xl">
-                                    <button type="button" onclick="App.studioAI.openSmartBrief()" class="studio-smart-brief-btn w-fit inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl text-xs sm:text-sm font-extrabold shadow-sm">
-                                        <i class="fa-solid fa-wand-magic-sparkles text-amber-300"></i> Ceritakan kebutuhanmu
-                                    </button>
+                                <div class="mt-6 flex flex-wrap items-center justify-start gap-3" id="studio-ai-live-stats">
+                                    </div>
+                                <div class="mt-5 flex flex-wrap items-center justify-start gap-2.5 sm:gap-3 max-w-3xl">
                                     <button type="button" onclick="App.studioAI.showCategoriesOnly()" class="studio-smart-brief-btn w-fit inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl text-xs sm:text-sm font-extrabold shadow-sm">
-                                        <i class="fa-solid fa-layer-group text-amber-300"></i> Kategori
+                                        <i class="fa-solid fa-layer-group text-amber-300"></i> Jelajahi Kategori
                                     </button>
                                     <button type="button" onclick="App.studioAI.showCreatorsOnly()" class="studio-smart-brief-btn w-fit inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl text-xs sm:text-sm font-extrabold shadow-sm">
-                                        <i class="fa-solid fa-users text-amber-300"></i> Creator
+                                        <i class="fa-solid fa-heart text-amber-300"></i> Tampilkan Semua Creator
                                     </button>
                                 </div>
                             </div>
@@ -2984,11 +2988,35 @@ App.router.bindCanonicalLinkGuard();
                         const statsBox = document.getElementById('studio-ai-live-stats');
                         if (statsBox) {
                             const st = data.stats || { creatorCount: 0, serviceCount: 0, categoryCount: 0 };
-                            statsBox.innerHTML = [
-                                ['Creator', st.creatorCount],
-                                ['Jasa aktif', st.serviceCount],
-                                ['Kategori', st.categoryCount]
-                            ].map(([label, value]) => `<div class="studio-ai-stat"><div class="text-sm font-black text-[#151c75]">${Number(value || 0)}</div><div class="text-[9px] font-bold text-slate-500">${label}</div></div>`).join('');
+                            statsBox.innerHTML = `
+                                <div class="flex items-center gap-3 px-4 py-2.5 rounded-2xl bg-white/10 border border-white/20 backdrop-blur-md shadow-lg hover:bg-white/20 transition-all cursor-default">
+                                    <div class="w-8 h-8 rounded-full bg-emerald-400/20 text-emerald-300 flex items-center justify-center border border-emerald-400/30">
+                                        <i class="fa-solid fa-users text-sm"></i>
+                                    </div>
+                                    <div>
+                                        <div class="text-[10px] font-bold text-blue-200 uppercase tracking-wide">Creator Aktif</div>
+                                        <div class="text-sm font-black text-white">${Number(st.creatorCount || 0)}</div>
+                                    </div>
+                                </div>
+                                <div class="flex items-center gap-3 px-4 py-2.5 rounded-2xl bg-white/10 border border-white/20 backdrop-blur-md shadow-lg hover:bg-white/20 transition-all cursor-default">
+                                    <div class="w-8 h-8 rounded-full bg-amber-400/20 text-amber-300 flex items-center justify-center border border-amber-400/30">
+                                        <i class="fa-solid fa-briefcase text-sm"></i>
+                                    </div>
+                                    <div>
+                                        <div class="text-[10px] font-bold text-blue-200 uppercase tracking-wide">Jasa Tersedia</div>
+                                        <div class="text-sm font-black text-white">${Number(st.serviceCount || 0)}</div>
+                                    </div>
+                                </div>
+                                <div class="flex items-center gap-3 px-4 py-2.5 rounded-2xl bg-white/10 border border-white/20 backdrop-blur-md shadow-lg hover:bg-white/20 transition-all cursor-default">
+                                    <div class="w-8 h-8 rounded-full bg-blue-400/20 text-blue-300 flex items-center justify-center border border-blue-400/30">
+                                        <i class="fa-solid fa-eye text-sm"></i>
+                                    </div>
+                                    <div>
+                                        <div class="text-[10px] font-bold text-blue-200 uppercase tracking-wide">Pengunjung</div>
+                                        <div class="text-sm font-black text-white">400+ Hari Ini</div>
+                                    </div>
+                                </div>
+                            `;
                         }
                         if (!categorySlug) App.studioAI._category = '';
                         if (categorySlug) {
@@ -4430,37 +4458,6 @@ App.router.bindCanonicalLinkGuard();
                     const category = App.studioAI._category;
                     const activeCategory = (data.categories || []).find(x => String(x.slug || '').toLowerCase() === String(category || '').toLowerCase());
                     const creators = (data.creators || []).map(c => {
-                        const services = c.services || [];
-                        const catNames = (c.category_names || []).map(n => String(n).toLowerCase());
-                        const matchCategory = !activeCategory ||
-                            services.some(s => s.category_id === activeCategory.id) ||
-                            catNames.includes(String(activeCategory.name || '').toLowerCase()) ||
-                            catNames.includes(String(activeCategory.slug || '').toLowerCase());
-                        const hayParts = [c.display_name, c.username, c.bio, c.location, ...services.map(s => `${s.title} ${s.description}`)];
-                        const hay = hayParts.join(' ').toLowerCase();
-                        const tokens = q.split(/\s+/).filter(Boolean);
-                        let score = 0;
-                        if (activeCategory && matchCategory) score += 40;
-                        if (q) {
-                            for (const token of tokens) {
-                                if (String(c.display_name || '').toLowerCase().includes(token)) score += 24;
-                                if (String(c.username || '').toLowerCase().includes(token)) score += 18;
-                                if (String(c.bio || '').toLowerCase().includes(token)) score += 8;
-                                services.forEach(s => {
-                                    const title = String(s.title || '').toLowerCase();
-                                    const desc = String(s.description || '').toLowerCase();
-                                    if (title.includes(token)) score += 28;
-                                    else if (desc.includes(token)) score += 10;
-                                });
-                            }
-                        }
-                        score += c.is_verified ? 8 : 0;
-                        score += Math.min(12, Number(c.likes || 0) / 10);
-                        score += Math.min(12, Number(c.completed_orders || c.order_count || 0) / 2);
-                        return { c, score, categoryMatch: !activeCategory || services.some(s => s.category_id === activeCategory.id), hay };
-                    }).filter(item => (!q || item.score > 0) && item.categoryMatch)
-                      .sort((a, b) => b.score - a.score || String(a.c.display_name || '').localeCompare(String(b.c.display_name || '')))
-                      .map(item => item.c);
                     const title = document.getElementById('studio-ai-results-title');
                     if (title) title.textContent = q || category ? 'Yang paling nyambung buatmu' : 'Creator yang siap membantu';
                         if (!creators.length) {
