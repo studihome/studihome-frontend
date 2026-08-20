@@ -4484,69 +4484,49 @@ App.router.bindCanonicalLinkGuard();
                     }
 
                     grid.innerHTML = visibleCreators.map(c => {
-                        // Logika Cerdas Gambar & Data
-                        const imgSource = c.avatar_url ? App.utils.safeUrl(c.avatar_url) : (c.cover_url ? App.utils.safeUrl(c.cover_url) : `https://ui-avatars.com/api/?name=${encodeURIComponent(c.display_name || c.username)}&background=151c75&color=fff&size=512`);
-                        const catCount = (c.category_names && c.category_names.length) ? c.category_names.length : 1;
-                        const categoryName = (c.category_names && c.category_names.length > 0) ? c.category_names[0] : 'Creator AI';
-                        
-                        // Lencana Verifikasi Biru Tajam
-                        const verifiedBadge = c.is_verified ? `<i class="fa-solid fa-circle-check text-blue-500 text-lg ml-1" title="Terverifikasi"></i>` : '';
-                        
-                        // Lencana Kreator Dikelola Studihome
-                        const managedBadge = c.managed_by_studihome ? '<span class="inline-flex items-center justify-center w-5 h-5 rounded-full bg-amber-400 text-[#151c75] text-[10px] font-black shadow-sm ml-1 align-middle" title="Creator dikelola Studihome">✦</span>' : '';
-
+                        const wa = App.creator._waUrl(c.whatsapp, c.display_name || 'Creator');
+                        const service = (c.services || [])[0];
+                        const officialStyle = c.is_studihome_official ? 'border-amber-200 ring-1 ring-amber-200/70' : '';
+                        const heroStyle = c.is_studihome_official ? 'bg-gradient-to-br from-[#f59e0b] via-[#facc15] to-[#fff7ed]' : 'bg-gradient-to-br from-[#151c75] to-[#3f48bf]';
+                        const nameColor = c.is_studihome_official ? 'text-[#151c75]' : 'text-white';
+                        const subColor = c.is_studihome_official ? 'text-[#7c5a00]' : 'text-blue-100';
                         return `
-                            <!-- Kartu Induk: Sudut sangat bulat (2rem), border halus, efek angkat (hover) -->
-                            <article class="group bg-white rounded-[2rem] overflow-hidden card-3d cursor-pointer flex flex-col h-full transform transition-all duration-300 hover:-translate-y-1.5 border border-slate-100 hover:shadow-xl" onclick="App.router.goCreator('${App.utils.escapeHtml(c.username)}')">
-                                
-                                <!-- Bagian Atas (Gambar Rasio 1:1 Sempurna) -->
-                                <div class="relative w-full aspect-square bg-slate-50 overflow-hidden shrink-0 border-b border-slate-100">
-                                    <!-- Gambar Profil (Zoom in perlahan saat dihover) -->
-                                    <img src="${imgSource}" alt="${App.utils.escapeHtml(c.display_name || c.username)}" class="w-full h-full object-cover transition-transform duration-700 ease-out group-hover:scale-105">
-                                    
-                                    <!-- Lencana Official Kanan Atas -->
-                                    ${c.is_studihome_official ? `<div class="absolute top-4 right-4 z-10 px-3 py-1.5 rounded-full bg-amber-400 text-[#151c75] text-[9px] font-black uppercase tracking-wider shadow-sm"><i class="fa-solid fa-star mr-1"></i> Official</div>` : ''}
-
-                                    <!-- Kategori (Kiri Bawah Gambar, gaya kaca/glassmorphism) -->
-                                    <div class="absolute bottom-3 left-3 z-10 px-2.5 py-1 rounded-lg bg-black/50 backdrop-blur-md text-white text-[10px] font-black uppercase tracking-wider shadow-sm border border-white/10">
-                                        ${App.utils.escapeHtml(categoryName)}
+                            <article class="studio-ai-card card-3d rounded-2xl overflow-hidden bg-white ${officialStyle}">
+                                <div class="h-28 sm:h-30 ${heroStyle} relative overflow-hidden">
+                                    ${c.cover_url ? `<img src="${App.utils.safeUrl(c.cover_url)}" alt="" class="w-full h-full object-cover opacity-60" loading="lazy" decoding="async">` : ''}
+                                    <div class="absolute inset-0 bg-gradient-to-t from-[#151c75]/85 to-transparent"></div>
+                                    <div class="absolute left-3.5 bottom-2.5 flex items-end gap-2.5">
+                                        <div class="w-11 h-11 rounded-xl bg-white text-[#151c75] flex items-center justify-center font-black text-sm shadow-md border border-blue-100 overflow-hidden shrink-0">
+                                            ${c.avatar_url ? `<img src="${App.utils.safeUrl(c.avatar_url)}" alt="${App.utils.escapeHtml(c.display_name)}" class="w-full h-full object-cover">` : '<i class="fa-solid fa-heart text-rose-500 text-sm"></i>'}
+                                        </div>
+                                        <div class="pb-0.5">
+                                            <div class="${nameColor} text-xs sm:text-sm font-extrabold leading-tight flex items-center gap-1">
+                                                ${App.utils.escapeHtml(c.display_name || c.username)}
+                                                ${c.is_studihome_official ? '<span class="ml-1 inline-flex items-center px-1.5 py-0.5 rounded-full bg-white/75 border border-white/80 text-[7px] font-black text-[#7c5a00]">Studihome</span>' : ''}
+                                            </div>
+                                            <div class="flex items-center gap-1 ${subColor} text-[10px] mt-0.5">
+                                                <span>@${App.utils.escapeHtml(c.username)}</span>
+                                                ${c.is_verified ? '<span class="text-amber-400 text-[9px]" title="Creator terverifikasi"><i class="fa-solid fa-circle-check"></i></span>' : ''}
+                                            </div>
+                                        </div>
                                     </div>
                                 </div>
-                                
-                                <!-- Bagian Bawah (Area Teks Putih Bersih) -->
-                                <div class="p-5 sm:p-6 flex flex-col flex-grow bg-white">
-                                    
-                                    <!-- Nama Creator (Besar & Tegas warna Navy) -->
-                                    <h3 class="text-xl sm:text-2xl font-black text-[#151c75] group-hover:text-[#3f48bf] transition-colors flex items-center gap-1.5 truncate">
-                                        ${App.utils.escapeHtml(c.display_name || c.username)}
-                                        ${verifiedBadge}
-                                        ${managedBadge}
-                                    </h3>
-                                    
-                                    <!-- Bio / Deskripsi Singkat -->
-                                    <p class="text-[13px] sm:text-sm text-slate-500 mt-2 line-clamp-2 leading-relaxed font-medium">
-                                        ${App.utils.escapeHtml(c.bio || 'Menyediakan layanan AI, digital, dan otomasi kreatif di Studihome.')}
-                                    </p>
-                                    
-                                    <!-- Footer: Statistik & Tombol -->
-                                    <div class="mt-auto pt-6 flex items-center justify-between">
-                                        
-                                        <!-- Statistik (Kiri) -->
-                                        <div class="flex items-center gap-3 sm:gap-4 text-[13px] font-bold text-slate-400">
-                                            <div class="flex items-center gap-1.5 group-hover:text-rose-500 transition-colors" title="Jumlah Suka">
-                                                <i class="fa-regular fa-user text-base"></i> <span>${c.likes || 0}</span>
-                                            </div>
-                                            <div class="flex items-center gap-1.5 group-hover:text-[#151c75] transition-colors" title="Kategori Jasa">
-                                                <i class="fa-solid fa-layer-group text-base"></i> <span>${catCount}</span>
-                                            </div>
+                                <div class="p-3.5 sm:p-4">
+                                    <div class="flex items-center justify-between gap-2.5">
+                                        <div class="flex flex-wrap gap-1.5">
+                                            ${(c.services || []).slice(0, 2).map(s => `<span class="px-2 py-0.5 rounded-lg bg-blue-50 text-[#151c75] text-[9px] font-extrabold">${App.utils.escapeHtml(s.title)}</span>`).join('')}
                                         </div>
-                                        
-                                        <!-- Tombol Profil (Kapsul Mewah) -->
-                                        <div class="inline-flex items-center gap-1.5 px-5 py-2.5 rounded-full border border-slate-200 bg-slate-50 text-[#151c75] text-xs font-extrabold group-hover:bg-[#151c75] group-hover:text-white group-hover:border-[#151c75] transition-all shadow-sm">
-                                            Profil <i class="fa-solid fa-arrow-right"></i>
-                                        </div>
-                                        
+                                        <div class="text-[10px] text-slate-500 whitespace-nowrap">❤️ ${c.likes || 0}</div>
                                     </div>
+                                    <p class="text-xs text-slate-600 leading-relaxed mt-1.5 line-clamp-3">${App.utils.escapeHtml(c.bio || 'Dapur AI di Studihome.')}</p>
+                                    <div class="flex items-center justify-between mt-3 pt-2.5 border-t border-slate-100 gap-2">
+                                        <div class="text-[10px] font-bold text-slate-500">${App.utils.escapeHtml(c.location || 'Indonesia')}</div>
+                                        <div class="flex items-center gap-1.5">
+                                            <a href="/${App.utils.escapeHtml(c.username)}" onclick="event.preventDefault(); App.router.goCreator('${App.utils.escapeHtml(c.username)}')" class="px-3 py-1.5 rounded-xl text-[10px] font-extrabold text-[#151c75] bg-blue-50 hover:bg-blue-100">Profil</a>
+                                            ${wa ? `<a href="${wa}" target="_blank" rel="noopener noreferrer" class="px-3 py-1.5 rounded-xl text-[10px] font-extrabold text-white bg-emerald-600 hover:bg-emerald-700"><i class="fa-brands fa-whatsapp mr-1"></i> WhatsApp</a>` : ''}
+                                        </div>
+                                    </div>
+                                    ${service ? `<div class="mt-2 text-[10px] font-bold text-amber-600">Mulai Rp ${Number(service.price_from || 0).toLocaleString('id-ID')}</div>` : ''}
                                 </div>
                             </article>`;
                     }).join('');
