@@ -4167,7 +4167,7 @@ App.router.bindCanonicalLinkGuard();
                             verified, ratingReliability, popularity, portfolio, serviceBreadth,
                             quality: Math.round(quality * 100),
                             freshBoost: App.studioAI.smartQualityEngine._freshCreatorBoost(creator)
-                        };
+                        },
                     },
                     apply: (creator, score) => {
                         const q = App.studioAI.smartQualityEngine._qualityProfile(creator);
@@ -4193,7 +4193,7 @@ App.router.bindCanonicalLinkGuard();
                             },
                             freshnessBoost: Number(q.freshBoost.toFixed(2)),
                             qualityReasons: qualityReason.slice(0, 2)
-                        };
+                        },
                     },
                     sort: (rows) => rows.sort((a, b) =>
                         Number(b.percentage || 0) - Number(a.percentage || 0) ||
@@ -4314,7 +4314,7 @@ App.router.bindCanonicalLinkGuard();
                             budgetInfo,
                             deadlineDays,
                             contextCoverage
-                        };
+                        },
                     },
                     decideNextAction: (ranked, analysis) => {
                         const best = ranked?.[0];
@@ -4646,7 +4646,7 @@ App.router.bindCanonicalLinkGuard();
                                     ${service ? `<div class="mt-2 text-[10px] font-extrabold text-amber-600">Mulai Rp ${Number(service.price_from || 0).toLocaleString('id-ID')}</div>` : ''}
                                 </div>
                             </article>`;
-                    }).join('');
+                   }).join('');
                 },
             creator: {
                 _slugify: (value) => String(value || '').toLowerCase().trim().normalize('NFKD').replace(/[\u0300-\u036f]/g, '').replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '').slice(0, 120),
