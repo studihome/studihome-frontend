@@ -9,7 +9,6 @@
   const esc = value => window.App?.utils?.escapeHtml
     ? window.App.utils.escapeHtml(value)
     : String(value ?? '').replace(/[&<>\"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','\"':'&quot;',"'":'&#039;'}[c]));
-  const visible = el => { if (!el) return false; const r = el.getBoundingClientRect(); return r.width > 0 && r.height > 0 && getComputedStyle(el).display !== 'none'; };
 
   function getCreators() {
     const rows = window.App?.state?.studioAI?.creators;
@@ -90,6 +89,28 @@
       .studio-ai-control-row .studio-ai-control:hover,.studio-ai-control-row .studio-ai-control.active{background:#151c75;color:#fff;border-color:#151c75;box-shadow:0 8px 18px rgba(21,28,117,.12)}
       .studio-ai-stats-row{display:flex;align-items:center;gap:1rem;flex-wrap:wrap;margin:.25rem 0 1rem;color:#64748b;font-size:.72rem;font-weight:700}
       .studio-ai-stats-row strong{color:#151c75;font-weight:900}
+
+      /* Hero contract: Kategori + Creator are primary controls; activity is secondary. */
+      .studio-ai-hero .studio-ai-search-wrap + div{display:grid!important;grid-template-columns:max-content max-content;align-items:center;justify-content:start;gap:.45rem .65rem!important;margin-top:.7rem!important;width:100%;max-width:48rem}
+      .studio-ai-hero .studio-ai-search-wrap + div > button{grid-row:1!important;min-height:44px!important;padding:.72rem 1.25rem!important;font-size:.82rem!important;justify-self:start}
+      .studio-ai-hero .studio-ai-search-wrap + div > button:nth-of-type(1){grid-column:1!important}
+      .studio-ai-hero .studio-ai-search-wrap + div > button:nth-of-type(2){grid-column:2!important}
+      .studio-ai-hero .studio-ai-search-wrap + div > div:has(#live-stat-creators){grid-column:1!important;grid-row:2!important}
+      .studio-ai-hero .studio-ai-search-wrap + div > div:has(#live-stat-visitors){grid-column:2!important;grid-row:2!important}
+      .studio-ai-hero .studio-ai-search-wrap + div > div:has(#live-stat-creators),
+      .studio-ai-hero .studio-ai-search-wrap + div > div:has(#live-stat-visitors){display:inline-flex!important;align-items:center!important;gap:.45rem!important;min-height:1.65rem!important;padding:0!important;background:transparent!important;border:0!important;border-radius:0!important;box-shadow:none!important;backdrop-filter:none!important;color:rgba(255,255,255,.82)!important;white-space:nowrap!important;font-size:.72rem!important;font-weight:700!important}
+      .studio-ai-hero .studio-ai-search-wrap + div > div:has(#live-stat-creators) > div:first-child,
+      .studio-ai-hero .studio-ai-search-wrap + div > div:has(#live-stat-visitors) > div:first-child{width:1.15rem!important;height:1.15rem!important;border-radius:999px!important;font-size:.55rem!important;box-shadow:none!important}
+      .studio-ai-hero .studio-ai-search-wrap + div > div:has(#live-stat-creators) .text-\[9px\],
+      .studio-ai-hero .studio-ai-search-wrap + div > div:has(#live-stat-visitors) .text-\[9px\]{font-size:.68rem!important;color:rgba(255,255,255,.78)!important;letter-spacing:.01em!important}
+      .studio-ai-hero .studio-ai-search-wrap + div > div:has(#live-stat-creators) .text-xs,
+      .studio-ai-hero .studio-ai-search-wrap + div > div:has(#live-stat-visitors) .text-xs{font-size:.78rem!important;font-weight:900!important;color:#fff!important}
+      @media(max-width:640px){
+        .studio-ai-hero .studio-ai-search-wrap + div{grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:.45rem .5rem!important}
+        .studio-ai-hero .studio-ai-search-wrap + div > button{width:100%!important;justify-self:stretch!important;padding:.7rem .8rem!important}
+        .studio-ai-hero .studio-ai-search-wrap + div > div:has(#live-stat-creators),.studio-ai-hero .studio-ai-search-wrap + div > div:has(#live-stat-visitors){justify-self:start!important}
+      }
+
       .studio-creator-card-premium{background:#fff;border:1px solid #dbe5f4;border-radius:26px;padding:18px;box-shadow:0 12px 30px rgba(21,28,117,.07);transition:transform .2s ease,box-shadow .2s ease,border-color .2s ease}
       .studio-creator-card-premium:hover{transform:translateY(-3px);box-shadow:0 20px 40px rgba(21,28,117,.12);border-color:#c7d8ff}
       .studio-creator-card-head{display:flex;align-items:center;gap:11px}
@@ -111,7 +132,7 @@
       .studio-creator-portfolio-body{padding:7px}.studio-creator-portfolio-body h4{margin:0;color:#151c75;font-size:9px;font-weight:900;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.studio-creator-portfolio-body p{margin:3px 0 0;color:#94a3b8;font-size:8px;line-height:1.35;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
       .studio-creator-no-portfolio{margin-top:13px;padding:11px;border-radius:13px;background:#f8fafc;color:#94a3b8;text-align:center;font-size:9px;font-weight:700}
       .studio-creator-actions{display:flex;gap:7px;margin-top:14px;padding-top:12px;border-top:1px solid #eef2f7}.studio-creator-actions button,.studio-creator-actions a{display:inline-flex;align-items:center;justify-content:center;padding:8px 10px;border-radius:10px;background:#eef4ff;color:#151c75;font-size:9px;font-weight:900;text-decoration:none;border:0;cursor:pointer}.studio-creator-actions a{background:#059669;color:#fff}
-      @media(max-width:720px){.studio-creator-portfolio-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.studio-ai-stats-row{gap:.7rem}.studio-ai-control-row{gap:.45rem}}
+      @media(max-width:720px){.studio-creator-portfolio-grid{grid-template-columns:repeat(2,minmax(0,1fr)}
       @media(max-width:460px){.studio-creator-portfolio-grid{grid-template-columns:1fr}.studio-creator-card-premium{padding:15px;border-radius:22px}}
       @media(prefers-reduced-motion:reduce){.studio-creator-card-premium,.studio-ai-control-row .studio-ai-control{transition:none!important}}
     `;
@@ -149,11 +170,12 @@
   function renderStats() {
     const hero = document.querySelector('.studio-ai-hero');
     if (!hero) return false;
-    let stats = document.getElementById('studio-ai-stats-row');
-    if (!stats) { stats=document.createElement('div'); stats.id='studio-ai-stats-row'; hero.appendChild(stats); }
-    const creators=getCreators(); const active=creators.filter(c=>c.is_published!==false).length;
-    stats.className='studio-ai-stats-row';
-    stats.innerHTML=`<span>Creator Aktif <strong>${active}</strong></span><span>Pengunjung <strong id="studio-live-visitors">${Number(window.App?.state?.studioAI?.visitorCount || 0).toLocaleString('id-ID')}</strong></span>`;
+    const creators = getCreators();
+    const active = creators.filter(c => c.is_published !== false).length;
+    const creatorEl = hero.querySelector('#live-stat-creators');
+    const visitorEl = hero.querySelector('#live-stat-visitors');
+    if (creatorEl) creatorEl.textContent = String(active || creatorEl.textContent || 0);
+    if (visitorEl && window.App?.state?.studioAI?.visitorCount != null) visitorEl.textContent = Number(window.App.state.studioAI.visitorCount).toLocaleString('id-ID');
     return true;
   }
 
@@ -173,8 +195,6 @@
     installCss();
     const tryRender=()=>{ ensurePortfolioData(); renderControls(); render(); renderStats(); };
     tryRender();
-    const observer=new MutationObserver(()=>{ if(document.getElementById('studio-ai-creator-section')) tryRender(); });
-    observer.observe(document.body,{childList:true,subtree:true});
     window.addEventListener('popstate',tryRender);
     setTimeout(tryRender,400);
     setTimeout(tryRender,1200);
