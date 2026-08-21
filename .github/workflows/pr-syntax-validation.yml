@@ -22,7 +22,6 @@ jobs:
 
       - name: Check JavaScript modules
         run: |
-          node --check dapur-editor-ux-v1.js
           node --check studio-ai-creator-card.js
           node --check dapur-entry.js
           node --check dapur-editor.js
