@@ -18,7 +18,7 @@ jobs:
       - name: Setup Node
         uses: actions/setup-node@v4
         with:
-          node-version: 20
+          node-version: 22
 
       - name: Check JavaScript modules
         run: |
@@ -28,8 +28,8 @@ jobs:
           node --check dapur-editor.js
 
       - name: Check inline JavaScript in route shells
+        shell: python3 {0}
         run: |
-          python3 <<'PY'
           import re
           import subprocess
           import tempfile
@@ -39,9 +39,7 @@ jobs:
               html = Path(html_name).read_text(encoding='utf-8')
               blocks = re.findall(r'<script(?P<attrs>[^>]*)>(?P<body>.*?)</script>', html, flags=re.I | re.S)
               checked = 0
-              for i, match in enumerate(blocks):
-                  attrs = match.group('attrs')
-                  body = match.group('body')
+              for i, (attrs, body) in enumerate(blocks):
                   if re.search(r'\bsrc\s*=', attrs, flags=re.I):
                       continue
                   if re.search(r'type\s*=\s*["\']application/ld\+json["\']', attrs, flags=re.I):
@@ -56,7 +54,6 @@ jobs:
                       raise SystemExit(f'Inline JavaScript syntax failure in {html_name} block {i}.')
                   checked += 1
               print(f'{html_name}: validated {checked} inline JavaScript blocks.')
-          PY
 
       - name: Diff hygiene
         run: git diff --check
