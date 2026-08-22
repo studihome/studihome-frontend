@@ -24,7 +24,8 @@
   function install(){
     const api=window.AdminDapurUI;
     if(!api||api.__hardeningWrapped)return false;
-    const original={categories:api.categories,service:api.service,portfolio:api.portfolio};
+    const original={profile:api.profile,categories:api.categories,service:api.service,portfolio:api.portfolio};
+    if(typeof original.profile==='function')api.profile=async(...args)=>original.profile(await resolveCreator(),...args.slice(1));
     if(typeof original.categories==='function')api.categories=async(...args)=>original.categories(await resolveCreator(),...args);
     if(typeof original.service==='function')api.service=async(...args)=>original.service(await resolveCreator(),...args.slice(1));
     if(typeof original.portfolio==='function')api.portfolio=async(...args)=>original.portfolio(await resolveCreator(),...args.slice(1));
