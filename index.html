@@ -8913,7 +8913,7 @@ window.StudihomeProductionPilotSimulation = {
   if (typeof window.supabase !== 'undefined') pass('runtime.supabase-lib','Supabase client library is available.');
   else warn('runtime.supabase-lib','Supabase client library is not detected.');
 
-  if (typeof window.SUPABASE_URL === 'string' && window.SUPABASE_URL) pass('runtime.supabase-config','Supabase URL config is populated.');
+  if (typeof window.STUDIHOME_SUPABASE_URL === 'string' && window.STUDIHOME_SUPABASE_URL) pass('runtime.supabase-config','Supabase URL config is populated.');
   else warn('runtime.supabase-config','Supabase URL is not exposed in this diagnostic scope or has not initialized yet.');
 
   rpcNames.forEach((name) => {
@@ -8946,8 +8946,6 @@ window.StudihomeProductionPilotSimulation = {
   });
 })();
 </script>
-<style id="studihome-managed-creator-style">
-.studihome-managed-star{display:inline-flex;align-items:center;justify-content:center;width:1rem;height:1rem;border-radius:999px;background:rgba(255,255,255,.92);color:#151c75;font-size:.58rem;font-weight:900;box-shadow:0 2px 6px rgba(21,28,117,.12);}
 <style id="studihome-managed-creator-style">
 .studihome-managed-star{display:inline-flex;align-items:center;justify-content:center;width:1rem;height:1rem;border-radius:999px;background:rgba(255,255,255,.92);color:#151c75;font-size:.58rem;font-weight:900;box-shadow:0 2px 6px rgba(21,28,117,.12);}
 .studihome-official-card{border-color:#f6d365!important;box-shadow:0 0 0 1px rgba(250,204,21,.18),0 16px 36px rgba(245,158,11,.12)!important;}
