@@ -8130,7 +8130,7 @@ window.StudihomeProductionAcceptanceGate = {
     const creatorPath = /^\/[a-z0-9][a-z0-9-]{2,39}(?:\/portfolio\/[a-z0-9][a-z0-9-]{0,120})?$/i.test(path) && !knownRoutes.has(path);
 
     checks.appBootstrapped = !!app;
-    checks.supabaseConfigured = !!(window.SUPABASE_URL && window.SUPABASE_ANON_KEY);
+    checks.supabaseConfigured = !!(window.STUDIHOME_SUPABASE_URL && window.STUDIHOME_SUPABASE_ANON_KEY);
     checks.supabaseClient = !!window.supabaseClient;
     checks.routeRegistryIntact = !!app?.router?.navigate && typeof app?.router?.routePath === 'function';
     checks.canonicalPath = knownRoutes.has(path) || creatorPath;
