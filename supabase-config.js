@@ -53,10 +53,18 @@ window.STUDIHOME_SUPABASE_ANON_KEY =
 
   if (createClientOnce()) return;
 
+  // The config is intentionally self-healing: if the primary SDK tag was reset,
+  // start the isolated loader without modifying the application's existing HTML.
+  if (!window.__STUDIHOME_SUPABASE_SDK_LOADER__) {
+    const loader = document.createElement('script');
+    loader.src = '/supabase-sdk-loader-v1.js?v=1';
+    loader.async = true;
+    loader.onerror = () => console.error('[Studihome] Supabase SDK loader failed to load.');
+    document.head.appendChild(loader);
+  }
+
   const retry = () => {
-    if (!createClientOnce()) {
-      window.setTimeout(retry, 50);
-    }
+    if (!createClientOnce()) window.setTimeout(retry, 50);
   };
 
   window.addEventListener('studihome:supabase-sdk-ready', retry, { once: true });
