@@ -44,7 +44,7 @@ Hero baseline yang harus dipertahankan:
 `cdn.tailwindcss.com` dilarang di production.
 
 `index.html` sekarang menggunakan:
-`/tailwind-compiled.css?v=20260817r1`
+`/tailwind-compiled.css?v=20260817r2`
 
 Compiled CSS menggunakan Tailwind utilities tanpa mengaktifkan Preflight secara membabi buta. Jangan mengembalikan CDN.
 

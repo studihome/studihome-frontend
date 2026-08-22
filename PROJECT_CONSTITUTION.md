@@ -241,7 +241,7 @@ Latest known Production commit:
 State:
 `READY`
 
-Current homepage source includes `/tailwind-compiled.css?v=20260817r1` and no Tailwind CDN reference. fileciteturn694file0L2-L6
+Current homepage source includes `/tailwind-compiled.css?v=20260817r2` and no Tailwind CDN reference. fileciteturn694file0L2-L6
 
 ## ARTICLE XVI — OPEN RELEASE GATES
 ### Gate A — Homepage hero parity
