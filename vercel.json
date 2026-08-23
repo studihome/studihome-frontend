@@ -1,59 +1,137 @@
 {
   "$schema": "https://openapi.vercel.sh/vercel.json",
   "rewrites": [
-    { "source": "/studio-ai", "destination": "/index.html" },
-    { "source": "/products", "destination": "/index.html" },
-    { "source": "/kamar", "destination": "/index.html" },
-    { "source": "/dashboard", "destination": "/index.html" },
-    { "source": "/admin", "destination": "/index.html" },
-    { "source": "/dapur", "destination": "/dapur.html" },
-    { "source": "/dapur/", "destination": "/dapur.html" },
-    { "source": "/dapur/:username", "destination": "/dapur.html" },
-    { "source": "/dapur/:username/", "destination": "/dapur.html" },
-    { "source": "/creator-studio", "destination": "/index.html" },
-    { "source": "/ai-video", "destination": "/index.html" },
-    { "source": "/ai-automation", "destination": "/index.html" },
-    { "source": "/ai-content", "destination": "/index.html" },
-    { "source": "/ai-untuk-guru", "destination": "/index.html" },
-    { "source": "/ai-untuk-umkm", "destination": "/index.html" },
-    { "source": "/:username/portfolio/:slug*", "destination": "/index.html" },
-    { "source": "/:username", "destination": "/index.html" }
+    {
+      "source": "/studio-ai",
+      "destination": "/index.html"
+    },
+    {
+      "source": "/products",
+      "destination": "/index.html"
+    },
+    {
+      "source": "/kamar",
+      "destination": "/index.html"
+    },
+    {
+      "source": "/dashboard",
+      "destination": "/index.html"
+    },
+    {
+      "source": "/admin",
+      "destination": "/index.html"
+    },
+    {
+      "source": "/dapur",
+      "destination": "/dapur.html"
+    },
+    {
+      "source": "/dapur/",
+      "destination": "/dapur.html"
+    },
+    {
+      "source": "/dapur/:username",
+      "destination": "/dapur.html"
+    },
+    {
+      "source": "/dapur/:username/",
+      "destination": "/dapur.html"
+    },
+    {
+      "source": "/creator-studio",
+      "destination": "/index.html"
+    },
+    {
+      "source": "/ai-video",
+      "destination": "/index.html"
+    },
+    {
+      "source": "/ai-automation",
+      "destination": "/index.html"
+    },
+    {
+      "source": "/ai-content",
+      "destination": "/index.html"
+    },
+    {
+      "source": "/ai-untuk-guru",
+      "destination": "/index.html"
+    },
+    {
+      "source": "/ai-untuk-umkm",
+      "destination": "/index.html"
+    },
+    {
+      "source": "/:username/portfolio/:slug*",
+      "destination": "/index.html"
+    },
+    {
+      "source": "/:username",
+      "destination": "/index.html"
+    }
   ],
   "headers": [
     {
       "source": "/index.html",
       "headers": [
-        { "key": "Cache-Control", "value": "no-store, no-cache, must-revalidate, proxy-revalidate, max-age=0" }
+        {
+          "key": "Cache-Control",
+          "value": "no-store, no-cache, must-revalidate, proxy-revalidate, max-age=0"
+        }
       ]
     },
     {
       "source": "/(.*)",
       "headers": [
-        { "key": "X-Frame-Options", "value": "SAMEORIGIN" }
+        {
+          "key": "X-Frame-Options",
+          "value": "SAMEORIGIN"
+        }
       ]
     },
     {
       "source": "/dapur-button.js",
       "headers": [
-        { "key": "Cache-Control", "value": "no-store, no-cache, must-revalidate, proxy-revalidate, max-age=0" }
+        {
+          "key": "Cache-Control",
+          "value": "no-store, no-cache, must-revalidate, proxy-revalidate, max-age=0"
+        }
       ]
     },
     {
       "source": "/dapur.html",
       "headers": [
-        { "key": "Cache-Control", "value": "no-store, no-cache, must-revalidate, proxy-revalidate, max-age=0" }
+        {
+          "key": "Cache-Control",
+          "value": "no-store, no-cache, must-revalidate, proxy-revalidate, max-age=0"
+        }
       ]
     },
     {
       "source": "/maintenance-gate.js",
       "headers": [
-        { "key": "Cache-Control", "value": "no-store, no-cache, must-revalidate, proxy-revalidate, max-age=0" }
+        {
+          "key": "Cache-Control",
+          "value": "no-store, no-cache, must-revalidate, proxy-revalidate, max-age=0"
+        }
       ]
     },
     {
       "source": "/under-construction.js",
       "headers": [
-        { "key": "Cache-Control", "value": "no-store, no-cache, must-revalidate, proxy-revalidate, max-age=0" }
+        {
+          "key": "Cache-Control",
+          "value": "no-store, no-cache, must-revalidate, proxy-revalidate, max-age=0"
+        }
+      ]
+    },
+    {
+      "source": "/(.*)",
+      "headers": [
+        {
+          "key": "Content-Security-Policy",
+          "value": "script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net https://vercel.live; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: https:; connect-src 'self' https://*.supabase.co wss://*.supabase.co; frame-ancestors 'self'"
+        }
       ]
     }
   ]
