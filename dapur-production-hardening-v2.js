@@ -1,9 +1,9 @@
-(()=>{
+(=>){
 'use strict';
 if(window.__DAPUR_PRODUCTION_HARDENING_V2__)return;
 window.__DAPUR_PRODUCTION_HARDENING_V2__=true;
 const client=()=>window.supabaseClient;
-const path=()=>((location.pathname||'/').replace(/\/+$/,'')||'/');
+const path=()=>((location.pathname||'/').replace(/\/+$\/,'')||'/');
 const slug=()=>{const m=path().match(/^\/dapur\/([a-z0-9][a-z0-9-]{2,39})$/i);return m?m[1].toLowerCase():''};
 let ownerPromise=null;
 async function owner(){
@@ -21,6 +21,44 @@ async function owner(){
   try{return await ownerPromise}catch(e){ownerPromise=null;throw e}
 }
 const mutationTables={creator_profiles:'profile',creator_services:'creator_id',creator_portfolios:'creator_id',creator_category_members:'creator_id'};
+
+function makeExecWrapper({target,op,args,kind}){
+  // A thenable wrapper that records chained filters (e.g., .eq) and executes the
+  // actual PostgREST builder only when awaited. This preserves the common
+  // pattern: client.from('x').update(vals).eq('id',id).eq(...)
+  const filters = [];
+  const passthrough = new Proxy({}, {
+    get(_, prop){
+      if(prop==='then'){
+        return async (resolve,reject)=>{
+          try{
+            const o = await owner();
+            // Build base builder and apply owner constraint first
+            let builder = target[op](...args);
+            if(kind==='profile'){
+              builder = builder.eq('id', o.id).eq('user_id', o.uid);
+            } else {
+              builder = builder.eq(kind, o.id);
+            }
+            // Apply recorded filters (eq, match, order etc.) in order
+            for(const f of filters){
+              const [name, ...rest] = f;
+              if(typeof builder[name]==='function') builder = builder[name](...rest);
+            }
+            const result = await builder;
+            return resolve(result);
+          }catch(err){
+            return reject(err);
+          }
+        };
+      }
+      // Common chained filter: .eq(key, val)
+      return (...a)=>{ filters.push([prop, ...a]); return passthrough };
+    }
+  });
+  return passthrough;
+}
+
 async function patchClient(){
   const c=client(); if(!c||c.__dapurProductionPatched)return false;
   const originalFrom=c.from.bind(c), originalRpc=c.rpc.bind(c);
@@ -28,9 +66,19 @@ async function patchClient(){
     const builder=originalFrom(table),kind=mutationTables[table];
     if(!kind)return builder;
     const addOwner=b=>owner().then(o=>kind==='profile'?b.eq('id',o.id).eq('user_id',o.uid):b.eq(kind,o.id));
+
+    // Return a proxy around the builder. We only need to specially handle
+    // methods that are typically chained after an update/delete call: update
+    // and delete. For insert/upsert we can continue to rely on owner() before
+    // the operation (these are not commonly chained in the same way).
     return new Proxy(builder,{get(target,prop,receiver){
-      if(prop==='update')return values=>addOwner(target.update({...values}));
-      if(prop==='delete')return (...args)=>addOwner(target.delete(...args));
+      if(prop==='update')return (...values)=>{
+        // Provide a thenable wrapper that preserves chaining like .eq(...)
+        return makeExecWrapper({target,op:'update',args:values,kind});
+      };
+      if(prop==='delete')return (...args)=>{
+        return makeExecWrapper({target,op:'delete',args,kind});
+      };
       if(prop==='upsert')return (values,...args)=>owner().then(o=>{const arr=Array.isArray(values)?values:[values];return target.upsert(arr.map(v=>kind==='profile'?{...v,user_id:o.uid}:{...v,creator_id:o.id}),...args)});
       if(prop==='insert')return (values,...args)=>owner().then(o=>{const arr=Array.isArray(values)?values:[values];const next=arr.map(v=>kind==='profile'?{...v,user_id:o.uid}:{...v,creator_id:o.id});return target.insert(Array.isArray(values)?next:next[0],...args)});
       return Reflect.get(target,prop,receiver);
