@@ -1,13 +1,13 @@
-(=>){
+(function(){
 'use strict';
 if(window.__DAPUR_PRODUCTION_HARDENING_V2__)return;
 window.__DAPUR_PRODUCTION_HARDENING_V2__=true;
 const client=()=>window.supabaseClient;
-const path=()=>((location.pathname||'/').replace(/\/+$\/,'')||'/');
+const path=()=>((location.pathname||'/').replace(/\/+$/,'')||'/');
 const slug=()=>{const m=path().match(/^\/dapur\/([a-z0-9][a-z0-9-]{2,39})$/i);return m?m[1].toLowerCase():''};
 let ownerPromise=null;
 async function owner(){
-  if(ownerPromise)return ownerPromise;
+  if(ownerPromise) return ownerPromise;
   ownerPromise=(async()=>{
     const c=client(); if(!c)throw new Error('Koneksi Dapur belum siap.');
     const a=await c.auth.getUser(); if(a.error)throw a.error;
@@ -22,68 +22,90 @@ async function owner(){
 }
 const mutationTables={creator_profiles:'profile',creator_services:'creator_id',creator_portfolios:'creator_id',creator_category_members:'creator_id'};
 
-function makeExecWrapper({target,op,args,kind}){
-  // A thenable wrapper that records chained filters (e.g., .eq) and executes the
-  // actual PostgREST builder only when awaited. This preserves the common
-  // pattern: client.from('x').update(vals).eq('id',id).eq(...)
-  const filters = [];
-  const passthrough = new Proxy({}, {
-    get(_, prop){
-      if(prop==='then'){
-        return async (resolve,reject)=>{
-          try{
-            const o = await owner();
-            // Build base builder and apply owner constraint first
-            let builder = target[op](...args);
-            if(kind==='profile'){
-              builder = builder.eq('id', o.id).eq('user_id', o.uid);
-            } else {
-              builder = builder.eq(kind, o.id);
-            }
-            // Apply recorded filters (eq, match, order etc.) in order
-            for(const f of filters){
-              const [name, ...rest] = f;
-              if(typeof builder[name]==='function') builder = builder[name](...rest);
-            }
-            const result = await builder;
-            return resolve(result);
-          }catch(err){
-            return reject(err);
-          }
-        };
-      }
-      // Common chained filter: .eq(key, val)
-      return (...a)=>{ filters.push([prop, ...a]); return passthrough };
-    }
-  });
-  return passthrough;
-}
-
 async function patchClient(){
-  const c=client(); if(!c||c.__dapurProductionPatched)return false;
+  const c=client(); if(!c||c.__dapurProductionPatched) return false;
   const originalFrom=c.from.bind(c), originalRpc=c.rpc.bind(c);
-  c.from=function(table){
-    const builder=originalFrom(table),kind=mutationTables[table];
-    if(!kind)return builder;
-    const addOwner=b=>owner().then(o=>kind==='profile'?b.eq('id',o.id).eq('user_id',o.uid):b.eq(kind,o.id));
 
-    // Return a proxy around the builder. We only need to specially handle
-    // methods that are typically chained after an update/delete call: update
-    // and delete. For insert/upsert we can continue to rely on owner() before
-    // the operation (these are not commonly chained in the same way).
+  // Cache admin check so we don't call RPC repeatedly in the same session.
+  let adminPromise = null;
+  async function isAdmin(){
+    if(adminPromise!==null) return adminPromise;
+    adminPromise = (async()=>{
+      try{
+        const r = await originalRpc('is_admin');
+        if(r && r.error) return false;
+        const val = r && typeof r.data!=='undefined' ? r.data : false;
+        if(Array.isArray(val) && val.length>0){
+          const first = val[0];
+          if(typeof first==='object') return Boolean(Object.values(first).find(v=>v===true));
+        }
+        return Boolean(val);
+      }catch(e){
+        return false;
+      }
+    })();
+    return adminPromise;
+  }
+
+  function makeExecWrapper({target,op,args,kind}){
+    const filters = [];
+    const passthrough = new Proxy({}, {
+      get(_, prop){
+        if(prop==='then'){
+          return async (resolve,reject)=>{
+            try{
+              const admin = await isAdmin();
+              let builder = target[op](...args);
+              if(!admin){
+                const o = await owner();
+                if(kind==='profile'){
+                  builder = builder.eq('id', o.id).eq('user_id', o.uid);
+                } else {
+                  builder = builder.eq(kind, o.id);
+                }
+              }
+              for(const f of filters){
+                const [name, ...rest] = f;
+                if(typeof builder[name]==='function') builder = builder[name](...rest);
+              }
+              const result = await builder;
+              return resolve(result);
+            }catch(err){
+              return reject(err);
+            }
+          };
+        }
+        return (...a)=>{ filters.push([prop, ...a]); return passthrough };
+      }
+    });
+    return passthrough;
+  }
+
+  c.from=function(table){
+    const builder=originalFrom(table), kind=mutationTables[table];
+    if(!kind) return builder;
+
     return new Proxy(builder,{get(target,prop,receiver){
       if(prop==='update')return (...values)=>{
-        // Provide a thenable wrapper that preserves chaining like .eq(...)
         return makeExecWrapper({target,op:'update',args:values,kind});
       };
       if(prop==='delete')return (...args)=>{
         return makeExecWrapper({target,op:'delete',args,kind});
       };
-      if(prop==='upsert')return (values,...args)=>owner().then(o=>{const arr=Array.isArray(values)?values:[values];return target.upsert(arr.map(v=>kind==='profile'?{...v,user_id:o.uid}:{...v,creator_id:o.id}),...args)});
-      if(prop==='insert')return (values,...args)=>owner().then(o=>{const arr=Array.isArray(values)?values:[values];const next=arr.map(v=>kind==='profile'?{...v,user_id:o.uid}:{...v,creator_id:o.id});return target.insert(Array.isArray(values)?next:next[0],...args)});
+      if(prop==='upsert')return (values,...args)=>owner().then(o=>{
+        const arr=Array.isArray(values)?values:[values];
+        const mapped = arr.map(v=> kind==='profile' ? {...v, user_id: o.uid} : {...v, creator_id: o.id});
+        return target.upsert(mapped,...args);
+      });
+      if(prop==='insert')return (values,...args)=>owner().then(o=>{
+        const arr=Array.isArray(values)?values:[values];
+        const mapped = arr.map(v=> kind==='profile' ? {...v, user_id: o.uid} : {...v, creator_id: o.id});
+        return target.insert(Array.isArray(values)?mapped:mapped[0],...args);
+      });
       return Reflect.get(target,prop,receiver);
     }});
   };
+
   c.rpc=async function(fn,args={}){
     if(fn==='change_creator_username_once'){
       const o=await owner(),username=String(args?.p_username||'').trim().toLowerCase();
@@ -92,8 +114,9 @@ async function patchClient(){
     }
     return originalRpc(fn,args);
   };
+
   c.__dapurProductionPatched=true;
-  window.DapurProductionHardening={owner,originalFrom,originalRpc};
+  window.DapurProductionHardening={owner,originalFrom,originalRpc,isAdmin};
   return true;
 }
 function start(){if(!patchClient())setTimeout(start,50)}
