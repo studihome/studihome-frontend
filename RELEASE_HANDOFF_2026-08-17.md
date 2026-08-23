@@ -34,10 +34,11 @@ Runtime canonical:
 
 Dilarang mengembalikan:
 - global `MutationObserver` pada Dapur runtime;
-- second-stage DOM decorator;
 - legacy Dapur script injector;
 - renderer kedua;
 - route section `/dapur/foyer`, `/dapur/menu`, `/dapur/hidangan`, `/dapur/ambalan`.
+
+Catatan PR 23 Agustus 2026: `dapur-ui-tweaks-v1.js` adalah decorator satu-kali berbasis DOM event, tanpa `MutationObserver`, untuk perubahan label/step dan prefill ringan. Jika perubahan ini nantinya dipindahkan ke renderer canonical, file tersebut dapat dihapus.
 
 ## 3. DAPUR ACCESS CONTRACT
 Publik:
@@ -143,30 +144,69 @@ Jangan menghapus compatibility/admin surface tanpa reference proof.
 
 Jangan memakai inline regex parameter di `rewrites.source`; konfigurasi tersebut sebelumnya menyebabkan `Invalid vercel.json file provided`.
 
-## 10. CURRENT PRODUCTION VERIFICATION
-Verified production deployment:
+## 10. DAPUR PRODUCTION HARDENING — 23 AGUSTUS 2026
+Root cause yang diperbaiki:
+- wrapper lama diawali fragmen sintaks invalid `(=>){`, sehingga parser berhenti sebelum runtime Dapur berjalan;
+- regex normalisasi path juga malformed pada versi rusak;
+- update/delete perlu mempertahankan chaining PostgREST seperti `.eq()`/`.match()`;
+- operasi mutation non-admin perlu diberi owner constraint, sedangkan admin tidak boleh diblokir oleh constraint frontend yang tidak sesuai authority backend.
+
+Perubahan:
+- `dapur-production-hardening-v2.js` memakai IIFE valid;
+- `patchClient()` menjaga thenable mutation wrapper;
+- owner constraint tetap diterapkan untuk non-admin;
+- admin detection memakai RPC `is_admin` dan hasilnya dicache selama sesi wrapper;
+- `insert`/`upsert` tetap memetakan `user_id`/`creator_id` dari owner;
+- `dapur.html` menaikkan cache-bust production hardening ke `v=20260823prod1`.
+
+Catatan security: wrapper frontend bukan authorization boundary. RLS/backend authority tetap menjadi sumber kebenaran.
+
+## 11. UI TWEAKS — 23 AGUSTUS 2026
+`dapur-ui-tweaks-v1.js` menambahkan perubahan non-intrusif:
+- label `Edit Profil` → `Edit Foyer`;
+- workspace hanya menampilkan tiga step: Menu, Hidangan, Ambalan;
+- layout tiga step tetap satu kolom pada viewport mobile;
+- saat modal Foyer dibuka, WhatsApp/location dicoba diprefill dari `creator_profiles` milik owner melalui `DapurProductionHardening.owner()`.
+
+Tidak ada perubahan pada business CRUD flow. Prefill hanya mengisi field yang masih kosong dan gagal secara soft jika data/field tidak tersedia.
+
+## 12. GOOGLE PHOTOS MIGRATION NOTE
+Jangan menganggap URL `photos.fife.usercontent.google.com` aman untuk production hanya karena source code berhasil memuatnya.
+
+Target migration:
+1. pindahkan media Creator ke Supabase Storage bucket yang sesuai;
+2. validasi ownership/path dan tipe/ukuran file sesuai Storage policy;
+3. gunakan public URL atau signed URL sesuai visibility media;
+4. update referensi pada tabel canonical, termasuk `creator_portfolios`/`creator_profiles` bila schema aktual menggunakannya;
+5. verifikasi tidak ada reference Google Photos yang tersisa sebelum production cutover.
+
+Status migration pada PR ini: **PENDING**. PR tidak mengarang URL Storage dan tidak mengubah data production tanpa migration yang dapat diverifikasi.
+
+## 13. TEST / RELEASE GATE
+Minimal sebelum merge/deploy:
+- `node --check dapur-production-hardening-v2.js`
+- `node --check dapur-ui-tweaks-v1.js`
+- `git diff --check`
+- review changed-file list dan secret scan;
+- authenticated Dapur smoke test;
+- owner vs admin mutation test;
+- mobile 375px/768px;
+- console/network check;
+- Google Photos migration verification jika migration dikerjakan.
+
+CI PASS tidak sama dengan Browser PASS.
+Browser PASS tidak sama dengan Production PASS.
+
+## 14. CURRENT PRODUCTION VERIFICATION
+Verified production deployment sebelumnya:
 - Deployment: `dpl_HRw5bSKV1UM4znuG29Nt3YaAnzbv`
 - Commit: `9a383cb7e91d389bf51ac76c3717a48f8b52e102`
 - State: `READY`
 
-Latest runtime log check for this deployment:
-- window: 1 hour
-- error/warning logs: **none found**
+Deployment tersebut **bukan bukti** bahwa PR 23 Agustus 2026 sudah production verified. Setelah merge, deployment SHA wajib dicocokkan dengan commit PR yang merged.
 
-Source verification pada commit final:
-- compiled Tailwind CSS reference present;
-- Tailwind CDN absent;
-- `login-email` has `autocomplete="username"`;
-- password autocomplete attributes present;
-- homepage hero visual lock present;
-- no change to auth modal visual structure.
-
-## 11. RELEASE VERIFICATION LIMITATION
-HTTP/deployment/runtime checks sudah terverifikasi.
-
-Browser console evidence dari user menunjukkan:
-- public console sudah bersih;
-- member/admin warning sebelumnya berasal dari autocomplete dan sudah dikoreksi di source final.
+## 15. RELEASE VERIFICATION LIMITATION
+HTTP/deployment/runtime checks sebelumnya sudah terverifikasi.
 
 Authenticated browser E2E penuh tetap harus diperlakukan sebagai manual smoke test final ketika akun uji tersedia:
 1. Premium tanpa Creator → `Mulai Membuat Dapur` → `/dapur/{username}`.
@@ -180,17 +220,17 @@ Authenticated browser E2E penuh tetap harus diperlakukan sebagai manual smoke te
 
 Jangan menganggap source inspection menggantikan authenticated browser E2E.
 
-## 12. DO NOT REGRESS
+## 16. DO NOT REGRESS
 Jangan:
 - mengubah `/dapur` menjadi admin dashboard;
 - mengubah public Creator URL `/{username}` menjadi `/dapur/{username}`;
 - membuat route section Dapur;
-- menambah renderer/decorator/observer baru;
+- menambah global `MutationObserver`;
 - memasukkan service-role key ke frontend;
 - mengubah payment/order logic tanpa audit khusus;
 - menyatakan release verified tanpa cocokkan commit SHA dan deployment SHA.
 
-## 13. NEXT CHAT PROTOCOL
+## 17. NEXT CHAT PROTOCOL
 Jika percakapan terputus, baca file berikut terlebih dahulu:
 1. `MASTER_HANDOFF_PROMPT_STUDIHOME.md`
 2. `PROJECT_CONSTITUTION.md`
@@ -207,15 +247,10 @@ Kemudian:
 8. verify production;
 9. baru laporkan status.
 
-## 14. RELEASE STATUS
-Source final: **READY**
-Production deployment final: **READY**
-Runtime errors/warnings pada deployment final: **NONE FOUND**
-UI/UX contract: **PRESERVED**
-Homepage hero contract: **RESTORED/LOCKED**
-Tailwind CDN warning: **REMOVED**
-Auth autocomplete warning: **REMOVED IN SOURCE**
+## 18. RELEASE STATUS
+Source baseline: **READY**
+Production deployment baseline: **READY**
+PR 23 Agustus 2026: **PENDING CI + BROWSER + PRODUCTION VERIFICATION**
+Google Photos migration: **PENDING**
 
-Status release engineering: **READY FOR FINAL MANUAL AUTHENTICATED SMOKE TEST**
-
-Jangan meng-upgrade status menjadi `FULLY VERIFIED` sebelum manual authenticated smoke test di atas selesai.
+Status release engineering: **NOT PRODUCTION VERIFIED**
