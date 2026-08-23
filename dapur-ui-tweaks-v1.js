@@ -5,7 +5,14 @@
 
   const text=(node)=>String(node?.textContent||'').trim();
   const getClient=()=>window.supabaseClient;
-  const getSlug=()=>((location.pathname||'').match(/^\/dapur\/([a-z0-9][a-z0-9-]{2,39})$/i)||[])[1]?.toLowerCase()||'';
+
+  const ensureStyle=()=>{
+    if(document.getElementById('dapur-ui-tweaks-v1-style')) return;
+    const style=document.createElement('style');
+    style.id='dapur-ui-tweaks-v1-style';
+    style.textContent='.dapur-three-step-grid{grid-template-columns:repeat(3,minmax(0,1fr))!important}@media(max-width:768px){.dapur-three-step-grid{grid-template-columns:1fr!important}}';
+    document.head.appendChild(style);
+  };
 
   const renameProfileAction=()=>{
     document.querySelectorAll('button,a').forEach(el=>{
@@ -22,11 +29,7 @@
       step.hidden=!allowed.test(title);
     });
     const grid=steps[0]?.parentElement;
-    if(grid){
-      grid.style.gridTemplateColumns='repeat(3,minmax(0,1fr))';
-      grid.style.removeProperty('grid-template-columns');
-      grid.classList.add('dapur-three-step-grid');
-    }
+    if(grid) grid.classList.add('dapur-three-step-grid');
   };
 
   const prefillFoyer=async()=>{
@@ -37,10 +40,8 @@
     const locationInput=inputs.find(i=>/location|lokasi|address|alamat/i.test(i.name||''));
     if(!whatsappInput && !locationInput) return;
     if(whatsappInput?.value && locationInput?.value) return;
-
     try{
-      const c=getClient();
-      const hardening=window.DapurProductionHardening;
+      const c=getClient(), hardening=window.DapurProductionHardening;
       if(!c||!hardening?.owner) return;
       const owner=await hardening.owner();
       const q=await c.from('creator_profiles').select('*').eq('id',owner.id).maybeSingle();
@@ -54,6 +55,7 @@
   };
 
   const init=()=>{
+    ensureStyle();
     renameProfileAction();
     limitWorkspaceSteps();
     document.addEventListener('click',event=>{
