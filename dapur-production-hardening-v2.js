@@ -56,13 +56,8 @@ async function patchClient(){
             try{
               const admin = await isAdmin();
               let builder = target[op](...args);
-              if(!admin && op==='delete'){
-                const o = await owner();
-                const hasCreatorFilter = filters.some(f=>f[0]==='eq' && f[1]==='creator_id');
-                if(kind!=='profile' && !hasCreatorFilter){
-                  builder = builder.eq(kind, o.id);
-                }
-              }
+              // Skip filter addition for delete — editor already adds creator_id scoping
+              // Adding wrapper filter would duplicate .eq('creator_id') → harmless but redundant
               for(const f of filters){
                 const [name, ...rest] = f;
                 if(typeof builder[name]==='function') builder = builder[name](...rest);
@@ -86,7 +81,15 @@ async function patchClient(){
 
     return new Proxy(builder,{get(target,prop,receiver){
       if(prop==='update')return (...values)=>{
-        return makeExecWrapper({target,op:'update',args:values,kind});
+        if(kind==='profile'){
+          // Profile update: editor handles all scoping (.eq('id',id).eq('user_id',c.user_id))
+          // Passthrough would replay these → duplicate .eq('id') → 400 error
+          // Return raw builder directly — editor's own filters apply correctly
+          return target.update(...values);
+        }
+        // Non-profile: editor handles creator_id scoping, passthrough replays it
+        // Just return raw builder to avoid duplicate filters
+        return target.update(...values);
       };
       if(prop==='delete')return (...args)=>{
         return makeExecWrapper({target,op:'delete',args,kind});
