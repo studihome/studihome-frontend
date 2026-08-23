@@ -2939,7 +2939,8 @@ App.router.bindCanonicalLinkGuard();
                                     </div>
                                 </div>
                                 
-                                <div class="inline-flex items-center rounded-full bg-white/8 border border-white/12 backdrop-blur-md px-1 py-1 max-w-full">
+<div class="mt-4 flex flex-wrap items-center gap-2.5 max-w-3xl">
+                                    <div class="inline-flex items-center rounded-full bg-white/8 border border-white/12 backdrop-blur-md px-1 py-1">
                                         <span class="inline-flex items-center gap-1.5 px-3 py-1.5 text-[11px] text-white/80 whitespace-nowrap">
                                             <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 shrink-0 shadow-[0_0_6px_rgba(52,211,153,.7)]"></span>
                                             <span class="font-bold text-white" id="live-stat-creators">29</span>
@@ -2952,13 +2953,14 @@ App.router.bindCanonicalLinkGuard();
                                             Pengunjung
                                         </span>
                                     </div>
-
-                                    <button type="button" onclick="App.studioAI.showCategoriesOnly()" class="studio-smart-brief-btn w-fit inline-flex items-center justify-center gap-1.5 px-3.5 py-2.5 rounded-xl text-xs font-extrabold shadow-sm ml-auto sm:ml-0">
-                                        <i class="fa-solid fa-layer-group text-amber-300"></i> Kategori
-                                    </button>
-                                    <button type="button" onclick="App.studioAI.showCreatorsOnly()" class="studio-smart-brief-btn w-fit inline-flex items-center justify-center gap-1.5 px-3.5 py-2.5 rounded-xl text-xs font-extrabold shadow-sm">
-                                        <i class="fa-solid fa-heart text-amber-300"></i> Creator
-                                    </button>
+                                    <div class="flex items-center gap-2 sm:ml-auto">
+                                        <button type="button" onclick="App.studioAI.showCategoriesOnly()" class="studio-smart-brief-btn w-fit inline-flex items-center justify-center gap-1.5 px-3.5 py-2 rounded-xl text-xs font-extrabold shadow-sm">
+                                            <i class="fa-solid fa-layer-group text-amber-300"></i> Kategori
+                                        </button>
+                                        <button type="button" onclick="App.studioAI.showCreatorsOnly()" class="studio-smart-brief-btn w-fit inline-flex items-center justify-center gap-1.5 px-3.5 py-2 rounded-xl text-xs font-extrabold shadow-sm">
+                                            <i class="fa-solid fa-heart text-amber-300"></i> Creator
+                                        </button>
+                                    </div>
                                 </div>
                             </div>
                             <div class="studio-ai-orb" aria-hidden="true"></div>
