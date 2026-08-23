@@ -2939,25 +2939,18 @@ App.router.bindCanonicalLinkGuard();
                                     </div>
                                 </div>
                                 
-                                <div class="mt-5 flex flex-wrap items-center justify-start gap-2.5 sm:gap-3 max-w-3xl">
-                                    <div class="flex items-center gap-2.5 px-3.5 py-2.5 rounded-xl bg-white/10 border border-white/20 backdrop-blur-md shadow-lg cursor-default transition-all hover:bg-white/20">
-                                        <div class="w-7 h-7 rounded-full bg-emerald-400/20 text-emerald-300 flex items-center justify-center border border-emerald-400/30 shrink-0">
-                                            <i class="fa-solid fa-users text-xs"></i>
-                                        </div>
-                                        <div>
-                                            <div class="text-[9px] font-bold text-blue-200 uppercase tracking-wider">Creator Aktif</div>
-                                            <div class="text-xs font-black text-white" id="live-stat-creators">29</div>
-                                        </div>
-                                    </div>
-                                    
-                                    <div class="flex items-center gap-2.5 px-3.5 py-2.5 rounded-xl bg-white/10 border border-white/20 backdrop-blur-md shadow-lg cursor-default transition-all hover:bg-white/20">
-                                        <div class="w-7 h-7 rounded-full bg-blue-400/20 text-blue-300 flex items-center justify-center border border-blue-400/30 shrink-0">
-                                            <i class="fa-solid fa-eye text-xs"></i>
-                                        </div>
-                                        <div>
-                                            <div class="text-[9px] font-bold text-blue-200 uppercase tracking-wider">Pengunjung</div>
-                                            <div class="text-xs font-black text-white" id="live-stat-visitors">157</div>
-                                        </div>
+                                <div class="inline-flex items-center rounded-full bg-white/8 border border-white/12 backdrop-blur-md px-1 py-1 max-w-full">
+                                        <span class="inline-flex items-center gap-1.5 px-3 py-1.5 text-[11px] text-white/80 whitespace-nowrap">
+                                            <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 shrink-0 shadow-[0_0_6px_rgba(52,211,153,.7)]"></span>
+                                            <span class="font-bold text-white" id="live-stat-creators">29</span>
+                                            Creator
+                                        </span>
+                                        <span class="w-px h-3.5 bg-white/15 shrink-0"></span>
+                                        <span class="inline-flex items-center gap-1.5 px-3 py-1.5 text-[11px] text-white/80 whitespace-nowrap">
+                                            <span class="w-1.5 h-1.5 rounded-full bg-blue-400 shrink-0 shadow-[0_0_6px_rgba(96,165,250,.7)]"></span>
+                                            <span class="font-bold text-white" id="live-stat-visitors">157</span>
+                                            Pengunjung
+                                        </span>
                                     </div>
 
                                     <button type="button" onclick="App.studioAI.showCategoriesOnly()" class="studio-smart-brief-btn w-fit inline-flex items-center justify-center gap-1.5 px-3.5 py-2.5 rounded-xl text-xs font-extrabold shadow-sm ml-auto sm:ml-0">
@@ -3005,32 +2998,23 @@ App.router.bindCanonicalLinkGuard();
                         if (statsBox) {
                             const st = data.stats || { creatorCount: 0, serviceCount: 0, categoryCount: 0 };
                             statsBox.innerHTML = `
-                                <div class="flex items-center gap-3 px-4 py-2.5 rounded-2xl bg-white/10 border border-white/20 backdrop-blur-md shadow-lg hover:bg-white/20 transition-all cursor-default">
-                                    <div class="w-8 h-8 rounded-full bg-emerald-400/20 text-emerald-300 flex items-center justify-center border border-emerald-400/30">
-                                        <i class="fa-solid fa-users text-sm"></i>
-                                    </div>
-                                    <div>
-                                        <div class="text-[10px] font-bold text-blue-200 uppercase tracking-wide">Creator Aktif</div>
-                                        <div class="text-sm font-black text-white">${Number(st.creatorCount || 0)}</div>
-                                    </div>
-                                </div>
-                                <div class="flex items-center gap-3 px-4 py-2.5 rounded-2xl bg-white/10 border border-white/20 backdrop-blur-md shadow-lg hover:bg-white/20 transition-all cursor-default">
-                                    <div class="w-8 h-8 rounded-full bg-amber-400/20 text-amber-300 flex items-center justify-center border border-amber-400/30">
-                                        <i class="fa-solid fa-briefcase text-sm"></i>
-                                    </div>
-                                    <div>
-                                        <div class="text-[10px] font-bold text-blue-200 uppercase tracking-wide">Jasa Tersedia</div>
-                                        <div class="text-sm font-black text-white">${Number(st.serviceCount || 0)}</div>
-                                    </div>
-                                </div>
-                                <div class="flex items-center gap-3 px-4 py-2.5 rounded-2xl bg-white/10 border border-white/20 backdrop-blur-md shadow-lg hover:bg-white/20 transition-all cursor-default">
-                                    <div class="w-8 h-8 rounded-full bg-blue-400/20 text-blue-300 flex items-center justify-center border border-blue-400/30">
-                                        <i class="fa-solid fa-eye text-sm"></i>
-                                    </div>
-                                    <div>
-                                        <div class="text-[10px] font-bold text-blue-200 uppercase tracking-wide">Pengunjung</div>
-                                        <div class="text-sm font-black text-white">400+ Hari Ini</div>
-                                    </div>
+                                <div class="inline-flex items-center rounded-full bg-white/8 border border-white/12 backdrop-blur-md px-1 py-1 max-w-full">
+                                    <span class="inline-flex items-center gap-1.5 px-3 py-1.5 text-[11px] text-white/80 whitespace-nowrap">
+                                        <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 shrink-0 shadow-[0_0_6px_rgba(52,211,153,.7)]"></span>
+                                        <span class="font-bold text-white">${Number(st.creatorCount || 0)}</span>
+                                        Creator
+                                    </span>
+                                    <span class="w-px h-3.5 bg-white/15 shrink-0"></span>
+                                    <span class="inline-flex items-center gap-1.5 px-3 py-1.5 text-[11px] text-white/80 whitespace-nowrap">
+                                        <span class="w-1.5 h-1.5 rounded-full bg-amber-400 shrink-0 shadow-[0_0_6px_rgba(251,191,36,.7)]"></span>
+                                        <span class="font-bold text-white">${Number(st.serviceCount || 0)}</span>
+                                        Jasa
+                                    </span>
+                                    <span class="w-px h-3.5 bg-white/15 shrink-0"></span>
+                                    <span class="inline-flex items-center gap-1.5 px-3 py-1.5 text-[11px] text-white/80 whitespace-nowrap">
+                                        <span class="w-1.5 h-1.5 rounded-full bg-blue-400 shrink-0 shadow-[0_0_6px_rgba(96,165,250,.7)]"></span>
+                                        400+ Hari Ini
+                                    </span>
                                 </div>
                             `;
                         }
