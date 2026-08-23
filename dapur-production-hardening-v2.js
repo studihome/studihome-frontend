@@ -25,8 +25,6 @@ const mutationTables={creator_profiles:'profile',creator_services:'creator_id',c
 async function patchClient(){
   const c=client(); if(!c||c.__dapurProductionPatched) return false;
   const originalFrom=c.from.bind(c), originalRpc=c.rpc.bind(c);
-
-  // Cache admin check so we don't call RPC repeatedly in the same session.
   let adminPromise = null;
   async function isAdmin(){
     if(adminPromise!==null) return adminPromise;
@@ -46,7 +44,6 @@ async function patchClient(){
     })();
     return adminPromise;
   }
-
   function makeExecWrapper({target,op,args,kind}){
     const filters = [];
     const passthrough = new Proxy({}, {
@@ -58,11 +55,8 @@ async function patchClient(){
               let builder = target[op](...args);
               if(!admin){
                 const o = await owner();
-                if(kind==='profile'){
-                  builder = builder.eq('id', o.id).eq('user_id', o.uid);
-                } else {
-                  builder = builder.eq(kind, o.id);
-                }
+                if(kind==='profile') builder = builder.eq('id', o.id).eq('user_id', o.uid);
+                else builder = builder.eq(kind, o.id);
               }
               for(const f of filters){
                 const [name, ...rest] = f;
@@ -70,9 +64,7 @@ async function patchClient(){
               }
               const result = await builder;
               return resolve(result);
-            }catch(err){
-              return reject(err);
-            }
+            }catch(err){ return reject(err); }
           };
         }
         return (...a)=>{ filters.push([prop, ...a]); return passthrough };
@@ -80,32 +72,25 @@ async function patchClient(){
     });
     return passthrough;
   }
-
   c.from=function(table){
     const builder=originalFrom(table), kind=mutationTables[table];
     if(!kind) return builder;
-
     return new Proxy(builder,{get(target,prop,receiver){
-      if(prop==='update')return (...values)=>{
-        return makeExecWrapper({target,op:'update',args:values,kind});
-      };
-      if(prop==='delete')return (...args)=>{
-        return makeExecWrapper({target,op:'delete',args,kind});
-      };
-      if(prop==='upsert')return (values,...args)=>owner().then(o=>{
+      if(prop==='update') return (...values)=>makeExecWrapper({target,op:'update',args:values,kind});
+      if(prop==='delete') return (...args)=>makeExecWrapper({target,op:'delete',args,kind});
+      if(prop==='upsert') return (values,...args)=>owner().then(o=>{
         const arr=Array.isArray(values)?values:[values];
-        const mapped = arr.map(v=> kind==='profile' ? {...v, user_id: o.uid} : {...v, creator_id: o.id});
+        const mapped=arr.map(v=>kind==='profile'?{...v,user_id:o.uid}:{...v,creator_id:o.id});
         return target.upsert(mapped,...args);
       });
-      if(prop==='insert')return (values,...args)=>owner().then(o=>{
+      if(prop==='insert') return (values,...args)=>owner().then(o=>{
         const arr=Array.isArray(values)?values:[values];
-        const mapped = arr.map(v=> kind==='profile' ? {...v, user_id: o.uid} : {...v, creator_id: o.id});
+        const mapped=arr.map(v=>kind==='profile'?{...v,user_id:o.uid}:{...v,creator_id:o.id});
         return target.insert(Array.isArray(values)?mapped:mapped[0],...args);
       });
       return Reflect.get(target,prop,receiver);
     }});
   };
-
   c.rpc=async function(fn,args={}){
     if(fn==='change_creator_username_once'){
       const o=await owner(),username=String(args?.p_username||'').trim().toLowerCase();
@@ -114,7 +99,6 @@ async function patchClient(){
     }
     return originalRpc(fn,args);
   };
-
   c.__dapurProductionPatched=true;
   window.DapurProductionHardening={owner,originalFrom,originalRpc,isAdmin};
   return true;
