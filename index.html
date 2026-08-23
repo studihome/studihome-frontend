@@ -5392,7 +5392,7 @@ renderCreatorStandardSummary: (creator, data, categories, services, portfolios) 
                                                         <div class="text-[11px] sm:text-xs text-slate-600 mt-0.5 leading-relaxed">Kelola profil, jasa, dan portfolio kamu dari satu tempat.</div>
                                                     </div>
                                                 </div>
-                                                <button onclick="App.router.navigate('dapur')" class="btn-brand-gradient px-3.5 py-2 rounded-xl text-[11px] font-bold shrink-0">Buka Dapur</button>
+                                                <button onclick="(async()=>{try{const uid=App.state.user?.id;if(!uid)return App.ui.toast('Silakan masuk dulu.','error');const{data:p}=await supabaseClient.from('creator_profiles').select('username').eq('user_id',uid).maybeSingle();if(p?.username)window.location.href='/dapur/'+encodeURIComponent(p.username);else{const{data:r,e}=await supabaseClient.rpc('ensure_creator_draft');if(e)throw e;const u=String(r?.username||'').trim().toLowerCase();if(u)window.location.href='/dapur/'+encodeURIComponent(u);else App.ui.toast('Dapur belum bisa dibuat.','error')}}catch(e){App.ui.toast(e?.message||'Gagal membuka Dapur.','error')}})()" class="btn-brand-gradient px-3.5 py-2 rounded-xl text-[11px] font-bold shrink-0">Buka Dapur</button>
                                             </div>`
                                         : `
                                             <div class="card-3d p-4 sm:p-5 rounded-2xl mb-6 bg-white border border-blue-100 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
@@ -5405,7 +5405,7 @@ renderCreatorStandardSummary: (creator, data, categories, services, portfolios) 
                                                         <div class="text-[11px] sm:text-xs text-slate-600 mt-0.5 leading-relaxed">Kamu sudah punya Premium. Yuk, bikin halaman gratis untuk jasa dan portfolio kamu.</div>
                                                     </div>
                                                 </div>
-                                                <button onclick="App.router.navigate('dapur')" class="btn-brand-gradient px-3.5 py-2 rounded-xl text-[11px] font-bold shrink-0">Mulai di Dapur</button>
+                                                <button onclick="(async()=>{try{App.ui.toast('Membuat Dapur kamu…','info');const{data:r,e}=await supabaseClient.rpc('ensure_creator_draft');if(e)throw e;const u=String(r?.username||'').trim().toLowerCase();if(u)window.location.href='/dapur/'+encodeURIComponent(u);else App.ui.toast('Dapur belum bisa dibuat.','error')}catch(e){App.ui.toast(e?.message||'Gagal membuat Dapur.','error')}})()" class="btn-brand-gradient px-3.5 py-2 rounded-xl text-[11px] font-bold shrink-0">Mulai di Dapur</button>
                                             </div>`;
                                     creatorEntry.classList.remove('hidden');
                                 } catch (_) {
@@ -5618,10 +5618,15 @@ renderCreatorStandardSummary: (creator, data, categories, services, portfolios) 
                         main.innerHTML = `<div class="max-w-2xl mx-auto card-3d p-8 rounded-3xl bg-white text-center"><div class="w-16 h-16 mx-auto rounded-2xl bg-blue-50 flex items-center justify-center mb-4"><i class="fa-solid fa-wand-magic-sparkles text-2xl text-[#151c75]"></i></div><h1 class="text-xl font-black text-[#151c75]">Jadi Creator Studihome</h1><p class="text-xs sm:text-sm text-slate-600 mt-2 leading-relaxed">Kamu sudah punya akun, tapi belum memenuhi syarat Creator. Miliki minimal satu produk Premium Studihome yang aktif untuk membuka halaman Creator gratis.</p><button onclick="App.router.navigate('products')" class="btn-brand-gradient mt-5 px-5 py-2.5 rounded-xl text-xs font-bold">Lihat Produk Premium</button></div>`;
                         return;
                     }
+                    const uname = this.data?.profile?.username;
+                    if (uname) {
+                        window.location.href = '/dapur/' + encodeURIComponent(uname);
+                        return;
+                    }
                     this.renderEditor();
                     setTimeout(()=>this.focusSection(App.state.dapurSection||''),80);
                 },
-                focusSection(section){ const map={foyer:'#creator-foyer',menu:'#creator-menu',hidangan:'#creator-hidangan',ambalan:'#creator-ambalan'}; const el=document.querySelector(map[section]||''); if(el) el.scrollIntoView({behavior:'smooth',block:'start'}); },
+                focusSection(section){ if(!section)return; const map={foyer:'#creator-foyer',menu:'#creator-menu',hidangan:'#creator-hidangan',ambalan:'#creator-ambalan'}; const sel=map[section]; if(!sel)return; const el=document.querySelector(sel); if(el) el.scrollIntoView({behavior:'smooth',block:'start'}); },
                 profileScore() {
                     const d = this.data || {};
                     const p = d.profile || {};

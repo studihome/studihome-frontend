@@ -56,11 +56,10 @@ async function patchClient(){
             try{
               const admin = await isAdmin();
               let builder = target[op](...args);
-              if(!admin){
+              if(!admin && op==='delete'){
                 const o = await owner();
-                if(kind==='profile'){
-                  builder = builder.eq('id', o.id).eq('user_id', o.uid);
-                } else {
+                const hasCreatorFilter = filters.some(f=>f[0]==='eq' && f[1]==='creator_id');
+                if(kind!=='profile' && !hasCreatorFilter){
                   builder = builder.eq(kind, o.id);
                 }
               }
