@@ -5707,8 +5707,9 @@ ${(() => { const rs=String(p.review_status||'DRAFT').toUpperCase(); const map={D
                         if(!/^image\/(png|jpe?g|webp)$/i.test(file.type)) throw new Error('Gunakan PNG, JPG, atau WebP.');
                         if(status) status.textContent='Mengompres logo…';
                         const blob=await App.creatorStudio.compressAvatar(file);
-                        const user=await App.api._profile(); if(!user?.id) throw new Error('Sesi login tidak ditemukan.');
-                        const path=`${user.id}/avatar.webp`;
+                        const creatorUserId=App.creatorStudio.data?.profile?.user_id;
+                        if(!creatorUserId) throw new Error('Profil creator belum dimuat.');
+                        const path=`${creatorUserId}/avatar.webp`;
                         const up=await supabaseClient.storage.from('creator-media').upload(path,blob,{upsert:true,contentType:'image/webp',cacheControl:'3600'});
                         if(up.error) throw up.error;
                         const pub=supabaseClient.storage.from('creator-media').getPublicUrl(path);
