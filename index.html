@@ -5154,18 +5154,17 @@ renderCreatorStandardSummary: (creator, data, categories, services, portfolios) 
                             <div>
                                 <span class="text-[10px] font-extrabold text-blue-600 bg-blue-50 px-2.5 py-1 rounded-lg uppercase tracking-wider">${App.utils.escapeHtml(p.category || 'General')}</span>
                                 <h3 class="text-lg sm:text-xl font-extrabold text-[#151c75] mt-2 mb-1.5">${App.utils.escapeHtml(p.title)}</h3>
-                                <p class="text-xs sm:text-sm text-slate-600 leading-relaxed">${App.utils.escapeHtml(p.desc)}</p>
+                                <p class="text-xs sm:text-sm text-slate-600 leading-relaxed">${App.utils.escapeHtml((p.desc||'').replace(/^\[video:[^\]]*\]\n?/,''))}</p>
                                 ${(() => {
                                     const desc = p.desc || '';
-                                    const urls = [...desc.matchAll(/(https?:\/\/[^\s]+)/gi)].map(m => m[1]);
-                                    const vids = [];
-                                    for (const u of urls) {
-                                        const yt = u.match(/(?:youtube\.com\/(?:watch\?v=|shorts\/|embed\/)|youtu\.be\/)([\w-]{11,})/i);
-                                        const gd = u.match(/drive\.google\.com\/(?:file\/d\/|open\?id=|uc\?export=view&id=)([\w-]+)/i);
-                                        if (yt) vids.push(`<div class="mt-3"><div class="text-[7px] text-slate-400 break-all mb-0.5 truncate hover:text-white transition-colors"><a href="${u}" target="_blank" rel="noopener">${u}</a></div><div class="relative w-full aspect-video rounded-xl overflow-hidden bg-black"><iframe src="https://www.youtube-nocookie.com/embed/${yt[1]}?autoplay=1&mute=1&rel=0&modestbranding=1&enablejsapi=1" class="absolute inset-0 w-full h-full" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen loading="lazy"></iframe></div></div>`);
-                                        else if (gd) vids.push(`<div class="mt-3"><div class="text-[7px] text-slate-400 break-all mb-0.5 truncate hover:text-white transition-colors"><a href="${u}" target="_blank" rel="noopener">${u}</a></div><div class="relative w-full aspect-video rounded-xl overflow-hidden bg-black"><iframe src="https://drive.google.com/file/d/${gd[1]}/preview" class="absolute inset-0 w-full h-full" frameborder="0" allow="autoplay" loading="lazy"></iframe></div></div>`);
-                                    }
-                                    return vids.join('');
+                                    const videoMatch = desc.match(/^\[video:([^\]]*)\]\n?/);
+                                    const videoUrl = videoMatch ? videoMatch[1] : '';
+                                    if (!videoUrl) return '';
+                                    const yt = videoUrl.match(/(?:youtube\.com\/(?:watch\?v=|shorts\/|embed\/)|youtu\.be\/)([\w-]{11,})/i);
+                                    const gd = videoUrl.match(/drive\.google\.com\/(?:file\/d\/|open\?id=|uc\?export=view&id=)([\w-]+)/i);
+                                    if (yt) return `<div class="mt-3 relative w-full aspect-video rounded-xl overflow-hidden bg-black"><iframe src="https://www.youtube-nocookie.com/embed/${yt[1]}?autoplay=1&mute=1&rel=0&modestbranding=1&enablejsapi=1" class="absolute inset-0 w-full h-full" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen loading="lazy"></iframe></div>`;
+                                    if (gd) return `<div class="mt-3 relative w-full aspect-video rounded-xl overflow-hidden bg-black"><iframe src="https://drive.google.com/file/d/${gd[1]}/preview" class="absolute inset-0 w-full h-full" frameborder="0" allow="autoplay" loading="lazy"></iframe></div>`;
+                                    return '';
                                 })()}
                             </div>
 
@@ -6764,7 +6763,11 @@ renderStudioAiControl: async () => {
                             </div>
                             <div>
                                 <label class="block text-[10px] font-bold text-slate-600 mb-1">Deskripsi Singkat</label>
-                                <textarea id="p-desc" required placeholder="Deskripsi Singkat" class="w-full card-3d px-3 py-2 rounded-xl text-xs bg-white" oninput="App.admin.previewVideo(this.value)">${App.utils.escapeHtml(p.desc)}</textarea>
+                                <textarea id="p-desc" required placeholder="Deskripsi Singkat" class="w-full card-3d px-3 py-2 rounded-xl text-xs bg-white">${App.utils.escapeHtml((p.desc||'').replace(/^\[video:[^\]]*\]\n?/,''))}</textarea>
+                            </div>
+                            <div>
+                                <label class="block text-[10px] font-bold text-slate-600 mb-1">Tautan Video (YouTube / Google Drive)</label>
+                                <input type="url" id="p-video-url" placeholder="https://youtube.com/watch?v=... atau https://drive.google.com/file/d/..." value="${App.utils.escapeHtml(((p.desc||'').match(/^\[video:([^\]]*)\]/)||[])[1]||'')}" class="w-full card-3d px-3 py-2 rounded-xl text-xs bg-white" oninput="App.admin.previewVideo(this.value)">
                                 <div id="p-desc-video-preview" class="mt-2"></div>
                             </div>
 
@@ -6823,23 +6826,20 @@ renderStudioAiControl: async () => {
                     }
                 },
 
-                previewVideo(text) {
+                previewVideo(url) {
                         const box = document.getElementById('p-desc-video-preview');
                         if (!box) return;
-                        const urls = [...text.matchAll(/(https?:\/\/[^\s]+)/gi)].map(m => m[1]);
-                        const parts = [];
-                        for (const url of urls) {
-                            const yt = url.match(/(?:youtube\.com\/(?:watch\?v=|shorts\/|embed\/)|youtu\.be\/)([\w-]{11,})/i);
-                            const gd = url.match(/drive\.google\.com\/(?:file\/d\/|open\?id=|uc\?export=view&id=)([\w-]+)/i);
-                            if (yt) {
-                                parts.push(`<div class="mb-2"><a href="${url}" target="_blank" rel="noopener" class="text-[7px] text-slate-400 break-all block mb-0.5 truncate hover:text-white transition-colors">${url}</a><div class="relative w-full aspect-video rounded-xl overflow-hidden bg-black border border-slate-200"><iframe src="https://www.youtube-nocookie.com/embed/${yt[1]}?autoplay=1&mute=1&rel=0&modestbranding=1&enablejsapi=1" class="absolute inset-0 w-full h-full" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen loading="lazy"></iframe></div></div>`);
-                            } else if (gd) {
-                                parts.push(`<div class="mb-2"><a href="${url}" target="_blank" rel="noopener" class="text-[7px] text-slate-400 break-all block mb-0.5 truncate hover:text-white transition-colors">${url}</a><div class="relative w-full aspect-video rounded-xl overflow-hidden bg-black border border-slate-200"><iframe src="https://drive.google.com/file/d/${gd[1]}/preview" class="absolute inset-0 w-full h-full" frameborder="0" allow="autoplay" loading="lazy"></iframe></div></div>`);
-                            } else {
-                                parts.push(`<a href="${url}" target="_blank" rel="noopener" class="text-[7px] text-slate-400 break-all block mb-0.5 hover:text-white transition-colors">${url}</a>`);
-                            }
+                        url = (url || '').trim();
+                        if (!url) { box.innerHTML = ''; return; }
+                        const yt = url.match(/(?:youtube\.com\/(?:watch\?v=|shorts\/|embed\/)|youtu\.be\/)([\w-]{11,})/i);
+                        const gd = url.match(/drive\.google\.com\/(?:file\/d\/|open\?id=|uc\?export=view&id=)([\w-]+)/i);
+                        if (yt) {
+                            box.innerHTML = `<div class="relative w-full aspect-video rounded-xl overflow-hidden bg-black border border-slate-200"><iframe src="https://www.youtube-nocookie.com/embed/${yt[1]}?autoplay=1&mute=1&rel=0&modestbranding=1&enablejsapi=1" class="absolute inset-0 w-full h-full" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen loading="lazy"></iframe></div>`;
+                        } else if (gd) {
+                            box.innerHTML = `<div class="relative w-full aspect-video rounded-xl overflow-hidden bg-black border border-slate-200"><iframe src="https://drive.google.com/file/d/${gd[1]}/preview" class="absolute inset-0 w-full h-full" frameborder="0" allow="autoplay" loading="lazy"></iframe></div>`;
+                        } else {
+                            box.innerHTML = '<p class="text-[10px] text-amber-600">Format tidak dikenali. Gunakan link YouTube atau Google Drive.</p>';
                         }
-                        box.innerHTML = parts.length ? `<div class="space-y-1">${parts.join('')}</div>` : '';
                     },
                     saveProduct: async (e, editProductId = '') => {
                     e.preventDefault();
@@ -6849,7 +6849,7 @@ renderStudioAiControl: async () => {
                     const product = {
                         id: editProductId || undefined,
                         title: document.getElementById('p-title').value,
-                        desc: document.getElementById('p-desc').value,
+                        desc: (() => { const d = document.getElementById('p-desc').value.trim(); const v = document.getElementById('p-video-url')?.value?.trim(); return v ? `[video:${v}]\n${d}` : d; })(),
                         price: priceVal,
                         priceOriginal: origVal,
                         badge: document.getElementById('p-badge').value || 'PREMIUM',
