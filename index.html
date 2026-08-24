@@ -4623,6 +4623,21 @@ App.router.bindCanonicalLinkGuard();
                                         </div>
                                     </div>
                                 </div>
+                                <div class="p-4 sm:p-5">
+                                    <div class="flex items-center justify-between gap-2">
+                                        <div class="flex flex-wrap gap-1">
+                                            ${(c.services || []).slice(0, 2).map(s => `<span class="px-2 py-0.5 rounded-md bg-blue-50 text-[#151c75] text-[9px] font-extrabold">${App.utils.escapeHtml(s.title)}</span>`).join('')}
+                                        </div>
+                                        <div class="text-[10px] font-extrabold text-rose-500 whitespace-nowrap flex items-center gap-1"><i class="fa-solid fa-heart text-xs"></i> ${c.likes || 0}</div>
+                                    </div>
+                                    ${loc ? `<div class="flex items-center gap-1 mt-2 text-[10px] text-slate-400 font-semibold"><i class="fa-solid fa-location-dot text-[8px]"></i> ${App.utils.escapeHtml(loc)}</div>` : ''}
+                                    <p class="text-xs text-slate-600 leading-relaxed mt-2 line-clamp-2">${App.utils.escapeHtml(c.bio || 'Creator Studihome siap membantu kebutuhanmu.')}</p>
+                                    <div class="flex items-center justify-between mt-3 pt-2.5 border-t border-slate-100 gap-2">
+                                        <div class="text-left">${Number((c.services || [])[0]?.price_from || 0) > 0 ? `<div class="text-[8px] font-semibold text-slate-400 uppercase tracking-wider">Mulai Harga</div><div class="text-[11px] font-extrabold text-[#151c75]">Rp ${Number((c.services || [])[0]?.price_from || 0).toLocaleString('id-ID')}</div>` : ''}</div>
+                                        <a href="/${App.utils.escapeHtml(c.username)}" onclick="event.preventDefault(); App.router.goCreator('${App.utils.escapeHtml(c.username)}')" class="inline-flex items-center justify-center gap-1.5 px-4 py-2 rounded-xl text-[10px] font-extrabold text-white bg-gradient-to-r from-[#151c75] to-[#3f48bf] hover:from-[#3f48bf] hover:to-[#151c75] transition-all shadow-sm hover:shadow-md">Profil <i class="fa-solid fa-arrow-up-right-from-square ml-1 text-[8px]"></i></a>
+                                    </div>
+                                </div>
+                            </article>`;
                         }
 
                         return `
