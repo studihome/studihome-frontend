@@ -2351,9 +2351,14 @@ App.router.bindCanonicalLinkGuard();
                             const { data: eligible, error: eErr } = await supabaseClient.rpc('is_creator_eligible');
                             if (eErr) throw eErr;
                             if (!eligible && String(user.role || '').toLowerCase() !== 'admin') throw new Error('Kamu belum punya akses Creator. Miliki minimal satu produk Premium Studihome yang aktif dulu, ya.');
-                            const row = { user_id: user.id, username: payload.username, display_name: payload.displayName, bio: payload.bio || '', avatar_url: payload.avatarUrl || '', cover_url: payload.coverUrl || '', whatsapp: payload.whatsapp || '', location: payload.location || '' };
+                            let targetUserId = user.id;
+                            if (payload.creatorId && String(user.role || '').toLowerCase() === 'admin') {
+                                const { data: existingProfile } = await supabaseClient.from('creator_profiles').select('user_id').eq('id', payload.creatorId).maybeSingle();
+                                if (existingProfile?.user_id) targetUserId = existingProfile.user_id;
+                            }
+                            const row = { user_id: targetUserId, username: payload.username, display_name: payload.displayName, bio: payload.bio || '', avatar_url: payload.avatarUrl || '', cover_url: payload.coverUrl || '', whatsapp: payload.whatsapp || '', location: payload.location || '' };
                             const res = payload.creatorId
-                                ? await supabaseClient.from('creator_profiles').update(row).eq('id', payload.creatorId).eq('user_id', user.id).select().single()
+                                ? await supabaseClient.from('creator_profiles').update(row).eq('id', payload.creatorId).eq('user_id', targetUserId).select().single()
                                 : await supabaseClient.from('creator_profiles').insert(row).select().single();
                             if (res.error) throw res.error;
                             data = { profile: res.data };
