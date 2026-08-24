@@ -430,7 +430,7 @@
         .admin-trust-card .trust-meta{min-height:1.6rem}
 
         /* Studio AI Creator profile — additive only */
-        .creator-profile-hero { position: relative; overflow: hidden; background: linear-gradient(135deg,#151c75 0%,#3f48bf 58%,#5363d6 100%); }
+        .creator-profile-hero { position: relative; overflow: hidden; background: linear-gradient(135deg,#0a1095 0%,#3840c5 58%,#666fe5 100%); }
         .creator-profile-hero::after { content:""; position:absolute; width:340px; height:340px; right:-110px; top:-120px; border-radius:50%; border:1px solid rgba(255,255,255,.18); box-shadow:0 0 0 38px rgba(255,255,255,.04),0 0 0 76px rgba(255,255,255,.03); pointer-events:none; }
         .creator-trust-chip { backdrop-filter: blur(12px); background: rgba(255,255,255,.11); border:1px solid rgba(255,255,255,.18); }
         .creator-service-card, .creator-portfolio-card { transition: transform .2s ease, box-shadow .2s ease, border-color .2s ease; }
@@ -4788,7 +4788,7 @@ App.router.bindCanonicalLinkGuard();
                         main.innerHTML = `
                             <section class="creator-profile-hero card-3d rounded-3xl text-white p-5 sm:p-7 md:p-9 mb-7 shadow-2xl">
                                 ${c.cover_url ? `<img src="${App.utils.safeUrl(c.cover_url)}" alt="" class="absolute inset-0 w-full h-full object-cover opacity-25">` : ''}
-                                <div class="absolute inset-0 bg-gradient-to-br from-[#151c75]/95 via-[#151c75]/88 to-[#3f48bf]/85"></div>
+                                <div class="absolute inset-0 bg-gradient-to-br from-[#0a1095]/95 via-[#0a1095]/88 to-[#666fe5]/85"></div>
                                 <div class="relative z-10 grid lg:grid-cols-[1fr_auto] gap-6 items-end">
                                     <div>
                                         <div class="flex flex-wrap items-center gap-2 mb-4">

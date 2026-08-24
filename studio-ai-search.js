@@ -136,9 +136,9 @@
       const reason = row.reason || 'Profil dan jasanya memiliki kecocokan dengan keyword yang kamu masukkan.';
       return `
         <article class="studio-search-result-card card-3d rounded-3xl overflow-hidden bg-white border border-blue-100">
-          <div class="h-28 bg-gradient-to-br from-[#151c75] to-[#3f48bf] relative overflow-hidden">
+          <div class="h-28 bg-gradient-to-br from-[#0a1095] via-[#3840c5] to-[#666fe5] relative overflow-hidden">
             ${c.cover_url ? `<img src="${escape(c.cover_url)}" alt="" class="w-full h-full object-cover opacity-50" loading="lazy" decoding="async">` : ''}
-            <div class="absolute inset-0 bg-gradient-to-t from-[#151c75]/90 to-transparent"></div>
+            <div class="absolute inset-0 bg-gradient-to-t from-[#0a1095]/90 to-transparent"></div>
             <div class="absolute left-4 bottom-3 flex items-center gap-3">
               <div class="w-11 h-11 rounded-2xl bg-white text-[#151c75] flex items-center justify-center font-black overflow-hidden shadow-lg border border-blue-100">
                 ${c.avatar_url ? `<img src="${escape(c.avatar_url)}" alt="${escape(c.display_name || c.username)}" class="w-full h-full object-cover" loading="lazy">` : initials}
