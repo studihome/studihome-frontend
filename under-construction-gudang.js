@@ -99,14 +99,13 @@
     button.id = LAUNCHER_ID;
     button.type = 'button';
     button.setAttribute('aria-label', 'Buka Under Construction');
-    button.setAttribute('title', 'Under Construction');
+    button.setAttribute('title', 'MT');
     button.innerHTML = `
       <span style="display:inline-flex;align-items:center;justify-content:center;width:32px;height:32px;border-radius:12px;background:#fffbeb;color:#b45309;flex:0 0 auto;">
         <i class="fa-solid fa-person-digging" aria-hidden="true"></i>
       </span>
       <span style="min-width:0;display:flex;flex-direction:column;align-items:flex-start;gap:1px;line-height:1.2;">
-        <span style="font-size:11px;font-weight:900;white-space:nowrap;">Under Construction</span>
-        <span style="font-size:8px;font-weight:600;color:#94a3b8;white-space:nowrap;">Kontrol maintenance</span>
+        <span style="font-size:11px;font-weight:900;white-space:nowrap;">MT</span>
       </span>`;
     button.style.cssText = [
       'display:flex',
