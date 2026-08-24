@@ -4599,7 +4599,7 @@ App.router.bindCanonicalLinkGuard();
                     grid.innerHTML = visibleCreators.map(c => {
                         const loc = String(c.location || '').trim();
                         const service = (c.services || [])[0];
-                        const fallbackIcon = `<i class="fa-solid fa-heart text-rose-400 text-xl"></i>`;
+                        const fallbackIcon = `<span class="text-xl">✦</span>`;
 
                         if (c.is_studihome_official) {
                             return `
