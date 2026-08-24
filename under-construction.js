@@ -15,7 +15,7 @@
   };
 
   const db = () => window.supabaseClient || null;
-  const esc = (v) => String(v ?? '').replace(/[&<>\"']/g, c => ({ '&':'&amp;', '<':'&lt;', '>':'&gt;', '\"':'&quot;', "'":'&#39;' }[c]));
+  const esc = (v) => String(v ?? '').replace(/[&<>"']/g, c => ({ '&':'&amp;', '<':'&lt;', '>':'&gt;', '"':'&quot;', "'":'&#39;' }[c]));
   const toast = (m, t = 'info') => window.App?.ui?.toast?.(m, t);
 
   async function getSettings() {
@@ -93,21 +93,34 @@
       .sh-loader-bar span{display:block;width:42%;height:100%;border-radius:inherit;background:linear-gradient(90deg,#151c75,#3f48bf,#1e88e5);animation:shLoad 1.4s ease-in-out infinite}
       .sh-title{margin:clamp(8px,2vw,14px) auto 10px;max-width:760px;color:#151c75;font-size:clamp(28px,5vw,48px);line-height:1.04;font-weight:950;letter-spacing:-.045em}
       .sh-desc{max-width:680px;margin:0 auto;color:#64748b;font-size:clamp(13px,2vw,16px);line-height:1.75;font-weight:600}
-      .sh-ind{margin:clamp(22px,4vw,30px) auto 0;max-width:720px;padding:16px 18px;border:1px solid #fde68a;border-radius:20px;background:#fffbeb;text-align:left}
-      .sh-ind-title{font-size:clamp(11px,1.7vw,13px);font-weight:900;color:#b45309}
-      .sh-ind-msg{margin-top:6px;color:#64748b;font-size:clamp(12px,1.7vw,14px);line-height:1.7}
       .sh-actions{display:flex;justify-content:center;margin-top:18px}
       .sh-wa{display:inline-flex;align-items:center;justify-content:center;gap:9px;padding:13px 18px;border-radius:15px;background:linear-gradient(135deg,#2563eb,#1d4ed8);color:#fff;text-decoration:none;font-size:12px;font-weight:900;box-shadow:0 12px 30px rgba(37,99,235,.22);transition:transform .2s ease,box-shadow .2s ease}
       .sh-wa:hover{transform:translateY(-2px);box-shadow:0 16px 34px rgba(37,99,235,.28)}
       .sh-wa:focus-visible{outline:3px solid rgba(37,99,235,.28);outline-offset:3px}
+      /* === MOTION-IN FRAME === */
+      .sh-frame{margin:clamp(18px,3.5vw,32px) auto 0;max-width:700px;position:relative;border-radius:24px;padding:2px;background:linear-gradient(135deg,#151c75,#3f48bf,#1e88e5,#4f5bd8);background-size:300% 300%;animation:shFrameBorder 6s ease infinite;opacity:0;transform:translateY(30px) scale(.97);animation:shFrameIn .9s cubic-bezier(.22,1,.36,1) forwards,shFrameBorder 6s ease infinite}
+      .sh-frame-inner{background:linear-gradient(160deg,#f8faff 0%,#eef3ff 40%,#f0f4ff 100%);border-radius:22px;padding:clamp(22px,4vw,36px) clamp(20px,3.5vw,32px);position:relative;overflow:hidden}
+      .sh-frame-inner::before{content:"";position:absolute;top:-40%;right:-20%;width:60%;height:80%;background:radial-gradient(circle,rgba(63,72,191,.06),transparent 70%);pointer-events:none}
+      .sh-frame-inner::after{content:"";position:absolute;bottom:-30%;left:-15%;width:50%;height:70%;background:radial-gradient(circle,rgba(30,136,229,.05),transparent 70%);pointer-events:none}
+      .sh-frame-icon{display:inline-flex;align-items:center;justify-content:center;width:clamp(44px,8vw,56px);height:clamp(44px,8vw,56px);border-radius:16px;background:linear-gradient(135deg,#151c75 0%,#3f48bf 50%,#1e88e5 100%);color:#fff;font-size:clamp(18px,3.5vw,24px);font-weight:950;margin-bottom:clamp(12px,2vw,18px);box-shadow:0 8px 24px rgba(21,28,117,.2),0 0 0 0 transparent;animation:shIconPulse 3s ease-in-out infinite}
+      .sh-frame-title{color:#151c75;font-size:clamp(15px,2.5vw,20px);font-weight:950;letter-spacing:-.03em;line-height:1.3;margin-bottom:8px}
+      .sh-frame-msg{color:#475569;font-size:clamp(12px,1.8vw,14px);line-height:1.75;font-weight:500;max-width:520px;margin:0 auto}
+      .sh-frame-dots{display:flex;justify-content:center;gap:8px;margin-top:clamp(14px,2vw,20px)}
+      .sh-frame-dot{width:6px;height:6px;border-radius:50%;background:linear-gradient(135deg,#3f48bf,#1e88e5);opacity:.4;animation:shDotPulse 2s ease-in-out infinite}
+      .sh-frame-dot:nth-child(2){animation-delay:.3s;opacity:.6}
+      .sh-frame-dot:nth-child(3){animation-delay:.6s;opacity:.8}
+      @keyframes shFrameIn{0%{opacity:0;transform:translateY(30px) scale(.97)}60%{opacity:1}100%{opacity:1;transform:translateY(0) scale(1)}}
+      @keyframes shFrameBorder{0%,100%{background-position:0% 50%}50%{background-position:100% 50%}}
+      @keyframes shIconPulse{0%,100%{box-shadow:0 8px 24px rgba(21,28,117,.2)}50%{box-shadow:0 8px 32px rgba(21,28,117,.35),0 0 20px rgba(63,72,191,.15)}}
+      @keyframes shDotPulse{0%,100%{transform:scale(1);opacity:.4}50%{transform:scale(1.4);opacity:.9}}
       @keyframes shSpin{to{transform:rotate(360deg)}}
       @keyframes shSpinReverse{to{transform:rotate(-360deg)}}
       @keyframes shFloat{0%,100%{transform:translateY(0) scale(1)}50%{transform:translateY(-7px) scale(1.04)}}
       @keyframes shPulse{0%,100%{transform:scale(1);opacity:.72}50%{transform:scale(1.2);opacity:1}}
       @keyframes shLetter{0%,70%,100%{transform:translateY(0);opacity:.72}35%{transform:translateY(-6px);opacity:1}}
       @keyframes shLoad{0%{transform:translateX(-130%)}50%{transform:translateX(110%)}100%{transform:translateX(250%)}}
-      @media(max-width:640px){.sh-page{padding:12px}.sh-panel{padding:24px 16px 28px;border-radius:24px}.sh-ind{text-align:center}.sh-actions{display:grid}.sh-wa{width:100%}}
-      @media(prefers-reduced-motion:reduce){.sh-loader-ring-a,.sh-loader-ring-b,.sh-loader-core,.sh-loader-word span,.sh-loader-bar span,.sh-brand-star{animation:none!important}}
+      @media(max-width:640px){.sh-page{padding:12px}.sh-panel{padding:24px 16px 28px;border-radius:24px}.sh-actions{display:grid}.sh-wa{width:100%}.sh-frame-inner{padding:20px 16px}}
+      @media(prefers-reduced-motion:reduce){.sh-loader-ring-a,.sh-loader-ring-b,.sh-loader-core,.sh-loader-word span,.sh-loader-bar span,.sh-brand-star,.sh-frame,.sh-frame-icon,.sh-frame-dot{animation:none!important;opacity:1!important;transform:none!important}}
     `;
     doc.head.appendChild(style);
   }
@@ -122,7 +135,15 @@
           ${loaderMarkup()}
           <h1 id="uc-title" class="sh-title">${esc(settings.title)}</h1>
           <p class="sh-desc">${esc(settings.description)}</p>
-          <div class="sh-ind"><div class="sh-ind-title">${esc(settings.independence_title)}</div><div class="sh-ind-msg">${esc(settings.independence_message)}</div></div>
+          ${(settings.independence_title || settings.independence_message) ? `
+          <div class="sh-frame" role="region" aria-label="Pesan khusus">
+            <div class="sh-frame-inner">
+              <div class="sh-frame-icon" aria-hidden="true">✦</div>
+              ${settings.independence_title ? `<div class="sh-frame-title">${esc(settings.independence_title)}</div>` : ''}
+              ${settings.independence_message ? `<div class="sh-frame-msg">${esc(settings.independence_message)}</div>` : ''}
+              <div class="sh-frame-dots" aria-hidden="true"><span class="sh-frame-dot"></span><span class="sh-frame-dot"></span><span class="sh-frame-dot"></span></div>
+            </div>
+          </div>` : ''}
           ${waUrl(settings) ? `<div class="sh-actions"><a class="sh-wa" href="${esc(waUrl(settings))}" target="_blank" rel="noopener noreferrer">✦ ${esc(settings.whatsapp_label || DEFAULTS.whatsapp_label)}</a></div>` : ''}
         </section>
       </main>`;
@@ -165,8 +186,8 @@
       <section class="rounded-3xl border border-slate-100 bg-white p-5 shadow-sm space-y-3"><h3 class="text-sm font-black text-[#151c75]">Konten</h3>
         <label class="block"><span class="text-[10px] font-black text-slate-700">Judul</span><input id="uc-title" value="${esc(settings.title)}" maxlength="120" class="mt-1.5 w-full rounded-xl border border-slate-200 bg-slate-50 px-3 py-3 text-xs outline-none"></label>
         <label class="block"><span class="text-[10px] font-black text-slate-700">Deskripsi</span><textarea id="uc-description" rows="4" class="mt-1.5 w-full rounded-xl border border-slate-200 bg-slate-50 px-3 py-3 text-xs outline-none">${esc(settings.description)}</textarea></label>
-        <label class="block"><span class="text-[10px] font-black text-slate-700">Judul ucapan kemerdekaan</span><input id="uc-ind-title" value="${esc(settings.independence_title)}" maxlength="140" class="mt-1.5 w-full rounded-xl border border-slate-200 bg-slate-50 px-3 py-3 text-xs outline-none"></label>
-        <label class="block"><span class="text-[10px] font-black text-slate-700">Pesan ucapan kemerdekaan</span><textarea id="uc-ind-message" rows="3" class="mt-1.5 w-full rounded-xl border border-slate-200 bg-slate-50 px-3 py-3 text-xs outline-none">${esc(settings.independence_message)}</textarea></label>
+        <label class="block"><span class="text-[10px] font-black text-slate-700">Judul pesan khusus</span><input id="uc-ind-title" value="${esc(settings.independence_title)}" maxlength="140" class="mt-1.5 w-full rounded-xl border border-slate-200 bg-slate-50 px-3 py-3 text-xs outline-none"></label>
+        <label class="block"><span class="text-[10px] font-black text-slate-700">Pesan khusus</span><textarea id="uc-ind-message" rows="3" class="mt-1.5 w-full rounded-xl border border-slate-200 bg-slate-50 px-3 py-3 text-xs outline-none">${esc(settings.independence_message)}</textarea></label>
       </section>
       <section class="rounded-3xl border border-slate-100 bg-white p-5 shadow-sm space-y-3"><h3 class="text-sm font-black text-[#151c75]">WhatsApp</h3>
         <input id="uc-wa-number" value="${esc(settings.whatsapp_number)}" placeholder="62812xxxx" inputmode="tel" class="w-full rounded-xl border border-slate-200 bg-slate-50 px-3 py-3 text-xs outline-none">
