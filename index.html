@@ -4596,15 +4596,14 @@ App.router.bindCanonicalLinkGuard();
                         const service = (c.services || [])[0];
                         const fallbackIcon = `<i class="fa-solid fa-heart text-rose-400 text-xl"></i>`;
                         const officialStyle = c.is_studihome_official ? 'border-amber-200 ring-1 ring-amber-200/70' : '';
-                        const heroStyle = c.is_studihome_official ? 'bg-gradient-to-br from-[#f59e0b] via-[#facc15] to-[#fff7ed]' : 'bg-gradient-to-br from-[#151c75] to-[#3f48bf]';
+                        const heroStyle = c.is_studihome_official ? 'bg-gradient-to-br from-[#f59e0b] via-[#facc15] to-[#fff7ed]' : 'bg-gradient-to-br from-[#151c75] via-[#2d3a9e] to-[#3f48bf]';
                         const nameColor = c.is_studihome_official ? 'text-[#151c75]' : 'text-white';
                         const subColor = c.is_studihome_official ? 'text-[#7c5a00]' : 'text-blue-100';
                         
                         return `
                             <article class="studio-ai-card card-3d rounded-2xl overflow-hidden bg-white ${officialStyle} transition-all duration-200 hover:-translate-y-1 hover:shadow-lg">
                                 <div class="h-28 ${heroStyle} relative overflow-hidden">
-                                    ${c.cover_url ? `<img src="${App.utils.safeUrl(c.cover_url)}" alt="" class="w-full h-full object-cover opacity-60" loading="lazy" decoding="async">` : ''}
-                                    <div class="absolute inset-0 bg-gradient-to-t from-[#151c75]/85 to-transparent"></div>
+                                    ${c.cover_url ? `<img src="${App.utils.safeUrl(c.cover_url)}" alt="" class="w-full h-full object-cover opacity-60" loading="lazy" decoding="async">`: `<div class="absolute inset-0 bg-gradient-to-br from-[#151c75] via-[#2d3a9e] to-[#3f48bf] overflow-hidden"><div class="absolute -top-8 -right-8 w-32 h-32 rounded-full bg-white/5"></div><div class="absolute -bottom-6 -left-6 w-24 h-24 rounded-full bg-white/5"></div><div class="absolute top-3 right-12 w-8 h-8 rounded-full bg-amber-400/15"></div><div class="absolute bottom-4 right-6 w-5 h-5 rounded-full bg-white/8"></div></div>`}                                    <div class="absolute inset-0 bg-gradient-to-t from-[#151c75]/85 to-transparent"></div>
                                     <div class="absolute left-4 bottom-3 flex items-end gap-3">
                                         <div class="w-12 h-12 rounded-2xl bg-white flex items-center justify-center shadow-md border border-white/80 overflow-hidden shrink-0">
                                             ${c.avatar_url ? `<img src="${App.utils.safeUrl(c.avatar_url)}" alt="${App.utils.escapeHtml(c.display_name)}" class="w-full h-full object-cover">` : fallbackIcon}
@@ -4631,8 +4630,8 @@ App.router.bindCanonicalLinkGuard();
                                     ${loc ? `<div class="flex items-center gap-1 mt-2 text-[10px] text-slate-400 font-semibold"><i class="fa-solid fa-location-dot text-[8px]"></i> ${App.utils.escapeHtml(loc)}</div>` : ''}
                                     <p class="text-xs text-slate-600 leading-relaxed mt-2 line-clamp-2">${App.utils.escapeHtml(c.bio || 'Creator Studihome siap membantu kebutuhanmu.')}</p>
                                     <div class="flex items-center justify-between mt-3 pt-2.5 border-t border-slate-100 gap-2">
-                                        <div class="text-[11px] font-extrabold text-[#151c75]">${Number((c.services || [])[0]?.price_from || 0) > 0 ? 'Rp ' + Number((c.services || [])[0]?.price_from || 0).toLocaleString('id-ID') : ''}</div>
-                                        <a href="/${App.utils.escapeHtml(c.username)}" onclick="event.preventDefault(); App.router.goCreator('${App.utils.escapeHtml(c.username)}')" class="px-3 py-1.5 rounded-lg text-[10px] font-extrabold text-white bg-[#151c75] hover:bg-[#3f48bf] transition-colors">Profil <i class="fa-solid fa-arrow-up-right-from-square ml-1 text-[8px]"></i></a>
+                                        <div class="text-left">${Number((c.services || [])[0]?.price_from || 0) > 0 ? `<div class="text-[8px] font-semibold text-slate-400 uppercase tracking-wider">Mulai Harga</div><div class="text-[11px] font-extrabold text-[#151c75]">Rp ${Number((c.services || [])[0]?.price_from || 0).toLocaleString('id-ID')}</div>` : ''}</div>
+                                        <a href="/${App.utils.escapeHtml(c.username)}" onclick="event.preventDefault(); App.router.goCreator('${App.utils.escapeHtml(c.username)}')" class="inline-flex items-center justify-center gap-1.5 px-4 py-2 rounded-xl text-[10px] font-extrabold text-white bg-[#151c75] hover:bg-[#3f48bf] transition-colors shadow-sm">Profil <i class="fa-solid fa-arrow-up-right-from-square ml-1 text-[8px]"></i></a>
                                         </div>
                                     </div>
                                </div>
