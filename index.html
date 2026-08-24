@@ -1002,7 +1002,7 @@
     <div id="product-detail-modal" class="fixed inset-0 z-50 hidden bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-3 sm:p-4">
         <div class="card-3d w-full max-w-xl p-5 sm:p-6 rounded-3xl relative bg-white max-h-[90vh] overflow-y-auto my-auto">
             <!-- Modal Close Button repositioned to extreme top-right corner z-30 -->
-            <button onclick="App.ui.toggleModal('product-detail-modal', false)" class="modal-close-btn absolute top-3 right-3 sm:top-4 sm:right-4 w-9 h-9 rounded-full flex items-center justify-center transition-all shadow-lg font-extrabold hover:brightness-110 z-30 bg-white/20 backdrop-blur-sm text-white">
+            <button onclick="document.querySelectorAll('#product-detail-modal iframe').forEach(f=>f.src='');App.ui.toggleModal('product-detail-modal', false)" class="modal-close-btn absolute top-3 right-3 sm:top-4 sm:right-4 w-9 h-9 rounded-full flex items-center justify-center transition-all shadow-lg font-extrabold hover:brightness-110 z-30 bg-white/20 backdrop-blur-sm text-white">
                 <i class="fa-solid fa-xmark text-sm"></i>
             </button>
             <div id="product-detail-modal-content">
@@ -5155,6 +5155,14 @@ renderCreatorStandardSummary: (creator, data, categories, services, portfolios) 
                                 <span class="text-[10px] font-extrabold text-blue-600 bg-blue-50 px-2.5 py-1 rounded-lg uppercase tracking-wider">${App.utils.escapeHtml(p.category || 'General')}</span>
                                 <h3 class="text-lg sm:text-xl font-extrabold text-[#151c75] mt-2 mb-1.5">${App.utils.escapeHtml(p.title)}</h3>
                                 <p class="text-xs sm:text-sm text-slate-600 leading-relaxed">${App.utils.escapeHtml(p.desc)}</p>
+                                ${(() => {
+                                    const desc = p.desc || '';
+                                    const ytMatch = desc.match(/(?:youtube\.com\/(?:watch\?v=|shorts\/|embed\/)|youtu\.be\/)([\w-]{11,})/i);
+                                    const gdriveMatch = desc.match(/drive\.google\.com\/(?:file\/d\/|open\?id=|uc\?export=view&id=)([\w-]+)/i);
+                                    if (ytMatch) return `<div class="mt-3 relative w-full aspect-video rounded-xl overflow-hidden bg-black"><iframe src="https://www.youtube-nocookie.com/embed/${ytMatch[1]}?rel=0&modestbranding=1" class="absolute inset-0 w-full h-full" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen loading="lazy"></iframe></div>`;
+                                    if (gdriveMatch) return `<div class="mt-3 relative w-full aspect-video rounded-xl overflow-hidden bg-black"><iframe src="https://drive.google.com/file/d/${gdriveMatch[1]}/preview" class="absolute inset-0 w-full h-full" frameborder="0" allow="autoplay" loading="lazy"></iframe></div>`;
+                                    return '';
+                                })()}
                             </div>
 
                             <div class="feature-box-amber p-3.5 sm:p-4 rounded-2xl shadow-2xs">
@@ -6752,7 +6760,8 @@ renderStudioAiControl: async () => {
                             </div>
                             <div>
                                 <label class="block text-[10px] font-bold text-slate-600 mb-1">Deskripsi Singkat</label>
-                                <textarea id="p-desc" required placeholder="Deskripsi Singkat" class="w-full card-3d px-3 py-2 rounded-xl text-xs bg-white">${App.utils.escapeHtml(p.desc)}</textarea>
+                                <textarea id="p-desc" required placeholder="Deskripsi Singkat" class="w-full card-3d px-3 py-2 rounded-xl text-xs bg-white" oninput="App.admin.previewVideo(this.value)">${App.utils.escapeHtml(p.desc)}</textarea>
+                                <div id="p-desc-video-preview" class="mt-2"></div>
                             </div>
 
                             <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
@@ -6810,7 +6819,20 @@ renderStudioAiControl: async () => {
                     }
                 },
 
-                saveProduct: async (e, editProductId = '') => {
+                previewVideo(text) {
+                        const box = document.getElementById('p-desc-video-preview');
+                        if (!box) return;
+                        const ytMatch = text.match(/(?:youtube\.com\/(?:watch\?v=|shorts\/|embed\/)|youtu\.be\/)([\w-]{11,})/i);
+                        const gdMatch = text.match(/drive\.google\.com\/(?:file\/d\/|open\?id=|uc\?export=view&id=)([\w-]+)/i);
+                        if (ytMatch) {
+                            box.innerHTML = `<div class="relative w-full aspect-video rounded-xl overflow-hidden bg-black border border-slate-200"><iframe src="https://www.youtube-nocookie.com/embed/${ytMatch[1]}?rel=0&modestbranding=1" class="absolute inset-0 w-full h-full" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen loading="lazy"></iframe></div>`;
+                        } else if (gdMatch) {
+                            box.innerHTML = `<div class="relative w-full aspect-video rounded-xl overflow-hidden bg-black border border-slate-200"><iframe src="https://drive.google.com/file/d/${gdMatch[1]}/preview" class="absolute inset-0 w-full h-full" frameborder="0" allow="autoplay" loading="lazy"></iframe></div>`;
+                        } else {
+                            box.innerHTML = '';
+                        }
+                    },
+                    saveProduct: async (e, editProductId = '') => {
                     e.preventDefault();
                     const priceVal = Number(document.getElementById('p-price').value);
                     const origVal = Number(document.getElementById('p-price-orig').value);
