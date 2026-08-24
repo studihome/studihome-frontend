@@ -265,6 +265,8 @@
             backdrop-filter: blur(8px);
         }
         .modal-close-btn:hover { background: rgba(147,197,253,.9) !important; }
+        #product-detail-modal .modal-close-btn { background: rgba(255,255,255,.2) !important; color: #fff !important; border-color: rgba(255,255,255,.25) !important; }
+        #product-detail-modal .modal-close-btn:hover { background: rgba(255,255,255,.35) !important; }
 
         /* Fullscreen-friendly module viewport on mobile/tablet */
         @media (max-width: 1023px) {
@@ -1000,8 +1002,8 @@
     <div id="product-detail-modal" class="fixed inset-0 z-50 hidden bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-3 sm:p-4">
         <div class="card-3d w-full max-w-xl p-5 sm:p-6 rounded-3xl relative bg-white max-h-[90vh] overflow-y-auto my-auto">
             <!-- Modal Close Button repositioned to extreme top-right corner z-30 -->
-            <button onclick="App.ui.toggleModal('product-detail-modal', false)" class="modal-close-btn absolute top-2 right-2 sm:top-3 sm:right-3 w-8 h-8 rounded-full flex items-center justify-center transition-all bg-white/20 backdrop-blur-sm text-white font-extrabold hover:bg-white/30 z-30">
-                <i class="fa-solid fa-xmark text-xs"></i>
+            <button onclick="App.ui.toggleModal('product-detail-modal', false)" class="modal-close-btn absolute top-3 right-3 sm:top-4 sm:right-4 w-9 h-9 rounded-full flex items-center justify-center transition-all shadow-lg font-extrabold hover:brightness-110 z-30 bg-white/20 backdrop-blur-sm text-white">
+                <i class="fa-solid fa-xmark text-sm"></i>
             </button>
             <div id="product-detail-modal-content">
                 <!-- Injected dynamically -->
