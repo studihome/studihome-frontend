@@ -77,15 +77,13 @@
       .sh-glow-a{width:40vw;height:40vw;max-width:520px;max-height:520px;top:-15vw;left:-12vw;background:rgba(63,72,191,.09)}
       .sh-glow-b{width:34vw;height:34vw;max-width:460px;max-height:460px;right:-12vw;bottom:-14vw;background:rgba(30,136,229,.08)}
       .sh-panel{width:min(900px,100%);padding:clamp(26px,6vw,64px);position:relative;border:1px solid rgba(148,163,184,.22);border-radius:clamp(24px,4vw,38px);background:rgba(255,255,255,.88);box-shadow:0 30px 90px rgba(21,28,117,.12);backdrop-filter:blur(18px);text-align:center}
-      .sh-brand{display:inline-flex;align-items:center;gap:9px;color:#151c75;font-weight:950;letter-spacing:.15em;font-size:clamp(10px,1.6vw,13px);text-transform:uppercase}
-      .sh-brand-star{font-size:1.2em;animation:shPulse 1.7s ease-in-out infinite}
-      .sh-loader{width:min(220px,56vw);height:min(220px,56vw);margin:clamp(22px,4vw,34px) auto 24px;position:relative;display:grid;place-items:center}
+.sh-loader{width:min(220px,56vw);height:min(220px,56vw);margin:clamp(22px,4vw,34px) auto 24px;position:relative;display:grid;place-items:center}
       .sh-loader-ring{position:absolute;border-radius:50%;border:1px solid rgba(63,72,191,.18)}
       .sh-loader-ring-a{inset:10%;animation:shSpin 5.2s linear infinite}
       .sh-loader-ring-a:after{content:"";position:absolute;top:50%;left:-3px;width:7px;height:7px;margin-top:-3px;border-radius:50%;background:#3f48bf;box-shadow:0 0 18px rgba(63,72,191,.8)}
       .sh-loader-ring-b{inset:24%;border-color:rgba(30,136,229,.18);animation:shSpinReverse 3.6s linear infinite}
       .sh-loader-ring-b:after{content:"";position:absolute;right:-3px;top:50%;width:7px;height:7px;margin-top:-3px;border-radius:50%;background:#1e88e5;box-shadow:0 0 18px rgba(30,136,229,.8)}
-      .sh-loader-core{width:29%;height:29%;display:grid;place-items:center;border-radius:30%;background:linear-gradient(135deg,#151c75,#4f5bd8);color:#fff;font-weight:950;font-size:clamp(30px,7vw,46px);line-height:1;box-shadow:0 18px 45px rgba(21,28,117,.25);animation:shFloat 2.4s ease-in-out infinite}
+      .sh-loader-core{width:29%;height:29%;display:grid;place-items:center;border-radius:50%;background:linear-gradient(135deg,#151c75,#4f5bd8);color:#fff;font-weight:950;font-size:clamp(30px,7vw,46px);line-height:1;box-shadow:0 18px 45px rgba(21,28,117,.25);animation:shFloat 2.4s ease-in-out infinite}
       .sh-loader-word{position:absolute;left:50%;bottom:5%;transform:translateX(-50%);display:flex;gap:.02em;color:#151c75;font-size:clamp(18px,4vw,30px);font-weight:950;letter-spacing:-.045em;white-space:nowrap;text-shadow:0 8px 30px rgba(21,28,117,.1)}
       .sh-loader-word span{display:inline-block;animation:shLetter 1.55s ease-in-out infinite;animation-delay:calc(var(--i,0)*.065s)}
       .sh-loader-word span:nth-child(1){--i:0}.sh-loader-word span:nth-child(2){--i:1}.sh-loader-word span:nth-child(3){--i:2}.sh-loader-word span:nth-child(4){--i:3}.sh-loader-word span:nth-child(5){--i:4}.sh-loader-word span:nth-child(6){--i:5}.sh-loader-word span:nth-child(7){--i:6}.sh-loader-word span:nth-child(8){--i:7}.sh-loader-word span:nth-child(9){--i:8}
@@ -104,7 +102,7 @@
       @keyframes shLetter{0%,70%,100%{transform:translateY(0);opacity:.72}35%{transform:translateY(-6px);opacity:1}}
       @keyframes shLoad{0%{transform:translateX(-130%)}50%{transform:translateX(110%)}100%{transform:translateX(250%)}}
       @media(max-width:640px){.sh-page{padding:12px}.sh-panel{padding:24px 16px 28px;border-radius:24px}.sh-actions{display:grid}.sh-wa{width:100%}}
-      @media(prefers-reduced-motion:reduce){.sh-loader-ring-a,.sh-loader-ring-b,.sh-loader-core,.sh-loader-word span,.sh-loader-bar span,.sh-brand-star{animation:none!important;opacity:1!important;transform:none!important}}
+      @media(prefers-reduced-motion:reduce){.sh-loader-ring-a,.sh-loader-ring-b,.sh-loader-core,.sh-loader-word span,.sh-loader-bar span{animation:none!important;opacity:1!important;transform:none!important}}
     `;
     doc.head.appendChild(style);
   }
@@ -115,8 +113,7 @@
       <main class="sh-page" aria-labelledby="uc-title">
         <div class="sh-glow sh-glow-a"></div><div class="sh-glow sh-glow-b"></div>
         <section class="sh-panel">
-          <div class="sh-brand"><span class="sh-brand-star">✦</span> Studihome</div>
-          ${loaderMarkup()}
+${loaderMarkup()}
           <h1 id="uc-title" class="sh-title">${esc(settings.title)}</h1>
           <p class="sh-desc">${esc(settings.description)}</p>
 
