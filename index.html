@@ -4592,7 +4592,7 @@ App.router.bindCanonicalLinkGuard();
                     }
 
                     grid.innerHTML = visibleCreators.map(c => {
-                        const wa = App.creator._waUrl(c.whatsapp, c.display_name || 'Creator');
+                        const loc = String(c.location || '').trim();
                         const service = (c.services || [])[0];
                         const fallbackIcon = `<i class="fa-solid fa-heart text-rose-400 text-xl"></i>`;
                         const officialStyle = c.is_studihome_official ? 'border-amber-200 ring-1 ring-amber-200/70' : '';
@@ -4601,7 +4601,7 @@ App.router.bindCanonicalLinkGuard();
                         const subColor = c.is_studihome_official ? 'text-[#7c5a00]' : 'text-blue-100';
                         
                         return `
-                            <article class="studio-ai-card card-3d rounded-3xl overflow-hidden bg-white ${officialStyle}">
+                            <article class="studio-ai-card card-3d rounded-2xl overflow-hidden bg-white ${officialStyle} transition-all duration-200 hover:-translate-y-1 hover:shadow-lg">
                                 <div class="h-28 ${heroStyle} relative overflow-hidden">
                                     ${c.cover_url ? `<img src="${App.utils.safeUrl(c.cover_url)}" alt="" class="w-full h-full object-cover opacity-60" loading="lazy" decoding="async">` : ''}
                                     <div class="absolute inset-0 bg-gradient-to-t from-[#151c75]/85 to-transparent"></div>
@@ -4628,15 +4628,13 @@ App.router.bindCanonicalLinkGuard();
                                         </div>
                                         <div class="text-[10px] font-extrabold text-rose-500 whitespace-nowrap flex items-center gap-1"><i class="fa-solid fa-heart text-xs"></i> ${c.likes || 0}</div>
                                     </div>
-                                    <p class="text-xs text-slate-600 leading-relaxed mt-2.5 line-clamp-2">${App.utils.escapeHtml(c.bio || 'Dapur AI di Studihome.')}</p>
+                                    ${loc ? `<div class="flex items-center gap-1 mt-2 text-[10px] text-slate-400 font-semibold"><i class="fa-solid fa-location-dot text-[8px]"></i> ${App.utils.escapeHtml(loc)}</div>` : ''}
+                                    <p class="text-xs text-slate-600 leading-relaxed mt-2 line-clamp-2">${App.utils.escapeHtml(c.bio || 'Creator Studihome siap membantu kebutuhanmu.')}</p>
                                     <div class="flex items-center justify-between mt-3 pt-2.5 border-t border-slate-100 gap-2">
-                                        <div class="text-[10px] font-bold text-slate-500">${App.utils.escapeHtml(c.location || 'Indonesia')}</div>
-                                        <div class="flex items-center gap-1.5">
-                                            <a href="/${App.utils.escapeHtml(c.username)}" onclick="event.preventDefault(); App.router.goCreator('${App.utils.escapeHtml(c.username)}')" class="px-2.5 py-1.5 rounded-lg text-[10px] font-extrabold text-[#151c75] bg-blue-50 hover:bg-blue-100">Profil</a>
-                                            ${wa ? `<a href="${wa}" target="_blank" rel="noopener noreferrer" class="px-2.5 py-1.5 rounded-lg text-[10px] font-extrabold text-white bg-emerald-600 hover:bg-emerald-700"><i class="fa-brands fa-whatsapp mr-1"></i> WhatsApp</a>` : ''}
+                                        <div class="text-[11px] font-extrabold text-[#151c75]">${Number((c.services || [])[0]?.price_from || 0) > 0 ? 'Rp ' + Number((c.services || [])[0]?.price_from || 0).toLocaleString('id-ID') : ''}</div>
+                                        <a href="/${App.utils.escapeHtml(c.username)}" onclick="event.preventDefault(); App.router.goCreator('${App.utils.escapeHtml(c.username)}')" class="px-3 py-1.5 rounded-lg text-[10px] font-extrabold text-white bg-[#151c75] hover:bg-[#3f48bf] transition-colors">Profil <i class="fa-solid fa-arrow-up-right-from-square ml-1 text-[8px]"></i></a>
                                         </div>
                                     </div>
-                                    ${service ? `<div class="mt-2 text-[10px] font-extrabold text-amber-600">Mulai Rp ${Number(service.price_from || 0).toLocaleString('id-ID')}</div>` : ''}
                                </div>
                         </article>`;
                 }).join('');
