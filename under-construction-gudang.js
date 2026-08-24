@@ -4,7 +4,7 @@
   const PATH = (location.pathname || '/').replace(/\/+$/, '') || '/';
   if (PATH !== '/admin') return;
 
-  const VERSION = '5';
+  const VERSION = '6';
   const LAUNCHER_ID = 'studihome-under-construction-menu';
   const OVERLAY_ID = 'studihome-under-construction-overlay';
   const SHARED_ID = `studihome-under-construction-shared-v${VERSION}`;
@@ -136,6 +136,15 @@
     return button;
   }
 
+  function findGudangItem() {
+    const allLinks = document.querySelectorAll('a, button, [role="button"]');
+    for (const el of allLinks) {
+      const t = text(el.innerText || el.textContent || el.getAttribute('title') || '');
+      if (t.includes('gudang') && connected(el)) return el;
+    }
+    return null;
+  }
+
   function placeLauncher() {
     let launcher = document.getElementById(LAUNCHER_ID);
     const container = findContainer();
@@ -143,7 +152,11 @@
     if (!launcher) launcher = buttonMarkup();
 
     if (container && connected(container)) {
-      if (launcher.parentElement !== container) {
+      const gudangItem = findGudangItem();
+      if (gudangItem && connected(gudangItem) && gudangItem.parentElement === container) {
+        if (connected(launcher)) launcher.remove();
+        gudangItem.insertAdjacentElement('afterend', launcher);
+      } else if (launcher.parentElement !== container) {
         if (connected(launcher)) launcher.remove();
         container.appendChild(launcher);
       }
