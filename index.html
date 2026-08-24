@@ -580,6 +580,10 @@
             .studio-ai-card, .studio-ai-search-wrap { transition:none !important; }
         }
 
+        /* Hero stats row: wrap on mobile, single row on desktop */
+        .hero-stats-row { flex-wrap: wrap; justify-content: center; }
+        @media (min-width: 640px) { .hero-stats-row { flex-wrap: nowrap; justify-content: flex-start; } }
+
         /* Step 19 — unified room UX, scoped to new/additive areas only */
         .studio-ai-hero, .creator-profile-hero, .room-workspace {
             scroll-margin-top: 5.5rem;
@@ -2939,7 +2943,7 @@ App.router.bindCanonicalLinkGuard();
                                     </div>
                                 </div>
                                 
-<div class="mt-4 flex flex-wrap items-center justify-center sm:justify-start gap-3 sm:gap-4 max-w-3xl">
+<div class="mt-4 flex items-center gap-3 sm:gap-4 max-w-3xl hero-stats-row">
                                     <!-- Activity Stats -->
                                     <div class="flex items-center gap-2.5">
                                         <div class="flex items-center gap-1.5">
