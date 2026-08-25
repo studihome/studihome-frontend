@@ -6548,7 +6548,7 @@ renderStudioAiControl: async () => {
                                             <div class="grid grid-cols-1 sm:grid-cols-2 gap-2.5 border-t border-slate-200 pt-2">
                                                 <div>
                                                     <label class="block text-[10px] font-bold text-slate-600 mb-1">Tombol Utama - Label</label>
-                                                    <input type="text" id="hero-cta1-label" value="${App.utils.escapeHtml(heroPromoMods.length > 0 ? 'Lihat Modul Hero Promo' : (hero.ctaPrimaryLabel || hero.ctaPrimary || 'Jelajahi Produk'))}" class="w-full card-3d px-3 py-2 rounded-xl text-xs bg-white font-bold">
+                                                    <input type="text" id="hero-cta1-label" value="${App.utils.escapeHtml(hero.ctaPrimaryLabel || hero.ctaPrimary || (heroPromoMods.length > 0 ? 'Lihat Modul Hero Promo' : 'Jelajahi Produk'))}" class="w-full card-3d px-3 py-2 rounded-xl text-xs bg-white font-bold">
                                                 </div>
                                                 <div>
                                                     <label class="block text-[10px] font-bold text-slate-600 mb-1">Tombol Utama - Target URL (#products atau https://...)</label>
@@ -6978,7 +6978,7 @@ renderStudioAiControl: async () => {
                     var urlInput = document.getElementById('hero-cta1-url');
                     var labelInput = document.getElementById('hero-cta1-label');
                     if (urlInput) urlInput.value = mods.length > 0 ? '#hero-promo-modules' : (demoHero.ctaPrimaryUrl || '#products');
-                    if (labelInput && mods.length > 0) {
+                    if (labelInput && mods.length > 0 && !labelInput.value) {
                         labelInput.value = 'Lihat Modul Hero Promo';
                     }
                 },
@@ -7169,7 +7169,7 @@ renderStudioAiControl: async () => {
                         badge: document.getElementById('hero-badge').value,
                         title: document.getElementById('hero-title').value,
                         subtitle: document.getElementById('hero-subtitle').value,
-                        ctaPrimaryLabel: isHeroPromoActive ? 'Lihat Modul Hero Promo' : document.getElementById('hero-cta1-label').value,
+                        ctaPrimaryLabel: document.getElementById('hero-cta1-label').value || (isHeroPromoActive ? 'Lihat Modul Hero Promo' : 'Jelajahi Produk'),
                         ctaPrimaryUrl: isHeroPromoActive ? '#hero-promo-modules' : (document.getElementById('hero-cta1-url').value || '#products'),
                         ctaSecondaryLabel: document.getElementById('hero-cta2-label').value,
                         ctaSecondaryUrl: document.getElementById('hero-cta2-url').value
