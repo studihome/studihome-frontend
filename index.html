@@ -5601,8 +5601,14 @@ renderCreatorStandardSummary: (creator, data, categories, services, portfolios) 
                     container.innerHTML = `<div class="p-8 text-center text-xs text-slate-500">Memuat materi modul...</div>`;
 
                     try {
-                        const data = await App.api.post('GET_PRODUCT_MODULES', { productId });
-                        const modules = data.modules || [];
+                        let data, modules;
+                        if (productId === 'hero-promo') {
+                            modules = JSON.parse(localStorage.getItem('studihome_hero_promo_modules') || '[]');
+                            data = { productTitle: 'Hero Promo', modules };
+                        } else {
+                            data = await App.api.post('GET_PRODUCT_MODULES', { productId });
+                            modules = data.modules || [];
+                        }
 
                         if (modules.length === 0) {
                             container.innerHTML = `
@@ -5626,7 +5632,7 @@ renderCreatorStandardSummary: (creator, data, categories, services, portfolios) 
                                     <div class="card-3d-inset p-4 sm:p-5 rounded-2xl space-y-3.5">
                                         <h3 class="font-bold text-sm text-[#151c75]">${App.utils.escapeHtml(m.title)}</h3>
 
-                                        ${m.yt_url ? App.dashboard.renderModuleMedia(m.yt_url, m.title) : ''}
+                                        ${(m.yt_url || m.youtube_url) ? App.dashboard.renderModuleMedia(m.yt_url || m.youtube_url, m.title) : ''}
 
                                         <div class="card-3d p-4 rounded-xl text-xs sm:text-sm text-slate-700 whitespace-pre-line leading-relaxed bg-white">
                                             ${App.utils.escapeHtml(m.markdown || '')}
@@ -6885,12 +6891,15 @@ renderStudioAiControl: async () => {
                     App.admin.render();
                 },
 
+                _getHeroPromoMods: () => JSON.parse(localStorage.getItem('studihome_hero_promo_modules') || '[]'),
+                _saveHeroPromoMods: (mods) => localStorage.setItem('studihome_hero_promo_modules', JSON.stringify(mods)),
+
                 loadProductModulesForAdmin: (productId) => {
                     const editor = document.getElementById('admin-module-editor');
                     if (!editor) return;
 
                     const isHeroPromo = productId === 'hero-promo';
-                    const mods = App.state.demo.modules[productId] || [];
+                    const mods = isHeroPromo ? App.admin._getHeroPromoMods() : (App.state.demo.modules[productId] || []);
                     const h3 = document.querySelector('#admin-tab-modules h3, #admin-tab-modules .font-bold.text-sm');
                     if (h3) h3.textContent = isHeroPromo ? 'Hero Promo' : 'Kelola Modul Pembelajaran';
 
@@ -6994,12 +7003,35 @@ renderStudioAiControl: async () => {
                         download_url: document.getElementById('m-dl').value,
                         links: links
                     };
+
+                    if (productId === 'hero-promo') {
+                        let mods = App.admin._getHeroPromoMods();
+                        moduleData.id = editModuleId || ('hpm-' + Date.now());
+                        if (editModuleId) {
+                            mods = mods.map(m => m.id === editModuleId ? moduleData : m);
+                        } else {
+                            mods.push(moduleData);
+                        }
+                        App.admin._saveHeroPromoMods(mods);
+                        App.ui.toast('Modul Hero Promo berhasil disimpan!', 'success');
+                        App.admin.loadProductModulesForAdmin(productId);
+                        return;
+                    }
+
                     await App.api.post('ADMIN_SAVE_MODULE', { productId, moduleData });
                     App.ui.toast('Modul berhasil disimpan!', 'success');
                     App.admin.loadProductModulesForAdmin(productId);
                 },
 
                 deleteModule: async (productId, moduleId) => {
+                    if (productId === 'hero-promo') {
+                        let mods = App.admin._getHeroPromoMods();
+                        mods = mods.filter(m => m.id !== moduleId);
+                        App.admin._saveHeroPromoMods(mods);
+                        App.ui.toast('Modul Hero Promo dihapus.', 'info');
+                        App.admin.loadProductModulesForAdmin(productId);
+                        return;
+                    }
                     await App.api.post('ADMIN_DELETE_MODULE', { productId, moduleId });
                     App.ui.toast('Modul dihapus.', 'info');
                     App.admin.loadProductModulesForAdmin(productId);
