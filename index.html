@@ -1645,7 +1645,7 @@ App.router.bindCanonicalLinkGuard();
                         if (user.role === 'admin') {
                             items.push({ key: 'admin', label: 'Admin', icon: 'fa-user-shield' });
                         } else {
-                            items.push({ key: 'dashboard', label: 'Kamar', icon: 'fa-graduation-cap' });
+                            items.push({ key: 'dashboard', label: 'Kamar', icon: 'fa-user-shield' });
                         }
                     }
 
@@ -3973,7 +3973,7 @@ App.router.bindCanonicalLinkGuard();
                         push('automation','Otomasi & AI Workflow','Kurangi kerja berulang dengan automation, chatbot, integrasi, atau AI agent.','fa-solid fa-gears','Cocok kalau kamu ingin kerja lebih cepat dan mengurangi pekerjaan manual.',['otomasi','automation','workflow','n8n']);
                     }
                     if (has(/guru|dosen|pendidikan|belajar|kursus|training|modul|asesmen/)) {
-                        push('education','AI untuk Belajar & Pendidikan','Temukan mentor, trainer, lesson, atau solusi AI untuk pembelajaran.','fa-solid fa-graduation-cap','Cocok kalau kamu ingin belajar AI atau langsung menerapkannya di dunia pendidikan.',['guru','dosen','pendidikan','training']);
+                        push('education','AI untuk Belajar & Pendidikan','Temukan mentor, trainer, lesson, atau solusi AI untuk pembelajaran.','fa-solid fa-user-shield','Cocok kalau kamu ingin belajar AI atau langsung menerapkannya di dunia pendidikan.',['guru','dosen','pendidikan','training']);
                     }
                     if (has(/website|webapp|landing|aplikasi|toko online/)) {
                         push('digital-assets','Website & Aset Digital','Cari bantuan untuk website, landing page, webapp, atau aset digital bisnis.','fa-solid fa-globe','Cocok kalau kamu butuh tempat online yang terlihat rapi dan siap dipakai.',['website','webapp','landing']);
