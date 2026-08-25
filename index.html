@@ -5629,7 +5629,7 @@ renderCreatorStandardSummary: (creator, data, categories, services, portfolios) 
                         let data, modules;
                         if (productId === 'hero-promo') {
                             const dbMods = await App.admin._loadHeroPromoModsFromDB();
-                            modules = dbMods !== null ? dbMods : JSON.parse(localStorage.getItem('studihome_hero_promo_modules') || '[]');
+                            modules = (dbMods !== null && dbMods.length > 0) ? dbMods : JSON.parse(localStorage.getItem('studihome_hero_promo_modules') || '[]');
                             if (dbMods !== null && dbMods.length > 0) localStorage.setItem('studihome_hero_promo_modules', JSON.stringify(dbMods));
                             data = { productTitle: 'PENAWARAN TERBATAS!!', modules };
                         } else {
@@ -6511,7 +6511,7 @@ renderStudioAiControl: async () => {
                             const aiLinks = adminData.aiLinks || App.state.demo.aiLinks;
                             const testimonials = adminData.testimonials || App.state.demo.testimonials;
                             const heroPromoModsDB3 = await App.admin._loadHeroPromoModsFromDB();
-                            const heroPromoMods = heroPromoModsDB3 !== null ? heroPromoModsDB3 : JSON.parse(localStorage.getItem('studihome_hero_promo_modules') || '[]');
+                            const heroPromoMods = (heroPromoModsDB3 !== null && heroPromoModsDB3.length > 0) ? heroPromoModsDB3 : JSON.parse(localStorage.getItem('studihome_hero_promo_modules') || '[]');
                             if (heroPromoModsDB3 !== null) localStorage.setItem('studihome_hero_promo_modules', JSON.stringify(heroPromoMods));
 
                             area.innerHTML = `
@@ -7130,7 +7130,7 @@ renderStudioAiControl: async () => {
 
                 saveHeroSettings: async () => {
                     const heroPromoModsSH = await App.admin._loadHeroPromoModsFromDB();
-                    const heroPromoMods = heroPromoModsSH !== null ? heroPromoModsSH : JSON.parse(localStorage.getItem('studihome_hero_promo_modules') || '[]');
+                    const heroPromoMods = (heroPromoModsSH !== null && heroPromoModsSH.length > 0) ? heroPromoModsSH : JSON.parse(localStorage.getItem('studihome_hero_promo_modules') || '[]');
                     const isHeroPromoActive = heroPromoMods.length > 0;
                     const hero = {
                         badge: document.getElementById('hero-badge').value,
