@@ -6964,20 +6964,22 @@ renderStudioAiControl: async () => {
                         const uc = (ucRow && ucRow.under_construction) || {};
                         uc.heroPromoModules = mods;
                         await supabaseClient.from('site_settings').upsert({ id: 1, under_construction: uc, updated_at: new Date().toISOString() }, { onConflict: 'id' });
-                        /* Also try dedicated column if exists */
-                        if (App.admin._heroPromoColumnExists !== false) {
-                            try { await supabaseClient.from('site_settings').upsert({ id: 1, hero_promo_modules: mods, updated_at: new Date().toISOString() }, { onConflict: 'id' }); } catch (_) {}
-                        }
+                        /* Skip dedicated column — use under_construction as primary */
                     } catch (_) {}
                 },
                 _syncHeroPromoCta: (mods) => {
                     const demoHero = App.state.demo.hero || {};
                     const pubHero = App.state.publicData?.hero || {};
                     if (mods.length > 0) {
-                        demoHero.ctaPrimaryLabel = demoHero.ctaPrimaryLabel || 'Lihat Modul Hero Promo';
                         demoHero.ctaPrimaryUrl = '#hero-promo-modules';
-                        pubHero.ctaPrimaryLabel = pubHero.ctaPrimaryLabel || 'Lihat Modul Hero Promo';
                         pubHero.ctaPrimaryUrl = '#hero-promo-modules';
+                    }
+                    /* Sync admin form inputs */
+                    var urlInput = document.getElementById('hero-cta1-url');
+                    var labelInput = document.getElementById('hero-cta1-label');
+                    if (urlInput) urlInput.value = mods.length > 0 ? '#hero-promo-modules' : (demoHero.ctaPrimaryUrl || '#products');
+                    if (labelInput && mods.length > 0 && (!labelInput.value || labelInput.value === 'Jelajahi Produk')) {
+                        labelInput.value = 'Selengkapnya';
                     }
                 },
 
