@@ -5615,9 +5615,10 @@ renderCreatorStandardSummary: (creator, data, categories, services, portfolios) 
                             return;
                         }
 
+                        const isHeroPromoProduct = (data.productTitle || '').toLowerCase().includes('hero promo');
                         container.innerHTML = `
                             <div class="mb-5">
-                                <span class="text-[10px] font-bold text-amber-600 uppercase tracking-wider">MODUL PEMBELAJARAN</span>
+                                ${isHeroPromoProduct ? '' : '<span class="text-[10px] font-bold text-amber-600 uppercase tracking-wider">MODUL PEMBELAJARAN</span>'}
                                 <h2 class="text-lg sm:text-xl font-bold text-[#151c75]">${App.utils.escapeHtml(data.productTitle)}</h2>
                             </div>
                             <div class="space-y-6">
@@ -6888,50 +6889,10 @@ renderStudioAiControl: async () => {
                     const editor = document.getElementById('admin-module-editor');
                     if (!editor) return;
 
-                    if (productId === 'hero-promo') {
-                        const hero = App.state.demo.hero || {};
-                        const prods = App.state.demo.products || App.adminData?.products || [];
-                        const h3 = document.querySelector('#admin-tab-modules h3, #admin-tab-modules .font-bold.text-sm');
-                        if (h3) h3.textContent = 'Hero Promo';
-                        editor.innerHTML = `
-                            <div class="space-y-4">
-                                <h4 class="font-bold text-xs text-[#151c75]">Hero Promo — Pengaturan Tombol Utama</h4>
-                                <div class="card-3d p-4 rounded-2xl bg-white space-y-3">
-                                    <div>
-                                        <label class="block text-[10px] font-bold text-slate-600 mb-1">Tombol Utama - Label</label>
-                                        <input type="text" id="hero-promo-cta-label" value="${App.utils.escapeHtml(hero.ctaPrimaryLabel || '')}" placeholder="Contoh: Lihat Produk, Mulai Belajar" class="w-full card-3d-inset px-3 py-2 rounded-xl text-xs">
-                                    </div>
-                                    <div>
-                                        <label class="block text-[10px] font-bold text-slate-600 mb-1">Tombol Utama - Arahkan ke Modul Produk</label>
-                                        <select id="hero-promo-product-select" onchange="App.admin.updateHeroPromoUrl(this.value)" class="w-full card-3d-inset px-3 py-2 rounded-xl text-xs font-bold text-[#151c75] outline-none">
-                                            <option value="#products">Semua Produk (#products)</option>
-                                            ${prods.map(p => {
-                                                const mods = App.state.demo.modules[p.id] || [];
-                                                const modCount = mods.length;
-                                                return `<option value="#product-${p.id}" ${hero.ctaPrimaryUrl === '#product-'+p.id ? 'selected' : ''}>${App.utils.escapeHtml(p.title)} (${modCount} modul)</option>`;
-                                            }).join('')}
-                                            <option value="custom" ${hero.ctaPrimaryUrl && !hero.ctaPrimaryUrl.startsWith('#') && hero.ctaPrimaryUrl !== '#products' ? 'selected' : ''}>URL Kustom...</option>
-                                        </select>
-                                    </div>
-                                    <div id="hero-promo-custom-url-wrap" class="${hero.ctaPrimaryUrl && !hero.ctaPrimaryUrl.startsWith('#') ? '' : 'hidden'}">
-                                        <label class="block text-[10px] font-bold text-slate-600 mb-1">URL Kustom</label>
-                                        <input type="text" id="hero-promo-cta-url" value="${App.utils.escapeHtml(hero.ctaPrimaryUrl && !hero.ctaPrimaryUrl.startsWith('#') ? hero.ctaPrimaryUrl : '')}" placeholder="https://..." class="w-full card-3d-inset px-3 py-2 rounded-xl text-xs">
-                                    </div>
-                                    <div>
-                                        <label class="block text-[10px] font-bold text-slate-600 mb-1">Tautan Tambahan (opsional)</label>
-                                        <input type="text" id="hero-promo-cta-secondary-label" value="${App.utils.escapeHtml(hero.ctaSecondaryLabel || '')}" placeholder="Label tautan" class="w-full card-3d-inset px-3 py-2 rounded-xl text-xs mb-1.5">
-                                        <input type="text" id="hero-promo-cta-secondary-url" value="${App.utils.escapeHtml(hero.ctaSecondaryUrl || '')}" placeholder="https://..." class="w-full card-3d-inset px-3 py-2 rounded-xl text-xs">
-                                    </div>
-                                    <button onclick="App.admin.saveHeroPromo()" class="btn-brand-gradient px-4 py-2 rounded-xl text-xs font-bold">Simpan Hero Promo</button>
-                                </div>
-                            </div>
-                        `;
-                        return;
-                    }
-
+                    const isHeroPromo = productId === 'hero-promo';
                     const mods = App.state.demo.modules[productId] || [];
                     const h3 = document.querySelector('#admin-tab-modules h3, #admin-tab-modules .font-bold.text-sm');
-                    if (h3) h3.textContent = 'Kelola Modul Pembelajaran';
+                    if (h3) h3.textContent = isHeroPromo ? 'Hero Promo' : 'Kelola Modul Pembelajaran';
 
                     editor.innerHTML = `
                         <div class="flex items-center justify-between">
@@ -7044,25 +7005,7 @@ renderStudioAiControl: async () => {
                     App.admin.loadProductModulesForAdmin(productId);
                 },
 
-                saveHeroPromo: async () => {
-                    const hero = App.state.demo.hero || {};
-                    hero.ctaPrimaryLabel = document.getElementById('hero-promo-cta-label')?.value.trim() || '';
-                    const selectVal = document.getElementById('hero-promo-product-select')?.value || '#products';
-                    if (selectVal === 'custom') {
-                        hero.ctaPrimaryUrl = document.getElementById('hero-promo-cta-url')?.value.trim() || '#products';
-                    } else {
-                        hero.ctaPrimaryUrl = selectVal;
-                    }
-                    hero.ctaSecondaryLabel = document.getElementById('hero-promo-cta-secondary-label')?.value.trim() || '';
-                    hero.ctaSecondaryUrl = document.getElementById('hero-promo-cta-secondary-url')?.value.trim() || '';
-                    await App.api.post('ADMIN_SAVE_HERO_SETTINGS', { hero });
-                    App.ui.toast('Hero Promo berhasil disimpan!', 'success');
-                },
-
-                updateHeroPromoUrl: (val) => {
-                    const wrap = document.getElementById('hero-promo-custom-url-wrap');
-                    if (wrap) wrap.classList.toggle('hidden', val !== 'custom');
-                },
+                
 
                 saveHeroSettings: async () => {
                     const hero = {
