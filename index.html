@@ -2835,8 +2835,13 @@ App.router.bindCanonicalLinkGuard();
                     const aiLinks = data.aiLinks || App.state.demo.aiLinks;
                     const featuredProducts = (data.products || []).filter(p => p.isFeatured).slice(0, 3);
 
-                    const primaryLabel = hero.ctaPrimaryLabel || hero.ctaPrimary || 'Jelajahi Produk';
-                    const primaryUrl = hero.ctaPrimaryUrl || '#products';
+                    const heroPromoMods = JSON.parse(localStorage.getItem('studihome_hero_promo_modules') || '[]');
+                    let primaryLabel = hero.ctaPrimaryLabel || hero.ctaPrimary || 'Jelajahi Produk';
+                    let primaryUrl = hero.ctaPrimaryUrl || '#products';
+                    if (heroPromoMods.length > 0) {
+                        primaryUrl = '#hero-promo-modules';
+                        if (!primaryLabel || primaryLabel === 'Jelajahi Produk') primaryLabel = 'Lihat Modul Hero Promo';
+                    }
                     const secondaryLabel = hero.ctaSecondaryLabel || hero.ctaSecondary || 'Klaim Prompt Gratis';
                     const secondaryUrl = hero.ctaSecondaryUrl || '#p4';
 
@@ -6514,7 +6519,7 @@ renderStudioAiControl: async () => {
                                                 </div>
                                                 <div>
                                                     <label class="block text-[10px] font-bold text-slate-600 mb-1">Tombol Utama - Target URL (#products atau https://...)</label>
-                                                    <input type="text" id="hero-cta1-url" value="${App.utils.escapeHtml(hero.ctaPrimaryUrl || '#products')}" class="w-full card-3d px-3 py-2 rounded-xl text-xs bg-white font-mono">
+                                                    <input type="text" id="hero-cta1-url" value="${App.utils.escapeHtml(hero.ctaPrimaryUrl || '#products')}" ${heroPromoMods.length > 0 ? 'readonly class="w-full card-3d px-3 py-2 rounded-xl text-xs bg-slate-100 font-mono text-slate-500"' : 'class="w-full card-3d px-3 py-2 rounded-xl text-xs bg-white font-mono"'} placeholder="${heroPromoMods.length > 0 ? '#hero-promo-modules (otomatis)' : '#products'}">
                                                 </div>
                                             </div>
                                             <div class="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
@@ -6899,10 +6904,13 @@ renderStudioAiControl: async () => {
                     App.admin._syncHeroPromoCta(mods);
                 },
                 _syncHeroPromoCta: (mods) => {
-                    const hero = App.state.demo.hero || {};
+                    const demoHero = App.state.demo.hero || {};
+                    const pubHero = App.state.publicData?.hero || {};
                     if (mods.length > 0) {
-                        hero.ctaPrimaryLabel = hero.ctaPrimaryLabel || 'Lihat Modul Hero Promo';
-                        hero.ctaPrimaryUrl = '#hero-promo-modules';
+                        demoHero.ctaPrimaryLabel = demoHero.ctaPrimaryLabel || 'Lihat Modul Hero Promo';
+                        demoHero.ctaPrimaryUrl = '#hero-promo-modules';
+                        pubHero.ctaPrimaryLabel = pubHero.ctaPrimaryLabel || 'Lihat Modul Hero Promo';
+                        pubHero.ctaPrimaryUrl = '#hero-promo-modules';
                     }
                 },
 
@@ -7058,12 +7066,13 @@ renderStudioAiControl: async () => {
 
                 saveHeroSettings: async () => {
                     const heroPromoMods = JSON.parse(localStorage.getItem('studihome_hero_promo_modules') || '[]');
+                    const isHeroPromoActive = heroPromoMods.length > 0;
                     const hero = {
                         badge: document.getElementById('hero-badge').value,
                         title: document.getElementById('hero-title').value,
                         subtitle: document.getElementById('hero-subtitle').value,
-                        ctaPrimaryLabel: heroPromoMods.length > 0 ? (document.getElementById('hero-cta1-label').value || 'Lihat Modul Hero Promo') : document.getElementById('hero-cta1-label').value,
-                        ctaPrimaryUrl: heroPromoMods.length > 0 ? '#hero-promo-modules' : document.getElementById('hero-cta1-url').value,
+                        ctaPrimaryLabel: isHeroPromoActive ? 'Lihat Modul Hero Promo' : document.getElementById('hero-cta1-label').value,
+                        ctaPrimaryUrl: isHeroPromoActive ? '#hero-promo-modules' : (document.getElementById('hero-cta1-url').value || '#products'),
                         ctaPrimaryUrl: document.getElementById('hero-cta1-url').value,
                         ctaSecondaryLabel: document.getElementById('hero-cta2-label').value,
                         ctaSecondaryUrl: document.getElementById('hero-cta2-url').value
