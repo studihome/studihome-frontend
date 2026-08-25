@@ -2922,21 +2922,32 @@ App.router.bindCanonicalLinkGuard();
                     App.home.renderTestimonialsOnly();
                     App.home.startTestimonialCycle();
 
-                    /* Cross-device hero promo sync: load modules from DB, update CTA button */
+                    /* Cross-device hero promo sync: ensure CTA button always reflects module state */
+                    function _syncHeroPromoCtaButton(mods) {
+                        if (!mods || mods.length === 0) return;
+                        var ctaBtn = document.querySelector('.btn-brand-amber[onclick*="handleCtaClick"]');
+                        if (!ctaBtn) return;
+                        ctaBtn.setAttribute('onclick', "App.home.handleCtaClick('#hero-promo-modules')");
+                        var span = ctaBtn.querySelector('span');
+                        if (span && (!span.textContent || span.textContent === 'Jelajahi Produk' || span.textContent === 'Selengkapnya')) {
+                            span.textContent = 'Lihat Modul Hero Promo';
+                        }
+                    }
+                    /* First: sync from DB if available */
                     App.admin._loadHeroPromoModsFromDB().then(function(dbMods) {
                         if (dbMods && dbMods.length > 0) {
                             localStorage.setItem('studihome_hero_promo_modules', JSON.stringify(dbMods));
-                            var ctaBtn = document.querySelector('.btn-brand-amber[onclick*="handleCtaClick"]');
-                            if (ctaBtn) {
-                                var currentUrl = ctaBtn.getAttribute('onclick') || '';
-                                if (currentUrl.indexOf('hero-promo-modules') === -1) {
-                                    ctaBtn.setAttribute('onclick', "App.home.handleCtaClick('#hero-promo-modules')");
-                                    var span = ctaBtn.querySelector('span');
-                                    if (span && (!span.textContent || span.textContent === 'Jelajahi Produk')) span.textContent = 'Lihat Modul Hero Promo';
-                                }
-                            }
+                            _syncHeroPromoCtaButton(dbMods);
+                        } else {
+                            /* DB empty or column missing: use localStorage */
+                            var localMods = JSON.parse(localStorage.getItem('studihome_hero_promo_modules') || '[]');
+                            _syncHeroPromoCtaButton(localMods);
                         }
-                    }).catch(function() {});
+                    }).catch(function() {
+                        /* DB failed: use localStorage */
+                        var localMods = JSON.parse(localStorage.getItem('studihome_hero_promo_modules') || '[]');
+                        _syncHeroPromoCtaButton(localMods);
+                    });
                 }
             },
 
