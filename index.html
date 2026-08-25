@@ -2710,7 +2710,9 @@ App.router.bindCanonicalLinkGuard();
 
                     if (targetUrl.startsWith('#')) {
                         const target = targetUrl.replace('#', '');
-                        if (target.startsWith('checkout-') || target.startsWith('p')) {
+                        if (target === 'hero-promo-modules') {
+                            App.dashboard.openModulePlayer('hero-promo');
+                        } else if (target.startsWith('checkout-') || target.startsWith('p')) {
                             const productId = target.replace('checkout-', '');
                             App.shop.startCheckout(productId);
                         } else {
@@ -6892,7 +6894,17 @@ renderStudioAiControl: async () => {
                 },
 
                 _getHeroPromoMods: () => JSON.parse(localStorage.getItem('studihome_hero_promo_modules') || '[]'),
-                _saveHeroPromoMods: (mods) => localStorage.setItem('studihome_hero_promo_modules', JSON.stringify(mods)),
+                _saveHeroPromoMods: (mods) => {
+                    localStorage.setItem('studihome_hero_promo_modules', JSON.stringify(mods));
+                    App.admin._syncHeroPromoCta(mods);
+                },
+                _syncHeroPromoCta: (mods) => {
+                    const hero = App.state.demo.hero || {};
+                    if (mods.length > 0) {
+                        hero.ctaPrimaryLabel = hero.ctaPrimaryLabel || 'Lihat Modul Hero Promo';
+                        hero.ctaPrimaryUrl = '#hero-promo-modules';
+                    }
+                },
 
                 loadProductModulesForAdmin: (productId) => {
                     const editor = document.getElementById('admin-module-editor');
@@ -6903,7 +6915,12 @@ renderStudioAiControl: async () => {
                     const h3 = document.querySelector('#admin-tab-modules h3, #admin-tab-modules .font-bold.text-sm');
                     if (h3) h3.textContent = isHeroPromo ? 'Hero Promo' : 'Kelola Modul Pembelajaran';
 
+                    const heroPromoModCount = isHeroPromo ? mods.length : 0;
                     editor.innerHTML = `
+                        ${isHeroPromo ? `<div class="card-3d p-3 rounded-xl bg-amber-50 border border-amber-200 text-xs text-amber-800 flex items-center gap-2">
+                            <i class="fa-solid fa-link text-amber-500"></i>
+                            <span>${heroPromoModCount > 0 ? `<b>Tombol Utama</b> otomatis mengarah ke modul ini (${heroPromoModCount} modul). Label: "Lihat Modul Hero Promo"` : 'Buat modul pertama, Tombol Utama akan otomatis terhubung.'}</span>
+                        </div>` : ''}
                         <div class="flex items-center justify-between">
                             <h4 class="font-bold text-xs text-[#151c75]">Daftar Modul</h4>
                             <button onclick="App.admin.showModuleForm('${productId}')" class="btn-brand-gradient px-3 py-1.5 rounded-xl text-xs font-bold">
@@ -7040,11 +7057,13 @@ renderStudioAiControl: async () => {
                 
 
                 saveHeroSettings: async () => {
+                    const heroPromoMods = JSON.parse(localStorage.getItem('studihome_hero_promo_modules') || '[]');
                     const hero = {
                         badge: document.getElementById('hero-badge').value,
                         title: document.getElementById('hero-title').value,
                         subtitle: document.getElementById('hero-subtitle').value,
-                        ctaPrimaryLabel: document.getElementById('hero-cta1-label').value,
+                        ctaPrimaryLabel: heroPromoMods.length > 0 ? (document.getElementById('hero-cta1-label').value || 'Lihat Modul Hero Promo') : document.getElementById('hero-cta1-label').value,
+                        ctaPrimaryUrl: heroPromoMods.length > 0 ? '#hero-promo-modules' : document.getElementById('hero-cta1-url').value,
                         ctaPrimaryUrl: document.getElementById('hero-cta1-url').value,
                         ctaSecondaryLabel: document.getElementById('hero-cta2-label').value,
                         ctaSecondaryUrl: document.getElementById('hero-cta2-url').value
