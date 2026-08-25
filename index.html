@@ -6955,7 +6955,7 @@ renderStudioAiControl: async () => {
                     box.classList.remove('hidden');
 
                     let m = { title: '', yt_url: '', markdown: '', download_url: '', links: [{ label: '', url: '' }] };
-                    const mods = App.state.demo.modules[productId] || [];
+                    const mods = productId === 'hero-promo' ? App.admin._getHeroPromoMods() : (App.state.demo.modules[productId] || []);
                     if (editModuleId) {
                         const found = mods.find(item => item.id === editModuleId);
                         if (found) m = found;
@@ -7073,7 +7073,6 @@ renderStudioAiControl: async () => {
                         subtitle: document.getElementById('hero-subtitle').value,
                         ctaPrimaryLabel: isHeroPromoActive ? 'Lihat Modul Hero Promo' : document.getElementById('hero-cta1-label').value,
                         ctaPrimaryUrl: isHeroPromoActive ? '#hero-promo-modules' : (document.getElementById('hero-cta1-url').value || '#products'),
-                        ctaPrimaryUrl: document.getElementById('hero-cta1-url').value,
                         ctaSecondaryLabel: document.getElementById('hero-cta2-label').value,
                         ctaSecondaryUrl: document.getElementById('hero-cta2-url').value
                     };
