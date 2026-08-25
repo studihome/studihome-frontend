@@ -5463,7 +5463,7 @@ renderCreatorStandardSummary: (creator, data, categories, services, portfolios) 
                                     if (creatorProfileError) throw creatorProfileError;
                                     creatorEntry.innerHTML = creatorProfile
                                         ? `
-                                            <div class="card-3d p-4 sm:p-5 rounded-2xl mb-6 bg-[#ffecc8] border border-blue-100 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
+                                            <div class="card-3d p-4 sm:p-5 rounded-2xl mb-6 border border-blue-100 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3" style="background-color:#ffecc8">
                                                 <div class="flex items-start gap-3">
                                                     <div class="w-10 h-10 rounded-2xl bg-blue-50 flex items-center justify-center shrink-0">
                                                         <i class="fa-solid fa-briefcase text-[#151c75]"></i>
@@ -5476,7 +5476,7 @@ renderCreatorStandardSummary: (creator, data, categories, services, portfolios) 
                                                 <button onclick="(async()=>{try{const uid=App.state.user?.id;if(!uid)return App.ui.toast('Silakan masuk dulu.','error');const{data:p}=await supabaseClient.from('creator_profiles').select('username').eq('user_id',uid).maybeSingle();if(p?.username)window.location.href='/dapur/'+encodeURIComponent(p.username);else{const{data:r,e}=await supabaseClient.rpc('ensure_creator_draft');if(e)throw e;const u=String(r?.username||'').trim().toLowerCase();if(u)window.location.href='/dapur/'+encodeURIComponent(u);else App.ui.toast('Dapur belum bisa dibuat.','error')}}catch(e){App.ui.toast(e?.message||'Gagal membuka Dapur.','error')}})()" class="btn-brand-gradient px-3.5 py-2 rounded-xl text-[11px] font-bold shrink-0">Buka Dapur</button>
                                             </div>`
                                         : `
-                                            <div class="card-3d p-4 sm:p-5 rounded-2xl mb-6 bg-[#ffecc8] border border-blue-100 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
+                                            <div class="card-3d p-4 sm:p-5 rounded-2xl mb-6 border border-blue-100 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3" style="background-color:#ffecc8">
                                                 <div class="flex items-start gap-3">
                                                     <div class="w-10 h-10 rounded-2xl bg-blue-50 flex items-center justify-center shrink-0">
                                                         <i class="fa-solid fa-wand-magic-sparkles text-[#151c75]"></i>
