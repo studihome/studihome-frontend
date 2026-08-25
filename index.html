@@ -6978,8 +6978,8 @@ renderStudioAiControl: async () => {
                     var urlInput = document.getElementById('hero-cta1-url');
                     var labelInput = document.getElementById('hero-cta1-label');
                     if (urlInput) urlInput.value = mods.length > 0 ? '#hero-promo-modules' : (demoHero.ctaPrimaryUrl || '#products');
-                    if (labelInput && mods.length > 0 && (!labelInput.value || labelInput.value === 'Jelajahi Produk')) {
-                        labelInput.value = 'Selengkapnya';
+                    if (labelInput && mods.length > 0) {
+                        labelInput.value = 'Lihat Modul Hero Promo';
                     }
                 },
 
