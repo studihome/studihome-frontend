@@ -6548,7 +6548,7 @@ renderStudioAiControl: async () => {
                                             <div class="grid grid-cols-1 sm:grid-cols-2 gap-2.5 border-t border-slate-200 pt-2">
                                                 <div>
                                                     <label class="block text-[10px] font-bold text-slate-600 mb-1">Tombol Utama - Label</label>
-                                                    <input type="text" id="hero-cta1-label" value="${App.utils.escapeHtml(hero.ctaPrimaryLabel || hero.ctaPrimary || 'Jelajahi Produk')}" class="w-full card-3d px-3 py-2 rounded-xl text-xs bg-white font-bold">
+                                                    <input type="text" id="hero-cta1-label" value="${App.utils.escapeHtml(heroPromoMods.length > 0 ? 'Lihat Modul Hero Promo' : (hero.ctaPrimaryLabel || hero.ctaPrimary || 'Jelajahi Produk'))}" class="w-full card-3d px-3 py-2 rounded-xl text-xs bg-white font-bold">
                                                 </div>
                                                 <div>
                                                     <label class="block text-[10px] font-bold text-slate-600 mb-1">Tombol Utama - Target URL (#products atau https://...)</label>
