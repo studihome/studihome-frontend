@@ -6890,6 +6890,7 @@ renderStudioAiControl: async () => {
 
                     if (productId === 'hero-promo') {
                         const hero = App.state.demo.hero || {};
+                        const prods = App.state.demo.products || App.adminData?.products || [];
                         const h3 = document.querySelector('#admin-tab-modules h3, #admin-tab-modules .font-bold.text-sm');
                         if (h3) h3.textContent = 'Hero Promo';
                         editor.innerHTML = `
@@ -6898,11 +6899,23 @@ renderStudioAiControl: async () => {
                                 <div class="card-3d p-4 rounded-2xl bg-white space-y-3">
                                     <div>
                                         <label class="block text-[10px] font-bold text-slate-600 mb-1">Tombol Utama - Label</label>
-                                        <input type="text" id="hero-promo-cta-label" value="${App.utils.escapeHtml(hero.ctaPrimaryLabel || '')}" placeholder="Contoh: Lihat Produk" class="w-full card-3d-inset px-3 py-2 rounded-xl text-xs">
+                                        <input type="text" id="hero-promo-cta-label" value="${App.utils.escapeHtml(hero.ctaPrimaryLabel || '')}" placeholder="Contoh: Lihat Produk, Mulai Belajar" class="w-full card-3d-inset px-3 py-2 rounded-xl text-xs">
                                     </div>
                                     <div>
-                                        <label class="block text-[10px] font-bold text-slate-600 mb-1">Tombol Utama - Target URL (#products atau https://...)</label>
-                                        <input type="text" id="hero-promo-cta-url" value="${App.utils.escapeHtml(hero.ctaPrimaryUrl || '#products')}" placeholder="#products atau https://..." class="w-full card-3d-inset px-3 py-2 rounded-xl text-xs">
+                                        <label class="block text-[10px] font-bold text-slate-600 mb-1">Tombol Utama - Arahkan ke Modul Produk</label>
+                                        <select id="hero-promo-product-select" onchange="App.admin.updateHeroPromoUrl(this.value)" class="w-full card-3d-inset px-3 py-2 rounded-xl text-xs font-bold text-[#151c75] outline-none">
+                                            <option value="#products">Semua Produk (#products)</option>
+                                            ${prods.map(p => {
+                                                const mods = App.state.demo.modules[p.id] || [];
+                                                const modCount = mods.length;
+                                                return `<option value="#product-${p.id}" ${hero.ctaPrimaryUrl === '#product-'+p.id ? 'selected' : ''}>${App.utils.escapeHtml(p.title)} (${modCount} modul)</option>`;
+                                            }).join('')}
+                                            <option value="custom" ${hero.ctaPrimaryUrl && !hero.ctaPrimaryUrl.startsWith('#') && hero.ctaPrimaryUrl !== '#products' ? 'selected' : ''}>URL Kustom...</option>
+                                        </select>
+                                    </div>
+                                    <div id="hero-promo-custom-url-wrap" class="${hero.ctaPrimaryUrl && !hero.ctaPrimaryUrl.startsWith('#') ? '' : 'hidden'}">
+                                        <label class="block text-[10px] font-bold text-slate-600 mb-1">URL Kustom</label>
+                                        <input type="text" id="hero-promo-cta-url" value="${App.utils.escapeHtml(hero.ctaPrimaryUrl && !hero.ctaPrimaryUrl.startsWith('#') ? hero.ctaPrimaryUrl : '')}" placeholder="https://..." class="w-full card-3d-inset px-3 py-2 rounded-xl text-xs">
                                     </div>
                                     <div>
                                         <label class="block text-[10px] font-bold text-slate-600 mb-1">Tautan Tambahan (opsional)</label>
@@ -7034,11 +7047,21 @@ renderStudioAiControl: async () => {
                 saveHeroPromo: async () => {
                     const hero = App.state.demo.hero || {};
                     hero.ctaPrimaryLabel = document.getElementById('hero-promo-cta-label')?.value.trim() || '';
-                    hero.ctaPrimaryUrl = document.getElementById('hero-promo-cta-url')?.value.trim() || '#products';
+                    const selectVal = document.getElementById('hero-promo-product-select')?.value || '#products';
+                    if (selectVal === 'custom') {
+                        hero.ctaPrimaryUrl = document.getElementById('hero-promo-cta-url')?.value.trim() || '#products';
+                    } else {
+                        hero.ctaPrimaryUrl = selectVal;
+                    }
                     hero.ctaSecondaryLabel = document.getElementById('hero-promo-cta-secondary-label')?.value.trim() || '';
                     hero.ctaSecondaryUrl = document.getElementById('hero-promo-cta-secondary-url')?.value.trim() || '';
                     await App.api.post('ADMIN_SAVE_HERO_SETTINGS', { hero });
                     App.ui.toast('Hero Promo berhasil disimpan!', 'success');
+                },
+
+                updateHeroPromoUrl: (val) => {
+                    const wrap = document.getElementById('hero-promo-custom-url-wrap');
+                    if (wrap) wrap.classList.toggle('hidden', val !== 'custom');
                 },
 
                 saveHeroSettings: async () => {
