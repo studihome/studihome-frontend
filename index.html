@@ -808,12 +808,6 @@
                     <i class="fa-solid fa-magnifying-glass text-sm"></i>
                 </button>
 
-                <!-- System Clock Widget -->
-                <div class="hidden lg:flex items-center gap-2 bg-white px-3 py-1.5 rounded-xl text-xs border border-blue-100 shadow-2xs">
-                    <i class="fa-regular fa-clock text-[#151c75]"></i>
-                    <span id="live-clock" class="font-bold text-slate-700">00:00:00</span>
-                </div>
-
                 <!-- Server Connection Status: dot only -->
                 <div id="api-status-badge" class="hidden sm:flex items-center justify-center w-4 h-4 cursor-help server-status-tooltip border-0 bg-transparent shadow-none" data-status="connecting" data-tooltip="Sedang menghubungkan ke Supabase" aria-label="Status koneksi Studihome" tabindex="0">
                     <span id="api-status-dot" class="block w-2.5 h-2.5 rounded-full bg-sky-500 animate-pulse" aria-hidden="true"></span>
@@ -1249,8 +1243,6 @@ const App = {
             },
             init: async () => {
                 App.studioAI._loadSmartContext();
-                setInterval(App.utils.updateClock, 1000);
-                App.utils.updateClock();
                 App.ui.updateApiStatus('connecting');
                 try {
                     initSupabase();
@@ -7611,13 +7603,6 @@ renderStudioAiControl: async () => {
                     } catch (e) {
                         return fallback;
                     }
-                },
-
-                updateClock: () => {
-                    const el = document.getElementById('live-clock');
-                    if (!el) return;
-                    const now = new Date();
-                    el.textContent = now.toLocaleTimeString('id-ID', { hour12: false, timeZone: 'Asia/Jakarta' }) + ' WIB';
                 },
 
                 escapeHtml: (str) => {
