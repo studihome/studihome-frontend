@@ -255,10 +255,14 @@
         @keyframes toastBubbleOut { to { opacity:0; transform:translateY(7px) translateX(-4px) scale(.98); } }
         .hero-star-vector { shape-rendering: geometricPrecision; text-rendering: geometricPrecision; }
         @keyframes pulse-slow { 0%,100%{opacity:.15;transform:scale(1)} 50%{opacity:.25;transform:scale(1.05)} }
-        @keyframes cd-fire { 0%,100%{transform:scale(1);filter:brightness(1)} 50%{transform:scale(1.15);filter:brightness(1.3)} }
-        @keyframes cd-float { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-2px)} }
-        @keyframes cd-blink { 0%,100%{opacity:1} 50%{opacity:.4} }
-        @keyframes cd-glow { 0%,100%{opacity:.3;transform:scale(1)} 50%{opacity:.6;transform:scale(1.1)} }
+        @keyframes cd-pulse-ring { 0%{transform:scale(.8);opacity:.6} 100%{transform:scale(1.6);opacity:0} }
+        @keyframes cd-seconds-pulse { 0%,100%{transform:scale(1);box-shadow:0 0 0 0 rgba(250,204,21,0)} 50%{transform:scale(1.04);box-shadow:0 0 12px 2px rgba(250,204,21,.25)} }
+        .cd-digit-group { display:flex;flex-direction:column;align-items:center;gap:4px }
+        .cd-digit { width:42px;height:44px;display:flex;align-items:center;justify-content:center;border-radius:10px;font-size:18px;font-weight:900;color:#fff;background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.08);backdrop-filter:blur(4px);letter-spacing:-.02em;line-height:1;transition:all .3s cubic-bezier(.4,0,.2,1) }
+        .cd-secs .cd-digit { animation:cd-seconds-pulse 1s ease-in-out infinite; background:rgba(250,204,21,.12);border-color:rgba(250,204,21,.2);color:#facc15 }
+        .cd-label { font-size:8px;font-weight:800;color:rgba(255,255,255,.45);text-transform:uppercase;letter-spacing:.08em;line-height:1 }
+        .cd-separator { font-size:16px;font-weight:900;color:rgba(255,255,255,.25);line-height:1;padding-bottom:14px }
+        @media(min-width:640px){ .cd-digit{width:48px;height:50px;font-size:22px;border-radius:12px} .cd-label{font-size:9px} .cd-separator{font-size:20px} }
         #api-status-badge { width: 1rem; height: 1rem; border: 0 !important; background: transparent !important; box-shadow: none !important; }
         #api-status-dot { display: block; }
 
@@ -2869,41 +2873,39 @@ App.router.bindCanonicalLinkGuard();
                                     </p>
                                     <!-- Countdown Timer -->
                                     <div id="hero-countdown-container" class="hidden mb-6 sm:mb-8">
-                                        <div class="inline-flex flex-col sm:flex-row items-start sm:items-center gap-3 px-5 py-4 rounded-2xl" style="background:linear-gradient(135deg,rgba(239,68,68,.1),rgba(220,38,38,.05));border:1px solid rgba(239,68,68,.2);backdrop-filter:blur(12px);position:relative;overflow:hidden">
-                                            <!-- 3-depth glass layers -->
-                                            <div class="absolute inset-0 rounded-2xl" style="background:linear-gradient(180deg,rgba(255,255,255,.04) 0%,transparent 50%,rgba(0,0,0,.08) 100%);pointer-events:none"></div>
-                                            <div class="absolute top-0 left-0 w-full h-px" style="background:linear-gradient(90deg,transparent,rgba(255,255,255,.12),transparent)"></div>
-                                            <div class="absolute bottom-0 left-0 w-full h-px" style="background:linear-gradient(90deg,transparent,rgba(255,255,255,.06),transparent)"></div>
-                                            <!-- Depth layer 1: urgency badge -->
-                                            <div class="flex items-center gap-2 px-3 py-1.5 rounded-xl relative z-10" style="background:linear-gradient(135deg,rgba(239,68,68,.2),rgba(220,38,38,.1));border:1px solid rgba(239,68,68,.25);box-shadow:0 2px 8px rgba(239,68,68,.15)">
-                                                <i class="fa-solid fa-fire text-red-400 text-xs" style="animation:cd-fire 1.5s ease-in-out infinite"></i>
-                                                <span id="hero-countdown-title" class="text-[10px] sm:text-xs font-extrabold text-red-300 tracking-wide"></span>
+                                        <div class="inline-flex flex-col sm:flex-row items-start sm:items-center gap-3 sm:gap-4 px-5 sm:px-6 py-4 sm:py-5 rounded-2xl relative" style="background:rgba(255,255,255,.08);backdrop-filter:blur(20px) saturate(180%);border:1px solid rgba(255,255,255,.12);box-shadow:0 8px 32px rgba(0,0,0,.12),inset 0 1px 0 rgba(255,255,255,.1)">
+                                            <!-- Glass highlight -->
+                                            <div class="absolute inset-0 rounded-2xl pointer-events-none" style="background:linear-gradient(180deg,rgba(255,255,255,.06) 0%,transparent 40%,rgba(0,0,0,.04) 100%)"></div>
+                                            <!-- Urgency label -->
+                                            <div class="flex items-center gap-2 relative z-10">
+                                                <div class="relative flex items-center justify-center w-5 h-5">
+                                                    <div class="absolute inset-0 rounded-full" style="background:rgba(239,68,68,.2);animation:cd-pulse-ring 2s ease-out infinite"></div>
+                                                    <i class="fa-solid fa-bolt text-[10px] relative z-10" style="color:#facc15"></i>
+                                                </div>
+                                                <span id="hero-countdown-title" class="text-[10px] sm:text-[11px] font-extrabold text-white/80 tracking-wide uppercase"></span>
                                             </div>
-                                            <!-- Depth layer 2: digit blocks -->
-                                            <div class="flex items-center gap-1.5 sm:gap-2 relative z-10" style="animation:cd-float 3s ease-in-out infinite">
-                                                <div id="hero-cd-days" class="text-center">
-                                                    <div class="w-11 h-11 sm:w-13 sm:h-13 rounded-xl flex items-center justify-center text-sm sm:text-lg font-black text-white" style="background:linear-gradient(145deg,#ef4444,#dc2626,#b91c1c);box-shadow:0 4px 16px rgba(220,38,38,.4),inset 0 1px 0 rgba(255,255,255,.15),0 0 0 1px rgba(239,68,68,.2)">00</div>
-                                                    <div class="text-[7px] sm:text-[8px] font-extrabold text-red-300 mt-1 uppercase tracking-widest">Hari</div>
+                                            <!-- Digit display -->
+                                            <div class="flex items-center gap-2 sm:gap-2.5 relative z-10">
+                                                <div id="hero-cd-days" class="text-center cd-digit-group">
+                                                    <div class="cd-digit" style="font-variant-numeric:tabular-nums">00</div>
+                                                    <div class="cd-label">Hari</div>
                                                 </div>
-                                                <span class="text-red-500 font-black text-base sm:text-xl" style="text-shadow:0 0 8px rgba(239,68,68,.5);animation:cd-blink 1s ease-in-out infinite">:</span>
-                                                <div id="hero-cd-hours" class="text-center">
-                                                    <div class="w-11 h-11 sm:w-13 sm:h-13 rounded-xl flex items-center justify-center text-sm sm:text-lg font-black text-white" style="background:linear-gradient(145deg,#ef4444,#dc2626,#b91c1c);box-shadow:0 4px 16px rgba(220,38,38,.4),inset 0 1px 0 rgba(255,255,255,.15),0 0 0 1px rgba(239,68,68,.2)">00</div>
-                                                    <div class="text-[7px] sm:text-[8px] font-extrabold text-red-300 mt-1 uppercase tracking-widest">Jam</div>
+                                                <span class="cd-separator">.</span>
+                                                <div id="hero-cd-hours" class="text-center cd-digit-group">
+                                                    <div class="cd-digit" style="font-variant-numeric:tabular-nums">00</div>
+                                                    <div class="cd-label">Jam</div>
                                                 </div>
-                                                <span class="text-red-500 font-black text-base sm:text-xl" style="text-shadow:0 0 8px rgba(239,68,68,.5);animation:cd-blink 1s ease-in-out infinite">:</span>
-                                                <div id="hero-cd-mins" class="text-center">
-                                                    <div class="w-11 h-11 sm:w-13 sm:h-13 rounded-xl flex items-center justify-center text-sm sm:text-lg font-black text-white" style="background:linear-gradient(145deg,#ef4444,#dc2626,#b91c1c);box-shadow:0 4px 16px rgba(220,38,38,.4),inset 0 1px 0 rgba(255,255,255,.15),0 0 0 1px rgba(239,68,68,.2)">00</div>
-                                                    <div class="text-[7px] sm:text-[8px] font-extrabold text-red-300 mt-1 uppercase tracking-widest">Menit</div>
+                                                <span class="cd-separator">.</span>
+                                                <div id="hero-cd-mins" class="text-center cd-digit-group">
+                                                    <div class="cd-digit" style="font-variant-numeric:tabular-nums">00</div>
+                                                    <div class="cd-label">Menit</div>
                                                 </div>
-                                                <span class="text-red-500 font-black text-base sm:text-xl" style="text-shadow:0 0 8px rgba(239,68,68,.5);animation:cd-blink 1s ease-in-out infinite">:</span>
-                                                <div id="hero-cd-secs" class="text-center">
-                                                    <div class="w-11 h-11 sm:w-13 sm:h-13 rounded-xl flex items-center justify-center text-sm sm:text-lg font-black text-white" style="background:linear-gradient(145deg,#ef4444,#dc2626,#b91c1c);box-shadow:0 4px 16px rgba(220,38,38,.4),inset 0 1px 0 rgba(255,255,255,.15),0 0 0 1px rgba(239,68,68,.2)">00</div>
-                                                    <div class="text-[7px] sm:text-[8px] font-extrabold text-red-300 mt-1 uppercase tracking-widest">Detik</div>
+                                                <span class="cd-separator">.</span>
+                                                <div id="hero-cd-secs" class="text-center cd-digit-group cd-secs">
+                                                    <div class="cd-digit" style="font-variant-numeric:tabular-nums">00</div>
+                                                    <div class="cd-label">Detik</div>
                                                 </div>
                                             </div>
-                                            <!-- Depth layer 3: glow accent -->
-                                            <div class="absolute -top-8 -right-8 w-24 h-24 rounded-full pointer-events-none" style="background:radial-gradient(circle,rgba(239,68,68,.15),transparent 70%);animation:cd-glow 4s ease-in-out infinite"></div>
-                                            <div class="absolute -bottom-6 -left-6 w-20 h-20 rounded-full pointer-events-none" style="background:radial-gradient(circle,rgba(220,38,38,.1),transparent 70%);animation:cd-glow 5s ease-in-out infinite 1s"></div>
                                         </div>
                                     </div>
                                     <div id="hero-countdown-expired" class="hidden mb-6 sm:mb-8">
