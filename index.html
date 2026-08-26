@@ -5807,9 +5807,8 @@ ${(() => { const rs=String(p.review_status||'DRAFT').toUpperCase(); const map={D
                         if(status) status.textContent='Mengompres logo…';
                         const blob=await App.creatorStudio.compressAvatar(file);
                         const creatorUserId=App.creatorStudio.data?.profile?.user_id;
-                        const creatorProfileId=App.creatorStudio.data?.profile?.id;
-                        if(!creatorUserId) throw new Error('Profil creator belum dimuat.');
-                        const path=`creator/${creatorProfileId || creatorUserId}/avatar.webp`;
+                                                if(!creatorUserId) throw new Error('Profil creator belum dimuat.');
+                        const path=`${creatorUserId}/avatar.webp`;
                         const up=await supabaseClient.storage.from('creator-media').upload(path,blob,{upsert:true,contentType:'image/webp',cacheControl:'3600'});
                         if(up.error) throw up.error;
                         const pub=supabaseClient.storage.from('creator-media').getPublicUrl(path);
