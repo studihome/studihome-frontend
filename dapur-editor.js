@@ -35,6 +35,8 @@
     const r=await S().from('creator_profiles').select('user_id,username,username_changed_at,display_name,bio,avatar_url,whatsapp,location,is_published').eq('id',id).maybeSingle();
     if(r.error||!r.data)throw r.error||new Error('Creator tidak ditemukan.');
     const c=r.data;
+    // Scope creatorStudio data to target creator (fixes admin avatar upload path)
+    if(window.App?.creatorStudio)window.App.creatorStudio.data={...((window.App.creatorStudio.data)||{}),profile:{user_id:c.user_id,id:id,username:c.username,display_name:c.display_name}};
     const isOwner=!!(S().auth?.user&&S().auth.user().data?.user?.id===c.user_id);
     const locked=!!c.username_changed_at;
     const avatar=c.avatar_url||'';
