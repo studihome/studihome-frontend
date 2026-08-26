@@ -255,6 +255,10 @@
         @keyframes toastBubbleOut { to { opacity:0; transform:translateY(7px) translateX(-4px) scale(.98); } }
         .hero-star-vector { shape-rendering: geometricPrecision; text-rendering: geometricPrecision; }
         @keyframes pulse-slow { 0%,100%{opacity:.15;transform:scale(1)} 50%{opacity:.25;transform:scale(1.05)} }
+        @keyframes cd-fire { 0%,100%{transform:scale(1);filter:brightness(1)} 50%{transform:scale(1.15);filter:brightness(1.3)} }
+        @keyframes cd-float { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-2px)} }
+        @keyframes cd-blink { 0%,100%{opacity:1} 50%{opacity:.4} }
+        @keyframes cd-glow { 0%,100%{opacity:.3;transform:scale(1)} 50%{opacity:.6;transform:scale(1.1)} }
         #api-status-badge { width: 1rem; height: 1rem; border: 0 !important; background: transparent !important; box-shadow: none !important; }
         #api-status-dot { display: block; }
 
@@ -2530,7 +2534,7 @@ App.router.bindCanonicalLinkGuard();
                         } else if (action === 'ADMIN_DELETE_MODULE') {
                             const {error}=await supabaseClient.from('modules').delete().eq('id',payload.moduleId); if(error)throw error; data={success:true};
                         } else if (action === 'ADMIN_SAVE_HERO') {
-                            const cd=typeof payload.countdown==='object'&&payload.countdown?payload.countdown:{};const uc=App.state.publicData?.master?.underConstruction||{};uc.heroCountdown=cd;await supabaseClient.from('site_settings').upsert({id:1,badge:payload.badge||'',hero_title:payload.title||'',hero_subtitle:payload.subtitle||'',cta_primary_label:payload.ctaPrimaryLabel||'Jelajahi Produk',cta_primary_url:payload.ctaPrimaryUrl||'#products',cta_secondary_label:payload.ctaSecondaryLabel||'Klaim Produk Gratis',cta_secondary_url:payload.ctaSecondaryUrl||'#products',qris_slots:App.state.publicData?.master?.qrisSlots || [],under_construction:uc,updated_at:new Date().toISOString()},{onConflict:'id'}); if(error)throw error; data={success:true};
+                            const cd=typeof payload.countdown==='object'&&payload.countdown?payload.countdown:{};const uc=App.state.publicData?.master?.underConstruction||{};uc.heroCountdown=cd;const {error:heroErr}=await supabaseClient.from('site_settings').upsert({id:1,badge:payload.badge||'',hero_title:payload.title||'',hero_subtitle:payload.subtitle||'',cta_primary_label:payload.ctaPrimaryLabel||'Jelajahi Produk',cta_primary_url:payload.ctaPrimaryUrl||'#products',cta_secondary_label:payload.ctaSecondaryLabel||'Klaim Produk Gratis',cta_secondary_url:payload.ctaSecondaryUrl||'#products',qris_slots:App.state.publicData?.master?.qrisSlots || [],under_construction:uc,updated_at:new Date().toISOString()},{onConflict:'id'}); if(heroErr)throw heroErr; data={success:true};
                         } else if (action === 'ADMIN_SAVE_AI_LINKS') {
                             const links=payload.aiLinks||[]; const {error:dErr}=await supabaseClient.from('ai_links').delete().neq('id','00000000-0000-0000-0000-000000000000'); if(dErr)throw dErr;
                             const rows=links.map((x,i)=>({name:x.name,icon:x.icon,sort_order:i+1})); if(rows.length){const {error:iErr}=await supabaseClient.from('ai_links').insert(rows);if(iErr)throw iErr;} data={success:true};
@@ -2865,32 +2869,41 @@ App.router.bindCanonicalLinkGuard();
                                     </p>
                                     <!-- Countdown Timer -->
                                     <div id="hero-countdown-container" class="hidden mb-6 sm:mb-8">
-                                        <div class="inline-flex items-center gap-2 px-4 py-2.5 rounded-2xl" style="background:linear-gradient(135deg,rgba(239,68,68,.12),rgba(239,68,68,.06));border:1px solid rgba(239,68,68,.2)">
-                                            <div class="flex items-center gap-1.5 mr-1">
-                                                <i class="fa-solid fa-fire text-red-400 text-xs animate-pulse"></i>
-                                                <span id="hero-countdown-title" class="text-xs font-bold text-red-300"></span>
+                                        <div class="inline-flex flex-col sm:flex-row items-start sm:items-center gap-3 px-5 py-4 rounded-2xl" style="background:linear-gradient(135deg,rgba(239,68,68,.1),rgba(220,38,38,.05));border:1px solid rgba(239,68,68,.2);backdrop-filter:blur(12px);position:relative;overflow:hidden">
+                                            <!-- 3-depth glass layers -->
+                                            <div class="absolute inset-0 rounded-2xl" style="background:linear-gradient(180deg,rgba(255,255,255,.04) 0%,transparent 50%,rgba(0,0,0,.08) 100%);pointer-events:none"></div>
+                                            <div class="absolute top-0 left-0 w-full h-px" style="background:linear-gradient(90deg,transparent,rgba(255,255,255,.12),transparent)"></div>
+                                            <div class="absolute bottom-0 left-0 w-full h-px" style="background:linear-gradient(90deg,transparent,rgba(255,255,255,.06),transparent)"></div>
+                                            <!-- Depth layer 1: urgency badge -->
+                                            <div class="flex items-center gap-2 px-3 py-1.5 rounded-xl relative z-10" style="background:linear-gradient(135deg,rgba(239,68,68,.2),rgba(220,38,38,.1));border:1px solid rgba(239,68,68,.25);box-shadow:0 2px 8px rgba(239,68,68,.15)">
+                                                <i class="fa-solid fa-fire text-red-400 text-xs" style="animation:cd-fire 1.5s ease-in-out infinite"></i>
+                                                <span id="hero-countdown-title" class="text-[10px] sm:text-xs font-extrabold text-red-300 tracking-wide"></span>
                                             </div>
-                                            <div class="flex items-center gap-1.5">
+                                            <!-- Depth layer 2: digit blocks -->
+                                            <div class="flex items-center gap-1.5 sm:gap-2 relative z-10" style="animation:cd-float 3s ease-in-out infinite">
                                                 <div id="hero-cd-days" class="text-center">
-                                                    <div class="w-10 h-10 sm:w-12 sm:h-12 rounded-xl flex items-center justify-center text-sm sm:text-base font-black text-white" style="background:linear-gradient(135deg,#dc2626,#b91c1c);box-shadow:0 4px 12px rgba(220,38,38,.3)">00</div>
-                                                    <div class="text-[8px] font-bold text-red-300 mt-0.5">Hari</div>
+                                                    <div class="w-11 h-11 sm:w-13 sm:h-13 rounded-xl flex items-center justify-center text-sm sm:text-lg font-black text-white" style="background:linear-gradient(145deg,#ef4444,#dc2626,#b91c1c);box-shadow:0 4px 16px rgba(220,38,38,.4),inset 0 1px 0 rgba(255,255,255,.15),0 0 0 1px rgba(239,68,68,.2)">00</div>
+                                                    <div class="text-[7px] sm:text-[8px] font-extrabold text-red-300 mt-1 uppercase tracking-widest">Hari</div>
                                                 </div>
-                                                <span class="text-red-400 font-black text-sm sm:text-base">:</span>
+                                                <span class="text-red-500 font-black text-base sm:text-xl" style="text-shadow:0 0 8px rgba(239,68,68,.5);animation:cd-blink 1s ease-in-out infinite">:</span>
                                                 <div id="hero-cd-hours" class="text-center">
-                                                    <div class="w-10 h-10 sm:w-12 sm:h-12 rounded-xl flex items-center justify-center text-sm sm:text-base font-black text-white" style="background:linear-gradient(135deg,#dc2626,#b91c1c);box-shadow:0 4px 12px rgba(220,38,38,.3)">00</div>
-                                                    <div class="text-[8px] font-bold text-red-300 mt-0.5">Jam</div>
+                                                    <div class="w-11 h-11 sm:w-13 sm:h-13 rounded-xl flex items-center justify-center text-sm sm:text-lg font-black text-white" style="background:linear-gradient(145deg,#ef4444,#dc2626,#b91c1c);box-shadow:0 4px 16px rgba(220,38,38,.4),inset 0 1px 0 rgba(255,255,255,.15),0 0 0 1px rgba(239,68,68,.2)">00</div>
+                                                    <div class="text-[7px] sm:text-[8px] font-extrabold text-red-300 mt-1 uppercase tracking-widest">Jam</div>
                                                 </div>
-                                                <span class="text-red-400 font-black text-sm sm:text-base">:</span>
+                                                <span class="text-red-500 font-black text-base sm:text-xl" style="text-shadow:0 0 8px rgba(239,68,68,.5);animation:cd-blink 1s ease-in-out infinite">:</span>
                                                 <div id="hero-cd-mins" class="text-center">
-                                                    <div class="w-10 h-10 sm:w-12 sm:h-12 rounded-xl flex items-center justify-center text-sm sm:text-base font-black text-white" style="background:linear-gradient(135deg,#dc2626,#b91c1c);box-shadow:0 4px 12px rgba(220,38,38,.3)">00</div>
-                                                    <div class="text-[8px] font-bold text-red-300 mt-0.5">Menit</div>
+                                                    <div class="w-11 h-11 sm:w-13 sm:h-13 rounded-xl flex items-center justify-center text-sm sm:text-lg font-black text-white" style="background:linear-gradient(145deg,#ef4444,#dc2626,#b91c1c);box-shadow:0 4px 16px rgba(220,38,38,.4),inset 0 1px 0 rgba(255,255,255,.15),0 0 0 1px rgba(239,68,68,.2)">00</div>
+                                                    <div class="text-[7px] sm:text-[8px] font-extrabold text-red-300 mt-1 uppercase tracking-widest">Menit</div>
                                                 </div>
-                                                <span class="text-red-400 font-black text-sm sm:text-base">:</span>
+                                                <span class="text-red-500 font-black text-base sm:text-xl" style="text-shadow:0 0 8px rgba(239,68,68,.5);animation:cd-blink 1s ease-in-out infinite">:</span>
                                                 <div id="hero-cd-secs" class="text-center">
-                                                    <div class="w-10 h-10 sm:w-12 sm:h-12 rounded-xl flex items-center justify-center text-sm sm:text-base font-black text-white" style="background:linear-gradient(135deg,#dc2626,#b91c1c);box-shadow:0 4px 12px rgba(220,38,38,.3)">00</div>
-                                                    <div class="text-[8px] font-bold text-red-300 mt-0.5">Detik</div>
+                                                    <div class="w-11 h-11 sm:w-13 sm:h-13 rounded-xl flex items-center justify-center text-sm sm:text-lg font-black text-white" style="background:linear-gradient(145deg,#ef4444,#dc2626,#b91c1c);box-shadow:0 4px 16px rgba(220,38,38,.4),inset 0 1px 0 rgba(255,255,255,.15),0 0 0 1px rgba(239,68,68,.2)">00</div>
+                                                    <div class="text-[7px] sm:text-[8px] font-extrabold text-red-300 mt-1 uppercase tracking-widest">Detik</div>
                                                 </div>
                                             </div>
+                                            <!-- Depth layer 3: glow accent -->
+                                            <div class="absolute -top-8 -right-8 w-24 h-24 rounded-full pointer-events-none" style="background:radial-gradient(circle,rgba(239,68,68,.15),transparent 70%);animation:cd-glow 4s ease-in-out infinite"></div>
+                                            <div class="absolute -bottom-6 -left-6 w-20 h-20 rounded-full pointer-events-none" style="background:radial-gradient(circle,rgba(220,38,38,.1),transparent 70%);animation:cd-glow 5s ease-in-out infinite 1s"></div>
                                         </div>
                                     </div>
                                     <div id="hero-countdown-expired" class="hidden mb-6 sm:mb-8">
@@ -6648,7 +6661,6 @@ renderStudioAiControl: async () => {
                                                     <input type="text" id="hero-cta2-url" value="${App.utils.escapeHtml(hero.ctaSecondaryUrl || '#p4')}" class="w-full card-3d px-3 py-2 rounded-xl text-xs bg-white font-mono">
                                                 </div>
                                             </div>
-                                            <button onclick="App.admin.saveHeroSettings()" class="btn-brand-gradient px-4 py-2 rounded-xl text-xs font-bold mt-1">Simpan Tampilan Hero</button>
                                             <div class="border-t border-slate-200 pt-3 mt-3">
                                                 <h5 class="font-bold text-[10px] text-[#151c75] uppercase tracking-wider mb-2"><i class="fa-solid fa-clock mr-1 text-amber-500"></i> Countdown Timer Promo</h5>
                                                 <div class="space-y-2">
@@ -6675,6 +6687,7 @@ renderStudioAiControl: async () => {
                                                         <input type="text" id="hero-countdown-expired-msg" placeholder="Penawaran sudah berakhir!" value="${App.utils.escapeHtml(heroCD.expiredMsg || '')}" class="w-full card-3d px-3 py-2 rounded-xl text-xs bg-white">
                                                     </div>
                                                 </div>
+                                                <button onclick="App.admin.saveHeroSettings()" class="btn-brand-gradient px-4 py-2 rounded-xl text-xs font-bold mt-3">Simpan Tampilan Hero</button>
                                             </div>
                                         </div>
                                     </div>
