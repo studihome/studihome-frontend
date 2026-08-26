@@ -254,6 +254,7 @@
         @keyframes toastBubbleIn { to { opacity:1; transform:translateY(0) translateX(0) scale(1); } }
         @keyframes toastBubbleOut { to { opacity:0; transform:translateY(7px) translateX(-4px) scale(.98); } }
         .hero-star-vector { shape-rendering: geometricPrecision; text-rendering: geometricPrecision; }
+        @keyframes pulse-slow { 0%,100%{opacity:.15;transform:scale(1)} 50%{opacity:.25;transform:scale(1.05)} }
         #api-status-badge { width: 1rem; height: 1rem; border: 0 !important; background: transparent !important; box-shadow: none !important; }
         #api-status-dot { display: block; }
 
@@ -2529,7 +2530,7 @@ App.router.bindCanonicalLinkGuard();
                         } else if (action === 'ADMIN_DELETE_MODULE') {
                             const {error}=await supabaseClient.from('modules').delete().eq('id',payload.moduleId); if(error)throw error; data={success:true};
                         } else if (action === 'ADMIN_SAVE_HERO') {
-                            const {error}=await supabaseClient.from('site_settings').upsert({id:1,badge:payload.badge||'',hero_title:payload.title||'',hero_subtitle:payload.subtitle||'',cta_primary_label:payload.ctaPrimaryLabel||'Jelajahi Produk',cta_primary_url:payload.ctaPrimaryUrl||'#products',cta_secondary_label:payload.ctaSecondaryLabel||'Klaim Produk Gratis',cta_secondary_url:payload.ctaSecondaryUrl||'#products',qris_slots:App.state.publicData?.master?.qrisSlots || [],updated_at:new Date().toISOString()},{onConflict:'id'}); if(error)throw error; data={success:true};
+                            const cd=typeof payload.countdown==='object'&&payload.countdown?payload.countdown:{};const uc=App.state.publicData?.master?.underConstruction||{};uc.heroCountdown=cd;await supabaseClient.from('site_settings').upsert({id:1,badge:payload.badge||'',hero_title:payload.title||'',hero_subtitle:payload.subtitle||'',cta_primary_label:payload.ctaPrimaryLabel||'Jelajahi Produk',cta_primary_url:payload.ctaPrimaryUrl||'#products',cta_secondary_label:payload.ctaSecondaryLabel||'Klaim Produk Gratis',cta_secondary_url:payload.ctaSecondaryUrl||'#products',qris_slots:App.state.publicData?.master?.qrisSlots || [],under_construction:uc,updated_at:new Date().toISOString()},{onConflict:'id'}); if(error)throw error; data={success:true};
                         } else if (action === 'ADMIN_SAVE_AI_LINKS') {
                             const links=payload.aiLinks||[]; const {error:dErr}=await supabaseClient.from('ai_links').delete().neq('id','00000000-0000-0000-0000-000000000000'); if(dErr)throw dErr;
                             const rows=links.map((x,i)=>({name:x.name,icon:x.icon,sort_order:i+1})); if(rows.length){const {error:iErr}=await supabaseClient.from('ai_links').insert(rows);if(iErr)throw iErr;} data={success:true};
@@ -2842,26 +2843,71 @@ App.router.bindCanonicalLinkGuard();
 
                     main.innerHTML = `
                         <!-- HERO SECTION -->
-                        <div class="hero-stage card-3d p-6 sm:p-10 md:p-12 rounded-3xl mb-8 sm:mb-10 relative overflow-hidden bg-gradient-to-br from-[#151c75] to-[#3f48bf] text-white border border-blue-900/30 shadow-2xl">
-                            <div class="hero-star-mark absolute -right-10 -bottom-10 md:right-0 md:bottom-[-20px] text-[200px] sm:text-[320px] text-blue-200/20 select-none pointer-events-none animate-spin-slow font-black flex items-center justify-center leading-none">✦</div>
-                            <div class="max-w-3xl relative z-10">
-                                <div class="inline-flex items-center gap-1.5 bg-white/10 backdrop-blur-md border border-white/20 px-3.5 py-1.5 rounded-2xl text-xs font-bold text-amber-300 mb-4 sm:mb-6 shadow-2xs">
-                                    <span class="animate-spin-slow text-[#FACC15] font-black text-sm">✦</span> ${App.utils.escapeHtml(hero.badge)}
-                                </div>
-                                <h1 class="text-2xl sm:text-4xl md:text-5xl font-black text-white leading-tight mb-4 sm:mb-6 tracking-tight drop-shadow-md">
-                                    ${App.utils.escapeHtml(hero.title)}
-                                </h1>
-                                <p class="text-xs sm:text-sm md:text-base font-medium text-blue-100 leading-relaxed mb-6 sm:mb-8 max-w-2xl">
-                                    ${App.utils.escapeHtml(hero.subtitle)}
-                                </p>
-                                <div class="flex flex-wrap items-center gap-3">
-                                    <button onclick="App.home.handleCtaClick('${App.utils.escapeHtml(primaryUrl)}')" class="btn-brand-amber font-extrabold px-5 sm:px-6 py-3 rounded-2xl text-xs sm:text-sm shadow-lg transition-all flex items-center gap-2">
-                                        <span>${App.utils.escapeHtml(primaryLabel)}</span>
-                                        <i class="fa-solid fa-arrow-right text-slate-900"></i>
-                                    </button>
-                                    <button onclick="App.home.handleCtaClick('${App.utils.escapeHtml(secondaryUrl)}')" class="bg-white/10 hover:bg-white/20 text-white font-bold px-5 sm:px-6 py-3 rounded-2xl text-xs sm:text-sm backdrop-blur-md border border-white/30 transition-all shadow-2xs">
-                                        ${App.utils.escapeHtml(secondaryLabel)}
-                                    </button>
+                        <div class="hero-stage card-3d rounded-3xl mb-8 sm:mb-10 relative overflow-hidden border border-blue-900/30 shadow-2xl" style="background:linear-gradient(135deg,#0f172a 0%,#1e1b4b 30%,#312e81 60%,#4338ca 100%)">
+                            <!-- Animated gradient orbs -->
+                            <div class="absolute inset-0 overflow-hidden pointer-events-none">
+                                <div class="absolute -top-20 -right-20 w-64 h-64 rounded-full opacity-20" style="background:radial-gradient(circle,#facc15,transparent 70%);animation:pulse-slow 4s ease-in-out infinite"></div>
+                                <div class="absolute -bottom-16 -left-16 w-48 h-48 rounded-full opacity-15" style="background:radial-gradient(circle,#818cf8,transparent 70%);animation:pulse-slow 5s ease-in-out infinite 1s"></div>
+                                <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-96 h-96 rounded-full opacity-5" style="background:radial-gradient(circle,#fbbf24,transparent 60%)"></div>
+                            </div>
+                            <!-- Grid pattern overlay -->
+                            <div class="absolute inset-0 opacity-[0.03]" style="background-image:linear-gradient(rgba(255,255,255,.1) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,.1) 1px,transparent 1px);background-size:40px 40px"></div>
+                            <div class="p-6 sm:p-10 md:p-12 relative z-10">
+                                <div class="max-w-3xl">
+                                    <div class="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-2xl text-xs font-bold mb-4 sm:mb-6 shadow-2xs" style="background:linear-gradient(135deg,rgba(250,204,21,.15),rgba(250,204,21,.08));border:1px solid rgba(250,204,21,.25);color:#facc15">
+                                        <span class="animate-spin-slow font-black text-sm">✦</span> ${App.utils.escapeHtml(hero.badge)}
+                                    </div>
+                                    <h1 class="text-2xl sm:text-4xl md:text-5xl font-black text-white leading-tight mb-4 sm:mb-6 tracking-tight" style="text-shadow:0 2px 20px rgba(0,0,0,.3)">
+                                        ${App.utils.escapeHtml(hero.title)}
+                                    </h1>
+                                    <p class="text-xs sm:text-sm md:text-base font-medium leading-relaxed mb-6 sm:mb-8 max-w-2xl" style="color:rgba(255,255,255,.7)">
+                                        ${App.utils.escapeHtml(hero.subtitle)}
+                                    </p>
+                                    <!-- Countdown Timer -->
+                                    <div id="hero-countdown-container" class="hidden mb-6 sm:mb-8">
+                                        <div class="inline-flex items-center gap-2 px-4 py-2.5 rounded-2xl" style="background:linear-gradient(135deg,rgba(239,68,68,.12),rgba(239,68,68,.06));border:1px solid rgba(239,68,68,.2)">
+                                            <div class="flex items-center gap-1.5 mr-1">
+                                                <i class="fa-solid fa-fire text-red-400 text-xs animate-pulse"></i>
+                                                <span id="hero-countdown-title" class="text-xs font-bold text-red-300"></span>
+                                            </div>
+                                            <div class="flex items-center gap-1.5">
+                                                <div id="hero-cd-days" class="text-center">
+                                                    <div class="w-10 h-10 sm:w-12 sm:h-12 rounded-xl flex items-center justify-center text-sm sm:text-base font-black text-white" style="background:linear-gradient(135deg,#dc2626,#b91c1c);box-shadow:0 4px 12px rgba(220,38,38,.3)">00</div>
+                                                    <div class="text-[8px] font-bold text-red-300 mt-0.5">Hari</div>
+                                                </div>
+                                                <span class="text-red-400 font-black text-sm sm:text-base">:</span>
+                                                <div id="hero-cd-hours" class="text-center">
+                                                    <div class="w-10 h-10 sm:w-12 sm:h-12 rounded-xl flex items-center justify-center text-sm sm:text-base font-black text-white" style="background:linear-gradient(135deg,#dc2626,#b91c1c);box-shadow:0 4px 12px rgba(220,38,38,.3)">00</div>
+                                                    <div class="text-[8px] font-bold text-red-300 mt-0.5">Jam</div>
+                                                </div>
+                                                <span class="text-red-400 font-black text-sm sm:text-base">:</span>
+                                                <div id="hero-cd-mins" class="text-center">
+                                                    <div class="w-10 h-10 sm:w-12 sm:h-12 rounded-xl flex items-center justify-center text-sm sm:text-base font-black text-white" style="background:linear-gradient(135deg,#dc2626,#b91c1c);box-shadow:0 4px 12px rgba(220,38,38,.3)">00</div>
+                                                    <div class="text-[8px] font-bold text-red-300 mt-0.5">Menit</div>
+                                                </div>
+                                                <span class="text-red-400 font-black text-sm sm:text-base">:</span>
+                                                <div id="hero-cd-secs" class="text-center">
+                                                    <div class="w-10 h-10 sm:w-12 sm:h-12 rounded-xl flex items-center justify-center text-sm sm:text-base font-black text-white" style="background:linear-gradient(135deg,#dc2626,#b91c1c);box-shadow:0 4px 12px rgba(220,38,38,.3)">00</div>
+                                                    <div class="text-[8px] font-bold text-red-300 mt-0.5">Detik</div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div id="hero-countdown-expired" class="hidden mb-6 sm:mb-8">
+                                        <div class="inline-flex items-center gap-2 px-4 py-2.5 rounded-2xl" style="background:linear-gradient(135deg,rgba(107,114,128,.15),rgba(107,114,128,.08));border:1px solid rgba(107,114,128,.2)">
+                                            <i class="fa-solid fa-clock-rotate-left text-slate-400 text-xs"></i>
+                                            <span id="hero-countdown-expired-text" class="text-xs font-bold text-slate-300"></span>
+                                        </div>
+                                    </div>
+                                    <div class="flex flex-wrap items-center gap-3">
+                                        <button onclick="App.home.handleCtaClick('${App.utils.escapeHtml(primaryUrl)}')" class="font-extrabold px-5 sm:px-6 py-3 rounded-2xl text-xs sm:text-sm shadow-lg transition-all flex items-center gap-2" style="background:linear-gradient(135deg,#facc15,#f59e0b);color:#0f172a;box-shadow:0 4px 20px rgba(250,204,21,.3)">
+                                            <span>${App.utils.escapeHtml(primaryLabel)}</span>
+                                            <i class="fa-solid fa-arrow-right"></i>
+                                        </button>
+                                        <button onclick="App.home.handleCtaClick('${App.utils.escapeHtml(secondaryUrl)}')" class="font-bold px-5 sm:px-6 py-3 rounded-2xl text-xs sm:text-sm transition-all shadow-2xs" style="background:rgba(255,255,255,.08);color:#fff;border:1px solid rgba(255,255,255,.15);backdrop-filter:blur(8px)">
+                                            ${App.utils.escapeHtml(secondaryLabel)}
+                                        </button>
+                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -2911,6 +2957,48 @@ App.router.bindCanonicalLinkGuard();
                             </div>
                         </div>
                     `;
+
+
+                    /* Hero Countdown Timer */
+                    (function() {
+                        var cdContainer = document.getElementById('hero-countdown-container');
+                        var cdExpired = document.getElementById('hero-countdown-expired');
+                        if (!cdContainer) return;
+                        var cd = null;
+                        try { cd = (App.state.publicData && App.state.publicData.master && App.state.publicData.master.underConstruction && App.state.publicData.master.underConstruction.heroCountdown) || null; } catch(e) {}
+                        if (!cd || !cd.enabled || !cd.endDate) { cdContainer.classList.add('hidden'); return; }
+                        var titleEl = document.getElementById('hero-countdown-title');
+                        var expiredEl = document.getElementById('hero-countdown-expired-text');
+                        if (titleEl) titleEl.textContent = cd.title || 'Penawaran Berakhir dalam...';
+                        if (expiredEl) expiredEl.textContent = cd.expiredMsg || 'Penawaran sudah berakhir!';
+                        var target = new Date(cd.endDate + 'T' + (cd.endTime || '23:59') + ':00+07:00').getTime();
+                        function pad(n) { return n < 10 ? '0' + n : '' + n; }
+                        function tick() {
+                            var now = Date.now();
+                            var diff = target - now;
+                            if (diff <= 0) {
+                                cdContainer.classList.add('hidden');
+                                cdExpired.classList.remove('hidden');
+                                return;
+                            }
+                            cdContainer.classList.remove('hidden');
+                            cdExpired.classList.add('hidden');
+                            var d = Math.floor(diff / 86400000);
+                            var h = Math.floor((diff % 86400000) / 3600000);
+                            var m = Math.floor((diff % 3600000) / 60000);
+                            var s = Math.floor((diff % 60000) / 1000);
+                            var days = document.getElementById('hero-cd-days');
+                            var hours = document.getElementById('hero-cd-hours');
+                            var mins = document.getElementById('hero-cd-mins');
+                            var secs = document.getElementById('hero-cd-secs');
+                            if (days) days.querySelector('div:first-child').textContent = pad(d);
+                            if (hours) hours.querySelector('div:first-child').textContent = pad(h);
+                            if (mins) mins.querySelector('div:first-child').textContent = pad(m);
+                            if (secs) secs.querySelector('div:first-child').textContent = pad(s);
+                        }
+                        tick();
+                        setInterval(tick, 1000);
+                    })();
 
                     App.home.renderTestimonialsOnly();
                     App.home.startTestimonialCycle();
@@ -6512,6 +6600,8 @@ renderStudioAiControl: async () => {
                         } else if (tab === 'master') {
                             const master = adminData.master || {};
                             const hero = adminData.hero || App.state.demo.hero;
+                            const heroUC = adminData.master?.underConstruction || {};
+                            const heroCD = heroUC.heroCountdown || {};
                             const aiLinks = adminData.aiLinks || App.state.demo.aiLinks;
                             const testimonials = adminData.testimonials || App.state.demo.testimonials;
                             const heroPromoModsDB3 = await App.admin._loadHeroPromoModsFromDB();
@@ -6559,6 +6649,33 @@ renderStudioAiControl: async () => {
                                                 </div>
                                             </div>
                                             <button onclick="App.admin.saveHeroSettings()" class="btn-brand-gradient px-4 py-2 rounded-xl text-xs font-bold mt-1">Simpan Tampilan Hero</button>
+                                            <div class="border-t border-slate-200 pt-3 mt-3">
+                                                <h5 class="font-bold text-[10px] text-[#151c75] uppercase tracking-wider mb-2"><i class="fa-solid fa-clock mr-1 text-amber-500"></i> Countdown Timer Promo</h5>
+                                                <div class="space-y-2">
+                                                    <label class="de-check" style="padding:10px;border:1.5px solid #e2e8f0;border-radius:14px;background:#fff;display:flex;align-items:center;justify-content:space-between">
+                                                        <span><b style="font-size:12px;color:#1e293b">Aktifkan Countdown</b><span style="display:block;margin-top:2px;color:#94a3b8;font-size:10px">Tampilkan timer hitung mundur di hero</span></span>
+                                                        <input type="checkbox" id="hero-countdown-enabled" class="w-5 h-5" style="accent-color:#6366f1" ${heroCD.enabled ? 'checked' : ''}>
+                                                    </label>
+                                                    <div>
+                                                        <label class="block text-[10px] font-bold text-slate-600 mb-1">Judul Urgency</label>
+                                                        <input type="text" id="hero-countdown-title" placeholder="Penawaran Berakhir dalam..." value="${App.utils.escapeHtml(heroCD.title || '')}" class="w-full card-3d px-3 py-2 rounded-xl text-xs bg-white">
+                                                    </div>
+                                                    <div class="grid grid-cols-2 gap-2">
+                                                        <div>
+                                                            <label class="block text-[10px] font-bold text-slate-600 mb-1">Tanggal Akhir</label>
+                                                            <input type="date" id="hero-countdown-date" value="${heroCD.endDate || ''}" class="w-full card-3d px-3 py-2 rounded-xl text-xs bg-white">
+                                                        </div>
+                                                        <div>
+                                                            <label class="block text-[10px] font-bold text-slate-600 mb-1">Jam Akhir (WIB)</label>
+                                                            <input type="time" id="hero-countdown-time" value="${heroCD.endTime || '23:59'}" class="w-full card-3d px-3 py-2 rounded-xl text-xs bg-white">
+                                                        </div>
+                                                    </div>
+                                                    <div>
+                                                        <label class="block text-[10px] font-bold text-slate-600 mb-1">Pesan Selesai</label>
+                                                        <input type="text" id="hero-countdown-expired-msg" placeholder="Penawaran sudah berakhir!" value="${App.utils.escapeHtml(heroCD.expiredMsg || '')}" class="w-full card-3d px-3 py-2 rounded-xl text-xs bg-white">
+                                                    </div>
+                                                </div>
+                                            </div>
                                         </div>
                                     </div>
 
@@ -7165,7 +7282,14 @@ renderStudioAiControl: async () => {
                         ctaPrimaryLabel: document.getElementById('hero-cta1-label').value || (isHeroPromoActive ? 'Lihat Modul Hero Promo' : 'Jelajahi Produk'),
                         ctaPrimaryUrl: isHeroPromoActive ? '#hero-promo-modules' : (document.getElementById('hero-cta1-url').value || '#products'),
                         ctaSecondaryLabel: document.getElementById('hero-cta2-label').value,
-                        ctaSecondaryUrl: document.getElementById('hero-cta2-url').value
+                        ctaSecondaryUrl: document.getElementById('hero-cta2-url').value,
+                        countdown: {
+                            enabled: document.getElementById('hero-countdown-enabled').checked,
+                            title: document.getElementById('hero-countdown-title').value || 'Penawaran Berakhir dalam...',
+                            endDate: document.getElementById('hero-countdown-date').value || '',
+                            endTime: document.getElementById('hero-countdown-time').value || '23:59',
+                            expiredMsg: document.getElementById('hero-countdown-expired-msg').value || 'Penawaran sudah berakhir!'
+                        }
                     };
                     await App.api.post('ADMIN_SAVE_HERO', hero);
                     App.ui.toast('Tampilan Hero berhasil diperbarui!', 'success');
