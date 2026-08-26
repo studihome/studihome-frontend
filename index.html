@@ -2064,7 +2064,7 @@ App.router.bindCanonicalLinkGuard();
                         aiLinks: (aiRes.data || []).map(x => ({ id: x.id, name: x.name, icon: x.icon, sortOrder: x.sort_order })),
                         products: (productsRes.data || []).map(App.api._mapProduct),
                         testimonials: testimonialsRes.data || [],
-                        master: { qrisSlots: Array.isArray(s.qris_slots) ? s.qris_slots : [] }
+                        master: { qrisSlots: Array.isArray(s.qris_slots) ? s.qris_slots : [], underConstruction: s.under_construction || {} }
                     };
                 },
                 _mapProduct: (p) => ({
@@ -2491,7 +2491,7 @@ App.router.bindCanonicalLinkGuard();
                             const grouped={}; (mRes.data||[]).forEach(m => { (grouped[m.product_id] ||= []).push({id:m.id,title:m.title,yt_url:m.youtube_url,markdown:m.markdown,download_url:m.download_url,links:m.links_json||[]}); });
                             data={
                                 hero:{badge:s.badge||'',title:s.hero_title||'',subtitle:s.hero_subtitle||'',ctaPrimaryLabel:s.cta_primary_label||'',ctaPrimaryUrl:s.cta_primary_url||'#products',ctaSecondaryLabel:s.cta_secondary_label||'',ctaSecondaryUrl:s.cta_secondary_url||'#p4'},
-                                master:{qrisSlots:s.qris_slots||[]}, aiLinks:(aRes.data||[]).map(x=>({id:x.id,name:x.name,icon:x.icon,sortOrder:x.sort_order})),
+                                master:{qrisSlots:s.qris_slots||[],underConstruction:s.under_construction||{}}, aiLinks:(aRes.data||[]).map(x=>({id:x.id,name:x.name,icon:x.icon,sortOrder:x.sort_order})),
                                 testimonials:tRes.data||[], products:(pRes.data||[]).map(App.api._mapProduct), modules:grouped,
                                 orders:(oRes.data||[]).map(o=>({id:o.id,userId:o.user_id,userName:o.profiles?.name||'',userEmail:o.profiles?.email||'',userPhone:o.profiles?.phone||'',productId:o.product_id,productTitle:o.products?.title||'',price:Number(o.total_amount||o.unit_price),status:o.status,paymentStatus:o.payment_status,paymentConfirmedAt:o.payment_confirmed_at||null,createdAt:o.created_at})),
                                 users:uRes.data||[]
