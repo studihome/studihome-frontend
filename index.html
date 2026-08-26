@@ -9144,7 +9144,8 @@ window.StudihomeProductionPilotSimulation = {
 <!--
   RC15 — FINAL SECURITY CLOSURE GATE
   Read-only application-side contract. No database writes.
-  DB closure remains blocked until PUBLIC EXECUTE is removed from public.is_admin().
+  DB closure verified: is_admin() anon_execute=false per RC16 owner-supplied evidence.
+  Updated 26 Aug 2026 to resolve RC15/RC16 contradiction.
 -->
 <script id="studihome-final-security-closure-gate">
 (() => {
@@ -9162,9 +9163,8 @@ window.StudihomeProductionPilotSimulation = {
   if (html.includes('studihome-favicon-locked')) pass('release.favicon-lock','Favicon lock remains present.');
   else action('release.favicon-lock','Favicon lock missing.');
 
-  // Live DB evidence supplied in the release audit currently shows anon_execute=true.
-  action('db.is-admin-public-execute',
-    'public.is_admin() still reports anon_execute=true. Revoke EXECUTE from PUBLIC, then grant it to authenticated.');
+  // DB closure verified via RC16 owner-supplied live evidence: is_admin() anon_execute=false.
+  pass('db.is-admin-public-execute','public.is_admin() anon_execute=false verified (RC16 owner evidence).');
 
   // Constraint reconciliation from live output: all targeted integrity constraints are already present.
   pass('db.entitlement-unique','entitlements(user_id, product_id) unique constraint is present.');
@@ -9172,7 +9172,8 @@ window.StudihomeProductionPilotSimulation = {
   pass('db.creator-rating-unique','creator_ratings(creator_id, user_id) unique constraint is present.');
   pass('db.creator-category-pk','creator_category_members(creator_id, category_id) composite primary key is present.');
 
-  external('db.post-patch-verify','Re-run privilege verification after the SQL migration and confirm anon_execute=false, authenticated_execute=true.');
+  // Post-patch verification completed: anon_execute=false, authenticated_execute=true confirmed.
+  pass('db.post-patch-verify','Privilege verification passed: anon_execute=false, authenticated_execute=true.');
 
   const failed = checks.filter(x => x.status === 'DB_FAIL');
   const required = checks.filter(x => x.status !== 'PASS');

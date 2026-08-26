@@ -1,11 +1,25 @@
 # STUDIHOME — RELEASE HANDOFF
 
-Tanggal: 17 Agustus 2026
-Repository: `studihome/studihome-frontend`
-Branch: `main`
-Hosting: Vercel
-Auth/Database: Supabase
+Tanggal asli: 17 Agustus 2026  
+Tanggal pembaruan: 26 Agustus 2026  
+Repository: `studihome/studihome-frontend`  
+Branch: `main`  
+Hosting: Vercel  
+Auth/Database: Supabase  
 Frontend: static HTML + CSS + Vanilla JS
+
+## ⚠ CATATAN RECONCILIASI (26 Agustus 2026)
+
+Handoff asli 17 Agustus berisi beberapa klaim yang tidak terverifikasi sumbernya. Dokumen ini sekarang merupakan versi reconciled yang memperbaiki inkonsistensi. Lihat `PROJECT_STATE_LATEST.md` untuk status source truth terkini.
+
+Klaim yang diperbarui:
+- Production SHA → **UNVERIFIABLE** (3 dokumen berbeda)
+- Security headers → **HSTS dan X-Content-Type-Options ditambahkan** (sebelumnya missing)
+- RC15/RC16 → **KONTRADIKSI DIPERBAIKI** (RC15 diupdate ke PASS)
+- CSS version → **?v=20260825r3** (bukan ?v=20260817r2)
+- Migrations → **12 total** (9 complete + 3 pending, bukan 9/9)
+
+---
 
 ## 1. RELEASE OBJECTIVE
 Menjaga Studihome tetap fungsional, aman, minimalis-profesional, responsive, dan mudah digunakan dengan risiko regresi seminimal mungkin.
@@ -23,8 +37,8 @@ Prioritas tetap:
 ## 2. CANONICAL DAPUR
 Route canonical:
 - `/dapur` → `dapur.html`
-- `/dapur/{username}` → `dapur.html`
-- `/{username}` → public Creator profile melalui `index.html`
+- `/dapur/:username` → `dapur.html`
+- `/:username` → public Creator profile melalui `index.html`
 
 Runtime canonical:
 - `dapur.html` = minimal shell
@@ -51,8 +65,7 @@ Member Premium tanpa Creator:
 - hasil canonical `/dapur/{username}`.
 
 Member Premium dengan Creator:
-- CTA `Kelola Dapur Kamu` / `Kelola Dapurku` sesuai surface;
-- masuk ke `/dapur/{username}`.
+- CTA kelola Creator → `/dapur/{username}`.
 
 Member non-Premium:
 - workspace tetap terkunci;
@@ -76,26 +89,17 @@ Foyer/Menu/Hidangan/Ambalan adalah section editor, bukan route.
 ## 5. HOMEPAGE VISUAL LOCK
 Homepage hero **tidak didesain ulang**.
 
-Perubahan terakhir hanya memulihkan visual contract yang sudah disepakati setelah migrasi Tailwind CDN → compiled CSS menyebabkan visual drift.
-
 Hero lock menggunakan gradient brand Studihome dan tidak mengubah struktur/copy/layout hero.
 
-Commit pemulihan final:
-`9a383cb7e91d389bf51ac76c3717a48f8b52e102`
-
-Production deployment:
-`dpl_HRw5bSKV1UM4znuG29Nt3YaAnzbv`
-
-Status:
-`READY`
+**Status (26 Aug):** Gate A **OPEN** — hero visual parity requires browser verification.
 
 ## 6. PRODUCTION CSS / ACCESSIBILITY
 Tailwind CDN sudah tidak digunakan pada `index.html`.
 
-Current production source menggunakan:
-`/tailwind-compiled.css?v=20260817r2`
+Current production source:
+`/tailwind-compiled.css?v=20260825r3`
 
-Compiled CSS dibuat tanpa Preflight agar tidak mereset desain existing.
+**⚠ Known issue:** Compiled CSS uses Tailwind v3.4.17 WITH Preflight. Constitution Art IV states "tanpa Preflight". This is a contract violation that needs resolution.
 
 Auth form accessibility:
 - `#login-email` → `autocomplete="username"`
@@ -105,9 +109,17 @@ Auth form accessibility:
 - `#reg-phone` → `autocomplete="tel"`
 - `#reg-password` → `autocomplete="new-password"`
 
-Tidak ada perubahan pada visual auth modal.
+**Status (26 Aug):** Gate B **OPEN** — browser verification required (Constitution says OPEN, old Handoff said CLOSED).
 
-## 7. BACKEND SECURITY STATE
+## 7. SECURITY HEADERS (UPDATED 26 Aug)
+`vercel.json` sekarang mengandung:
+- `X-Frame-Options: SAMEORIGIN` ✅
+- `Strict-Transport-Security: max-age=63072000; includeSubDomains; preload` ✅ (added 26 Aug)
+- `X-Content-Type-Options: nosniff` ✅ (added 26 Aug)
+- CSP meta tag di `index.html` ✅
+- Dead reference `/dapur-button.js` removed ✅ (26 Aug)
+
+## 8. BACKEND SECURITY STATE
 Public-read Creator data dipisahkan dari authorization-only functions.
 
 Anonymous role tidak digunakan untuk authorization function sensitif seperti:
@@ -119,20 +131,14 @@ Anonymous role tidak digunakan untuk authorization function sensitif seperti:
 
 `validate_creator_username(text)` memakai hardened `search_path`.
 
-Public Creator tables hanya memberi read data yang memang public; anonymous write tidak diberikan.
+**Status (26 Aug):** RC15/RC16 contradiction **RESOLVED** — RC15 updated to PASS, aligned with RC16 owner evidence. Fresh live verification recommended.
 
-Payment/order logic tidak diubah dalam Dapur refactor ini.
-
-## 8. LEGACY CLEANUP
-Runtime Dapur legacy yang sudah terbukti superseded telah dihapus setelah reference/runtime audit.
-
-Yang tetap ditahan karena masih memiliki consumer:
-- `dapur-admin-user-route-v1.js`
-- `dapur-button.js`
-- `admin-dapur-creator-v5.js`
-- `admin-dapur-ui-v2.js`
-
-Jangan menghapus compatibility/admin surface tanpa reference proof.
+### Pending Database Migrations (HARDENED — 26 Aug 2026)
+- **Migration 10** — `validate_creator_publish()` trigger fix ✅ **HARDENED** (search_path, REVOKE, idempotent, verification, rollback)
+- **Migration 11** — `contact_email DROP NOT NULL` ✅ **HARDENED** (Constitution alignment, CHECK verification, rollback)
+- **Migration 12** — `hero_promo_modules JSONB` ✅ **HARDENED** (RLS pre-check, policy verification, rollback)
+- **Status:** Files in repo, all 3 hardened, **NOT yet run to production**
+- **Execution order:** M10 → M11 → M12 via Supabase SQL Editor
 
 ## 9. ROUTING CONTRACT
 `vercel.json` wajib tetap memakai rewrite canonical sederhana:
@@ -141,44 +147,25 @@ Jangan menghapus compatibility/admin surface tanpa reference proof.
 - `/:username/portfolio/:slug*` → `/index.html`
 - `/:username` → `/index.html`
 
-Jangan memakai inline regex parameter di `rewrites.source`; konfigurasi tersebut sebelumnya menyebabkan `Invalid vercel.json file provided`.
+Jangan memakai inline regex parameter di `rewrites.source`.
 
-## 10. CURRENT PRODUCTION VERIFICATION
-Verified production deployment:
-- Deployment: `dpl_HRw5bSKV1UM4znuG29Nt3YaAnzbv`
-- Commit: `9a383cb7e91d389bf51ac76c3717a48f8b52e102`
-- State: `READY`
+## 10. CURRENT PRODUCTION VERIFICATION (26 Aug 2026)
+**Production SHA: UNVERIFIABLE** — 3 docs cite different SHAs.
 
-Latest runtime log check for this deployment:
-- window: 1 hour
-- error/warning logs: **none found**
-
-Source verification pada commit final:
-- compiled Tailwind CSS reference present;
-- Tailwind CDN absent;
-- `login-email` has `autocomplete="username"`;
-- password autocomplete attributes present;
-- homepage hero visual lock present;
-- no change to auth modal visual structure.
+Previous verifications (17 Aug) may be stale. Fresh verification required:
+- Vercel deployment status and SHA
+- HTTP route checks
+- Runtime log check
+- Browser console check
 
 ## 11. RELEASE VERIFICATION LIMITATION
-HTTP/deployment/runtime checks sudah terverifikasi.
+HTTP/deployment/runtime checks perlu diverifikasi ulang.
 
-Browser console evidence dari user menunjukkan:
+Browser evidence dari user sebelumnya:
 - public console sudah bersih;
-- member/admin warning sebelumnya berasal dari autocomplete dan sudah dikoreksi di source final.
+- member/admin warning sebelumnya berasal dari autocomplete.
 
-Authenticated browser E2E penuh tetap harus diperlakukan sebagai manual smoke test final ketika akun uji tersedia:
-1. Premium tanpa Creator → `Mulai Membuat Dapur` → `/dapur/{username}`.
-2. Premium dengan Creator → `Kelola Dapur Kamu` → `/dapur/{username}`.
-3. Non-Premium → workspace ditolak.
-4. Creator owner dapat edit; Creator milik akun lain ditolak.
-5. Username valid dapat disimpan; username duplicate ditolak.
-6. Logout → workspace ditolak.
-7. Public `/dapur` → auth popup → login/register.
-8. Mobile 375px dan 768px → tidak overflow.
-
-Jangan menganggap source inspection menggantikan authenticated browser E2E.
+Authenticated browser E2E penuh tetap harus diperlakukan sebagai manual smoke test final.
 
 ## 12. DO NOT REGRESS
 Jangan:
@@ -194,7 +181,7 @@ Jangan:
 Jika percakapan terputus, baca file berikut terlebih dahulu:
 1. `MASTER_HANDOFF_PROMPT_STUDIHOME.md`
 2. `PROJECT_CONSTITUTION.md`
-3. `RELEASE_HANDOFF_2026-08-17.md`
+3. `PROJECT_STATE_LATEST.md`
 
 Kemudian:
 1. audit `main` HEAD;
@@ -207,15 +194,26 @@ Kemudian:
 8. verify production;
 9. baru laporkan status.
 
-## 14. RELEASE STATUS
-Source final: **READY**
-Production deployment final: **READY**
-Runtime errors/warnings pada deployment final: **NONE FOUND**
-UI/UX contract: **PRESERVED**
-Homepage hero contract: **RESTORED/LOCKED**
-Tailwind CDN warning: **REMOVED**
-Auth autocomplete warning: **REMOVED IN SOURCE**
+## 14. RELEASE STATUS (26 Aug 2026)
 
-Status release engineering: **READY FOR FINAL MANUAL AUTHENTICATED SMOKE TEST**
+```
+STATUS: AUDIT OPEN
+```
 
-Jangan meng-upgrade status menjadi `FULLY VERIFIED` sebelum manual authenticated smoke test di atas selesai.
+- Source final: **RECONCILED** (docs aligned 26 Aug)
+- Production deployment: **UNVERIFIABLE** (needs Vercel dashboard check)
+- Runtime errors: **UNKNOWN** (requires fresh verification)
+- UI/UX contract: **GATE A OPEN** (hero parity needs browser check)
+- Homepage hero: **GATE A OPEN**
+- Auth accessibility: **GATE B OPEN**
+- Security headers: **COMPLETE** ✅ (added 26 Aug)
+- RC15/RC16 contradiction: **RESOLVED** ✅ (26 Aug)
+- Migrations 10-12: **READY TO RUN** (all 3 hardened 26 Aug, not yet run to production)
+- Tailwind CDN: **REMOVED** ✅
+- Documentation: **RECONCILED** ✅ (26 Aug)
+
+**Jangan meng-upgrade status menjadi `SIAP RILIS` sebelum:**
+1. Production SHA terverifikasi via Vercel dashboard
+2. Migrations 10-12 di-run ke production
+3. Browser E2E untuk Gate A, B, C, D selesai
+4. Semua 3 dokumen cite SHA yang sama

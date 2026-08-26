@@ -1,7 +1,11 @@
 # STUDIHOME — RELEASE CHECKLIST
 
+**Last updated: 26 Agustus 2026**  
+**Current status: AUDIT OPEN**
+
 ## A. Source / Config
-- [ ] `main` SHA identified.
+- [ ] `main` SHA identified and consistent across all 3 docs (Handoff, Constitution, State).
+- [ ] Production SHA verified via Vercel dashboard matches local HEAD.
 - [ ] `vercel.json` parses and contains only canonical Dapur rewrites.
 - [ ] No invalid inline regex in Vercel rewrite sources.
 - [ ] No legacy Dapur injector/gate is referenced by canonical shell.
@@ -10,6 +14,30 @@
 - [ ] No second-stage Dapur decorator.
 - [ ] No Tailwind CDN.
 - [ ] `/tailwind-compiled.css` exists and is loaded.
+- [ ] **CSS version consistent** across source and all docs (`?v=20260825r3`).
+- [ ] **No dead file references** (e.g., `/dapur-button.js` in vercel.json when file absent).
+
+## A2. Security Headers
+- [ ] `X-Frame-Options: SAMEORIGIN` present.
+- [ ] `Strict-Transport-Security: max-age=63072000; includeSubDomains; preload` present.
+- [ ] `X-Content-Type-Options: nosniff` present.
+- [x] CSP meta tag present in `index.html` (with appropriate directives).
+- [x] `Referrer-Policy: strict-origin-when-cross-origin` present.
+
+## A3. Database Migrations
+- [ ] Migration 10 (`validate_creator_publish` + `search_path=""` + REVOKE EXECUTE) run and verified. (File: **HARDENED ✅**, not yet run)
+- [ ] Migration 11 (`contact_email DROP NOT NULL`) run and verified. (File: **HARDENED ✅**, not yet run)
+- [ ] Migration 12 (`hero_promo_modules JSONB`) run and verified. (File: **HARDENED ✅**, not yet run)
+- [ ] All SECURITY DEFINER functions have `search_path=""` (post-migration check).
+- [ ] No anon/PUBLIC EXECUTE grants on authorization-only functions.
+
+## A4. Internal Gate Consistency
+- [ ] RC15 gate status matches RC16 gate status (no contradictions in `index.html`).
+- [ ] RC15 `db.is-admin-public-execute` is PASS.
+- [ ] RC15 `db.post-patch-verify` is PASS.
+- [ ] RC16 `release.fingerprint` matches or is documented as drift.
+- [ ] RC19 `security.final` reports `SECURITY_CLOSED`.
+- [ ] RC19 `release.status` reports `FROZEN`.
 
 ## B. Homepage Visual Regression Gate
 - [ ] Hero matches locked baseline: blue gradient `#151c75 → #3f48bf`.
@@ -26,6 +54,7 @@
 - [ ] `#reg-phone` → `autocomplete="tel"`.
 - [ ] `#reg-password` → `autocomplete="new-password"`.
 - [ ] No browser autocomplete warnings on member/admin login modal.
+- [ ] **Browser-verified** (Constitution Gate B — previously OPEN, must re-verify).
 
 ## D. Public Flow
 - [ ] `/` loads.
@@ -94,22 +123,35 @@
 - [ ] `prefers-reduced-motion` respected.
 - [ ] No horizontal overflow on ~375px viewport.
 
-## J. Release Decision
+## J. Documentation Alignment
+- [ ] MASTER_HANDOFF_PROMPT status matches actual state.
+- [ ] PROJECT_CONSTITUTION Art XV baseline matches actual production.
+- [ ] PROJECT_STATE_LATEST reflects current file inventory.
+- [ ] All 3 docs cite the same Production SHA.
+- [ ] No stale claims (e.g., "✅ verified" for items that require browser verification).
+
+## K. Release Decision
+
 ### PASS criteria
-All critical sections A–H pass. I may contain non-blocking warnings only if documented and outside the current release scope.
+All critical sections A–J pass. Section I may contain non-blocking warnings only if documented and outside the current release scope.
 
 ### DO NOT RELEASE when
-- Homepage hero differs from locked visual contract.
-- Auth accessibility warning remains on tested production modal.
-- Production SHA is not the final functional SHA.
-- Creator authorization/ownership is not proven.
+- Production SHA is not verified and consistent across all docs.
+- Homepage hero differs from locked visual contract (browser-verified).
+- Auth accessibility warning remains on tested production modal (browser-verified).
+- Creator authorization/ownership is not proven (browser E2E).
 - Public Creator read requests return unauthorized errors.
 - Any canonical Dapur legacy runtime is still active.
+- RC15/RC16 internal contradiction exists.
+- Migrations 10–12 not run.
+- Security headers incomplete.
+- Documentation contains unverifiable claims.
 
-Final status values:
-- `AUDIT OPEN`
-- `FIX IN PROGRESS`
-- `READY FOR E2E`
-- `SIAP RILIS`
+### Status values
+- `AUDIT OPEN` — audit findings not yet resolved
+- `FIX IN PROGRESS` — fixes being applied
+- `READY FOR E2E` — code ready, awaiting browser verification
+- `READY FOR MIGRATION` — code ready, migrations pending
+- `SIAP RILIS` — all gates passed, browser-verified
 
-`SIAP RILIS` is allowed only after actual verification, not source inspection alone.
+`SIAP RILIS` is allowed **only** after actual browser verification, not source inspection alone.

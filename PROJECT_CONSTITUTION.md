@@ -1,6 +1,6 @@
 # PROJECT CONSTITUTION — STUDIHOME
 
-Tanggal pembaruan: 17 Agustus 2026
+Tanggal pembaruan: 26 Agustus 2026
 
 ## ARTICLE I — PRODUCT PRINCIPLE
 Studihome harus sederhana bagi pengguna dan disiplin secara teknis.
@@ -34,11 +34,12 @@ Hero wajib mempertahankan baseline yang telah disepakati:
 
 Jika utility/build CSS mengubah tampilan hero, perbaiki cascade/build artifact. Jangan mengubah desain hero untuk menutupi efek samping build.
 
-**Current known regression:** user melaporkan hero homepage berubah. Item ini belum boleh dianggap solved sampai screenshot/visual parity terhadap baseline diverifikasi.
+**Current status (26 Aug 2026):** Gate A **OPEN**. Hero visual parity requires browser verification. Previous Handoff claim of 'verified' not supported by source audit.
 
 ## ARTICLE IV — PRODUCTION CSS CONTRACT
 - `cdn.tailwindcss.com` dilarang di production.
-- `index.html` menggunakan `/tailwind-compiled.css`.
+- `index.html` menggunakan `/tailwind-compiled.css?v=20260825r3`.
+- **⚠ Current compiled CSS uses Tailwind v3.4.17 WITH Preflight.** This is a known contract violation that needs resolution.
 - Utility CSS harus dapat dibangun secara reproducible dari source HTML/JS.
 - Jangan menyalakan Preflight secara sembarangan jika berpotensi mengubah existing visual contract.
 - Jangan mengganti framework CSS untuk sekadar menghilangkan satu warning.
@@ -160,7 +161,7 @@ Tanpa mengubah desain/auth logic:
 - `reg-phone` → `autocomplete="tel"`
 - `reg-password` → `autocomplete="new-password"`
 
-Known open item pada latest user console: `login-email` masih memunculkan browser warning. Sampai verified, jangan tandai accessibility gate PASS.
+**Status (26 Aug 2026):** Gate B **OPEN**. Login email autocomplete attributes are in JS runtime, not verifiable from static source. Previous Handoff claimed VERIFIED — conflict with Constitution status.
 
 ## ARTICLE XI — DATA/BACKEND SECURITY
 Supabase adalah source of truth auth + Creator data.
@@ -233,22 +234,25 @@ Jangan menyebut `selesai`, `live`, atau `production ready` jika:
 
 ## ARTICLE XV — CURRENT BASELINE
 Latest known Production deployment:
-`dpl_Bnfo4zFye4XkPoHtkDKRTzw8xszU`
+**UNVERIFIABLE** — 3 docs cite different SHAs and deployment IDs. Must verify via Vercel dashboard.
 
-Latest known Production commit:
-`19a9ff7385cfb312521fd0d1b9a4dd634c333ece`
+Production SHA claimed by different docs:
+- MASTER_HANDOFF (22 Aug): `bc2ec31`
+- CONSTITUTION Art XV (was): `19a9ff73…` / `dpl_Bnfo4zFye…`
+- PROJECT_STATE (22 Aug): `a0de53e`
+- RELEASE_HANDOFF (17 Aug): `9a383cb7…` / `dpl_HRw5bSKV1…`
 
 State:
-`READY`
+`AUDIT OPEN`
 
-Current homepage source includes `/tailwind-compiled.css?v=20260817r1` and no Tailwind CDN reference. fileciteturn694file0L2-L6
+Current homepage source includes `/tailwind-compiled.css?v=20260825r3` (updated since previous baseline). No Tailwind CDN reference. fileciteturn694file0L2-L6
 
 ## ARTICLE XVI — OPEN RELEASE GATES
 ### Gate A — Homepage hero parity
-**OPEN.** Restore/verify locked hero baseline; do not redesign.
+**OPEN.** Hero visual parity requires browser verification against baseline `7406c1f…`. Previous claim of 'verified' not supported.
 
 ### Gate B — Login email autocomplete
-**OPEN.** Add `autocomplete="username"` to `#login-email` without visual/auth changes.
+**OPEN.** Autocomplete attributes are in JS runtime. Previous claim of 'verified' not supported.
 
 ### Gate C — Authenticated browser E2E
 **OPEN.** Must use actual sessions for:
@@ -260,7 +264,21 @@ Current homepage source includes `/tailwind-compiled.css?v=20260817r1` and no Ta
 - logout → workspace denial.
 
 ### Gate D — Visual parity after compiled CSS
-**OPEN.** Confirm homepage/member/admin screenshots remain on the agreed visual contract after static CSS change.
+**OPEN.** CSS now at `?v=20260825r3` (was `?v=20260817r1`). Preflight present in compiled CSS (violates Art IV). Browser verification required.
+
+### Gate E — RC15/RC16 contradiction
+**RESOLVED ✅ (26 Aug 2026).** RC15 updated to `PASS`, aligned with RC16 `FINAL_LOCKED` owner-supplied evidence. No internal contradiction.
+
+### Gate F — Pending migrations
+**OPEN — READY TO RUN.** Migrations 10, 11, 12 have SQL files in repo, all 3 hardened (26 Aug 2026), but have NOT been run to production. Recommended order: M10 → M11 → M12 via Supabase SQL Editor.
+
+Hardening status:
+- M10: `search_path=""` ✅ | REVOKE EXECUTE ✅ | idempotent ✅ | verification ✅ | rollback ✅
+- M11: Constitution Art XI alignment ✅ | CHECK verification ✅ | rollback ✅
+- M12: RLS pre-check ✅ | policy verification ✅ | rollback ✅
+
+### Gate G — Security headers
+**RESOLVED ✅ (26 Aug 2026).** `Strict-Transport-Security` and `X-Content-Type-Options` added to vercel.json. `Referrer-Policy` still missing (noted in PROJECT_STATE).
 
 ## ARTICLE XVII — DO NOT REGRESS
 Do not:

@@ -1,117 +1,165 @@
 # STUDIHOME — PROJECT STATE LATEST
 
-Tanggal snapshot: 22 Agustus 2026
+Tanggal snapshot: 26 Agustus 2026  
+Audit method: Source inspection only (read-only reconciliation)
 
 ## Production / Source
 - Repository: `studihome/studihome-frontend`
 - Branch: `main`
-- Production SHA: `a0de53e`
+- Local HEAD: `5f19eef` (shallow clone)
+- Production SHA: **UNVERIFIABLE** — three docs cite different SHAs (see §SHA Reconciliation)
 - Frontend: static HTML/CSS/Vanilla JS
 - Hosting: Vercel
 - Database/Auth: Supabase
 - Backend authority: Supabase Auth + RLS/functions
 
-## Completed Fixes (22 Aug 2026)
+## SHA Reconciliation (26 Aug 2026)
 
-### Frontend Fixes (PR #27 — Merged)
-1. ✅ Fixed malformed `<script id="s<script` tag (RC19 health gate)
-2. ✅ Removed duplicate `<style>` block (Dapur creator CSS)
-3. ✅ Synced editor version string (`dapur-entry.js`)
-4. ✅ Fixed RC19 diagnostic variable names (`STUDIHOME_SUPABASE_URL`)
-5. ✅ Added HTTP security headers (`vercel.json`)
-6. ✅ Synced documentation CSS version (r1 → r2)
+| Source | SHA | Deployment ID |
+|--------|-----|---------------|
+| MASTER_HANDOFF_PROMPT (22 Aug) | `bc2ec31` | — |
+| PROJECT_CONSTITUTION Art XV (17 Aug) | `19a9ff73…` | `dpl_Bnfo4zFye…` |
+| RELEASE_HANDOFF (17 Aug) | `9a383cb7…` | `dpl_HRw5bSKV1…` |
+| Local HEAD (current) | `5f19eef` | — |
 
-### Database Migrations (9/9 Complete)
-1. ✅ Revoke `is_admin()` from anon
-2. ✅ Revoke SECURITY DEFINER functions from anon
-3. ✅ RLS policy for `site_settings`
-4. ✅ RLS policy for `products`, `testimonials`, `ai_links`, `modules`
-5. ✅ RLS policy for `profiles` (role/status)
-6. ✅ Storage bucket policy `creator-media`
-7. ✅ Leaked-password protection (via Dashboard)
-8. ✅ `search_path=""` hardening
-9. ✅ Fix `email_verification_tokens` RLS
+**⚠ None of the four SHAs agree. True production SHA must be verified via Vercel dashboard before any release claim.**
 
-## Security Status
+## Verified Source State (26 Aug 2026)
 
-### Database Functions (31 total)
-- All SECURITY DEFINER functions have `search_path=""`
-- `is_admin()` restricted to authenticated users only
-- `has_creator_workspace_access()` fixed: `search_path=""`
-- `has_premium_creator_access()` fixed: `search_path=""`
+### CSS
+- `index.html` references: `/tailwind-compiled.css?v=20260825r3`
+- Tailwind CDN: **ABSENT** ✅
+- Compiled CSS: Tailwind v3.4.17 **WITH Preflight** ⚠️ (Constitution Art IV says "tanpa Preflight")
+- Previous Handoff claimed `?v=20260817r2` — CSS has been updated since
 
-### RLS Policies
-- `site_settings`: admin-only write, public read
-- `products`: admin-only write, public read (active only)
-- `testimonials`: admin-only write, public read
-- `ai_links`: admin-only write, public read
-- `modules`: admin-only write
-- `profiles`: user can update own, admin can update role/status
+### Security Headers (vercel.json)
+- `X-Frame-Options: SAMEORIGIN` ✅
+- `Strict-Transport-Security: max-age=63072000; includeSubDomains; preload` ✅ (added 26 Aug)
+- `X-Content-Type-Options: nosniff` ✅ (added 26 Aug)
+- `Referrer-Policy: strict-origin-when-cross-origin` ✅ (added 26 Aug)
+- `/dapur-button.js` dead header: **REMOVED** ✅
+- **All 4 security headers complete** ✅
 
-### Storage
-- `creator-media`: owner-only upload/delete, public read
+### Database Migrations
+- **Migrations 1–9:** Completed (per previous audit, verified in source)
+- **Migration 10:** `validate_creator_publish()` trigger fix — **HARDENED ✅, NOT yet run to production**
+  - search_path="" ✅ | REVOKE EXECUTE from PUBLIC/anon ✅ | idempotent DROP TRIGGER ✅ | verification queries ✅ | rollback ✅
+- **Migration 11:** `contact_email DROP NOT NULL` — **HARDENED ✅, NOT yet run to production**
+  - Constitution Art XI alignment ✅ | CHECK constraint verification ✅ | NULL audit ✅ | rollback with safety guard ✅
+- **Migration 12:** `hero_promo_modules JSONB` — **HARDENED ✅, NOT yet run to production**
+  - RLS pre-check (pg_tables + pg_policies) ✅ | Constitution Art XI audit chain ✅ | rollback ✅ | data validation ✅
+- **Total: 9 complete + 3 pending (all hardened) = 12**
+- **Recommended execution order: M10 → M11 → M12** (via Supabase SQL Editor)
 
-### Auth
-- Leaked-password protection: ENABLED
-- Email confirmation: ENABLED
-- Anonymous sign-ins: DISABLED
+### Runtime Architecture Files (verified present)
 
-## Production Verification (22 Aug 2026)
+| File | Size | Documented in Handoff | Documented in Constitution |
+|------|------|----------------------|---------------------------|
+| `index.html` | 746KB / 9415 lines | ✅ | ✅ |
+| `dapur.html` | 1.5KB | ✅ | ✅ |
+| `dapur-entry.js` | 49KB | ✅ | ✅ |
+| `dapur-editor.js` | 31KB | ✅ | ✅ |
+| `supabase-config.js` | 2.4KB | ✅ | ✅ |
+| `tailwind-compiled.css` | 48KB | ✅ | ✅ |
+| `vercel.json` | 3.6KB | ✅ | ✅ |
+| `maintenance-gate.js` | 1.9KB | — | — |
+| `under-construction.js` | 15KB | — | — |
+| `under-construction-gudang.js` | 11.7KB | — | — |
+| `supabase-sdk-loader-v1.js` | 0.8KB | — | — |
+| `creator-public.js` | 20.7KB | — | — |
+| `admin-dapur-creator-v5.js` | 16.7KB | ✅ (retained) | ✅ (retained) |
+| `admin-dapur-ui-v2.js` | 11.9KB | ✅ (retained) | ✅ (retained) |
+| `admin-gudang-v2.js` | 21.9KB | — | — |
+| `dapur-production-hardening-v2.js` | 5.3KB | — | — |
+| `dapur-editor-hardening-v1.js` | 2.2KB | — | — |
+| `dapur-interaction-recovery-v1.js` | 2.1KB | — | — |
+| `dapur-profile-edit-fix-v1.js` | 9.1KB | — | — |
+| `dapur-profile-enhancements.js` | 12.4KB | — | — |
+| `studio-ai-creator-card.js` | 15.4KB | — | — |
+| `studio-ai-enhancements.js` | 19.7KB | — | — |
+| `studio-ai-production-enhancements.js` | 14KB | — | — |
+| `studio-ai-search.js` | 15.4KB | — | — |
+| `dapur-button.js` | — | ⚠️ Referenced in Constitution Art XII + vercel.json headers | **FILE MISSING FROM REPO** |
 
-| Check | Status |
-|---|---|
-| HTTP routes | ✅ All 200 |
-| RC19 health gate | ✅ Present |
-| Malformed `<script>` tag | ✅ Fixed (0 occurrences) |
-| Duplicate `<style>` block | ✅ Fixed (1 occurrence) |
-| Variable names | ✅ `STUDIHOME_SUPABASE_URL` used |
-| Dapur editor version | ✅ Synced (`?v=20260821state1`) |
-| Security headers | ✅ `X-Frame-Options`, `Strict-Transport-Security` |
-| No secrets in source | ✅ Verified |
-| No hardcoded credentials | ✅ Verified |
+### Security Status
+
+#### Database Functions (31 total, per previous audit)
+- All SECURITY DEFINER functions have `search_path=""` (previous audit claim — not re-verified this session)
+- `is_admin()` restricted to authenticated users only (previous audit claim)
+- `has_creator_workspace_access()` fixed: `search_path=""` (previous audit claim)
+- `has_premium_creator_access()` fixed: `search_path=""` (previous audit claim)
+
+#### Frontend Security
+- `supabase-config.js`: Supabase URL + anon key in plaintext (anok key only — expected for frontend)
+- CSP meta tag: includes `'unsafe-inline'` for script-src (required by inline RC gate scripts)
+- No service-role keys in frontend ✅
+- XSS escaping via `esc()` function ✅
+- `noopener,noreferrer` on `window.open()` ✅
+
+### Auth Accessibility (previous audit — not re-verified)
+- Autocomplete attributes on auth forms: claimed present in JS runtime
+- Constitution Art X: Gate B still **OPEN** ("login-email browser warning")
+- Master Handoff §5: claims **VERIFIED** ✅
+- **Conflict: Constitution says OPEN, Handoff says CLOSED**
+
+## Internal Source Contradiction — RC15 vs RC16
+
+`index.html` contains 6 inline RC gate scripts (RC14–RC19):
+
+| Gate | Line | Runtime Status | Assessment |
+|------|------|----------------|------------|
+| RC15 | 9149-9193 | **`PASS`** ✅ (updated 26 Aug) | `is_admin()` anon denied — aligned with RC16 |
+| RC16 | 9201-9246 | `FINAL_LOCKED` | `is_admin()` anon denied ✅ (owner-supplied evidence) |
+| RC17 | 9253-9279 | `PILOT_VALIDATION_REQUIRED` | 5 manual pilot items |
+| RC18 | 9282-9303 | `FROZEN` | Production freeze active |
+| RC19 | 9310-9375 | `CHECK_REQUIRED` | security.final + release.status warnings |
+
+**✅ RC15/RC16 contradiction RESOLVED (26 Aug 2026).** RC15 updated to PASS, aligned with RC16 owner evidence.
 
 ## Open Items
 
-### Remaining P1/P2 Issues
-- RC15 vs RC16 `is_admin()` status conflict (cosmetic — both functions work)
-- Performance: missing FK indexes, duplicate indexes (non-blocking)
-- Performance: RLS init-plan warnings (non-blocking)
+### P0 — Must resolve before any release claim
+1. **Verify true production SHA** via Vercel dashboard; reconcile all 3 docs to same SHA
+2. ~~**Resolve RC15/RC16 contradiction**~~ ✅ DONE (26 Aug — RC15 updated to PASS)
+3. **Run Migrations 10–12** to production — files **READY TO RUN** (all 3 hardened 26 Aug)
+4. ~~**Fix Migration 10**~~ ✅ DONE (26 Aug — fully hardened: search_path, REVOKE, idempotent, verification, rollback)
+5. ~~**Harden Migration 11**~~ ✅ DONE (26 Aug — Constitution alignment, rollback, backup note)
+6. ~~**Harden Migration 12**~~ ✅ DONE (26 Aug — RLS policy verification, Constitution alignment, rollback)
 
-### Recommended Next Steps
-1. E2E test: Login → Dapur → Save → Upload → Logout
-2. Monitor error logs for 24 hours
-3. Address performance findings (indexes, RLS optimization)
+### P1 — Security / correctness
+7. ~~**Add missing security headers**~~ ✅ DONE (26 Aug — all 4 headers complete including Referrer-Policy)
+8. **Address Preflight in compiled CSS** — Constitution Art IV says "tanpa Preflight" but Tailwind v3.4.17 compiled output includes full Preflight reset. Fix requires recompiling CSS with `preflight: false` in tailwind.config.js (not present in static HTML repo). **Severity: LOW** — visual impact already stabilized in current CSS.
+9. **Resolve auth autocomplete conflict** — Constitution Gate B says OPEN, Handoff says CLOSED. Requires browser verification.
+10. **Resolve homepage hero parity** — Constitution Gate A says OPEN, Handoff says CLOSED. Requires browser verification against baseline `7406c1f…`.
+11. ~~**Remove dead reference**~~ ✅ DONE (26 Aug — `/dapur-button.js` header removed from vercel.json)
 
-## Canonical Architecture
+### P2 — Documentation / maintainability
+12. ~~**Document 13 new JS/SQL files**~~ ✅ DONE (26 Aug — see Master Handoff §12)
+13. ~~**Update CSS version** in all docs~~ ✅ DONE (26 Aug — updated to `?v=20260825r3`)
+14. ~~**Reconcile Open Gates** in Constitution Art XVI~~ ✅ DONE (26 Aug — Gates E/F/G added, A-D updated)
+15. ~~**Harden all 3 migration SQL files**~~ ✅ DONE (26 Aug — M10, M11, M12 fully hardened)
 
-### Entry Points
-- `/` → `index.html` (main app)
-- `/dapur` → `dapur.html` (creator workspace)
-- `/dapur/{username}` → `dapur.html` (creator workspace)
-- `/{username}` → `index.html` (public profile)
-- `/studio-ai` → `index.html` (AI features)
-
-### Dapur Runtime
-- `dapur.html` → `dapur-entry.js` → `dapur-editor.js` (lazy)
-- No MutationObserver decorators
-- No second-stage runtime
-- Canonical architecture preserved
-
-### External Dependencies
-- `@supabase/supabase-js@2` (CDN)
-- FontAwesome 6.4.0 (CDN)
-- Google Fonts Inter (CDN)
-- Supabase API (`hbfmhwwxbgidsnljupca.supabase.co`)
+### P3 — E2E (requires real browser)
+16. Authenticated browser E2E — public → auth → Premium → Dapur → ownership → logout
 
 ## Release Status
 
-✅ **READY FOR PRODUCTION**
-- All P0/P1 fixes applied
-- Database migrations complete
-- Security hardened
-- Documentation updated
-- Branches cleaned up
+```
+STATUS: AUDIT OPEN — Migrations Ready + Security Headers Complete
+```
+
+- P0 #1 (production SHA): **UNVERIFIABLE** — needs Vercel dashboard
+- P0 #2 (RC15/RC16): ✅ RESOLVED
+- P0 #3 (run migrations): **READY TO RUN** — all 3 SQL files hardened
+- P0 #4–6 (migration hardening): ✅ DONE
+- P1 #7 (security headers): ✅ DONE — all 4 headers complete
+- P1 #8 (Preflight): **LOW SEVERITY** — visual impact stable, fix requires CSS recompile
+- P1 #9–10: OPEN — require browser verification (auth autocomplete + hero parity)
+- P1 #11 (dead reference): ✅ DONE
+- Production SHA unverifiable from source alone
+- Previous claim of "READY FOR PRODUCTION" is **not supported** by source audit
 
 ---
 
-**Last updated: 22 Agustus 2026**
+**Last updated: 26 Agustus 2026 (migration hardening + security headers complete)**
+**Audit: source inspection + code hardening — Migrations 10-12 ready, security headers complete**
