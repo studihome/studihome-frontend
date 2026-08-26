@@ -2363,6 +2363,7 @@ App.router.bindCanonicalLinkGuard();
                             const res = payload.creatorId
                                 ? await supabaseClient.from('creator_profiles').update(row).eq('id', payload.creatorId).eq('user_id', targetUserId).select().single()
                                 : await supabaseClient.from('creator_profiles').insert(row).select().single();
+                            if (payload.creatorId && res.data && String(targetUserId) !== String(res.data.user_id || '')) throw new Error('Update diblokir: user_id tidak cocok.');
                             if (res.error) throw res.error;
                             data = { profile: res.data };
                         } else if (action === 'CREATOR_SAVE_CATEGORIES') {
@@ -5806,8 +5807,9 @@ ${(() => { const rs=String(p.review_status||'DRAFT').toUpperCase(); const map={D
                         if(status) status.textContent='Mengompres logo…';
                         const blob=await App.creatorStudio.compressAvatar(file);
                         const creatorUserId=App.creatorStudio.data?.profile?.user_id;
+                        const creatorProfileId=App.creatorStudio.data?.profile?.id;
                         if(!creatorUserId) throw new Error('Profil creator belum dimuat.');
-                        const path=`${creatorUserId}/avatar.webp`;
+                        const path=`creator/${creatorProfileId || creatorUserId}/avatar.webp`;
                         const up=await supabaseClient.storage.from('creator-media').upload(path,blob,{upsert:true,contentType:'image/webp',cacheControl:'3600'});
                         if(up.error) throw up.error;
                         const pub=supabaseClient.storage.from('creator-media').getPublicUrl(path);
