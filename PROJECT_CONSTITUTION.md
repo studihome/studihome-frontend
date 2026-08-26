@@ -278,7 +278,7 @@ Hardening status:
 - M12: RLS pre-check ✅ | policy verification ✅ | rollback ✅
 
 ### Gate G — Security headers
-**RESOLVED ✅ (26 Aug 2026).** `Strict-Transport-Security` and `X-Content-Type-Options` added to vercel.json. `Referrer-Policy` still missing (noted in PROJECT_STATE).
+**RESOLVED ✅ (26 Aug 2026).** `Strict-Transport-Security`, `X-Content-Type-Options`, and `Referrer-Policy` added to vercel.json. All 4 security headers complete.
 
 ## ARTICLE XVII — DO NOT REGRESS
 Do not:
