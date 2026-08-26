@@ -2359,7 +2359,7 @@ App.router.bindCanonicalLinkGuard();
                                 const { data: existingProfile } = await supabaseClient.from('creator_profiles').select('user_id').eq('id', payload.creatorId).maybeSingle();
                                 if (existingProfile?.user_id) targetUserId = existingProfile.user_id;
                             }
-                            const row = { user_id: targetUserId, username: payload.username, display_name: payload.displayName, bio: payload.bio || '', avatar_url: payload.avatarUrl || '', cover_url: payload.coverUrl || '', whatsapp: payload.whatsapp || '', location: payload.location || '' };
+                            const row = { user_id: targetUserId, username: payload.username, display_name: payload.displayName, bio: payload.bio || '', avatar_url: payload.avatarUrl || undefined, cover_url: payload.coverUrl || '', whatsapp: payload.whatsapp || '', location: payload.location || '' };
                             const res = payload.creatorId
                                 ? await supabaseClient.from('creator_profiles').update(row).eq('id', payload.creatorId).eq('user_id', targetUserId).select().single()
                                 : await supabaseClient.from('creator_profiles').insert(row).select().single();
@@ -5808,7 +5808,7 @@ ${(() => { const rs=String(p.review_status||'DRAFT').toUpperCase(); const map={D
                         const blob=await App.creatorStudio.compressAvatar(file);
                         const creatorUserId=App.creatorStudio.data?.profile?.user_id;
                                                 if(!creatorUserId) throw new Error('Profil creator belum dimuat.');
-                        const path=`${creatorUserId}/avatar.webp`;
+                        const path=App.creatorStudio.data?.profile?.id?`${creatorUserId}/${App.creatorStudio.data.profile.id}/avatar.webp`:`${creatorUserId}/avatar.webp`;
                         const up=await supabaseClient.storage.from('creator-media').upload(path,blob,{upsert:true,contentType:'image/webp',cacheControl:'3600'});
                         if(up.error) throw up.error;
                         const pub=supabaseClient.storage.from('creator-media').getPublicUrl(path);
