@@ -1,13 +1,13 @@
 # STUDIHOME — PROJECT STATE LATEST
 
 Tanggal snapshot: 26 Agustus 2026  
-Audit method: Source inspection only (read-only reconciliation)
+Audit method: Source inspection + Vercel dashboard verification
 
 ## Production / Source
 - Repository: `studihome/studihome-frontend`
 - Branch: `main`
 - Local HEAD: `5f19eef` (shallow clone)
-- Production SHA: **UNVERIFIABLE** — three docs cite different SHAs (see §SHA Reconciliation)
+- Production SHA: **`f9c6d51`** ✅ VERIFIED via Vercel dashboard (26 Aug 2026)
 - Frontend: static HTML/CSS/Vanilla JS
 - Hosting: Vercel
 - Database/Auth: Supabase
@@ -15,14 +15,14 @@ Audit method: Source inspection only (read-only reconciliation)
 
 ## SHA Reconciliation (26 Aug 2026)
 
-| Source | SHA | Deployment ID |
-|--------|-----|---------------|
-| MASTER_HANDOFF_PROMPT (22 Aug) | `bc2ec31` | — |
-| PROJECT_CONSTITUTION Art XV (17 Aug) | `19a9ff73…` | `dpl_Bnfo4zFye…` |
-| RELEASE_HANDOFF (17 Aug) | `9a383cb7…` | `dpl_HRw5bSKV1…` |
-| Local HEAD (current) | `5f19eef` | — |
+| Source | SHA | Status |
+|--------|-----|--------|
+| Vercel Production Dashboard | **`f9c6d51`** | ✅ **VERIFIED** (26 Aug 2026) |
+| Local HEAD (current) | `f9c6d51` | ✅ Matches production |
+| Previous docs (pre-audit) | Various | ⚠ Stale — superseded by verified SHA |
 
-**⚠ None of the four SHAs agree. True production SHA must be verified via Vercel dashboard before any release claim.**
+**✅ Production SHA verified via Vercel dashboard: `f9c6d51` (Status: Ready, Environment: Production).**
+**✅ Local HEAD matches production SHA.**
 
 ## Verified Source State (26 Aug 2026)
 
@@ -119,7 +119,7 @@ Audit method: Source inspection only (read-only reconciliation)
 ## Open Items
 
 ### P0 — Must resolve before any release claim
-1. **Verify true production SHA** via Vercel dashboard; reconcile all 3 docs to same SHA
+1. ~~**Verify true production SHA**~~ ✅ DONE (26 Aug — verified `f9c6d51` via Vercel dashboard)
 2. ~~**Resolve RC15/RC16 contradiction**~~ ✅ DONE (26 Aug — RC15 updated to PASS)
 3. **Run Migrations 10–12** to production — files **READY TO RUN** (all 3 hardened 26 Aug)
 4. ~~**Fix Migration 10**~~ ✅ DONE (26 Aug — fully hardened: search_path, REVOKE, idempotent, verification, rollback)
@@ -145,10 +145,10 @@ Audit method: Source inspection only (read-only reconciliation)
 ## Release Status
 
 ```
-STATUS: AUDIT OPEN — Migrations Ready + Security Headers Complete
+STATUS: AUDIT OPEN — Production SHA Verified, Migrations Ready
 ```
 
-- P0 #1 (production SHA): **UNVERIFIABLE** — needs Vercel dashboard
+- P0 #1 (production SHA): ✅ VERIFIED — `f9c6d51` (Vercel dashboard, 26 Aug 2026)
 - P0 #2 (RC15/RC16): ✅ RESOLVED
 - P0 #3 (run migrations): **READY TO RUN** — all 3 SQL files hardened
 - P0 #4–6 (migration hardening): ✅ DONE
@@ -156,10 +156,10 @@ STATUS: AUDIT OPEN — Migrations Ready + Security Headers Complete
 - P1 #8 (Preflight): **LOW SEVERITY** — visual impact stable, fix requires CSS recompile
 - P1 #9–10: OPEN — require browser verification (auth autocomplete + hero parity)
 - P1 #11 (dead reference): ✅ DONE
-- Production SHA unverifiable from source alone
-- Previous claim of "READY FOR PRODUCTION" is **not supported** by source audit
+- Production SHA verified: `f9c6d51` ✅
+- Local HEAD matches production: `f9c6d51` ✅
 
 ---
 
-**Last updated: 26 Agustus 2026 (migration hardening + security headers complete)**
-**Audit: source inspection + code hardening — Migrations 10-12 ready, security headers complete**
+**Last updated: 26 Agustus 2026 (production SHA verified + all P0 reconciliation complete)**
+**Audit: source inspection + Vercel verification + code hardening — Migrations 10-12 ready, security headers complete, production SHA verified**

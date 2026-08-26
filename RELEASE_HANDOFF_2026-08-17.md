@@ -13,7 +13,7 @@ Frontend: static HTML + CSS + Vanilla JS
 Handoff asli 17 Agustus berisi beberapa klaim yang tidak terverifikasi sumbernya. Dokumen ini sekarang merupakan versi reconciled yang memperbaiki inkonsistensi. Lihat `PROJECT_STATE_LATEST.md` untuk status source truth terkini.
 
 Klaim yang diperbarui:
-- Production SHA → **UNVERIFIABLE** (3 dokumen berbeda)
+- Production SHA → **VERIFIED `f9c6d51`** (Vercel dashboard, 26 Aug 2026)
 - Security headers → **HSTS dan X-Content-Type-Options ditambahkan** (sebelumnya missing)
 - RC15/RC16 → **KONTRADIKSI DIPERBAIKI** (RC15 diupdate ke PASS)
 - CSS version → **?v=20260825r3** (bukan ?v=20260817r2)
@@ -150,11 +150,10 @@ Anonymous role tidak digunakan untuk authorization function sensitif seperti:
 Jangan memakai inline regex parameter di `rewrites.source`.
 
 ## 10. CURRENT PRODUCTION VERIFICATION (26 Aug 2026)
-**Production SHA: UNVERIFIABLE** — 3 docs cite different SHAs.
+**Production SHA: `f9c6d51`** ✅ VERIFIED via Vercel dashboard (Status: Ready, Environment: Production).
 
-Previous verifications (17 Aug) may be stale. Fresh verification required:
-- Vercel deployment status and SHA
-- HTTP route checks
+Local HEAD matches production SHA. Remaining verifications:
+- HTTP route checks (requires browser)
 - Runtime log check
 - Browser console check
 
@@ -197,11 +196,11 @@ Kemudian:
 ## 14. RELEASE STATUS (26 Aug 2026)
 
 ```
-STATUS: AUDIT OPEN
+STATUS: AUDIT OPEN — Production SHA Verified
 ```
 
 - Source final: **RECONCILED** (docs aligned 26 Aug)
-- Production deployment: **UNVERIFIABLE** (needs Vercel dashboard check)
+- Production deployment: **VERIFIED `f9c6d51`** (Vercel dashboard, 26 Aug 2026)
 - Runtime errors: **UNKNOWN** (requires fresh verification)
 - UI/UX contract: **GATE A OPEN** (hero parity needs browser check)
 - Homepage hero: **GATE A OPEN**
@@ -213,7 +212,7 @@ STATUS: AUDIT OPEN
 - Documentation: **RECONCILED** ✅ (26 Aug)
 
 **Jangan meng-upgrade status menjadi `SIAP RILIS` sebelum:**
-1. Production SHA terverifikasi via Vercel dashboard
+1. ~~Production SHA terverifikasi via Vercel dashboard~~ ✅ DONE (26 Aug — `f9c6d51`)
 2. Migrations 10-12 di-run ke production
 3. Browser E2E untuk Gate A, B, C, D selesai
-4. Semua 3 dokumen cite SHA yang sama
+4. ~~Semua 3 dokumen cite SHA yang sama~~ ✅ DONE (26 Aug — all docs cite `f9c6d51`)

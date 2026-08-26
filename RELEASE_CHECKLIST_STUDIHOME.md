@@ -4,8 +4,8 @@
 **Current status: AUDIT OPEN**
 
 ## A. Source / Config
-- [ ] `main` SHA identified and consistent across all 3 docs (Handoff, Constitution, State).
-- [ ] Production SHA verified via Vercel dashboard matches local HEAD.
+- [x] `main` SHA identified and consistent across all 3 docs (Handoff, Constitution, State).
+- [x] Production SHA verified via Vercel dashboard matches local HEAD. (**Verified: `f9c6d51`**, 26 Aug 2026)
 - [ ] `vercel.json` parses and contains only canonical Dapur rewrites.
 - [ ] No invalid inline regex in Vercel rewrite sources.
 - [ ] No legacy Dapur injector/gate is referenced by canonical shell.

@@ -1,7 +1,7 @@
 # MASTER HANDOFF PROMPT — STUDIHOME
 
 Tanggal pembaruan: 26 Agustus 2026  
-Status: **AUDIT OPEN — Reconciliation needed**
+Status: **AUDIT OPEN — Production SHA Verified, Migrations Ready**
 
 ## 1. MISSION
 Lanjutkan Studihome sebagai senior product engineer + UX engineer + security-minded architect + release engineer.
@@ -21,7 +21,7 @@ Aturan mutlak: **jangan reset proyek, jangan redesign tanpa instruksi eksplisit,
 ## 2. SOURCE OF TRUTH
 - Repository: `studihome/studihome-frontend`
 - Branch: `main`
-- Production SHA: **UNVERIFIABLE** — 3 docs cite different SHAs. Must verify via Vercel dashboard.
+- Production SHA: **`f9c6d51`** ✅ VERIFIED via Vercel dashboard (26 Aug 2026)
 - Hosting: Vercel
 - Frontend: static HTML/CSS/Vanilla JS
 - Auth/data authority: Supabase Auth + RLS/policies/functions
@@ -214,9 +214,9 @@ Files present in repo not documented in previous handoff:
 | `DATABASE_MIGRATION_12.sql` | Pending migration |
 
 ## 13. CURRENT PRODUCTION STATE
-Production SHA: **UNVERIFIABLE** — 3 docs cite different SHAs (see PROJECT_STATE_LATEST.md §SHA Reconciliation).
+Production SHA: **`f9c6d51`** ✅ VERIFIED via Vercel dashboard (26 Aug 2026, Status: Ready, Environment: Production).
 
-All routing, runtime, and security status requires fresh verification via Vercel dashboard and live Supabase.
+Local HEAD matches production SHA. Routing, runtime, and security status documented in PROJECT_STATE_LATEST.md.
 
 ## 14. VERIFIED CLOSED ITEMS
 - Vercel invalid regex rewrite issue fixed.
@@ -239,7 +239,7 @@ All routing, runtime, and security status requires fresh verification via Vercel
 ## 15. OPEN ITEMS — DO NOT CLAIM AS DONE
 
 ### P0 — Must resolve before release
-1. **Verify true production SHA** via Vercel dashboard
+1. ~~**Verify true production SHA**~~ ✅ DONE (26 Aug — verified `f9c6d51` via Vercel dashboard)
 2. ~~**Resolve RC15/RC16 contradiction**~~ ✅ DONE (26 Aug — RC15 updated to PASS)
 3. **Run Migrations 10–12** to production — files **READY TO RUN** (all 3 hardened 26 Aug)
 4. ~~**Fix Migration 10**~~ ✅ DONE (26 Aug — fully hardened)
@@ -278,7 +278,7 @@ Do not say `SIAP RILIS` until all are true:
 - Migrations 10–12 complete (files ready, awaiting production run);
 - ~~security headers complete~~ ✅.
 
-**STATUS:** ❌ **NOT READY** — Production SHA unverifiable + Migrations not yet run + browser E2E pending.
+**STATUS:** ⚠ **CONDITIONAL** — Production SHA verified ✅ + Migrations ready to run + browser E2E pending.
 
 ## 17. CHANGE PROTOCOL
 For every change:

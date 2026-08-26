@@ -234,16 +234,12 @@ Jangan menyebut `selesai`, `live`, atau `production ready` jika:
 
 ## ARTICLE XV — CURRENT BASELINE
 Latest known Production deployment:
-**UNVERIFIABLE** — 3 docs cite different SHAs and deployment IDs. Must verify via Vercel dashboard.
+**VERIFIED ✅** — Production SHA confirmed via Vercel dashboard.
 
-Production SHA claimed by different docs:
-- MASTER_HANDOFF (22 Aug): `bc2ec31`
-- CONSTITUTION Art XV (was): `19a9ff73…` / `dpl_Bnfo4zFye…`
-- PROJECT_STATE (22 Aug): `a0de53e`
-- RELEASE_HANDOFF (17 Aug): `9a383cb7…` / `dpl_HRw5bSKV1…`
+Production SHA: **`f9c6d51`** (verified 26 Aug 2026, Vercel status: Ready, Environment: Production)
 
 State:
-`AUDIT OPEN`
+`AUDIT OPEN` (migrations pending, browser E2E pending)
 
 Current homepage source includes `/tailwind-compiled.css?v=20260825r3` (updated since previous baseline). No Tailwind CDN reference. fileciteturn694file0L2-L6
 
