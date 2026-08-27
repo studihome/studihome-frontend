@@ -688,7 +688,7 @@
         .admin-creator-trust-summary:focus-visible{outline:3px solid rgba(96,165,250,.22);outline-offset:-2px}
         .admin-creator-trust-details{padding:0 1rem 1rem}
         @media(max-width:900px){.admin-studio-ai-grid,.admin-governance-grid{grid-template-columns:1fr}}
-        @media(max-width:640px){.admin-creator-trust-summary{padding:.75rem .8rem}.admin-creator-trust-details{padding:0 .8rem .8rem}}
+        @keyframes cd-glass-shimmer{0%,100%{background-position:0% 50%}50%{background-position:100% 50%}}@media(max-width:640px){.admin-creator-trust-summary{padding:.75rem .8rem}.admin-creator-trust-details{padding:0 .8rem .8rem}}
 
         /* Step 25 — Creator Growth & Conversion Engine (additive only) */
         .creator-intent-panel{background:linear-gradient(180deg,#ffffff 0%,#f8fbff 100%);border:1px solid #dbe7ff;box-shadow:0 16px 34px rgba(21,28,117,.08)}
@@ -2874,7 +2874,7 @@ App.router.bindCanonicalLinkGuard();
                                     </p>
                                     <!-- Countdown Timer -->
                                     <div id="hero-countdown-container" class="hidden mb-6 sm:mb-8">
-                                        <div class="inline-flex flex-col sm:flex-row items-start sm:items-center gap-3 sm:gap-4 px-5 sm:px-6 py-4 sm:py-5 rounded-2xl relative" style="background:rgba(255,255,255,.1);backdrop-filter:blur(20px) saturate(180%);border:1px solid rgba(255,255,255,.12);box-shadow:0 8px 32px rgba(0,0,0,.12),inset 0 1px 0 rgba(255,255,255,.1)">
+                                        <div class="inline-flex flex-col sm:flex-row items-start sm:items-center gap-3 sm:gap-4 px-5 sm:px-6 py-4 sm:py-5 rounded-2xl relative" style="background:linear-gradient(135deg,rgba(21,28,117,.65),rgba(63,72,191,.55),rgba(21,28,117,.65));background-size:200% 200%;backdrop-filter:blur(24px) saturate(200%);border:1px solid rgba(255,255,255,.15);box-shadow:0 8px 32px rgba(0,0,0,.2),inset 0 1px 0 rgba(255,255,255,.15),0 0 0 1px rgba(255,255,255,.05);animation:cd-glass-shimmer 4s ease-in-out infinite">
                                             <!-- Glass highlight -->
                                             <div class="absolute inset-0 rounded-2xl pointer-events-none" style="background:linear-gradient(180deg,rgba(255,255,255,.06) 0%,transparent 40%,rgba(0,0,0,.04) 100%)"></div>
                                             <!-- Urgency label -->
