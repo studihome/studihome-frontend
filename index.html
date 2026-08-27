@@ -6468,57 +6468,136 @@ renderStudioAiControl: async () => {
                     if (!area) return;
                     area.innerHTML = '<div class="flex items-center justify-center py-12 text-sm text-slate-400"><i class="fa-solid fa-spinner fa-spin mr-2"></i> Memuat data Social Proof...</div>';
                     try {
-                        const spResult = await supabaseClient
-                            .from('orders')
-                            .select('id, user_id, product_id, unit_price, total_amount, payment_status, payment_confirmed_at, created_at, products(title), profiles!orders_user_id_fkey(name, email)')
-                            .in('payment_status', ['PAID', 'CONFIRMED'])
-                            .order('created_at', { ascending: false })
-                            .limit(20);
-                        if (spResult.error) throw spResult.error;
-                        const spOrders = spResult.data || [];
-                        let spHtml = '<div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-4"><div>';
-                        spHtml += '<h3 class="text-sm font-extrabold text-[#151c75]">Social Proof \u2014 Pembelian Premium Terbaru</h3>';
-                        spHtml += '<p class="text-[10px] text-slate-500 mt-0.5">Data otomatis dari orders yang sudah terbayar. 5 pembelian terbaru tampil di homepage.</p>';
-                        spHtml += '</div></div>';
+                        // Fetch all paid orders + existing social_proof_items in parallel
+                        const [ordersRes, spRes] = await Promise.all([
+                            supabaseClient.from('orders')
+                                .select('id, user_id, product_id, unit_price, total_amount, payment_status, created_at, products(title), profiles!orders_user_id_fkey(name)')
+                                .in('payment_status', ['PAID', 'CONFIRMED'])
+                                .order('created_at', { ascending: false }),
+                            supabaseClient.from('social_proof_items')
+                                .select('order_id, is_active')
+                                .not('order_id', 'is', null)
+                        ]);
+                        if (ordersRes.error) throw ordersRes.error;
+                        const spOrders = ordersRes.data || [];
+                        const spItems = spRes.data || [];
+                        // Build map: orderId -> { is_active }
+                        const spMap = {};
+                        spItems.forEach(s => { spMap[s.order_id] = s; });
+
+                        let html = '<div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-4"><div>';
+                        html += '<h3 class="text-sm font-extrabold text-[#151c75]">Social Proof \u2014 Centang Member untuk Widget</h3>';
+                        html += '<p class="text-[10px] text-slate-500 mt-0.5">Centang order yang ingin ditampilkan di toast widget homepage. Semua yang dicentang akan tampil secara acak.</p>';
+                        html += '</div></div>';
+
                         if (!spOrders.length) {
-                            spHtml += '<div class="text-center py-12"><div class="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-slate-100 text-slate-300 mb-3"><i class="fa-solid fa-users-slash text-2xl"></i></div><p class="text-sm text-slate-500">Belum ada pembelian premium.</p><p class="text-[10px] text-slate-400 mt-1">Widget akan otomatis menampilkan data setelah ada pembayaran produk premium.</p></div>';
+                            html += '<div class="text-center py-12"><div class="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-slate-100 text-slate-300 mb-3"><i class="fa-solid fa-users-slash text-2xl"></i></div><p class="text-sm text-slate-500">Belum ada pembelian premium.</p></div>';
                         } else {
-                            let spRev = 0;
-                            spOrders.forEach(o => spRev += Number(o.total_amount || o.unit_price || 0));
-                            spHtml += '<div class="grid grid-cols-2 sm:grid-cols-3 gap-2 mb-4">';
-                            spHtml += '<div class="card-3d p-3 rounded-xl bg-white"><div class="text-lg font-black text-[#151c75]">' + spOrders.length + '</div><div class="text-[9px] text-slate-500 font-bold uppercase">Total Orders</div></div>';
-                            spHtml += '<div class="card-3d p-3 rounded-xl bg-white"><div class="text-lg font-black text-green-600">Rp ' + spRev.toLocaleString('id-ID') + '</div><div class="text-[9px] text-slate-500 font-bold uppercase">Total Revenue</div></div>';
-                            spHtml += '<div class="card-3d p-3 rounded-xl bg-white"><div class="text-lg font-black text-[#151c75]">5</div><div class="text-[9px] text-slate-500 font-bold uppercase">Tampil di Widget</div></div>';
-                            spHtml += '</div><div class="space-y-2">';
-                            spOrders.forEach((o, j) => {
+                            let checkedCount = 0;
+                            spOrders.forEach(o => { if (spMap[o.id] && spMap[o.id].is_active) checkedCount++; });
+
+                            html += '<div class="grid grid-cols-2 sm:grid-cols-3 gap-2 mb-4">';
+                            html += '<div class="card-3d p-3 rounded-xl bg-white"><div class="text-lg font-black text-[#151c75]">' + spOrders.length + '</div><div class="text-[9px] text-slate-500 font-bold uppercase">Total Orders</div></div>';
+                            html += '<div class="card-3d p-3 rounded-xl bg-white"><div class="text-lg font-black text-green-600">' + checkedCount + '</div><div class="text-[9px] text-slate-500 font-bold uppercase">Dicentang (Widget)</div></div>';
+                            html += '<div class="card-3d p-3 rounded-xl bg-white"><div class="text-lg font-black text-slate-400">' + (spOrders.length - checkedCount) + '</div><div class="text-[9px] text-slate-500 font-bold uppercase">Belum Dicentang</div></div>';
+                            html += '</div>';
+
+                            // Check All / Uncheck All
+                            html += '<div class="flex items-center gap-2 mb-3">';
+                            html += '<button onclick="App.admin.spToggleAll(true)" class="px-3 py-1.5 rounded-lg text-[10px] font-bold bg-[#151c75] text-white hover:bg-[#1e2578] transition-colors">Centang Semua</button>';
+                            html += '<button onclick="App.admin.spToggleAll(false)" class="px-3 py-1.5 rounded-lg text-[10px] font-bold bg-slate-100 text-slate-600 hover:bg-slate-200 transition-colors">Buang Centang</button>';
+                            html += '</div>';
+
+                            html += '<div class="space-y-1.5">';
+                            spOrders.forEach(o => {
                                 const n = (o.profiles && o.profiles.name) || 'Member Studihome';
                                 const t = (o.products && o.products.title) || 'Produk Premium';
                                 const p = Number(o.total_amount || o.unit_price || 0);
+                                const checked = spMap[o.id] && spMap[o.id].is_active;
+                                const ds = o.created_at ? new Date(o.created_at).toLocaleString('id-ID', {day:'2-digit',month:'short',year:'numeric',hour:'2-digit',minute:'2-digit'}) : '-';
                                 const pts = n.trim().split(/\s+/);
                                 let ini = '';
                                 for (let k = 0; k < pts.length && k < 2; k++) ini += pts[k].charAt(0);
                                 ini = ini.toUpperCase() || '\u2726';
-                                const iw = j < 5;
-                                const ds = o.created_at ? new Date(o.created_at).toLocaleString('id-ID', {day:'2-digit',month:'short',year:'numeric',hour:'2-digit',minute:'2-digit'}) : '-';
-                                spHtml += '<div class="flex items-center gap-3 p-3 rounded-xl border ' + (iw ? 'border-blue-200 bg-blue-50/50' : 'border-slate-200 bg-white') + '">';
-                                spHtml += '<div class="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-[#151c75] to-[#3f48bf] text-[10px] font-black text-white">' + App.utils.escapeHtml(ini) + '</div>';
-                                spHtml += '<div class="min-w-0 flex-1"><div class="flex items-center gap-2"><span class="text-xs font-bold text-[#151c75]">' + App.utils.escapeHtml(n) + '</span>';
-                                if (iw) spHtml += '<span class="inline-flex items-center px-1.5 py-0.5 rounded-full text-[8px] font-bold bg-blue-100 text-blue-700">WIDGET</span>';
-                                spHtml += '</div>';
-                                spHtml += '<div class="text-[9px] text-slate-500 mt-0.5">' + App.utils.escapeHtml(t) + ' \u00b7 Rp ' + p.toLocaleString('id-ID') + '</div>';
-                                spHtml += '<div class="text-[8px] text-slate-400 mt-0.5">' + App.utils.escapeHtml(ds) + '</div>';
-                                spHtml += '</div></div>';
+
+                                html += '<label class="flex items-center gap-3 p-2.5 rounded-xl border cursor-pointer transition-colors ' + (checked ? 'border-blue-200 bg-blue-50/50' : 'border-slate-200 bg-white hover:bg-slate-50') + '">';
+                                html += '<input type="checkbox" ' + (checked ? 'checked' : '') + ' onchange="App.admin.spToggle(' + o.id + ', this.checked)" class="h-4 w-4 rounded border-slate-300 text-[#151c75] focus:ring-[#151c75]">';
+                                html += '<div class="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-[#151c75] to-[#3f48bf] text-[10px] font-black text-white">' + App.utils.escapeHtml(ini) + '</div>';
+                                html += '<div class="min-w-0 flex-1">';
+                                html += '<div class="text-xs font-bold text-[#151c75]">' + App.utils.escapeHtml(n) + '</div>';
+                                html += '<div class="text-[9px] text-slate-500">' + App.utils.escapeHtml(t) + ' \u00b7 Rp ' + p.toLocaleString('id-ID') + '</div>';
+                                html += '<div class="text-[8px] text-slate-400">' + App.utils.escapeHtml(ds) + '</div>';
+                                html += '</div>';
+                                if (checked) html += '<span class="shrink-0 inline-flex items-center px-1.5 py-0.5 rounded-full text-[8px] font-bold bg-blue-100 text-blue-700">WIDGET</span>';
+                                html += '</label>';
                             });
-                            spHtml += '</div>';
-                            spHtml += '<div class="mt-4 p-3 rounded-xl bg-amber-50 border border-amber-200"><div class="flex items-start gap-2"><i class="fa-solid fa-info-circle text-amber-500 mt-0.5 text-xs"></i><div class="text-[10px] text-amber-700 leading-relaxed"><strong>Catatan:</strong> Widget homepage menampilkan <strong>5 pembelian premium terbaru</strong> dari data orders. Data diperbarui real-time dari database.</div></div></div>';
+                            html += '</div>';
+
+                            html += '<div class="mt-4 p-3 rounded-xl bg-amber-50 border border-amber-200"><div class="flex items-start gap-2"><i class="fa-solid fa-info-circle text-amber-500 mt-0.5 text-xs"></i><div class="text-[10px] text-amber-700 leading-relaxed"><strong>Catatan:</strong> Centang order untuk menampilkannya di toast widget homepage. Semua yang dicentang akan tampil secara acak. Data real-time dari database.</div></div></div>';
                         }
-                        area.innerHTML = spHtml;
+                        area.innerHTML = html;
                     } catch (spErr) {
                         area.innerHTML = '<div class="text-center py-12"><p class="text-sm text-red-500">Gagal memuat data: ' + App.utils.escapeHtml(spErr.message || 'Unknown error') + '</p></div>';
                     }
                 },
 
-                renderSubTab: async () => {
+                // Toggle single order in social_proof_items
+                spToggle: async (orderId, show) => {
+                    try {
+                        if (show) {
+                            // Upsert: insert or activate
+                            const { error } = await supabaseClient
+                                .from('social_proof_items')
+                                .upsert({ order_id: orderId, is_active: true }, { onConflict: 'order_id' });
+                            if (error) throw error;
+                        } else {
+                            // Deactivate (keep row for easy re-activation)
+                            const { error } = await supabaseClient
+                                .from('social_proof_items')
+                                .update({ is_active: false })
+                                .eq('order_id', orderId);
+                            if (error) throw error;
+                        }
+                        App.admin.renderSocialProof();
+                    } catch (e) {
+                        if (window.App?.ui?.toast) App.ui.toast('Gagal update: ' + e.message, 'error');
+                    }
+                },
+
+                // Toggle all orders
+                spToggleAll: async (show) => {
+                    try {
+                        const { data: orders, error: oErr } = await supabaseClient
+                            .from('orders')
+                            .select('id')
+                            .in('payment_status', ['PAID', 'CONFIRMED']);
+                        if (oErr) throw oErr;
+                        if (!orders || !orders.length) return;
+
+                        const ids = orders.map(o => o.id);
+
+                        if (show) {
+                            // Upsert all
+                            const rows = ids.map(id => ({ order_id: id, is_active: true }));
+                            const { error } = await supabaseClient
+                                .from('social_proof_items')
+                                .upsert(rows, { onConflict: 'order_id' });
+                            if (error) throw error;
+                        } else {
+                            // Deactivate all
+                            const { error } = await supabaseClient
+                                .from('social_proof_items')
+                                .update({ is_active: false })
+                                .in('order_id', ids);
+                            if (error) throw error;
+                        }
+                        App.admin.renderSocialProof();
+                    } catch (e) {
+                        if (window.App?.ui?.toast) App.ui.toast('Gagal update: ' + e.message, 'error');
+                    }
+                },
+
+                                renderSubTab: async () => {
                     const area = document.getElementById('admin-content-area');
                     if (!area) return;
 
