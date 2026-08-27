@@ -4,11 +4,11 @@
   // ============================================================
   // STUDIHOME — Social Proof Widget (Live Toast Notifications)
   // ============================================================
-  // Version: 2.0.0 (real data: entitlements + products + profiles)
+  // Version: 3.0.0 (uses orders table — entitlements has no created_at)
   // Date: 27 Aug 2026
   //
-  // Fetches the 5 most recent premium members from Supabase
-  // (entitlements → products + profiles) and displays toasts.
+  // Fetches the 5 most recent paid orders from Supabase
+  // (orders → products + profiles) and displays toasts.
   //
   // TIMING (organik/psikologis):
   //   Initial delay: 4000ms (4s after page load)
@@ -21,7 +21,7 @@
   //   - No eval(), no innerHTML with unescaped data
   // ============================================================
 
-  var VERSION = '2';
+  var VERSION = '3';
   var WIDGET_ID = 'studihome-social-proof-widget';
   var POLL_KEY = 'studihome-social-proof-items-v' + VERSION;
 
@@ -45,70 +45,43 @@
     return window.supabaseClient || null;
   }
 
-  // --- Fetch 5 latest premium members with product info ---
+  // --- Fetch 5 latest paid orders with profile + product info ---
   async function fetchItems() {
     var client = db();
     if (!client || !client.from) return [];
 
     try {
-      // Step 1: Get 5 most recent entitlements (premium purchases)
-      var entitlementRes = await client
-        .from('entitlements')
-        .select('id, user_id, product_id, created_at')
+      // Query orders with Supabase foreign-key joins (same pattern as admin panel)
+      // orders → profiles(name) via orders_user_id_fkey
+      // orders → products(title) via orders_product_id_fkey
+      var result = await client
+        .from('orders')
+        .select('id, user_id, product_id, created_at, products(title), profiles!orders_user_id_fkey(name)')
+        .in('payment_status', ['PAID', 'CONFIRMED'])
         .order('created_at', { ascending: false })
         .limit(CONFIG.maxMembers);
 
-      if (entitlementRes.error) {
-        console.warn('[Studihome Social Proof] Entitlements error:', entitlementRes.error.message);
+      if (result.error) {
+        console.warn('[Studihome Social Proof] Orders error:', result.error.message);
         return [];
       }
 
-      var entitlements = entitlementRes.data || [];
-      if (!entitlements.length) {
-        console.info('[Studihome Social Proof] No entitlements found — widget idle.');
+      var orders = result.data || [];
+      if (!orders.length) {
+        console.info('[Studihome Social Proof] No paid orders found — widget idle.');
         return [];
       }
 
-      // Step 2: Get profiles for these users
-      var userIds = [];
-      for (var i = 0; i < entitlements.length; i++) {
-        if (userIds.indexOf(entitlements[i].user_id) === -1) {
-          userIds.push(entitlements[i].user_id);
-        }
-      }
-      var productIds = [];
-      for (var j = 0; j < entitlements.length; j++) {
-        if (productIds.indexOf(entitlements[j].product_id) === -1) {
-          productIds.push(entitlements[j].product_id);
-        }
-      }
-
-      var profileRes = await client
-        .from('profiles')
-        .select('id, name')
-        .in('id', userIds);
-
-      var productRes = await client
-        .from('products')
-        .select('id, title')
-        .in('id', productIds);
-
-      // Build lookup maps
-      var profileMap = {};
-      (profileRes.data || []).forEach(function(p) { profileMap[p.id] = p.name; });
-      var productMap = {};
-      (productRes.data || []).forEach(function(p) { productMap[p.id] = p.title; });
-
-      // Step 3: Map entitlements to toast items
+      // Map to toast items
       var items = [];
-      for (var k = 0; k < entitlements.length; k++) {
-        var e = entitlements[k];
-        var name = profileMap[e.user_id] || 'Member Studihome';
-        var productTitle = productMap[e.product_id] || 'Produk Premium';
+      for (var i = 0; i < orders.length; i++) {
+        var o = orders[i];
+        var name = (o.profiles && o.profiles.name) || 'Member Studihome';
+        var productTitle = (o.products && o.products.title) || 'Produk Premium';
         items.push({
           name: name,
           product_title: productTitle,
-          created_at: e.created_at
+          created_at: o.created_at
         });
       }
 
