@@ -4,12 +4,12 @@
   // ============================================================
   // STUDIHOME — Social Proof Admin Panel (CRUD for Dapur)
   // ============================================================
-  // Version: 1.0.0
+  // Version: 1.1.0 (minimalist: hooks into existing admin tab bar)
   // Branch: feat/live-social-proof
   // Date: 27 Aug 2026
   //
-  // Renders a CRUD overlay in /admin for managing social_proof_items.
-  // Follows the same pattern as under-construction-gudang.js.
+  // Renders a CRUD overlay when the "Social Proof" tab button is clicked.
+  // Button is already in index.html admin tab bar (next to Gudang).
   //
   // SECURITY:
   //   - esc() used for all user-supplied text
@@ -21,18 +21,9 @@
   var PATH = (location.pathname || '/').replace(/\/+$/, '') || '/';
   if (PATH !== '/admin') return;
 
-  var VERSION = '1';
-  var LAUNCHER_ID = 'studihome-social-proof-admin-menu';
   var OVERLAY_ID = 'studihome-social-proof-admin-overlay';
-  var SHARED_ID = 'studihome-social-proof-admin-shared-v' + VERSION;
-
-  var sharedPromise = null;
 
   // --- Helpers ---
-  var sleep = function(ms) { return new Promise(function(r) { setTimeout(r, ms); }); };
-  var connected = function(el) { return !!el && el.isConnected === true; };
-
-  // --- XSS-safe escape (matches project convention) ---
   function esc(v) {
     return String(v == null ? '' : v).replace(/[&<>"']/g, function(c) {
       return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c];
@@ -47,87 +38,6 @@
     if (window.App && window.App.ui && window.App.ui.toast) {
       window.App.ui.toast(m, t);
     }
-  }
-
-  // --- Load shared under-construction module (reuse pattern) ---
-  function loadShared() {
-    if (window.StudihomeUnderConstruction) return Promise.resolve(window.StudihomeUnderConstruction);
-    if (sharedPromise) return sharedPromise;
-
-    var script = document.getElementById(SHARED_ID);
-    if (!script) {
-      script = document.createElement('script');
-      script.id = SHARED_ID;
-      script.src = '/under-construction.js?v=' + VERSION;
-      script.defer = true;
-      script.async = false;
-      document.head.appendChild(script);
-    }
-
-    sharedPromise = (async function() {
-      for (var i = 0; i < 160; i++) {
-        if (window.StudihomeUnderConstruction) return window.StudihomeUnderConstruction;
-        await sleep(50);
-      }
-      return null;
-    })();
-
-    return sharedPromise;
-  }
-
-  // --- Find admin sidebar container (same logic as gudang) ---
-  function findContainer() {
-    var selectors = [
-      '#admin-sidebar', '.admin-sidebar', '[data-admin-sidebar]',
-      '[data-sidebar]', 'aside', 'nav', '[role="navigation"]',
-      'div[class*="sidebar" i]', 'div[class*="navigation" i]'
-    ];
-    var candidates = [];
-    selectors.forEach(function(sel) {
-      document.querySelectorAll(sel).forEach(function(el) {
-        if (candidates.indexOf(el) === -1) candidates.push(el);
-      });
-    });
-    return candidates
-      .filter(function(el) { return connected(el); })
-      .sort(function(a, b) { return b.querySelectorAll('a,button,[role="button"]').length - a.querySelectorAll('a,button,[role="button"]').length; })[0] || null;
-  }
-
-  // --- Create sidebar launcher button ---
-  function buttonMarkup() {
-    var button = document.createElement('button');
-    button.id = LAUNCHER_ID;
-    button.type = 'button';
-    button.setAttribute('aria-label', 'Kelola Social Proof');
-    button.setAttribute('title', 'SP');
-    button.innerHTML =
-      '<span class="inline-flex items-center justify-center w-8 h-8 rounded-xl bg-blue-50 text-[#151c75] flex-shrink-0">' +
-        '<svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"/></svg>' +
-      '</span>' +
-      '<span class="min-w-0 flex flex-col items-start gap-px leading-tight">' +
-        '<span class="text-[11px] font-black whitespace-nowrap">Social Proof</span>' +
-      '</span>';
-    button.className = [
-      'flex items-center gap-2.5 w-full min-h-[52px] px-3 py-2',
-      'border border-blue-100 rounded-[14px] bg-white text-slate-700',
-      'cursor-pointer text-left shadow-sm transition-colors',
-      'hover:bg-blue-50 hover:border-blue-200'
-    ].join(' ');
-    button.addEventListener('click', function() { openPanel(); });
-    return button;
-  }
-
-  function placeLauncher() {
-    var launcher = document.getElementById(LAUNCHER_ID);
-    var container = findContainer();
-    if (!launcher) launcher = buttonMarkup();
-    if (container && connected(container)) {
-      if (connected(launcher)) launcher.remove();
-      container.appendChild(launcher);
-      return true;
-    }
-    if (!connected(launcher)) document.body.appendChild(launcher);
-    return true;
   }
 
   // --- Overlay ---
@@ -382,26 +292,31 @@
     }
   }
 
-  // --- Open panel ---
+  // --- Open panel (called from tab button) ---
   async function openPanel() {
     ensureOverlay();
     await reloadPanel();
   }
 
-  // --- Place sidebar launcher ---
-  function place() {
-    placeLauncher();
+  // --- Expose to App.admin ---
+  function exposeGlobal() {
+    if (!window.App) window.App = {};
+    if (!window.App.admin) window.App.admin = {};
+    window.App.admin.openSocialProof = openPanel;
   }
 
-  // --- Boot ---
-  async function boot() {
-    await loadShared();
-    place();
-    // Re-place periodically in case sidebar is dynamic
-    setInterval(function() {
-      var launcher = document.getElementById(LAUNCHER_ID);
-      if (!connected(launcher)) place();
-    }, 2000);
+  // --- Boot: expose and attach to existing button ---
+  function boot() {
+    exposeGlobal();
+
+    // Attach click handler to existing tab button (if already in DOM)
+    var btn = document.getElementById('sp-tab-btn');
+    if (btn) {
+      btn.addEventListener('click', function(e) {
+        e.preventDefault();
+        openPanel();
+      });
+    }
   }
 
   if (document.readyState === 'loading') {
