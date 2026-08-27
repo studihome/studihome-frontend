@@ -2,17 +2,20 @@
   'use strict';
 
   // ============================================================
-  // STUDIHOME Social Proof Widget v7
+  // STUDIHOME Social Proof Widget v8
   // ============================================================
   // Uses ONLY social_proof_items table (M13: public SELECT on
   // is_active=true). No dependency on orders/products RLS.
   //
   // Timing: 4s initial delay, 5s display, 12-25s random interval
+  // Boot: polls for supabaseClient every 200ms (bulletproof)
   // ============================================================
 
   var WIDGET_ID = 'studihome-social-proof-widget';
-  var POLL_KEY = 'studihome-sp-v7';
+  var POLL_KEY = 'studihome-sp-v8';
   var MAX_ITEMS = 10;
+  var POLL_INTERVAL = 200;
+  var POLL_TIMEOUT = 30000; // stop polling after 30s
 
   var TIMING = { initialDelay: 4000, displayMs: 5000, intervalMin: 12000, intervalMax: 25000 };
 
@@ -47,7 +50,7 @@
         .order('created_at', { ascending: false })
         .limit(MAX_ITEMS);
       if (res.error) {
-        console.warn('[SP]', res.error.message);
+        console.warn('[SP] fetch error:', res.error.message);
         return [];
       }
       return (res.data || []).map(function(r) {
@@ -57,7 +60,7 @@
         };
       });
     } catch (e) {
-      console.warn('[SP]', e);
+      console.warn('[SP] fetch exception:', e);
       return [];
     }
   }
@@ -117,7 +120,7 @@
   // ---- Loop ----
   async function start() {
     var items = await fetchItems();
-    if (!items.length) return;
+    if (!items.length) { console.warn('[SP] no active items found'); return; }
     var q = shuffle(items);
     var idx = 0;
     function next() {
@@ -133,14 +136,34 @@
     }, TIMING.initialDelay);
   }
 
+  // ---- Boot: bulletproof polling for supabaseClient ----
   function boot() {
     if (window[POLL_KEY]) return;
     window[POLL_KEY] = true;
-    if (db() && db().from) { start(); return; }
-    window.addEventListener('studihome:supabase-client-ready', function() { start(); }, { once: true });
+
+    // Immediate check: if client already exists, start now
+    if (db() && db().from) {
+      console.log('[SP] supabaseClient ready immediately');
+      start();
+      return;
+    }
+
+    // Poll until client appears or timeout
+    console.log('[SP] polling for supabaseClient...');
+    var elapsed = 0;
+    var timer = setInterval(function() {
+      elapsed += POLL_INTERVAL;
+      if (db() && db().from) {
+        clearInterval(timer);
+        console.log('[SP] supabaseClient ready after ' + elapsed + 'ms');
+        start();
+      } else if (elapsed >= POLL_TIMEOUT) {
+        clearInterval(timer);
+        console.warn('[SP] supabaseClient not found after ' + POLL_TIMEOUT + 'ms, giving up');
+      }
+    }, POLL_INTERVAL);
   }
 
-  if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', boot);
-  } else { boot(); }
+  // Always run boot immediately (script is at end of <body>, not deferred)
+  boot();
 })();
