@@ -4,12 +4,11 @@
   // ============================================================
   // STUDIHOME — Social Proof Widget (Live Toast Notifications)
   // ============================================================
-  // Version: 1.0.0
-  // Branch: feat/live-social-proof
+  // Version: 2.0.0 (real data: entitlements + products + profiles)
   // Date: 27 Aug 2026
   //
-  // Reads social_proof_items from Supabase (public RLS: is_active=true).
-  // Displays random toast notifications in bottom-left corner.
+  // Fetches the 5 most recent premium members from Supabase
+  // (entitlements → products + profiles) and displays toasts.
   //
   // TIMING (organik/psikologis):
   //   Initial delay: 4000ms (4s after page load)
@@ -22,7 +21,7 @@
   //   - No eval(), no innerHTML with unescaped data
   // ============================================================
 
-  var VERSION = '1';
+  var VERSION = '2';
   var WIDGET_ID = 'studihome-social-proof-widget';
   var POLL_KEY = 'studihome-social-proof-items-v' + VERSION;
 
@@ -31,7 +30,7 @@
     displayDuration: 5000,
     intervalMin: 12000,
     intervalMax: 25000,
-    maxItems: 50
+    maxMembers: 5
   };
 
   // --- XSS-safe escape (matches project convention) ---
@@ -46,24 +45,74 @@
     return window.supabaseClient || null;
   }
 
-  // --- Fetch active social proof items from Supabase ---
+  // --- Fetch 5 latest premium members with product info ---
   async function fetchItems() {
     var client = db();
     if (!client || !client.from) return [];
 
     try {
-      var result = await client
-        .from('social_proof_items')
-        .select('id, name, brand_name, package_name')
-        .eq('is_active', true)
-        .limit(CONFIG.maxItems);
+      // Step 1: Get 5 most recent entitlements (premium purchases)
+      var entitlementRes = await client
+        .from('entitlements')
+        .select('id, user_id, product_id, created_at')
+        .order('created_at', { ascending: false })
+        .limit(CONFIG.maxMembers);
 
-      if (result.error) {
-        console.warn('[Studihome Social Proof] Fetch error:', result.error.message);
+      if (entitlementRes.error) {
+        console.warn('[Studihome Social Proof] Entitlements error:', entitlementRes.error.message);
         return [];
       }
 
-      return result.data || [];
+      var entitlements = entitlementRes.data || [];
+      if (!entitlements.length) {
+        console.info('[Studihome Social Proof] No entitlements found — widget idle.');
+        return [];
+      }
+
+      // Step 2: Get profiles for these users
+      var userIds = [];
+      for (var i = 0; i < entitlements.length; i++) {
+        if (userIds.indexOf(entitlements[i].user_id) === -1) {
+          userIds.push(entitlements[i].user_id);
+        }
+      }
+      var productIds = [];
+      for (var j = 0; j < entitlements.length; j++) {
+        if (productIds.indexOf(entitlements[j].product_id) === -1) {
+          productIds.push(entitlements[j].product_id);
+        }
+      }
+
+      var profileRes = await client
+        .from('profiles')
+        .select('id, name')
+        .in('id', userIds);
+
+      var productRes = await client
+        .from('products')
+        .select('id, title')
+        .in('id', productIds);
+
+      // Build lookup maps
+      var profileMap = {};
+      (profileRes.data || []).forEach(function(p) { profileMap[p.id] = p.name; });
+      var productMap = {};
+      (productRes.data || []).forEach(function(p) { productMap[p.id] = p.title; });
+
+      // Step 3: Map entitlements to toast items
+      var items = [];
+      for (var k = 0; k < entitlements.length; k++) {
+        var e = entitlements[k];
+        var name = profileMap[e.user_id] || 'Member Studihome';
+        var productTitle = productMap[e.product_id] || 'Produk Premium';
+        items.push({
+          name: name,
+          product_title: productTitle,
+          created_at: e.created_at
+        });
+      }
+
+      return items;
     } catch (e) {
       console.warn('[Studihome Social Proof] Fetch failed:', e);
       return [];
@@ -89,17 +138,25 @@
 
   // --- Build toast markup using Tailwind utility classes only ---
   function toastHTML(item) {
+    // Extract initials for avatar
+    var parts = (item.name || '').trim().split(/\s+/);
+    var initials = '';
+    for (var i = 0; i < parts.length && i < 2; i++) {
+      initials += parts[i].charAt(0);
+    }
+    initials = initials.toUpperCase() || '✦';
+
     return (
       '<div class="pointer-events-auto flex items-start gap-3 max-w-xs rounded-2xl border border-blue-100 bg-white px-4 py-3 shadow-lg ring-1 ring-black/5 backdrop-blur-sm transition-all duration-300 opacity-0 translate-y-2">' +
         '<span class="mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-[#151c75] to-[#3f48bf] text-[10px] font-black text-white">' +
-          esc(item.name.charAt(item.name.indexOf(' ') + 1) || item.name.charAt(0)) +
+          esc(initials) +
         '</span>' +
         '<div class="min-w-0 flex-1">' +
           '<p class="truncate text-xs font-bold text-[#151c75]">' + esc(item.name) + '</p>' +
           '<p class="mt-0.5 truncate text-[10px] text-slate-500">' +
-            'baru saja membeli <span class="font-semibold text-amber-600">' + esc(item.package_name) + '</span>' +
+            'baru saja membeli <span class="font-semibold text-amber-600">' + esc(item.product_title) + '</span>' +
           '</p>' +
-          '<p class="mt-0.5 text-[9px] font-medium text-blue-400">' + esc(item.brand_name) + '</p>' +
+          '<p class="mt-0.5 text-[9px] font-medium text-blue-400">Studihome</p>' +
         '</div>' +
         '<button type="button" aria-label="Tutup notifikasi" class="sp-close shrink-0 mt-0.5 flex h-5 w-5 items-center justify-center rounded-full text-slate-300 hover:bg-slate-100 hover:text-slate-500 transition-colors">' +
           '&times;' +
@@ -172,10 +229,7 @@
   // --- Main loop: fetch items, then show random toasts on schedule ---
   async function startLoop() {
     var items = await fetchItems();
-    if (!items.length) {
-      console.info('[Studihome Social Proof] No active items found — widget idle.');
-      return;
-    }
+    if (!items.length) return;
 
     var shuffled = shuffle(items);
     var index = 0;
@@ -183,7 +237,6 @@
     function nextItem() {
       var item = shuffled[index % shuffled.length];
       index++;
-      // Re-shuffle when we've cycled through all items
       if (index >= shuffled.length) {
         shuffled = shuffle(items);
         index = 0;
@@ -193,10 +246,8 @@
 
     // Wait for initialDelay, then start showing
     setTimeout(function() {
-      // Show first toast immediately after initialDelay
       showToast(nextItem());
 
-      // Then continue with random intervals
       function scheduleNext() {
         var delay = randInt(CONFIG.intervalMin, CONFIG.intervalMax);
         setTimeout(function() {
@@ -213,13 +264,11 @@
     if (window[POLL_KEY]) return;
     window[POLL_KEY] = true;
 
-    // If Supabase client is already ready
     if (db() && db().from) {
       startLoop();
       return;
     }
 
-    // Otherwise wait for the singleton-ready event
     window.addEventListener('studihome:supabase-client-ready', function() {
       startLoop();
     }, { once: true });

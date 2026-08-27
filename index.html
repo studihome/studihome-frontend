@@ -6136,7 +6136,7 @@ ${(() => { const rs=String(p.review_status||'DRAFT').toUpperCase(); const map={D
                             <button onclick="App.admin.switchTab('gudang')" class="px-3.5 py-2 rounded-xl transition-all ${activeTab === 'gudang' ? 'btn-brand-gradient shadow-xs' : 'text-slate-700 hover:text-[#151c75]'}">
                                 <i class="fa-solid fa-warehouse mr-1"></i> Gudang
                             </button>
-                            <button id="sp-tab-btn" onclick="App.admin.openSocialProof && App.admin.openSocialProof()" class="px-3.5 py-2 rounded-xl transition-all ${activeTab === 'social-proof' ? 'btn-brand-gradient shadow-xs' : 'text-slate-700 hover:text-[#151c75]'}">
+                            <button id="sp-tab-btn" onclick="App.admin.switchTab('social-proof')" class="px-3.5 py-2 rounded-xl transition-all ${activeTab === 'social-proof' ? 'btn-brand-gradient shadow-xs' : 'text-slate-700 hover:text-[#151c75]'}">
                                 <i class="fa-solid fa-bell mr-1"></i> Social Proof
                             </button>
                         </div>
@@ -6472,6 +6472,10 @@ renderStudioAiControl: async () => {
                     }
                     if (tab === 'gudang') {
                         window.StudihomeGudangV2?.open?.();
+                        return;
+                    }
+                    if (tab === 'social-proof') {
+                        App.admin.renderSocialProof();
                         return;
                     }
 

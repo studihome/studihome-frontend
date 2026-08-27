@@ -2,14 +2,13 @@
   'use strict';
 
   // ============================================================
-  // STUDIHOME — Social Proof Admin Panel (CRUD for Dapur)
+  // STUDIHOME — Social Proof Admin Panel
   // ============================================================
-  // Version: 1.1.0 (minimalist: hooks into existing admin tab bar)
-  // Branch: feat/live-social-proof
+  // Version: 2.0.0 (renders into admin-content-area)
   // Date: 27 Aug 2026
   //
-  // Renders a CRUD overlay when the "Social Proof" tab button is clicked.
-  // Button is already in index.html admin tab bar (next to Gudang).
+  // Registers App.admin.renderSocialProof() which renders the
+  // real premium member list into the existing admin tab content area.
   //
   // SECURITY:
   //   - esc() used for all user-supplied text
@@ -20,8 +19,6 @@
 
   var PATH = (location.pathname || '/').replace(/\/+$/, '') || '/';
   if (PATH !== '/admin') return;
-
-  var OVERLAY_ID = 'studihome-social-proof-admin-overlay';
 
   // --- Helpers ---
   function esc(v) {
@@ -40,288 +37,166 @@
     }
   }
 
-  // --- Overlay ---
-  function closePanel() {
-    var el = document.getElementById(OVERLAY_ID);
-    if (el) el.remove();
-  }
-
-  function ensureOverlay() {
-    var overlay = document.getElementById(OVERLAY_ID);
-    if (overlay) return overlay;
-
-    overlay = document.createElement('div');
-    overlay.id = OVERLAY_ID;
-    overlay.className = [
-      'fixed inset-0 z-[2147482999] flex items-start justify-center',
-      'p-4 sm:p-6 bg-slate-900/60 backdrop-blur-sm overflow-auto'
-    ].join(' ');
-
-    var sheet = document.createElement('section');
-    sheet.className = [
-      'w-full max-w-[1080px] mt-auto sm:mt-8 bg-[#f8fbff] border border-blue-100',
-      'rounded-3xl shadow-2xl overflow-hidden'
-    ].join(' ');
-
-    // Header
-    var head = document.createElement('div');
-    head.className = 'flex items-center justify-between gap-3 px-4 sm:px-5 py-3.5 bg-gradient-to-r from-[#151c75] to-[#3f48bf] text-white';
-    head.innerHTML =
-      '<div>' +
-        '<div class="text-[9px] font-black uppercase tracking-[.12em] opacity-80">SITE CONTROL</div>' +
-        '<div class="text-lg font-black mt-0.5">Social Proof Items</div>' +
-        '<div class="text-[10px] opacity-60 mt-0.5">Kelola notifikasi transaksi real-time</div>' +
-      '</div>';
-
-    var close = document.createElement('button');
-    close.type = 'button';
-    close.setAttribute('aria-label', 'Tutup');
-    close.className = 'w-9 h-9 flex items-center justify-center rounded-xl bg-white/15 text-white text-xl hover:bg-white/25 transition-colors';
-    close.innerHTML = '&times;';
-    close.addEventListener('click', closePanel);
-    head.appendChild(close);
-
-    // Body
-    var body = document.createElement('div');
-    body.id = OVERLAY_ID + '-body';
-    body.className = 'p-4 sm:p-5 min-h-[200px] bg-[#f8fbff]';
-    body.innerHTML = '<div class="flex items-center justify-center py-12 text-sm text-slate-400">Memuat data...</div>';
-
-    sheet.appendChild(head);
-    sheet.appendChild(body);
-    overlay.appendChild(sheet);
-    overlay.addEventListener('click', function(e) { if (e.target === overlay) closePanel(); });
-    document.body.appendChild(overlay);
-
-    return overlay;
-  }
-
-  // --- Data operations ---
-  async function fetchAll() {
+  // --- Fetch real data: entitlements + profiles + products ---
+  async function fetchMembers() {
     var client = db();
     if (!client || !client.from) return [];
-    var result = await client
-      .from('social_proof_items')
-      .select('*')
-      .order('id', { ascending: true });
-    if (result.error) throw result.error;
-    return result.data || [];
+
+    try {
+      var entRes = await client
+        .from('entitlements')
+        .select('id, user_id, product_id, created_at')
+        .order('created_at', { ascending: false })
+        .limit(20);
+
+      if (entRes.error) throw entRes.error;
+      var entitlements = entRes.data || [];
+      if (!entitlements.length) return [];
+
+      var userIds = [];
+      var productIds = [];
+      for (var i = 0; i < entitlements.length; i++) {
+        if (userIds.indexOf(entitlements[i].user_id) === -1) userIds.push(entitlements[i].user_id);
+        if (productIds.indexOf(entitlements[i].product_id) === -1) productIds.push(entitlements[i].product_id);
+      }
+
+      var profileRes = await client.from('profiles').select('id, name, email').in('id', userIds);
+      var productRes = await client.from('products').select('id, title, price, is_active').in('id', productIds);
+
+      var profileMap = {};
+      (profileRes.data || []).forEach(function(p) { profileMap[p.id] = p; });
+      var productMap = {};
+      (productRes.data || []).forEach(function(p) { productMap[p.id] = p; });
+
+      return entitlements.map(function(e) {
+        var profile = profileMap[e.user_id] || {};
+        var product = productMap[e.product_id] || {};
+        return {
+          id: e.id,
+          name: profile.name || 'Member Studihome',
+          email: profile.email || '',
+          product_title: product.title || 'Produk Premium',
+          product_price: product.price || 0,
+          product_active: product.is_active !== false,
+          created_at: e.created_at
+        };
+      });
+    } catch (e) {
+      console.warn('[Studihome SP Admin] Fetch error:', e);
+      return [];
+    }
   }
 
-  async function insertItem(data) {
-    var client = db();
-    if (!client) throw new Error('Database belum siap');
-    var result = await client.from('social_proof_items').insert(data).select();
-    if (result.error) throw result.error;
-    return result.data;
-  }
+  // --- Render into admin-content-area ---
+  async function renderSocialProof() {
+    var area = document.getElementById('admin-content-area');
+    if (!area) return;
 
-  async function updateItem(id, patch) {
-    var client = db();
-    if (!client) throw new Error('Database belum siap');
-    var result = await client.from('social_proof_items').update(patch).eq('id', id).select();
-    if (result.error) throw result.error;
-    return result.data;
-  }
+    // Loading state
+    area.innerHTML = '<div class="flex items-center justify-center py-12 text-sm text-slate-400"><i class="fa-solid fa-spinner fa-spin mr-2"></i> Memuat data Social Proof...</div>';
 
-  async function deleteItem(id) {
-    var client = db();
-    if (!client) throw new Error('Database belum siap');
-    var result = await client.from('social_proof_items').delete().eq('id', id);
-    if (result.error) throw result.error;
-  }
-
-  // --- Render CRUD table ---
-  function renderTable(items) {
-    var body = document.getElementById(OVERLAY_ID + '-body');
-    if (!body) return;
-
-    var activeCount = items.filter(function(i) { return i.is_active; }).length;
+    var members = await fetchMembers();
 
     var html = '';
-
-    // Summary + Add button
+    // Header
     html += '<div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-4">';
-    html += '<div class="flex items-center gap-3">';
-    html += '<span class="text-sm font-black text-[#151c75]">' + items.length + ' item</span>';
-    html += '<span class="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold bg-green-50 text-green-700 border border-green-200">' + activeCount + ' aktif</span>';
+    html += '<div>';
+    html += '<h3 class="text-sm font-extrabold text-[#151c75]">🔔 Social Proof — Member Premium Terbaru</h3>';
+    html += '<p class="text-[10px] text-slate-500 mt-0.5">Data otomatis dari entitlements (pembelian premium). 5 member terbaru tampil di homepage.</p>';
     html += '</div>';
-    html += '<button id="sp-add-new" type="button" class="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-[#151c75] text-white text-[11px] font-extrabold hover:bg-[#1e2578] transition-colors">';
-    html += '<span class="text-base leading-none">+</span> Tambah Baru';
-    html += '</button>';
     html += '</div>';
 
-    // Items grid
-    if (!items.length) {
-      html += '<div class="text-center py-12 text-sm text-slate-400">Belum ada data social proof. Klik "Tambah Baru" untuk memulai.</div>';
+    if (!members.length) {
+      html += '<div class="text-center py-12">';
+      html += '<div class="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-slate-100 text-slate-300 mb-3"><i class="fa-solid fa-users-slash text-2xl"></i></div>';
+      html += '<p class="text-sm text-slate-500">Belum ada member premium.</p>';
+      html += '<p class="text-[10px] text-slate-400 mt-1">Widget akan otomatis menampilkan data setelah ada pembelian produk premium.</p>';
+      html += '</div>';
     } else {
-      html += '<div class="grid gap-2.5">';
-      items.forEach(function(item) {
-        var statusBadge = item.is_active
-          ? '<span class="inline-flex items-center px-2 py-0.5 rounded-full text-[9px] font-bold bg-green-50 text-green-700 border border-green-200">Aktif</span>'
-          : '<span class="inline-flex items-center px-2 py-0.5 rounded-full text-[9px] font-bold bg-slate-100 text-slate-400 border border-slate-200">Nonaktif</span>';
+      // Stats
+      var activeProducts = 0;
+      for (var i = 0; i < members.length; i++) {
+        if (members[i].product_active) activeProducts++;
+      }
 
-        html += '<div class="flex items-center gap-3 p-3 rounded-2xl border border-blue-100 bg-white hover:border-blue-200 transition-colors">';
-        html += '<div class="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-[#151c75] to-[#3f48bf] text-[10px] font-black text-white">' + esc((item.name || '?').charAt(0)) + '</div>';
+      html += '<div class="grid grid-cols-2 sm:grid-cols-3 gap-2 mb-4">';
+      html += '<div class="card-3d p-3 rounded-xl bg-white">';
+      html += '<div class="text-lg font-black text-[#151c75]">' + members.length + '</div>';
+      html += '<div class="text-[9px] text-slate-500 font-bold uppercase">Total Entitlements</div>';
+      html += '</div>';
+      html += '<div class="card-3d p-3 rounded-xl bg-white">';
+      html += '<div class="text-lg font-black text-green-600">' + activeProducts + '</div>';
+      html += '<div class="text-[9px] text-slate-500 font-bold uppercase">Produk Aktif</div>';
+      html += '</div>';
+      html += '<div class="card-3d p-3 rounded-xl bg-white">';
+      html += '<div class="text-lg font-black text-[#151c75]">5</div>';
+      html += '<div class="text-[9px] text-slate-500 font-bold uppercase">Tampil di Widget</div>';
+      html += '</div>';
+      html += '</div>';
+
+      // Member list
+      html += '<div class="space-y-2">';
+      for (var j = 0; j < members.length; j++) {
+        var m = members[j];
+        var parts = (m.name || '').trim().split(/\s+/);
+        var initials = '';
+        for (var k = 0; k < parts.length && k < 2; k++) initials += parts[k].charAt(0);
+        initials = initials.toUpperCase() || '✦';
+
+        var isInWidget = j < 5;
+        var dateStr = m.created_at ? new Date(m.created_at).toLocaleString('id-ID', { day: '2-digit', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' }) : '-';
+        var priceStr = m.product_price ? 'Rp ' + Number(m.product_price).toLocaleString('id-ID') : '-';
+
+        html += '<div class="flex items-center gap-3 p-3 rounded-xl border ' + (isInWidget ? 'border-blue-200 bg-blue-50/50' : 'border-slate-200 bg-white') + '">';
+        html += '<div class="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-[#151c75] to-[#3f48bf] text-[10px] font-black text-white">' + esc(initials) + '</div>';
         html += '<div class="min-w-0 flex-1">';
-        html += '<div class="text-xs font-bold text-[#151c75] truncate">' + esc(item.name) + '</div>';
-        html += '<div class="text-[10px] text-slate-500 truncate">' + esc(item.brand_name) + ' &middot; ' + esc(item.package_name) + '</div>';
+        html += '<div class="flex items-center gap-2">';
+        html += '<span class="text-xs font-bold text-[#151c75]">' + esc(m.name) + '</span>';
+        if (isInWidget) {
+          html += '<span class="inline-flex items-center px-1.5 py-0.5 rounded-full text-[8px] font-bold bg-blue-100 text-blue-700">WIDGET</span>';
+        }
         html += '</div>';
-        html += statusBadge;
-        html += '<div class="flex items-center gap-1 shrink-0">';
-        // Toggle active
-        html += '<button type="button" data-sp-toggle="' + item.id + '" data-active="' + (item.is_active ? 'true' : 'false') + '" class="p-1.5 rounded-lg hover:bg-slate-100 transition-colors" aria-label="' + (item.is_active ? 'Nonaktifkan' : 'Aktifkan') + '">';
-        html += item.is_active
-          ? '<svg class="w-3.5 h-3.5 text-green-500" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/></svg>'
-          : '<svg class="w-3.5 h-3.5 text-slate-300" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8 7a1 1 0 00-1 1v4a1 1 0 001 1h4a1 1 0 001-1V8a1 1 0 00-1-1H8z" clip-rule="evenodd"/></svg>';
-        html += '</button>';
-        // Delete
-        html += '<button type="button" data-sp-delete="' + item.id + '" class="p-1.5 rounded-lg hover:bg-red-50 transition-colors" aria-label="Hapus">';
-        html += '<svg class="w-3.5 h-3.5 text-red-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>';
-        html += '</button>';
+        html += '<div class="text-[9px] text-slate-500 mt-0.5">' + esc(m.product_title) + ' · ' + esc(priceStr) + '</div>';
+        html += '<div class="text-[8px] text-slate-400 mt-0.5">' + esc(dateStr) + '</div>';
         html += '</div>';
         html += '</div>';
-      });
+      }
+      html += '</div>';
+
+      // Note
+      html += '<div class="mt-4 p-3 rounded-xl bg-amber-50 border border-amber-200">';
+      html += '<div class="flex items-start gap-2">';
+      html += '<i class="fa-solid fa-info-circle text-amber-500 mt-0.5 text-xs"></i>';
+      html += '<div class="text-[10px] text-amber-700 leading-relaxed">';
+      html += '<strong>Catatan:</strong> Widget homepage secara otomatis menampilkan <strong>5 pembelian premium terbaru</strong> berdasarkan data entitlements. ';
+      html += 'Data diperbarui secara real-time dari database.';
+      html += '</div>';
+      html += '</div>';
       html += '</div>';
     }
 
-    body.innerHTML = html;
-
-    // Bind events
-    bindEvents();
+    area.innerHTML = html;
   }
 
-  // --- Inline add form ---
-  function showAddForm() {
-    var body = document.getElementById(OVERLAY_ID + '-body');
-    if (!body) return;
-
-    var html = '<div class="rounded-2xl border border-blue-100 bg-white p-4 space-y-3">';
-    html += '<h3 class="text-sm font-black text-[#151c75]">Tambah Social Proof Item</h3>';
-    html += '<label class="block"><span class="text-[10px] font-bold text-slate-600">Nama Customer</span>';
-    html += '<input id="sp-name" type="text" maxlength="100" placeholder="Bapak/Ibu ..." class="mt-1.5 w-full rounded-xl border border-slate-200 bg-slate-50 px-3 py-2.5 text-xs outline-none focus:border-blue-300 focus:ring-1 focus:ring-blue-200"></label>';
-    html += '<label class="block"><span class="text-[10px] font-bold text-slate-600">Brand</span>';
-    html += '<input id="sp-brand" type="text" maxlength="100" placeholder="Nama brand edukasi" class="mt-1.5 w-full rounded-xl border border-slate-200 bg-slate-50 px-3 py-2.5 text-xs outline-none focus:border-blue-300 focus:ring-1 focus:ring-blue-200"></label>';
-    html += '<label class="block"><span class="text-[10px] font-bold text-slate-600">Paket</span>';
-    html += '<input id="sp-package" type="text" maxlength="100" placeholder="Nama paket Studihome" class="mt-1.5 w-full rounded-xl border border-slate-200 bg-slate-50 px-3 py-2.5 text-xs outline-none focus:border-blue-300 focus:ring-1 focus:ring-blue-200"></label>';
-    html += '<label class="inline-flex items-center gap-2 cursor-pointer">';
-    html += '<input id="sp-active" type="checkbox" checked class="w-4 h-4 accent-[#151c75]">';
-    html += '<span class="text-xs font-bold text-slate-700">Aktif</span>';
-    html += '</label>';
-    html += '<div class="flex gap-2 pt-1">';
-    html += '<button id="sp-save-new" type="button" class="rounded-xl bg-[#151c75] px-4 py-2 text-[11px] font-extrabold text-white hover:bg-[#1e2578] transition-colors">Simpan</button>';
-    html += '<button id="sp-cancel-add" type="button" class="rounded-xl border border-slate-200 px-4 py-2 text-[11px] font-extrabold text-slate-600 hover:bg-slate-50 transition-colors">Batal</button>';
-    html += '</div>';
-    html += '</div>';
-
-    body.innerHTML = html;
-
-    document.getElementById('sp-cancel-add').addEventListener('click', function() { reloadPanel(); });
-    document.getElementById('sp-save-new').addEventListener('click', async function() {
-      var name = document.getElementById('sp-name').value.trim();
-      var brand = document.getElementById('sp-brand').value.trim();
-      var pkg = document.getElementById('sp-package').value.trim();
-      var active = document.getElementById('sp-active').checked;
-
-      if (!name || !brand || !pkg) {
-        toast('Semua field wajib diisi.', 'error');
-        return;
-      }
-
-      try {
-        await insertItem({ name: name, brand_name: brand, package_name: pkg, is_active: active });
-        toast('Item berhasil ditambahkan.', 'success');
-        reloadPanel();
-      } catch (e) {
-        toast(e.message || 'Gagal menyimpan.', 'error');
-      }
-    });
-
-    document.getElementById('sp-name').focus();
-  }
-
-  // --- Bind CRUD events ---
-  function bindEvents() {
-    // Add new
-    var addBtn = document.getElementById('sp-add-new');
-    if (addBtn) {
-      addBtn.addEventListener('click', showAddForm);
+  // --- Register on App.admin ---
+  function register() {
+    if (!window.App) {
+      setTimeout(register, 100);
+      return;
     }
-
-    // Toggle active
-    document.querySelectorAll('[data-sp-toggle]').forEach(function(btn) {
-      btn.addEventListener('click', async function() {
-        var id = parseInt(btn.getAttribute('data-sp-toggle'), 10);
-        var isActive = btn.getAttribute('data-active') === 'true';
-        try {
-          await updateItem(id, { is_active: !isActive });
-          toast(isActive ? 'Item dinonaktifkan.' : 'Item diaktifkan.', 'success');
-          reloadPanel();
-        } catch (e) {
-          toast(e.message || 'Gagal mengubah status.', 'error');
-        }
-      });
-    });
-
-    // Delete
-    document.querySelectorAll('[data-sp-delete]').forEach(function(btn) {
-      btn.addEventListener('click', async function() {
-        var id = parseInt(btn.getAttribute('data-sp-delete'), 10);
-        if (!confirm('Hapus item ini? Tindakan ini tidak dapat dibatalkan.')) return;
-        try {
-          await deleteItem(id);
-          toast('Item berhasil dihapus.', 'success');
-          reloadPanel();
-        } catch (e) {
-          toast(e.message || 'Gagal menghapus.', 'error');
-        }
-      });
-    });
-  }
-
-  // --- Reload panel ---
-  async function reloadPanel() {
-    try {
-      var items = await fetchAll();
-      renderTable(items);
-    } catch (e) {
-      var body = document.getElementById(OVERLAY_ID + '-body');
-      if (body) {
-        body.innerHTML = '<div class="text-center py-12 text-sm text-red-500">Gagal memuat data: ' + esc(e.message) + '</div>';
-      }
+    if (!window.App.admin) {
+      setTimeout(register, 100);
+      return;
     }
-  }
-
-  // --- Open panel (called from tab button) ---
-  async function openPanel() {
-    ensureOverlay();
-    await reloadPanel();
-  }
-
-  // --- Expose to App.admin ---
-  function exposeGlobal() {
-    if (!window.App) window.App = {};
-    if (!window.App.admin) window.App.admin = {};
-    window.App.admin.openSocialProof = openPanel;
-  }
-
-  // --- Boot: expose and attach to existing button ---
-  function boot() {
-    exposeGlobal();
-
-    // Attach click handler to existing tab button (if already in DOM)
-    var btn = document.getElementById('sp-tab-btn');
-    if (btn) {
-      btn.addEventListener('click', function(e) {
-        e.preventDefault();
-        openPanel();
-      });
-    }
+    window.App.admin.renderSocialProof = renderSocialProof;
+    window.App.admin.openSocialProof = function() {
+      window.App.admin.switchTab('social-proof');
+    };
   }
 
   if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', boot);
+    document.addEventListener('DOMContentLoaded', register);
   } else {
-    boot();
+    register();
   }
 })();
