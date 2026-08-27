@@ -1,25 +1,22 @@
 -- ============================================================
--- STUDIHOME — MIGRATION 14: Social Proof Toggle via Orders
+-- STUDIHOME MIGRATION 14: Social Proof Toggle via Orders
 -- ============================================================
--- Generated:  27 Aug 2026
--- Purpose:    Link social_proof_items to real orders for checkbox toggle
--- Platform:   Supabase SQL Editor
--- Dependency: M13 (social_proof_items table must exist)
+-- Platform: Supabase SQL Editor
+-- Depends on: M13 (social_proof_items table)
 --
--- CHANGELOG vs M13:
---   - Adds order_id FK to orders(id)
---   - Drops fake seed data (24 fiktif items)
---   - Makes name/brand_name/package_name nullable (derived from order join)
---   - Adds UNIQUE constraint on order_id
+-- Changes:
+--   1. Add order_id column (FK to orders.id)
+--   2. Add UNIQUE constraint on order_id
+--   3. Drop seed data (order_id IS NULL)
+--   4. Add indexes for fast lookups
 -- ============================================================
 
-
--- M14 — Langkah 1: Add order_id column (nullable first)
+-- Step 1: Add order_id column
 ALTER TABLE social_proof_items
     ADD COLUMN IF NOT EXISTS order_id bigint;
 
--- M14 — Langkah 2: Add foreign key to orders
-DO $$
+-- Step 2: Add foreign key (idempotent)
+DO $block$
 BEGIN
     IF NOT EXISTS (
         SELECT 1 FROM pg_constraint
@@ -28,14 +25,11 @@ BEGIN
         ALTER TABLE social_proof_items
             ADD CONSTRAINT social_proof_items_order_id_fkey
             FOREIGN KEY (order_id) REFERENCES orders(id) ON DELETE CASCADE;
-        RAISE NOTICE 'M14: FK to orders created';
-    ELSE
-        RAISE NOTICE 'M14: FK already exists — skip';
     END IF;
-END $$;
+END $block$;
 
--- M14 — Langkah 3: Add UNIQUE constraint on order_id
-DO $$
+-- Step 3: Add UNIQUE constraint on order_id (idempotent)
+DO $block$
 BEGIN
     IF NOT EXISTS (
         SELECT 1 FROM pg_constraint
@@ -44,46 +38,36 @@ BEGIN
         ALTER TABLE social_proof_items
             ADD CONSTRAINT social_proof_items_order_id_unique
             UNIQUE (order_id);
-        RAISE NOTICE 'M14: UNIQUE(order_id) created';
-    ELSE
-        RAISE NOTICE 'M14: UNIQUE(order_id) already exists — skip';
     END IF;
-END $$;
+END $block$;
 
--- M14 — Langkah 4: Make legacy columns nullable (data comes from order join now)
+-- Step 4: Make legacy columns nullable
 ALTER TABLE social_proof_items ALTER COLUMN name DROP NOT NULL;
 ALTER TABLE social_proof_items ALTER COLUMN brand_name DROP NOT NULL;
 ALTER TABLE social_proof_items ALTER COLUMN package_name DROP NOT NULL;
 
--- M14 — Langkah 5: Drop fake seed data + log
-DO $$
+-- Step 5: Drop fake seed data
+DO $block$
 BEGIN
     DELETE FROM social_proof_items WHERE order_id IS NULL;
-    RAISE NOTICE 'M14: Dropped seed data (order_id IS NULL)';
-END $$;
+END $block$;
 
--- M14 — Langkah 6: Add index for fast lookups
+-- Step 6: Index for fast lookups
 CREATE INDEX IF NOT EXISTS idx_social_proof_items_order_id
     ON social_proof_items(order_id);
 
--- M14 — Langkah 7: Add index for active lookups (widget query)
+-- Step 7: Index for active widget lookups
 CREATE INDEX IF NOT EXISTS idx_social_proof_items_active
     ON social_proof_items(is_active) WHERE is_active = true;
 
--- M14 — Langkah 8: Verification
-SELECT 'M14_fk' AS check_name,
-    c.conname, c.contype
-FROM pg_constraint c
-JOIN pg_class cl ON c.conrelid = cl.oid
-WHERE cl.relname = 'social_proof_items'
-    AND c.conname = 'social_proof_items_order_id_fkey';
+-- Step 8: Verification
+SELECT 'M14_fk' AS check_name, conname
+FROM pg_constraint
+WHERE conname = 'social_proof_items_order_id_fkey';
 
-SELECT 'M14_unique' AS check_name,
-    c.conname
-FROM pg_constraint c
-JOIN pg_class cl ON c.conrelid = cl.oid
-WHERE cl.relname = 'social_proof_items'
-    AND c.conname = 'social_proof_items_order_id_unique';
+SELECT 'M14_unique' AS check_name, conname
+FROM pg_constraint
+WHERE conname = 'social_proof_items_order_id_unique';
 
 SELECT 'M14_seed_dropped' AS check_name,
     COUNT(*) AS remaining_fake_rows

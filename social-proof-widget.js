@@ -4,12 +4,12 @@
   // ============================================================
   // STUDIHOME — Social Proof Widget (Live Toast Notifications)
   // ============================================================
-  // Version: 5.0.0 (social_proof_items toggle, all checked members)
+  // Version: 6.0.0 (query orders directly, max 10, auto-check new)
   // Date: 27 Aug 2026
   //
-  // Reads from social_proof_items (linked to orders via order_id).
-  // Admin checks/unchecks orders → widget shows all is_active=true.
-  // No fixed limit — shows all checked members.
+  // Strategy: Query orders (PAID/CONFIRMED) directly with FK joins
+  // to products(title) and profiles(name). Then check which are
+  // registered in social_proof_items. No dependency on M14 FK.
   //
   // TIMING (organik/psikologis):
   //   Initial delay: 4000ms (4s after page load)
@@ -17,7 +17,7 @@
   //   Interval: random 12000–25000ms (12–25s between toasts)
   // ============================================================
 
-  var VERSION = '5';
+  var VERSION = '6';
   var WIDGET_ID = 'studihome-social-proof-widget';
   var POLL_KEY = 'studihome-social-proof-items-v' + VERSION;
 
@@ -25,7 +25,8 @@
     initialDelay: 4000,
     displayDuration: 5000,
     intervalMin: 12000,
-    intervalMax: 25000
+    intervalMax: 25000,
+    maxItems: 10
   };
 
   function esc(v) {
@@ -38,38 +39,80 @@
     return window.supabaseClient || null;
   }
 
-  // --- Fetch all checked social proof items with order details ---
+  // Fetch checked social proof items (order_id list + is_active)
+  async function fetchCheckedIds(client) {
+    try {
+      var res = await client
+        .from('social_proof_items')
+        .select('order_id, is_active');
+      if (res.error) {
+        console.warn('[Studihome Social Proof] social_proof_items query:', res.error.message);
+        return [];
+      }
+      return (res.data || [])
+        .filter(function(r) { return r.is_active && r.order_id; })
+        .map(function(r) { return r.order_id; });
+    } catch (e) {
+      console.warn('[Studihome Social Proof] social_proof_items fetch failed:', e);
+      return [];
+    }
+  }
+
+  // Fetch the latest paid/confirmed orders with product + profile info
+  async function fetchOrders(client, ids) {
+    try {
+      var query = client
+        .from('orders')
+        .select('id, created_at, products(title), profiles!orders_user_id_fkey(name)')
+        .in('payment_status', ['PAID', 'CONFIRMED'])
+        .order('created_at', { ascending: false })
+        .limit(CONFIG.maxItems * 2);
+
+      var res = await query;
+      if (res.error) {
+        console.warn('[Studihome Social Proof] orders query:', res.error.message);
+        return [];
+      }
+      return res.data || [];
+    } catch (e) {
+      console.warn('[Studihome Social Proof] orders fetch failed:', e);
+      return [];
+    }
+  }
+
+  // Main fetch: get checked IDs, then get matching orders
   async function fetchItems() {
     var client = db();
     if (!client || !client.from) return [];
 
     try {
-      // Query social_proof_items linked to orders, filter active
-      var result = await client
-        .from('social_proof_items')
-        .select('id, order_id, is_active, orders(id, user_id, product_id, created_at, products(title), profiles!orders_user_id_fkey(name))')
-        .eq('is_active', true)
-        .not('order_id', 'is', null);
-
-      if (result.error) {
-        console.warn('[Studihome Social Proof] Error:', result.error.message);
-        return [];
-      }
-
-      var items = result.data || [];
-      if (!items.length) {
+      var checkedIds = await fetchCheckedIds(client);
+      if (!checkedIds.length) {
         console.info('[Studihome Social Proof] No checked items — widget idle.');
         return [];
       }
 
-      // Map to toast-ready items
+      var orders = await fetchOrders(client, checkedIds);
+
+      // Filter to only checked orders, take top N
+      var idSet = {};
+      checkedIds.forEach(function(id) { idSet[id] = true; });
+
+      var matched = orders.filter(function(o) { return idSet[o.id]; });
+
+      // Fallback: if no FK-resolved data, return basic items from order IDs
+      if (!matched.length && checkedIds.length) {
+        matched = checkedIds.slice(0, CONFIG.maxItems).map(function(id) {
+          return { id: id, created_at: null, products: null, profiles: null };
+        });
+      }
+
       var toastItems = [];
-      for (var i = 0; i < items.length; i++) {
-        var o = items[i].orders;
-        if (!o) continue;
+      for (var i = 0; i < matched.length && i < CONFIG.maxItems; i++) {
+        var o = matched[i];
         toastItems.push({
           name: (o.profiles && o.profiles.name) || 'Member Studihome',
-          product_title: (o.products && o.products.title) || 'Produk Premium',
+          product_title: (o.products && o.products.title) || 'Paket Premium',
           created_at: o.created_at
         });
       }
