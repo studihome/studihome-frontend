@@ -4,7 +4,7 @@
   // ============================================================
   // STUDIHOME — Social Proof Widget (Live Toast Notifications)
   // ============================================================
-  // Version: 3.0.0 (uses orders table — entitlements has no created_at)
+  // Version: 4.0.0 (responsive positioning, orders-based data)
   // Date: 27 Aug 2026
   //
   // Fetches the 5 most recent paid orders from Supabase
@@ -21,7 +21,7 @@
   //   - No eval(), no innerHTML with unescaped data
   // ============================================================
 
-  var VERSION = '3';
+  var VERSION = '4';
   var WIDGET_ID = 'studihome-social-proof-widget';
   var POLL_KEY = 'studihome-social-proof-items-v' + VERSION;
 
@@ -51,9 +51,6 @@
     if (!client || !client.from) return [];
 
     try {
-      // Query orders with Supabase foreign-key joins (same pattern as admin panel)
-      // orders → profiles(name) via orders_user_id_fkey
-      // orders → products(title) via orders_product_id_fkey
       var result = await client
         .from('orders')
         .select('id, user_id, product_id, created_at, products(title), profiles!orders_user_id_fkey(name)')
@@ -72,19 +69,15 @@
         return [];
       }
 
-      // Map to toast items
       var items = [];
       for (var i = 0; i < orders.length; i++) {
         var o = orders[i];
-        var name = (o.profiles && o.profiles.name) || 'Member Studihome';
-        var productTitle = (o.products && o.products.title) || 'Produk Premium';
         items.push({
-          name: name,
-          product_title: productTitle,
+          name: (o.profiles && o.profiles.name) || 'Member Studihome',
+          product_title: (o.products && o.products.title) || 'Produk Premium',
           created_at: o.created_at
         });
       }
-
       return items;
     } catch (e) {
       console.warn('[Studihome Social Proof] Fetch failed:', e);
@@ -111,7 +104,6 @@
 
   // --- Build toast markup using Tailwind utility classes only ---
   function toastHTML(item) {
-    // Extract initials for avatar
     var parts = (item.name || '').trim().split(/\s+/);
     var initials = '';
     for (var i = 0; i < parts.length && i < 2; i++) {
@@ -120,7 +112,7 @@
     initials = initials.toUpperCase() || '✦';
 
     return (
-      '<div class="pointer-events-auto flex items-start gap-3 max-w-xs rounded-2xl border border-blue-100 bg-white px-4 py-3 shadow-lg ring-1 ring-black/5 backdrop-blur-sm transition-all duration-300 opacity-0 translate-y-2">' +
+      '<div class="pointer-events-auto flex items-start gap-3 rounded-2xl border border-blue-100 bg-white px-4 py-3 shadow-lg ring-1 ring-black/5 backdrop-blur-sm transition-all duration-300 opacity-0 translate-y-2">' +
         '<span class="mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-[#151c75] to-[#3f48bf] text-[10px] font-black text-white">' +
           esc(initials) +
         '</span>' +
@@ -139,18 +131,20 @@
   }
 
   // --- Create / reuse container ---
+  // Responsive: mobile = full-width bottom bar with margins
+  //             desktop = fixed bottom-left corner
   function getContainer() {
     var container = document.getElementById(WIDGET_ID);
     if (container) return container;
 
     container = document.createElement('div');
     container.id = WIDGET_ID;
-    // Desktop: bottom-left. Mobile: bottom center, full-width padding.
     container.className = [
-      'fixed z-[9999] flex flex-col-reverse gap-2.5',
-      'bottom-4 left-4',
-      'sm:bottom-4 sm:left-4',
-      'max-w-[calc(100vw-2rem)]',
+      'fixed z-50 flex flex-col-reverse gap-2.5',
+      // Mobile: full-width, pinned to bottom with horizontal margins
+      'bottom-4 left-4 right-4',
+      // Desktop: override right-auto, constrain max-width, pin to left
+      'md:right-auto md:left-4 md:max-w-xs',
       'pointer-events-none'
     ].join(' ');
     container.setAttribute('aria-live', 'polite');
@@ -167,7 +161,6 @@
     var toast = wrapper.firstElementChild;
     container.appendChild(toast);
 
-    // Animate in (after paint)
     requestAnimationFrame(function() {
       requestAnimationFrame(function() {
         toast.classList.remove('opacity-0', 'translate-y-2');
@@ -175,7 +168,6 @@
       });
     });
 
-    // Close button
     var closeBtn = toast.querySelector('.sp-close');
     if (closeBtn) {
       closeBtn.addEventListener('click', function() {
@@ -183,7 +175,6 @@
       });
     }
 
-    // Auto-dismiss after displayDuration
     setTimeout(function() {
       dismissToast(toast);
     }, CONFIG.displayDuration);
@@ -199,7 +190,7 @@
     }, 300);
   }
 
-  // --- Main loop: fetch items, then show random toasts on schedule ---
+  // --- Main loop ---
   async function startLoop() {
     var items = await fetchItems();
     if (!items.length) return;
@@ -217,7 +208,6 @@
       return item;
     }
 
-    // Wait for initialDelay, then start showing
     setTimeout(function() {
       showToast(nextItem());
 
@@ -232,7 +222,7 @@
     }, CONFIG.initialDelay);
   }
 
-  // --- Boot: wait for Supabase client, then start ---
+  // --- Boot ---
   function boot() {
     if (window[POLL_KEY]) return;
     window[POLL_KEY] = true;
@@ -247,7 +237,6 @@
     }, { once: true });
   }
 
-  // --- IIFE entry ---
   if (document.readyState === 'loading') {
     document.addEventListener('DOMContentLoaded', boot);
   } else {
