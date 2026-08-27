@@ -55,9 +55,12 @@ ALTER TABLE social_proof_items ALTER COLUMN name DROP NOT NULL;
 ALTER TABLE social_proof_items ALTER COLUMN brand_name DROP NOT NULL;
 ALTER TABLE social_proof_items ALTER COLUMN package_name DROP NOT NULL;
 
--- M14 — Langkah 5: Drop fake seed data
-DELETE FROM social_proof_items WHERE order_id IS NULL;
-RAISE NOTICE 'M14: Dropped seed data (order_id IS NULL)';
+-- M14 — Langkah 5: Drop fake seed data + log
+DO $$
+BEGIN
+    DELETE FROM social_proof_items WHERE order_id IS NULL;
+    RAISE NOTICE 'M14: Dropped seed data (order_id IS NULL)';
+END $$;
 
 -- M14 — Langkah 6: Add index for fast lookups
 CREATE INDEX IF NOT EXISTS idx_social_proof_items_order_id
