@@ -2,20 +2,21 @@
   'use strict';
 
   // ============================================================
-  // STUDIHOME Social Proof Widget v8
+  // STUDIHOME Social Proof Widget v9
   // ============================================================
-  // Uses ONLY social_proof_items table (M13: public SELECT on
-  // is_active=true). No dependency on orders/products RLS.
+  // Queries v_social_proof_recent VIEW (Migration 16).
+  // VIEW joins orders + products + profiles, bypasses RLS,
+  // exposes only: member_name, product_title, created_at.
   //
   // Timing: 4s initial delay, 5s display, 12-25s random interval
   // Boot: polls for supabaseClient every 200ms (bulletproof)
   // ============================================================
 
   var WIDGET_ID = 'studihome-social-proof-widget';
-  var POLL_KEY = 'studihome-sp-v8';
+  var POLL_KEY = 'studihome-sp-v9';
   var MAX_ITEMS = 10;
   var POLL_INTERVAL = 200;
-  var POLL_TIMEOUT = 30000; // stop polling after 30s
+  var POLL_TIMEOUT = 30000;
 
   var TIMING = { initialDelay: 4000, displayMs: 5000, intervalMin: 12000, intervalMax: 25000 };
 
@@ -43,20 +44,38 @@
     var c = db();
     if (!c || !c.from) return [];
     try {
+      // Primary: query the public VIEW (real data, bypasses RLS)
       var res = await c
-        .from('social_proof_items')
-        .select('id, name, brand_name, package_name, created_at')
-        .eq('is_active', true)
+        .from('v_social_proof_recent')
+        .select('member_name, product_title, created_at')
         .order('created_at', { ascending: false })
         .limit(MAX_ITEMS);
+
       if (res.error) {
-        console.warn('[SP] fetch error:', res.error.message);
-        return [];
+        // Fallback: query social_proof_items (seed data)
+        console.warn('[SP] VIEW query failed, falling back to seed data:', res.error.message);
+        var fb = await c
+          .from('social_proof_items')
+          .select('name, brand_name, package_name, created_at')
+          .eq('is_active', true)
+          .order('created_at', { ascending: false })
+          .limit(MAX_ITEMS);
+        if (fb.error) {
+          console.warn('[SP] fallback also failed:', fb.error.message);
+          return [];
+        }
+        return (fb.data || []).map(function(r) {
+          return {
+            name: r.name || 'Member Studihome',
+            product_title: r.brand_name ? r.brand_name + ' \u2014 ' + r.package_name : r.package_name || 'Paket Premium'
+          };
+        });
       }
+
       return (res.data || []).map(function(r) {
         return {
-          name: r.name || 'Member Studihome',
-          product_title: r.brand_name ? r.brand_name + ' \u2014 ' + r.package_name : r.package_name || 'Paket Premium'
+          name: r.member_name || 'Member Studihome',
+          product_title: r.product_title || 'Paket Premium'
         };
       });
     } catch (e) {
@@ -121,6 +140,7 @@
   async function start() {
     var items = await fetchItems();
     if (!items.length) { console.warn('[SP] no active items found'); return; }
+    console.log('[SP] loaded ' + items.length + ' items');
     var q = shuffle(items);
     var idx = 0;
     function next() {
