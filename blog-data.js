@@ -209,18 +209,23 @@
     const discount = Math.round((1 - promo.promoPrice / promo.originalPrice) * 100);
 
     let promoHTML = `
-      <aside aria-label="Penawaran Spesial" class="w-full max-w-4xl mx-auto my-8 rounded-2xl overflow-hidden bg-gradient-to-r from-blue-900 to-indigo-600 shadow-xl flex flex-col md:flex-row items-center justify-between p-6 md:p-8 gap-4 md:gap-8">
-        <!-- Left: text & urgency -->
-        <div class="flex-1 min-w-0 flex flex-col items-start w-full">
-          <span class="inline-block px-3 py-1 bg-yellow-400/20 text-yellow-300 text-xs font-bold rounded-full uppercase tracking-wider mb-3 whitespace-nowrap">${promo.badge}</span>
-          <h3 class="text-white text-xl md:text-2xl font-bold leading-snug break-words">${promo.title}</h3>
-        </div>
+      <aside aria-label="Penawaran Spesial" class="w-full max-w-4xl mx-auto my-8 rounded-2xl overflow-hidden bg-gradient-to-r from-blue-900 to-indigo-600 shadow-xl">
+        <div class="flex flex-col md:flex-row items-center justify-between p-5 md:p-7 gap-4 md:gap-6">
+          <!-- Left: text & urgency -->
+          <div class="flex-1 min-w-0 flex flex-col items-start w-full">
+            <span class="inline-flex items-center gap-1.5 px-3 py-1 bg-yellow-400/20 text-yellow-300 text-[11px] font-bold rounded-full uppercase tracking-wider mb-2.5">${promo.badge}</span>
+            <h3 class="text-white text-lg md:text-xl font-extrabold leading-snug break-words">${promo.title}</h3>
+          </div>
 
-        <!-- Right: CTA (shrink-0 prevents squeeze) -->
-        <div class="shrink-0 w-full md:w-auto mt-4 md:mt-0">
-          <button onclick="App.router.navigate('products')" class="w-full md:w-auto inline-flex justify-center items-center px-8 py-3.5 bg-white text-blue-900 hover:text-blue-700 font-extrabold text-base rounded-xl hover:bg-slate-100 transition-colors whitespace-nowrap shadow-md">
-            ${promo.cta} ➔
-          </button>
+          <!-- Divider (desktop only) -->
+          <div class="hidden md:block w-px h-10 bg-white/15 shrink-0"></div>
+
+          <!-- Right: CTA -->
+          <div class="shrink-0 w-full md:w-auto mt-2 md:mt-0">
+            <button onclick="App.router.navigate('products')" class="w-full md:w-auto inline-flex items-center justify-center gap-2 px-7 py-3 bg-white text-blue-900 font-extrabold text-sm rounded-xl hover:bg-blue-50 hover:shadow-lg transition-all duration-200 whitespace-nowrap shadow-md">
+              ${promo.cta} <i class="fa-solid fa-arrow-right text-xs"></i>
+            </button>
+          </div>
         </div>
       </aside>`;
 
