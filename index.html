@@ -257,6 +257,7 @@
         @keyframes pulse-slow { 0%,100%{opacity:.15;transform:scale(1)} 50%{opacity:.25;transform:scale(1.05)} }
         @keyframes cd-pulse-ring { 0%{transform:scale(.8);opacity:.6} 100%{transform:scale(1.6);opacity:0} }
         @keyframes cd-seconds-pulse { 0%,100%{transform:scale(1);box-shadow:0 0 0 0 rgba(250,204,21,0)} 50%{transform:scale(1.04);box-shadow:0 0 12px 2px rgba(250,204,21,.25)} }
+        @keyframes onlineBlink { 0%,100%{opacity:1;box-shadow:0 0 6px 1px currentColor} 50%{opacity:.4;box-shadow:0 0 2px 0 currentColor} }
         .cd-digit-group { display:flex;flex-direction:column;align-items:center;gap:4px }
         .cd-digit { width:42px;height:44px;display:flex;align-items:center;justify-content:center;border-radius:10px;font-size:18px;font-weight:900;color:#fff;background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.08);backdrop-filter:blur(4px);letter-spacing:-.02em;line-height:1;transition:all .3s cubic-bezier(.4,0,.2,1) }
         .cd-secs .cd-digit { animation:cd-seconds-pulse 1s ease-in-out infinite; background:rgba(250,204,21,.12);border-color:rgba(250,204,21,.2);color:#facc15 }
@@ -3085,14 +3086,14 @@ App.router.bindCanonicalLinkGuard();
                                     <!-- Activity Stats -->
                                     <div class="flex items-center gap-2.5">
                                         <div class="flex items-center gap-1.5">
-                                            <span class="w-2 h-2 rounded-full bg-emerald-400 shadow-[0_0_8px_rgba(52,211,153,.7)]"></span>
-                                            <span class="text-[11px] sm:text-xs font-bold text-white" id="live-stat-creators">29</span>
+                                            <span class="w-2 h-2 rounded-full bg-emerald-400" style="color:rgba(52,211,153,.7);animation:onlineBlink 2s ease-in-out infinite"></span>
+                                            <span class="text-[11px] sm:text-xs font-bold text-white" id="live-stat-creators">18</span>
                                             <span class="text-[10px] sm:text-[11px] font-semibold text-white/60">Creator</span>
                                         </div>
                                         <span class="w-px h-3 bg-white/15"></span>
                                         <div class="flex items-center gap-1.5">
-                                            <span class="w-2 h-2 rounded-full bg-blue-400 shadow-[0_0_8px_rgba(96,165,250,.7)]"></span>
-                                            <span class="text-[11px] sm:text-xs font-bold text-white" id="live-stat-visitors">389</span>
+                                            <span class="w-2 h-2 rounded-full bg-blue-400" style="color:rgba(96,165,250,.7);animation:onlineBlink 2.5s ease-in-out infinite .3s"></span>
+                                            <span class="text-[11px] sm:text-xs font-bold text-white" id="live-stat-visitors">245</span>
                                             <span class="text-[10px] sm:text-[11px] font-semibold text-white/60">Pengunjung</span>
                                         </div>
                                     </div>
@@ -3201,24 +3202,38 @@ App.router.bindCanonicalLinkGuard();
                         // Menghidupkan Animasi Angka "Live Stats" di Hero
                         if (!App.studioAI._liveStatsBound) {
                             App.studioAI._liveStatsBound = true;
-                            const state = { c: 29, v: 157 };
+                            // Smooth traffic curve: sinusoidal interpolation between time periods
+                            // Creator: 8-27 | Visitor: 168-736
+                            const trafficAt = (hour, minute) => {
+                                const t = hour + minute / 60;
+                                // Smooth sine-based curve peaking at 13:00 (siang)
+                                // Low at 02:00 (dini hari), ramp pagi, peak siang, gentle sore, decline malam
+                                const raw = Math.sin((t - 2) * Math.PI / 12); // peak at 14:00, trough at 02:00
+                                const clamped = Math.max(0, Math.min(1, (raw + 0.15) / 1.15)); // normalize 0-1
+                                // Creators: 8-27 (range 19)
+                                const creators = Math.round(8 + clamped * 19);
+                                // Visitors: 168-736 (range 568)
+                                const visitors = Math.round(168 + clamped * 568);
+                                return { c: creators, v: visitors };
+                            };
+                            const now = new Date();
+                            let state = trafficAt(now.getHours(), now.getMinutes());
                             const tick = () => {
-                                const h = new Date().getHours();
-                                let targetC = 25, targetV = 120;
-                                if (h >= 5 && h < 9) { targetC = 39; targetV = 190; }
-                                else if (h >= 9 && h < 15) { targetC = 53; targetV = 270; }
-                                else if (h >= 15 && h < 19) { targetC = 60; targetV = 335; }
-                                else if (h >= 19 && h < 23) { targetC = 52; targetV = 300; }
-                                
-                                state.c += (targetC > state.c ? 1 : -1) * Math.floor(Math.random() * 2);
-                                state.v += (targetV > state.v ? 1 : -1) * Math.floor(Math.random() * 3);
-                                
+                                const cur = new Date();
+                                const target = trafficAt(cur.getHours(), cur.getMinutes());
+                                // Smooth drift toward target with randomness
+                                const driftC = target.c - state.c;
+                                const driftV = target.v - state.v;
+                                state.c += Math.sign(driftC) * (Math.abs(driftC) > 3 ? Math.ceil(Math.random() * 2) : (Math.random() < 0.3 ? Math.sign(driftC) : 0));
+                                state.v += Math.sign(driftV) * (Math.abs(driftV) > 8 ? Math.ceil(Math.random() * 5) : (Math.random() < 0.3 ? Math.sign(driftV) : 0));
+                                // Clamp to valid ranges
+                                state.c = Math.max(8, Math.min(27, state.c));
+                                state.v = Math.max(168, Math.min(736, state.v));
                                 const elC = document.getElementById('live-stat-creators');
                                 const elV = document.getElementById('live-stat-visitors');
                                 if (elC) elC.textContent = state.c;
                                 if (elV) elV.textContent = state.v;
-                                
-                                setTimeout(tick, 3000 + Math.floor(Math.random() * 5000));
+                                setTimeout(tick, 4000 + Math.floor(Math.random() * 4000));
                             };
                             setTimeout(tick, 2000);
                         }
