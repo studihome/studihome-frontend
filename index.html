@@ -2876,19 +2876,15 @@ App.router.bindCanonicalLinkGuard();
                                     </p>
                                     <!-- Countdown Timer -->
                                     <div id="hero-countdown-container" class="hidden mb-6 sm:mb-8">
-                                        <div class="inline-flex flex-col sm:flex-row items-start sm:items-center gap-3 sm:gap-4 px-5 sm:px-6 py-4 sm:py-5 rounded-2xl relative" style="background:linear-gradient(135deg,rgba(21,28,117,.65),rgba(63,72,191,.55),rgba(21,28,117,.65));background-size:200% 200%;backdrop-filter:blur(24px) saturate(200%);border:1px solid rgba(255,255,255,.15);box-shadow:0 8px 32px rgba(0,0,0,.2),inset 0 1px 0 rgba(255,255,255,.15),0 0 0 1px rgba(255,255,255,.05);animation:cd-glass-shimmer 4s ease-in-out infinite">
+                                        <div class="inline-flex flex-col sm:flex-row items-center gap-3 sm:gap-4 px-5 sm:px-6 py-4 sm:py-5 rounded-2xl relative" style="background:linear-gradient(135deg,rgba(21,28,117,.65),rgba(63,72,191,.55),rgba(21,28,117,.65));background-size:200% 200%;backdrop-filter:blur(24px) saturate(200%);border:1px solid rgba(255,255,255,.15);box-shadow:0 8px 32px rgba(0,0,0,.2),inset 0 1px 0 rgba(255,255,255,.15),0 0 0 1px rgba(255,255,255,.05);animation:cd-glass-shimmer 4s ease-in-out infinite">
                                             <!-- Glass highlight -->
                                             <div class="absolute inset-0 rounded-2xl pointer-events-none" style="background:linear-gradient(180deg,rgba(255,255,255,.06) 0%,transparent 40%,rgba(0,0,0,.04) 100%)"></div>
                                             <!-- Urgency label -->
-                                            <div class="flex items-center gap-2.5 relative z-10">
-                                                <div class="relative flex items-center justify-center w-7 h-7">
-                                                    <div class="absolute inset-0 rounded-full" style="background:rgba(239,68,68,.2);animation:cd-pulse-ring 2s ease-out infinite"></div>
-                                                    <i class="fa-solid fa-bolt text-sm relative z-10" style="color:#facc15"></i>
-                                                </div>
+                                            <div class="flex items-center justify-center gap-2.5 relative z-10">
                                                 <span id="hero-countdown-title" class="cd-urgency-title"></span>
                                             </div>
                                             <!-- Digit display -->
-                                            <div class="flex items-center gap-2 sm:gap-2.5 relative z-10">
+                                            <div class="flex items-center justify-center gap-2 sm:gap-2.5 relative z-10">
                                                 <div id="hero-cd-days" class="text-center cd-digit-group">
                                                     <div class="cd-digit" style="font-variant-numeric:tabular-nums">00</div>
                                                     <div class="cd-label">Hari</div>
