@@ -209,21 +209,18 @@
     const discount = Math.round((1 - promo.promoPrice / promo.originalPrice) * 100);
 
     let promoHTML = `
-      <aside aria-label="Penawaran Spesial" class="w-full max-w-4xl mx-auto my-8 rounded-2xl overflow-hidden bg-gradient-to-r from-blue-900 to-indigo-600 shadow-xl">
-        <div class="flex flex-col md:flex-row items-center justify-between p-5 md:p-7 gap-4 md:gap-6">
-          <!-- Left: text & urgency -->
-          <div class="flex-1 min-w-0 flex flex-col items-start w-full">
-            <span class="inline-flex items-center gap-1.5 px-3 py-1 bg-yellow-400/20 text-yellow-300 text-[11px] font-bold rounded-full uppercase tracking-wider mb-2.5">${promo.badge}</span>
-            <h3 class="text-white text-lg md:text-xl font-extrabold leading-snug break-words">${promo.title}</h3>
+      <aside aria-label="Penawaran Spesial" class="w-full max-w-4xl mx-auto my-8 rounded-2xl overflow-hidden shadow-xl" style="background:linear-gradient(135deg,#1a3a8a,#2d5be3);padding:1px">
+        <div class="rounded-2xl" style="background:linear-gradient(135deg,#1e3a8a,#3b5bdb);padding:20px 24px;display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:16px">
+          <!-- Left: text -->
+          <div style="flex:1 1 0;min-width:0;display:flex;flex-direction:column;align-items:flex-start">
+            <span style="display:inline-flex;align-items:center;gap:6px;padding:4px 12px;border-radius:9999px;font-size:11px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;margin-bottom:8px;white-space:nowrap;background:rgba(250,204,21,.2);color:#facc15">${promo.badge}</span>
+            <h3 style="color:#fff;font-size:18px;font-weight:800;line-height:1.3;margin:0">${promo.title}</h3>
           </div>
 
-          <!-- Divider (desktop only) -->
-          <div class="hidden md:block w-px h-10 bg-white/15 shrink-0"></div>
-
           <!-- Right: CTA -->
-          <div class="shrink-0 w-full md:w-auto mt-2 md:mt-0">
-            <button onclick="App.router.navigate('products')" class="w-full md:w-auto inline-flex items-center justify-center gap-2 px-7 py-3 bg-white text-blue-900 font-extrabold text-sm rounded-xl hover:bg-blue-50 hover:shadow-lg transition-all duration-200 whitespace-nowrap shadow-md">
-              ${promo.cta} <i class="fa-solid fa-arrow-right text-xs"></i>
+          <div style="flex-shrink:0">
+            <button onclick="App.router.navigate('products')" style="display:inline-flex;align-items:center;gap:8px;padding:10px 24px;border-radius:12px;font-size:14px;font-weight:800;white-space:nowrap;cursor:pointer;border:none;transition:all .2s;background:linear-gradient(135deg,#f59e0b,#d97706);color:#1e3a8a;box-shadow:0 4px 14px rgba(245,158,11,.35)" onmouseover="this.style.transform='translateY(-1px)';this.style.boxShadow='0 6px 20px rgba(245,158,11,.45)'" onmouseout="this.style.transform='';this.style.boxShadow='0 4px 14px rgba(245,158,11,.35)'">
+              ${promo.cta} <i class="fa-solid fa-arrow-right" style="font-size:12px"></i>
             </button>
           </div>
         </div>
