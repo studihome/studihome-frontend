@@ -232,6 +232,51 @@
     );
   }
 
+  // Process article content: wrap prompt blocks with styled container + copy button
+  function processContent(html) {
+    if (!html) return '';
+    // Wrap <pre><code> blocks with styled container + copy button
+    return html.replace(/<pre><code(?:\s+class="prompt-block")?>([\s\S]*?)<\/code><\/pre>/gi, function(match, code) {
+      const decoded = code.replace(/&amp;/g,'&').replace(/&lt;/g,'<').replace(/&gt;/g,'>').replace(/&quot;/g,'"').replace(/&#39;/g,"'");
+      const id = 'pb-' + Math.random().toString(36).slice(2, 8);
+      return '<div class="relative my-4 rounded-xl overflow-hidden" style="background:linear-gradient(135deg,#1e293b,#0f172a);border:1px solid rgba(255,255,255,.08)">' +
+        '<div class="flex items-center justify-between px-4 py-2 border-b border-white/5">' +
+          '<span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider"><i class="fa-solid fa-terminal mr-1 text-emerald-400"></i>Prompt</span>' +
+          '<button onclick="App.blog.copyPrompt(this, \''+id+'\')" class="copy-prompt-btn inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-[10px] font-bold text-slate-400 hover:text-white hover:bg-white/10 transition-all" data-id="'+id+'">' +
+            '<i class="fa-regular fa-copy"></i> <span class="btn-label">Salin</span>' +
+          '</button>' +
+        '</div>' +
+        '<pre id="'+id+'" class="p-4 overflow-x-auto text-[13px] leading-relaxed text-slate-200" style="margin:0;background:transparent;font-family:\'JetBrains Mono\',\'Fira Code\',monospace;tab-size:2"><code>' + decoded + '</code></pre>' +
+      '</div>';
+    });
+  }
+
+  function copyPrompt(btn, id) {
+    const pre = document.getElementById(id);
+    if (!pre) return;
+    const text = pre.textContent || pre.innerText;
+    const label = btn.querySelector('.btn-label');
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(text).then(() => {
+        if (label) label.textContent = 'Tersalin! \u2705';
+        btn.classList.add('text-emerald-400');
+        setTimeout(() => { if (label) label.textContent = 'Salin'; btn.classList.remove('text-emerald-400'); }, 2000);
+      }).catch(() => fallbackCopy(text, btn, label));
+    } else {
+      fallbackCopy(text, btn, label);
+    }
+  }
+
+  function fallbackCopy(text, btn, label) {
+    const ta = document.createElement('textarea');
+    ta.value = text;
+    ta.style.cssText = 'position:fixed;left:-9999px';
+    document.body.appendChild(ta);
+    ta.select();
+    try { document.execCommand('copy'); if (label) label.textContent = 'Tersalin! \u2705'; btn.classList.add('text-emerald-400'); setTimeout(() => { if (label) label.textContent = 'Salin'; btn.classList.remove('text-emerald-400'); }, 2000); } catch(e) {}
+    document.body.removeChild(ta);
+  }
+
   // ---- Blog module (App.blog) ----
   window.App = window.App || {};
   App.blog = {
@@ -244,6 +289,8 @@
     renderCardHTML,
     renderArticleDetail,
     slugify,
+    processContent,
+    copyPrompt,
 
     // Open article detail page
     // Render blog listing page
