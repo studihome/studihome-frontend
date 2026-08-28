@@ -190,38 +190,52 @@
       }
     }
 
+    // ISO date for <time datetime>
+    const isoDate = article.createdAt ? article.createdAt.slice(0, 10) : '';
+    const readMin = Math.ceil((article.content || '').replace(/<[^>]*>/g, '').split(/\s+/).length / 200);
+
     return `
-      <div class="max-w-3xl mx-auto">
+      <div class="max-w-4xl mx-auto px-4 sm:px-6 py-6 md:px-12 md:py-10">
         <!-- Back button -->
         <button onclick="App.router.navigate('home')" class="inline-flex items-center gap-1.5 text-xs font-bold text-[#151c75] hover:text-[#3f48bf] transition-colors mb-6">
           <i class="fa-solid fa-arrow-left"></i> Kembali ke Beranda
         </button>
 
-        <!-- Article header -->
-        <article>
-          <span class="inline-block px-2.5 py-1 rounded-lg text-[10px] font-bold bg-blue-100 text-blue-700 mb-3">${esc(article.category || 'Artikel')}</span>
-          <h1 class="text-xl sm:text-2xl font-black text-[#151c75] leading-tight mb-3">${esc(article.title)}</h1>
-          <div class="flex items-center gap-3 text-xs text-slate-500 mb-6">
-            <span><i class="fa-regular fa-calendar mr-1"></i>${dateStr}</span>
-            <span><i class="fa-regular fa-clock mr-1"></i>${Math.ceil((article.content || '').replace(/<[^>]*>/g, '').split(/\s+/).length / 200)} menit baca</span>
+        <!-- White Canvas Article Container -->
+        <article class="bg-white rounded-3xl shadow-md border border-slate-100 overflow-hidden">
+          <div class="px-5 py-6 sm:px-8 sm:py-8 md:px-12 md:py-10">
+            <!-- Category (semantic) -->
+            <nav aria-label="Kategori Artikel" class="mb-4">
+              <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[11px] font-bold bg-blue-50 text-blue-700 border border-blue-100">
+                <i class="fa-solid fa-folder-open text-[9px]"></i>${esc(article.category || 'Artikel')}
+              </span>
+            </nav>
+
+            <!-- Title (H1 semantic) -->
+            <h1 class="text-2xl sm:text-3xl md:text-4xl font-black text-slate-900 leading-tight mb-4">${esc(article.title)}</h1>
+
+            <!-- Meta: date + reading time (semantic <time>) -->
+            <div class="flex flex-wrap items-center gap-3 text-xs text-slate-500 mb-6 pb-6 border-b border-slate-100">
+              ${isoDate ? '<time datetime="' + isoDate + '" class="inline-flex items-center gap-1"><i class="fa-regular fa-calendar"></i>' + dateStr + '</time>' : '<span><i class="fa-regular fa-calendar mr-1"></i>' + dateStr + '</span>'}
+              <span class="inline-flex items-center gap-1"><i class="fa-regular fa-clock"></i>${readMin} menit baca</span>
+            </div>
+
+            <!-- Hero image -->
+            ${hasImage ? `<figure class="rounded-2xl overflow-hidden mb-8 bg-slate-50 border border-slate-100">
+              <img src="${esc(article.image)}" alt="${esc(article.title)}" class="w-full object-cover" style="max-height:440px" loading="eager">
+            </figure>` : ''}
+
+            <!-- Article body -->
+            <div class="prose prose-sm max-w-none text-slate-700 leading-relaxed" style="font-size:15px;line-height:1.85">
+              ${App.blog.processContent(article.content || '<p class="text-slate-400 italic">Konten artikel belum tersedia.</p>')}
+            </div>
+
+            <!-- Tags (semantic) -->
+            ${article.tags && article.tags.length ? '<nav aria-label="Tag Artikel" class="flex flex-wrap gap-2 mt-8 pt-6 border-t border-slate-100">' + article.tags.map(t => '<span class="inline-flex items-center px-2.5 py-1 rounded-lg text-[11px] font-bold bg-slate-50 text-slate-600 border border-slate-100 hover:bg-slate-100 transition-colors">#' + esc(t) + '</span>').join('') + '</nav>' : ''}
           </div>
-
-          ${hasImage ? `<div class="rounded-2xl overflow-hidden mb-6 bg-slate-100">
-            <img src="${esc(article.image)}" alt="${esc(article.title)}" class="w-full object-cover" style="max-height:400px">
-          </div>` : ''}
-
-          <!-- Article body -->
-          <div class="prose prose-sm max-w-none text-slate-700 leading-relaxed" style="font-size:14px;line-height:1.8">
-            ${App.blog.processContent(article.content || '<p class="text-slate-400 italic">Konten artikel belum tersedia.</p>')}
-          </div>
-
-          <!-- Tags -->
-          ${article.tags && article.tags.length ? `<div class="flex flex-wrap gap-2 mt-6 pt-6 border-t border-slate-200">
-            ${article.tags.map(t => `<span class="px-2.5 py-1 rounded-lg text-[10px] font-bold bg-slate-100 text-slate-600">#${esc(t)}</span>`).join('')}
-          </div>` : ''}
         </article>
 
-        <!-- Cross-sell products -->
+        <!-- Cross-sell products (OUTSIDE the white canvas) -->
         ${crossSellHTML}
       </div>`;
   }
@@ -235,19 +249,18 @@
   // Process article content: wrap prompt blocks with styled container + copy button
   function processContent(html) {
     if (!html) return '';
-    // Wrap <pre><code> blocks with styled container + copy button
     return html.replace(/<pre><code(?:\s+class="prompt-block")?>([\s\S]*?)<\/code><\/pre>/gi, function(match, code) {
       const decoded = code.replace(/&amp;/g,'&').replace(/&lt;/g,'<').replace(/&gt;/g,'>').replace(/&quot;/g,'"').replace(/&#39;/g,"'");
       const id = 'pb-' + Math.random().toString(36).slice(2, 8);
-      return '<div class="relative my-4 rounded-xl overflow-hidden" style="background:linear-gradient(135deg,#1e293b,#0f172a);border:1px solid rgba(255,255,255,.08)">' +
-        '<div class="flex items-center justify-between px-4 py-2 border-b border-white/5">' +
-          '<span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider"><i class="fa-solid fa-terminal mr-1 text-emerald-400"></i>Prompt</span>' +
-          '<button onclick="App.blog.copyPrompt(this, \''+id+'\')" class="copy-prompt-btn inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-[10px] font-bold text-slate-400 hover:text-white hover:bg-white/10 transition-all" data-id="'+id+'">' +
-            '<i class="fa-regular fa-copy"></i> <span class="btn-label">Salin</span>' +
+      return '<figure class="my-6 relative rounded-2xl overflow-hidden border border-slate-700/50" style="background:linear-gradient(145deg,#0f172a,#1e293b)">' +
+        '<figcaption class="flex items-center justify-between px-5 py-3 border-b border-white/5">' +
+          '<span class="inline-flex items-center gap-1.5 text-[11px] font-bold text-emerald-400 uppercase tracking-wider"><i class="fa-solid fa-terminal text-[10px]"></i>Prompt AI</span>' +
+          '<button onclick="App.blog.copyPrompt(this, \''+id+'\')" class="absolute top-3 right-3 z-10 inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium text-white backdrop-blur-sm transition-all duration-200" style="background:rgba(255,255,255,.1);backdrop-filter:blur(8px);border:1px solid rgba(255,255,255,.12)" data-id="'+id+'">' +
+            '<i class="fa-regular fa-copy text-[11px]"></i> <span class="btn-label">Salin Prompt</span>' +
           '</button>' +
-        '</div>' +
-        '<pre id="'+id+'" class="p-4 overflow-x-auto text-[13px] leading-relaxed text-slate-200" style="margin:0;background:transparent;font-family:\'JetBrains Mono\',\'Fira Code\',monospace;tab-size:2"><code>' + decoded + '</code></pre>' +
-      '</div>';
+        '</figcaption>' +
+        '<pre id="'+id+'" class="p-5 overflow-x-auto text-[13px] md:text-sm leading-relaxed text-blue-100" style="margin:0;background:transparent;font-family:\'JetBrains Mono\',\'Fira Code\',\'Cascadia Code\',monospace;tab-size:2"><code>' + decoded + '</code></pre>' +
+      '</figure>';
     });
   }
 
@@ -260,7 +273,7 @@
       navigator.clipboard.writeText(text).then(() => {
         if (label) label.textContent = 'Tersalin! \u2705';
         btn.classList.add('text-emerald-400');
-        setTimeout(() => { if (label) label.textContent = 'Salin'; btn.classList.remove('text-emerald-400'); }, 2000);
+        setTimeout(() => { if (label) label.textContent = 'Salin Prompt'; btn.classList.remove('text-emerald-400'); }, 2000);
       }).catch(() => fallbackCopy(text, btn, label));
     } else {
       fallbackCopy(text, btn, label);
