@@ -1327,10 +1327,11 @@ const App = {
                 }
                 const initialPath = window.location.pathname.toLowerCase().replace(/\/$/, '') || '/';
                 if (!window.location.hash && initialPath !== '/') {
-                    const knownPaths = ['/', '/products', '/kamar', '/dashboard', '/admin', '/studio-ai', '/dapur', '/ruang-kerja', '/creator-studio'];
+                    const knownPaths = ['/', '/products', '/kamar', '/dashboard', '/admin', '/studio-ai', '/dapur', '/ruang-kerja', '/creator-studio', '/blog'];
                     const isCategoryPath = /^(\/ai-|\/kursus-ai|\/jasa-ai|\/ai-untuk-)/i.test(initialPath);
                     const isCreatorPath = /^\/[a-z0-9][a-z0-9-]{2,39}(?:\/portfolio\/[a-z0-9][a-z0-9-]{0,120})?$/i.test(initialPath) && !knownPaths.includes(initialPath) && !isCategoryPath;
                     if (initialPath === '/studio-ai') { App.router.routePath('/studio-ai'); }
+                    else if (initialPath.startsWith('/blog/')) { App.router.routePath('/blog/' + initialPath.split('/blog/')[1]); }
                     else if (initialPath === '/ruang-kerja' || initialPath === '/creator-studio') { window.history.replaceState({}, '', '/dapur'); App.router.routePath('/dapur'); }
                     else if (initialPath === '/dashboard') { window.history.replaceState({}, '', '/kamar'); App.router.routePath('/kamar'); }
                     else if (isCategoryPath) { App.router.routePath(initialPath); }
@@ -1723,7 +1724,8 @@ App.router.bindCanonicalLinkGuard();
                         'dapur-hidangan': '/dapur/hidangan',
                         'dapur-ambalan': '/dapur/ambalan',
                         'ruang-kerja': '/dapur',
-                        'studio-ai': '/studio-ai'
+                        'studio-ai': '/studio-ai',
+                        'blog': '/blog'
                     };
 
                     const targetPath = routes[tab] || '/';
@@ -1751,6 +1753,7 @@ App.router.bindCanonicalLinkGuard();
                                 path: '/'
                             });
                             App.home.render();
+                            if (App.featuredSlider && App.blog) { setTimeout(() => App.featuredSlider.start(), 600); }
                             break;
                         case 'products':
                             App.ui.updateSeo({
@@ -1771,6 +1774,14 @@ App.router.bindCanonicalLinkGuard();
                             break;
                         case 'studio-ai':
                             App.studioAI.render();
+                            break;
+                        case 'blog':
+                            App.ui.updateSeo({
+                                title: 'Blog & Artikel | Studihome',
+                                description: 'Artikel terbaru seputar AI, pendidikan, dan otomasi dari Studihome.',
+                                path: '/blog'
+                            });
+                            App.blog.renderPage();
                             break;
                         default:
                             App.home.render();
@@ -1807,6 +1818,7 @@ App.router.bindCanonicalLinkGuard();
                     if (parts[0] === 'products') { App.state.routeType = 'products'; return; }
                     if (parts[0] === 'dashboard' || parts[0] === 'kamar') { App.state.routeType = 'dashboard'; return; }
                     if (parts[0] === 'admin') { App.state.routeType = 'admin'; return; }
+                    if (parts[0] === 'blog') { App.state.routeType = 'blog'; App.state.blogSlug = parts[1] || ''; return; }
                     if (/^(ai-|kursus-ai|jasa-ai|ai-untuk-)/i.test(parts[0])) { App.state.routeType = 'studio-ai'; App.state.studioAICategory = parts[0].toLowerCase(); return; }
                     if (parts.length === 1) { App.state.routeType = 'creator'; App.state.creatorUsername = parts[0].toLowerCase(); App.state.creatorAmbalanSlug = ''; return; }
                     if (parts.length >= 3 && parts[1] === 'portfolio') { App.state.routeType = 'creator'; App.state.creatorUsername = parts[0].toLowerCase(); App.state.creatorAmbalanSlug = parts.slice(2).join('-').toLowerCase(); return; }
@@ -1825,7 +1837,8 @@ App.router.bindCanonicalLinkGuard();
                         'dapur-hidangan': '/dapur/hidangan',
                         'dapur-ambalan': '/dapur/ambalan',
                         'ruang-kerja': '/dapur',
-                        'studio-ai': '/studio-ai'
+                        'studio-ai': '/studio-ai',
+                        'blog': '/blog'
                     };
 
                     let path = window.location.pathname.toLowerCase().replace(/\/{2,}/g, '/').replace(/\/$/, '') || '/';
@@ -1892,6 +1905,14 @@ App.router.bindCanonicalLinkGuard();
                         case 'admin':
                             App.ui.renderNavigation();
                             App.admin.render();
+                            return true;
+                        case 'blog':
+                            App.ui.renderNavigation();
+                            if (App.state.blogSlug && App.blog) {
+                                App.blog.openArticle(App.state.blogSlug);
+                            } else if (App.blog) {
+                                App.blog.renderPage();
+                            }
                             return true;
                         default:
                             return false;
@@ -2026,6 +2047,7 @@ App.router.bindCanonicalLinkGuard();
                     } else if (hash === 'dashboard') App.dashboard.render();
                     else if (hash === 'admin') App.admin.render();
                     else App.home.render();
+                    if (App.featuredSlider && App.blog) { setTimeout(() => App.featuredSlider.start(), 600); }
 
                     window.scrollTo({ top: 0, behavior: 'smooth' });
                 }
@@ -2930,17 +2952,8 @@ App.router.bindCanonicalLinkGuard();
                             </div>
                         </div>
 
-                        <!-- CONTINUOUS MARQUEE AI LOGOS -->
-                        <div class="mb-8 sm:mb-10 overflow-hidden card-3d-inset py-3.5 rounded-2xl bg-white/80">
-                            <div class="animate-marquee-ltr whitespace-nowrap flex items-center gap-8 sm:gap-12 font-extrabold text-slate-800 text-xs sm:text-sm tracking-wide">
-                                ${aiLinks.concat(aiLinks).map(a => `
-                                    <span class="inline-flex items-center gap-2 bg-white/90 px-3 py-1.5 rounded-xl border border-blue-100 shadow-2xs">
-                                        <i class="${a.icon} text-sm"></i>
-                                        <span class="text-[#151c75] font-extrabold">${App.utils.escapeHtml(a.name)}</span>
-                                    </span>
-                                `).join('')}
-                            </div>
-                        </div>
+                        <!-- FEATURED POST SLIDER (replaces marquee) -->
+                        ${App.featuredSlider ? App.featuredSlider.getHTML(App.blog ? App.blog.getPublished() : []) : ''}
 
                         <!-- FEATURED PRODUCTS -->
                         <div class="mb-8 sm:mb-10">
@@ -6752,22 +6765,62 @@ renderStudioAiControl: async () => {
                                         </div>
                                     </div>
 
-                                    <!-- AI MARQUEE LINKS -->
+                                    <!-- BLOG ARTICLES -->
                                     <div class="card-3d-inset p-4 sm:p-5 rounded-2xl space-y-3">
                                         <div class="flex items-center justify-between">
-                                            <h4 class="font-bold text-xs text-[#151c75] uppercase tracking-wider"><i class="fa-solid fa-bolt mr-1 text-amber-500"></i> Kelola Tautan Marquee AI</h4>
-                                            <button onclick="App.admin.openAiLinkModal(-1)" class="btn-brand-gradient px-3 py-1.5 rounded-xl text-xs font-bold">+ Tambah AI Link</button>
+                                            <h4 class="font-bold text-xs text-[#151c75] uppercase tracking-wider"><i class="fa-solid fa-newspaper mr-1 text-amber-500"></i> Kelola Artikel Blog</h4>
+                                            <button onclick="App.admin.openBlogArticleForm()" class="btn-brand-gradient px-3 py-1.5 rounded-xl text-xs font-bold">+ Tambah Artikel</button>
                                         </div>
-                                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-2.5" id="ai-links-container">
-                                            ${aiLinks.map((a, idx) => `
+                                        <div id="blog-article-form-box" class="hidden card-3d p-3.5 rounded-xl space-y-2.5 bg-white">
+                                            <input type="hidden" id="blog-article-id" value="">
+                                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+                                                <div>
+                                                    <label class="block text-[10px] font-bold text-slate-600 mb-1">Judul Artikel</label>
+                                                    <input type="text" id="blog-article-title" placeholder="Judul artikel..." class="w-full card-3d px-3 py-2 rounded-xl text-xs bg-white">
+                                                </div>
+                                                <div>
+                                                    <label class="block text-[10px] font-bold text-slate-600 mb-1">Kategori</label>
+                                                    <select id="blog-article-category" class="w-full card-3d px-3 py-2 rounded-xl text-xs bg-white">
+                                                        <option value="Pendidikan">Pendidikan</option>
+                                                        <option value="Bisnis">Bisnis</option>
+                                                        <option value="Tentang Kami">Tentang Kami</option>
+                                                    </select>
+                                                </div>
+                                            </div>
+                                            <div>
+                                                <label class="block text-[10px] font-bold text-slate-600 mb-1">Gambar URL (opsional)</label>
+                                                <input type="text" id="blog-article-image" placeholder="https://..." class="w-full card-3d px-3 py-2 rounded-xl text-xs bg-white font-mono">
+                                            </div>
+                                            <div>
+                                                <label class="block text-[10px] font-bold text-slate-600 mb-1">Deskripsi Singkat (excerpt)</label>
+                                                <input type="text" id="blog-article-excerpt" placeholder="Ringkasan singkat artikel..." class="w-full card-3d px-3 py-2 rounded-xl text-xs bg-white">
+                                            </div>
+                                            <div>
+                                                <label class="block text-[10px] font-bold text-slate-600 mb-1">Konten (HTML — gunakan &lt;p&gt;, &lt;strong&gt;, &lt;ul&gt;, &lt;li&gt;, dll)</label>
+                                                <textarea id="blog-article-content" rows="6" placeholder="<p>Konten artikel dalam HTML...</p>" class="w-full card-3d px-3 py-2 rounded-xl text-xs bg-white font-mono resize-y"></textarea>
+                                            </div>
+                                            <div>
+                                                <label class="block text-[10px] font-bold text-slate-600 mb-1">Status</label>
+                                                <select id="blog-article-status" class="w-full card-3d px-3 py-2 rounded-xl text-xs bg-white">
+                                                    <option value="published">Published</option>
+                                                    <option value="draft">Draft</option>
+                                                </select>
+                                            </div>
+                                            <div class="flex items-center gap-2">
+                                                <button onclick="App.admin.saveBlogArticle()" class="btn-brand-gradient px-4 py-2 rounded-xl text-xs font-bold">Simpan Artikel</button>
+                                                <button onclick="document.getElementById('blog-article-form-box').classList.add('hidden')" class="px-4 py-2 rounded-xl text-xs font-bold text-slate-500 hover:text-slate-700">Batal</button>
+                                            </div>
+                                        </div>
+                                        <div class="space-y-2.5" id="blog-articles-list">
+                                            ${(App.blog ? App.blog.getAll() : []).map(a => `
                                                 <div class="card-3d p-2.5 rounded-xl flex items-center justify-between bg-white">
-                                                    <div class="flex items-center gap-2">
-                                                        <i class="${a.icon} text-sm"></i>
-                                                        <span class="text-xs font-bold text-[#151c75]">${App.utils.escapeHtml(a.name)}</span>
+                                                    <div class="flex items-center gap-2 min-w-0">
+                                                        <span class="inline-block px-2 py-0.5 rounded-md text-[10px] font-bold ${a.status === 'published' ? 'bg-emerald-100 text-emerald-700' : 'bg-slate-100 text-slate-500'}">${a.status === 'published' ? 'Live' : 'Draft'}</span>
+                                                        <span class="text-xs font-bold text-[#151c75] truncate">${App.utils.escapeHtml(a.title)}</span>
                                                     </div>
-                                                    <div class="flex items-center gap-2">
-                                                        <button onclick="App.admin.openAiLinkModal(${idx})" class="text-xs text-[#151c75] font-bold hover:underline">Edit</button>
-                                                        <button onclick="App.admin.deleteAiLink(${idx})" class="text-xs text-red-500 font-bold hover:underline">Hapus</button>
+                                                    <div class="flex items-center gap-2 shrink-0">
+                                                        <button onclick="App.admin.editBlogArticle('${a.id}')" class="text-xs text-[#151c75] font-bold hover:underline">Edit</button>
+                                                        <button onclick="App.admin.deleteBlogArticle('${a.id}')" class="text-xs text-red-500 font-bold hover:underline">Hapus</button>
                                                     </div>
                                                 </div>
                                             `).join('')}
@@ -7416,6 +7469,79 @@ renderStudioAiControl: async () => {
                     current.splice(index, 1);
                     await App.api.post('ADMIN_SAVE_AI_LINKS', { aiLinks: current });
                     App.ui.toast('Link AI dihapus.', 'info');
+                    App.admin.renderSubTab();
+                },
+
+                // ---- Blog Article CRUD ----
+                openBlogArticleForm: (editId) => {
+                    const box = document.getElementById('blog-article-form-box');
+                    if (!box) return;
+                    box.classList.remove('hidden');
+                    const idEl = document.getElementById('blog-article-id');
+                    const titleEl = document.getElementById('blog-article-title');
+                    const catEl = document.getElementById('blog-article-category');
+                    const imgEl = document.getElementById('blog-article-image');
+                    const excerptEl = document.getElementById('blog-article-excerpt');
+                    const contentEl = document.getElementById('blog-article-content');
+                    const statusEl = document.getElementById('blog-article-status');
+                    if (editId && App.blog) {
+                        const a = App.blog.getById(editId);
+                        if (a) {
+                            idEl.value = a.id;
+                            titleEl.value = a.title || '';
+                            catEl.value = a.category || 'Pendidikan';
+                            imgEl.value = a.image || '';
+                            excerptEl.value = a.excerpt || '';
+                            contentEl.value = a.content || '';
+                            statusEl.value = a.status || 'published';
+                        }
+                    } else {
+                        idEl.value = '';
+                        titleEl.value = '';
+                        catEl.value = 'Pendidikan';
+                        imgEl.value = '';
+                        excerptEl.value = '';
+                        contentEl.value = '';
+                        statusEl.value = 'published';
+                    }
+                    box.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+                },
+
+                editBlogArticle: (id) => {
+                    App.admin.openBlogArticleForm(id);
+                },
+
+                saveBlogArticle: () => {
+                    const id = document.getElementById('blog-article-id').value;
+                    const title = (document.getElementById('blog-article-title').value || '').trim();
+                    const category = document.getElementById('blog-article-category').value;
+                    const image = (document.getElementById('blog-article-image').value || '').trim();
+                    const excerpt = (document.getElementById('blog-article-excerpt').value || '').trim();
+                    const articleContent = (document.getElementById('blog-article-content').value || '').trim();
+                    const status = document.getElementById('blog-article-status').value;
+                    if (!title) { App.ui.toast('Judul wajib diisi.', 'error'); return; }
+                    if (!App.blog) { App.ui.toast('Blog module belum dimuat.', 'error'); return; }
+                    const article = {
+                        id: id || undefined,
+                        title,
+                        category,
+                        image,
+                        excerpt,
+                        content: articleContent,
+                        status,
+                        titleChanged: true
+                    };
+                    App.blog.save(article);
+                    App.ui.toast('Artikel berhasil disimpan!', 'success');
+                    document.getElementById('blog-article-form-box').classList.add('hidden');
+                    App.admin.renderSubTab();
+                },
+
+                deleteBlogArticle: (id) => {
+                    if (!confirm('Hapus artikel ini?')) return;
+                    if (!App.blog) return;
+                    App.blog.remove(id);
+                    App.ui.toast('Artikel dihapus.', 'info');
                     App.admin.renderSubTab();
                 },
 
@@ -9469,6 +9595,9 @@ window.StudihomeProductionPilotSimulation = {
 <!-- /STUDIHOME CREATOR PROFILE FEATURES -->
 <!-- ADMIN UNDER CONSTRUCTION PANEL -->
 <script src="/under-construction-gudang.js?v=6"></script>
+<!-- BLOG SYSTEM -->
+<script src="/blog-data.js?v=1"></script>
+<script src="/featured-post-slider.js?v=1"></script>
 <!-- SOCIAL PROOF WIDGET (live toast notifications) -->
 <script src="/social-proof-widget.js?v=9"></script>
 <script src="/social-proof-admin.js?v=1"></script>
