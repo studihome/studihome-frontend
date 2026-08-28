@@ -6790,7 +6790,7 @@ renderStudioAiControl: async () => {
                                                 <div>
                                                     <label class="block text-[10px] font-bold text-slate-600 mb-1">Kategori</label>
                                                     <div class="relative" id="blog-cat-wrapper">
-                                                        <input type="text" id="blog-article-category" value="${esc(article.category || 'Pendidikan')}" placeholder="Ketik atau pilih kategori..." class="w-full card-3d px-3 py-2 rounded-xl text-xs bg-white" oninput="App.admin.filterBlogCategories(this.value)" onfocus="App.admin.showBlogCategories()" onblur="setTimeout(()=>App.admin.hideBlogCategories(),200)">
+                                                        <input type="text" id="blog-article-category" value="Pendidikan" placeholder="Ketik atau pilih kategori..." class="w-full card-3d px-3 py-2 rounded-xl text-xs bg-white" oninput="App.admin.filterBlogCategories(this.value)" onfocus="App.admin.showBlogCategories()" onblur="setTimeout(()=>App.admin.hideBlogCategories(),200)">
                                                         <div id="blog-cat-dropdown" class="hidden absolute z-50 top-full left-0 right-0 mt-1 bg-white border border-slate-200 rounded-xl shadow-lg max-h-32 overflow-auto">
                                                             ${['Pendidikan','Bisnis','Tentang Kami','AI','Teknologi','Tips & Tricks'].map(c => `<div class="px-3 py-1.5 text-xs cursor-pointer hover:bg-blue-50 text-slate-700" onmousedown="App.admin.selectBlogCategory('${c}')">${c}</div>`).join('')}
                                                         </div>
@@ -7010,7 +7010,10 @@ renderStudioAiControl: async () => {
                                 </div>
                             `;
                         }
-                    } catch (e) {}
+                    } catch (e) {
+                        console.error('[Admin] renderSubTab error:', e);
+                        area.innerHTML = '<div class="text-center py-8"><p class="text-xs text-red-500 mb-3"><i class="fa-solid fa-triangle-exclamation mr-1"></i>Gagal memuat panel admin.</p><p class="text-[10px] text-slate-400 mb-3">' + App.utils.escapeHtml(String(e.message || e)) + '</p><button onclick="App.admin.renderSubTab()" class="btn-brand-gradient px-4 py-2 rounded-xl text-xs font-bold">Coba Lagi</button></div>';
+                    }
                 },
 
                 setOrderSearch: (value) => {
