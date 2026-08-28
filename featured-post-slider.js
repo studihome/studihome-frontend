@@ -43,14 +43,14 @@
           const catClass = categoryColors[a.category] || 'bg-slate-100 text-slate-600';
 
           return `<article class="blog-slider-card flex-1 min-w-0 cursor-pointer group" onclick="App.blog.openArticle('${esc(a.slug)}')">
-            <div class="card-3d rounded-2xl overflow-hidden bg-white border border-blue-50 transition-all duration-300 hover:shadow-lg hover:shadow-blue-100/50 hover:-translate-y-0.5 h-full flex flex-col">
+            <div class="card-3d rounded-2xl overflow-hidden bg-white border border-blue-50 transition-all duration-200 hover:shadow-md hover:-translate-y-0.5 h-full flex flex-col">
               ${hasImage ? `<div class="aspect-video overflow-hidden bg-slate-100">
                 <img src="${esc(a.image)}" alt="${esc(a.title)}" class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" loading="lazy">
               </div>` : `<div class="aspect-[16/7] bg-gradient-to-br from-[#151c75] to-[#3f48bf] flex items-center justify-center relative overflow-hidden shrink-0">
                 <div class="absolute inset-0 opacity-10" style="background:radial-gradient(circle at 30% 40%, rgba(250,204,21,.4) 0%, transparent 60%)"></div>
                 <span class="text-white/80 text-3xl font-black relative z-10">${(a.title || 'S').charAt(0).toUpperCase()}</span>
               </div>`}
-              <div class="p-3.5 flex flex-col flex-1">
+              <div class="p-3 flex flex-col flex-1">
                 <div class="flex items-center gap-2 mb-1.5">
                   <span class="inline-block px-2 py-0.5 rounded-md text-[10px] font-bold ${catClass}">${esc(a.category || 'Artikel')}</span>
                   <span class="text-[10px] text-slate-400">${dateStr}</span>

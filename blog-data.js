@@ -146,19 +146,19 @@
     const hasImage = article.image && article.image.trim();
 
     return `<article class="blog-card group cursor-pointer" onclick="App.blog.openArticle('${article.slug}')">
-      <div class="card-3d rounded-2xl overflow-hidden bg-white border border-blue-50 transition-all duration-300 hover:shadow-lg hover:shadow-blue-100/50 hover:-translate-y-0.5">
+      <div class="card-3d rounded-2xl overflow-hidden bg-white border border-blue-50 transition-all duration-200 hover:shadow-md hover:-translate-y-0.5">
         ${hasImage ? `<div class="aspect-video overflow-hidden bg-slate-100">
           <img src="${esc(article.image)}" alt="${esc(article.title)}" class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" loading="lazy">
         </div>` : `<div class="aspect-video bg-gradient-to-br from-[#151c75] to-[#3f48bf] flex items-center justify-center relative overflow-hidden">
           <div class="absolute inset-0 opacity-10" style="background:radial-gradient(circle at 30% 40%, rgba(250,204,21,.4) 0%, transparent 60%)"></div>
           <span class="text-white/80 text-4xl font-black relative z-10">${(article.title || 'S').charAt(0).toUpperCase()}</span>
         </div>`}
-        <div class="p-4">
-          <div class="flex items-center gap-2 mb-2">
+        <div class="p-3">
+          <div class="flex items-center gap-2 mb-1.5">
             <span class="inline-block px-2 py-0.5 rounded-md text-[10px] font-bold ${catClass}">${esc(article.category || 'Artikel')}</span>
             <span class="text-[10px] text-slate-400">${dateStr}</span>
           </div>
-          <h3 class="text-sm font-extrabold text-[#151c75] leading-snug mb-1.5 line-clamp-2 group-hover:text-[#3f48bf] transition-colors">${esc(article.title)}</h3>
+          <h3 class="text-sm font-extrabold text-[#151c75] leading-snug mb-1 line-clamp-2 group-hover:text-[#3f48bf] transition-colors">${esc(article.title)}</h3>
           ${showExcerpt !== false ? `<p class="text-xs text-slate-500 leading-relaxed line-clamp-2">${esc(article.excerpt || '')}</p>` : ''}
         </div>
       </div>
@@ -212,7 +212,7 @@
 
           <!-- Article body -->
           <div class="prose prose-sm max-w-none text-slate-700 leading-relaxed" style="font-size:14px;line-height:1.8">
-            ${article.content || '<p class="text-slate-400 italic">Konten artikel belum tersedia.</p>'}
+            ${App.blog.processContent(article.content || '<p class="text-slate-400 italic">Konten artikel belum tersedia.</p>')}
           </div>
 
           <!-- Tags -->
