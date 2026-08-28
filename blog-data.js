@@ -209,20 +209,18 @@
     const discount = Math.round((1 - promo.promoPrice / promo.originalPrice) * 100);
 
     let promoHTML = `
-      <aside aria-label="Penawaran Spesial" class="w-full max-w-4xl mx-auto my-10 rounded-2xl overflow-hidden shadow-xl" style="background:linear-gradient(to right,#123dab,#666fe5)">
-        <div class="flex flex-col md:flex-row items-center justify-between p-6 md:px-8 md:py-5 gap-4 md:gap-6">
-          <!-- Left: compact copy -->
-          <div class="flex flex-col items-start md:justify-center w-full md:w-auto flex-1 min-w-0">
-            <span class="text-yellow-300 text-xs md:text-sm font-bold tracking-widest uppercase mb-1">${promo.badge}</span>
-            <h3 class="text-white text-lg md:text-2xl font-extrabold leading-tight">${promo.title}</h3>
-          </div>
+      <aside aria-label="Penawaran Spesial" class="w-full max-w-4xl mx-auto my-10 rounded-2xl overflow-hidden bg-gradient-to-r from-[#123dab] to-[#666fe5] shadow-xl flex flex-col md:flex-row items-center justify-between p-6 md:px-8 md:py-6 gap-6">
+        <!-- Left: text -->
+        <div class="flex flex-col items-start w-full md:flex-1 min-w-0">
+          <span class="inline-block text-yellow-300 text-[10px] md:text-xs font-extrabold tracking-widest uppercase mb-2">${promo.badge}</span>
+          <h3 class="text-white text-xl md:text-2xl font-black leading-snug">${promo.title}</h3>
+        </div>
 
-          <!-- Right: CTA -->
-          <div class="w-full md:w-auto shrink-0 flex items-center">
-            <button onclick="App.router.navigate('products')" class="w-full md:w-auto px-6 py-3 bg-white text-[#123dab] hover:bg-slate-50 font-bold text-sm md:text-base rounded-xl transition-all duration-300 hover:scale-105 shadow-md whitespace-nowrap">
-              Ambil Promo <i class="fa-solid fa-arrow-right text-xs ml-1.5"></i>
-            </button>
-          </div>
+        <!-- Right: CTA (shrink-0 prevents squeeze) -->
+        <div class="w-full md:w-auto shrink-0 mt-4 md:mt-0">
+          <button onclick="App.router.navigate('products')" class="w-full md:w-auto inline-flex items-center justify-center px-8 py-3.5 bg-white text-[#123dab] hover:bg-slate-50 font-extrabold text-sm md:text-base rounded-xl transition-all duration-300 hover:-translate-y-1 hover:shadow-xl shadow-black/10 whitespace-nowrap">
+            Ambil Promo <i class="fa-solid fa-arrow-right text-xs ml-2"></i>
+          </button>
         </div>
       </aside>`;
 
