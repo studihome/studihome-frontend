@@ -1610,6 +1610,9 @@ App.router.bindCanonicalLinkGuard();
                     ensureMeta('property', 'og:description', description);
                     ensureMeta('property', 'og:url', canonical);
                     ensureMeta('property', 'og:image', image);
+                    ensureMeta('property', 'og:type', meta.ogType || 'website');
+                    ensureMeta('property', 'og:locale', 'id_ID');
+                    ensureMeta('name', 'twitter:card', 'summary_large_image');
                     ensureMeta('name', 'twitter:title', title);
                     ensureMeta('name', 'twitter:description', description);
                     ensureMeta('name', 'twitter:url', canonical);
@@ -4910,13 +4913,22 @@ App.router.bindCanonicalLinkGuard();
                             description: creatorDescription,
                             path: creatorPath,
                             image: c.cover_url || c.avatar_url || 'https://studihome.id/assets/og-image.png',
+                            ogType: 'profile',
                             jsonLd: {
                                 '@context': 'https://schema.org',
                                 '@type': 'ProfilePage',
-                                'name': c.display_name || c.username,
+                                'name': creatorTitle,
                                 'url': `https://studihome.id${creatorPath}`,
                                 'description': creatorDescription,
-                                'mainEntity': { '@type': 'Person', 'name': c.display_name || c.username }
+                                'mainEntity': {
+                                    '@type': 'Person',
+                                    'name': c.display_name || c.username,
+                                    'jobTitle': (primaryCategory?.name || 'Creator AI'),
+                                    'url': `https://studihome.id${creatorPath}`,
+                                    'image': c.avatar_url || 'https://studihome.id/assets/og-image.png',
+                                    'description': creatorDescription,
+                                    'knowsAbout': (data.categories || []).map(x => x.name || '')
+                                }
                             }
                         });
                         const defaultWa = App.creator._waUrl(c.whatsapp, c.display_name || 'Creator');
@@ -4969,6 +4981,7 @@ App.router.bindCanonicalLinkGuard();
                                 </div>
                             </section>
                             ${targetPortfolio ? `
+                                ${(() => { const _pfSchema = { '@context': 'https://schema.org', '@type': 'CreativeWork', 'name': targetPortfolio.title, 'description': String(targetPortfolio.description || targetPortfolio.title).replace(/\s+/g, ' ').slice(0, 300), 'url': window.location.href, 'author': { '@type': 'Person', 'name': c.display_name || c.username }, 'image': targetPortfolio.media_type === 'image' ? targetPortfolio.media_url : (c.avatar_url || 'https://studihome.id/assets/og-image.png'), 'genre': targetPortfolio.media_type || 'Media' }; const _pfExisting = document.getElementById('portfolio-jsonld'); if (_pfExisting) _pfExisting.remove(); const _pfScript = document.createElement('script'); _pfScript.id = 'portfolio-jsonld'; _pfScript.type = 'application/ld+json'; _pfScript.textContent = JSON.stringify(_pfSchema); document.head.appendChild(_pfScript); return ''; })()}
                                 <section class="mb-12 mt-6 animate-fade-in" id="portfolio-detail-view">
                                     <button onclick="App.router.goCreator('${App.utils.escapeHtml(c.username)}')" class="inline-flex items-center gap-2 text-xs font-bold text-slate-500 mb-4 hover:text-[#151c75] transition-colors"><i class="fa-solid fa-arrow-left"></i> Kembali ke profil</button>
                                     <div class="card-3d p-5 sm:p-8 rounded-3xl bg-white border border-slate-200/80">
@@ -5361,6 +5374,35 @@ renderCreatorStandardSummary: (creator, data, categories, services, portfolios) 
                     `;
 
                     App.ui.toggleModal('product-detail-modal', true);
+
+                    /* --- SEO: Product JSON-LD --- */
+                    const _prodSchema = {
+                        '@context': 'https://schema.org',
+                        '@type': 'Product',
+                        'name': p.title,
+                        'description': String(p.desc || '').replace(/\s+/g, ' ').slice(0, 300),
+                        'image': p.imgUrl || 'https://studihome.id/assets/og-image.png',
+                        'brand': { '@type': 'Organization', 'name': 'Studihome' },
+                        'category': p.category || 'Digital Product',
+                        'offers': {
+                            '@type': 'Offer',
+                            'priceCurrency': 'IDR',
+                            'price': p.isFree ? '0' : String(p.price || 0),
+                            'availability': 'https://schema.org/InStock',
+                            'seller': { '@type': 'Organization', 'name': 'Studihome' }
+                        }
+                    };
+                    if (p.priceOriginal && p.priceOriginal > p.price) {
+                        _prodSchema.offers.priceValidUntil = new Date(Date.now() + 30*24*60*60*1000).toISOString().split('T')[0];
+                    }
+                    const _existingProdSchema = document.getElementById('product-detail-jsonld');
+                    if (_existingProdSchema) _existingProdSchema.remove();
+                    const _prodScript = document.createElement('script');
+                    _prodScript.id = 'product-detail-jsonld';
+                    _prodScript.type = 'application/ld+json';
+                    _prodScript.textContent = JSON.stringify(_prodSchema);
+                    document.head.appendChild(_prodScript);
+                    /* --- END SEO --- */
                 },
 
                 renderCardHTML: (p) => {
@@ -9430,5 +9472,7 @@ window.StudihomeProductionPilotSimulation = {
 <!-- SOCIAL PROOF WIDGET (live toast notifications) -->
 <script src="/social-proof-widget.js?v=9"></script>
 <script src="/social-proof-admin.js?v=1"></script>
+<!-- PROGRAMMATIC SEO & GEO -->
+<script src="/sitemap-builder.js?v=1"></script>
 </body>
 </html>
