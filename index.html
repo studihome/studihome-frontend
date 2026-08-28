@@ -263,6 +263,7 @@
         .cd-label { font-size:8px;font-weight:800;color:rgba(255,255,255,.45);text-transform:uppercase;letter-spacing:.08em;line-height:1 }
         .cd-urgency-title { font-family:'Barlow Condensed',system-ui,sans-serif;font-size:14px;font-weight:800;color:#fff;letter-spacing:.03em;text-transform:uppercase;line-height:1.1;text-shadow:0 1px 8px rgba(0,0,0,.3) }
         .cd-urgency-title .cd-highlight{color:#facc15;font-size:1.6em;font-weight:900;line-height:1;vertical-align:baseline;text-shadow:0 1px 12px rgba(250,204,21,.4)}
+        .hero-title-highlight{color:#facc15;text-shadow:0 1px 12px rgba(250,204,21,.35)}
         @media(min-width:640px){ .cd-urgency-title{font-size:16px} }
         .cd-separator { font-size:16px;font-weight:900;color:rgba(255,255,255,.25);line-height:1;padding-bottom:14px }
         @media(min-width:640px){ .cd-digit{width:48px;height:50px;font-size:22px;border-radius:12px} .cd-label{font-size:9px} .cd-separator{font-size:20px} }
@@ -2868,7 +2869,7 @@ App.router.bindCanonicalLinkGuard();
                                         <span class="animate-spin-slow font-black text-sm">✦</span> ${App.utils.escapeHtml(hero.badge)}
                                     </div>
                                     <h1 class="text-2xl sm:text-4xl md:text-5xl font-black text-white leading-tight mb-4 sm:mb-6 tracking-tight" style="text-shadow:0 2px 20px rgba(0,0,0,.3)">
-                                        ${App.utils.escapeHtml(hero.title)}
+                                        ${App.utils.escapeHtml(hero.title).replace(/#([^#]+)#/g, '<span class="hero-title-highlight">$1</span>')}
                                     </h1>
                                     <p class="text-xs sm:text-sm md:text-base font-medium leading-relaxed mb-6 sm:mb-8 max-w-2xl" style="color:rgba(255,255,255,.7)">
                                         ${App.utils.escapeHtml(hero.subtitle)}
@@ -6641,7 +6642,8 @@ renderStudioAiControl: async () => {
                                             </div>
                                             <div>
                                                 <label class="block text-[10px] font-bold text-slate-600 mb-1">Judul Utama (Headline)</label>
-                                                <input type="text" id="hero-title" value="${App.utils.escapeHtml(hero.title)}" class="w-full card-3d px-3 py-2 rounded-xl text-xs font-bold bg-white" style="color:#f59e0b;font-weight:800;border:1.5px solid rgba(250,204,21,.35);box-shadow:0 0 0 3px rgba(250,204,21,.08),0 1px 3px rgba(0,0,0,.06);transition:border-color .2s,box-shadow .2s" onfocus="this.style.borderColor='rgba(250,204,21,.7)';this.style.boxShadow='0 0 0 3px rgba(250,204,21,.18),0 1px 6px rgba(250,204,21,.12)'" onblur="this.style.borderColor='rgba(250,204,21,.35)';this.style.boxShadow='0 0 0 3px rgba(250,204,21,.08),0 1px 3px rgba(0,0,0,.06)'">
+                                                <input type="text" id="hero-title" value="${App.utils.escapeHtml(hero.title)}" class="w-full card-3d px-3 py-2 rounded-xl text-xs font-bold text-[#151c75] bg-white">
+                                                <p class="mt-1 text-[9px] text-slate-400">Format: gunakan <code class="bg-slate-100 px-1 rounded text-[#151c75] font-bold">#teks#</code> untuk highlight kuning amber</p>
                                             </div>
                                             <div>
                                                 <label class="block text-[10px] font-bold text-slate-600 mb-1">Subjudul Deskripsi</label>
