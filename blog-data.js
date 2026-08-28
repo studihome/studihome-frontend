@@ -209,7 +209,7 @@
     const discount = Math.round((1 - promo.promoPrice / promo.originalPrice) * 100);
 
     let promoHTML = `
-      <aside aria-label="Penawaran Spesial" class="w-full max-w-4xl mx-auto my-3 rounded-2xl overflow-hidden shadow-xl" style="background:linear-gradient(135deg,#1a3a8a,#2d5be3);padding:1px">
+      <aside aria-label="Penawaran Spesial" class="w-full max-w-4xl mx-auto my-2 rounded-2xl overflow-hidden shadow-xl" style="background:linear-gradient(135deg,#1a3a8a,#2d5be3);padding:1px">
         <div class="rounded-2xl" style="background:linear-gradient(135deg,#1e3a8a,#3b5bdb);padding:16px 20px;display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:16px">
           <!-- Left: text -->
           <div style="flex:1 1 0;min-width:0;display:flex;flex-direction:column;align-items:flex-start">
@@ -231,14 +231,14 @@
     const readMin = Math.ceil((article.content || '').replace(/<[^>]*>/g, '').split(/\s+/).length / 200);
 
     return `
-      <div class="max-w-4xl mx-auto px-4 sm:px-6 py-5 sm:py-6 md:px-12 md:py-10">
+      <div class="max-w-4xl mx-auto px-2 sm:px-5 py-5 sm:py-6 md:px-10 md:py-10">
         <!-- Back button -->
         <button onclick="App.router.navigate('home')" class="inline-flex items-center gap-1.5 text-xs font-bold text-[#151c75] hover:text-[#3f48bf] transition-colors mb-6">
           <i class="fa-solid fa-arrow-left"></i> Kembali ke Teras
         </button>
 
         <!-- White Canvas Article Container -->
-        <article class="bg-white rounded-3xl shadow-md border border-slate-100 overflow-hidden mb-10">
+        <article class="bg-white rounded-3xl shadow-md border border-slate-100 overflow-hidden mb-6">
           <div class="px-4 py-5 sm:px-6 sm:py-7 md:px-10 md:py-9">
             <!-- Category (semantic) -->
             <nav aria-label="Kategori Artikel" class="mb-4">
