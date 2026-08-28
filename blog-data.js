@@ -209,17 +209,17 @@
     const discount = Math.round((1 - promo.promoPrice / promo.originalPrice) * 100);
 
     let promoHTML = `
-      <aside aria-label="Penawaran Spesial" class="w-full max-w-4xl mx-auto my-10 rounded-2xl overflow-hidden bg-gradient-to-r from-[#123dab] to-[#666fe5] shadow-xl flex flex-col md:flex-row items-center justify-between p-6 md:px-8 md:py-6 gap-6">
+      <aside aria-label="Penawaran Spesial" class="w-full max-w-4xl mx-auto my-10 rounded-2xl overflow-hidden bg-gradient-to-r from-[#123dab] to-[#666fe5] shadow-xl flex flex-col sm:flex-row items-start sm:items-center justify-between p-5 sm:p-6 md:px-8 md:py-6 gap-4 sm:gap-6">
         <!-- Left: text -->
-        <div class="flex flex-col items-start w-full md:flex-1 min-w-0">
-          <span class="inline-block text-yellow-300 text-[10px] md:text-xs font-extrabold tracking-widest uppercase mb-2">${promo.badge}</span>
-          <h3 class="text-white text-xl md:text-2xl font-black leading-snug">${promo.title}</h3>
+        <div class="flex flex-col items-start w-full sm:flex-1 min-w-0">
+          <span class="inline-flex items-center gap-1 text-yellow-300 text-[10px] md:text-[11px] font-extrabold tracking-widest uppercase mb-1.5">${promo.badge}</span>
+          <h3 class="text-white text-lg sm:text-xl md:text-2xl font-extrabold leading-snug tracking-tight">${promo.title}</h3>
         </div>
 
-        <!-- Right: CTA (shrink-0 prevents squeeze) -->
-        <div class="w-full md:w-auto shrink-0 mt-4 md:mt-0">
-          <button onclick="App.router.navigate('products')" class="w-full md:w-auto inline-flex items-center justify-center px-8 py-3.5 bg-white text-[#123dab] hover:bg-slate-50 font-extrabold text-sm md:text-base rounded-xl transition-all duration-300 hover:-translate-y-1 hover:shadow-xl shadow-black/10 whitespace-nowrap">
-            Ambil Promo <i class="fa-solid fa-arrow-right text-xs ml-2"></i>
+        <!-- Right: CTA -->
+        <div class="w-full sm:w-auto shrink-0 mt-3 sm:mt-0">
+          <button onclick="App.router.navigate('products')" class="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-6 sm:px-7 py-3 bg-white text-[#123dab] hover:bg-white/90 font-bold text-sm md:text-[15px] rounded-xl transition-all duration-200 hover:-translate-y-0.5 hover:shadow-lg shadow-black/10 whitespace-nowrap">
+            ${promo.cta} <i class="fa-solid fa-arrow-right text-[11px]"></i>
           </button>
         </div>
       </aside>`;
