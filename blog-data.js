@@ -231,15 +231,15 @@
     const readMin = Math.ceil((article.content || '').replace(/<[^>]*>/g, '').split(/\s+/).length / 200);
 
     return `
-      <div class="w-full md:max-w-4xl mx-auto md:my-8">
+      <div class="w-full md:max-w-4xl mx-auto px-4 py-5 sm:px-6 sm:py-6 md:px-12 md:py-10">
         <!-- Back button -->
         <button onclick="App.router.navigate('home')" class="inline-flex items-center gap-1.5 text-xs font-bold text-[#151c75] hover:text-[#3f48bf] transition-colors mb-6">
           <i class="fa-solid fa-arrow-left"></i> Kembali ke Teras
         </button>
 
         <!-- White Canvas Article Container -->
-        <article class="w-full bg-white md:max-w-4xl mx-auto md:my-8 md:rounded-2xl rounded-none px-5 py-8 md:px-12 md:py-12 shadow-none md:shadow-md mb-6 md:mb-0">
-          <div>
+        <article class="w-full bg-white rounded-3xl md:shadow-md md:border border-slate-100 overflow-hidden mb-8">
+          <div class="px-4 pt-8 pb-5 sm:px-6 sm:pt-10 sm:pb-7 md:px-10 md:pt-10 md:pb-9">
             <!-- Category (semantic) -->
             <nav aria-label="Kategori Artikel" class="mb-4">
               <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[11px] font-bold bg-blue-50 text-blue-700 border border-blue-100">
@@ -267,7 +267,7 @@
             </div>
 
             <!-- Tags + Share (inline) -->
-            <div class="flex flex-wrap items-center justify-between gap-6 mt-12 pt-6 border-t border-slate-100">
+            <div class="flex flex-wrap items-center justify-between gap-4 mt-5 pt-4 border-t border-slate-100">
               <!-- Left: tags -->
               ${article.tags && article.tags.length ? '<div class="flex flex-wrap gap-2">' + article.tags.map(t => '<span class="inline-flex items-center px-2.5 py-1 rounded-lg text-[11px] font-bold bg-slate-50 text-slate-600 border border-slate-100 hover:bg-slate-100 transition-colors">#' + esc(t) + '</span>').join('') + '</div>' : ''}
               <!-- Right: single share button -->
