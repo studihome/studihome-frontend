@@ -206,26 +206,32 @@
       };
     }
 
+    const discount = Math.round((1 - promo.promoPrice / promo.originalPrice) * 100);
+
     let promoHTML = `
-      <div class="w-full max-w-4xl mx-auto rounded-3xl overflow-hidden bg-gradient-to-br from-indigo-900 to-slate-900 text-white p-6 md:p-10 flex flex-col md:flex-row items-center justify-between gap-8 mt-12">
-        <!-- Left: text -->
-        <div class="flex flex-col items-start gap-3 w-full md:w-2/3">
-          <span class="inline-block bg-rose-500 text-white text-[10px] md:text-xs font-bold px-3 py-1 rounded-full uppercase tracking-wider">${promo.badge}</span>
-          <h2 class="text-2xl md:text-3xl font-extrabold leading-tight text-white">${promo.title}</h2>
-          <p class="text-indigo-100 text-sm md:text-base leading-relaxed">${promo.desc}</p>
-          <div class="flex items-center gap-3 mt-2">
-            <span class="text-slate-400 line-through text-sm">Rp ${promo.originalPrice.toLocaleString('id-ID')}</span>
-            <span class="text-xl font-bold text-emerald-400">Rp ${promo.promoPrice.toLocaleString('id-ID')}</span>
-            <span class="text-[10px] font-bold text-emerald-400 bg-emerald-900/40 px-2 py-0.5 rounded-full">HEMAT ${Math.round((1 - promo.promoPrice / promo.originalPrice) * 100)}%</span>
+      <aside aria-label="Penawaran Spesial" class="relative w-full max-w-4xl mx-auto mt-12 mb-8 rounded-3xl overflow-hidden bg-slate-900 border border-slate-800 shadow-2xl p-8 md:p-12 flex flex-col md:flex-row items-center justify-between gap-8">
+        <!-- Ambient glow -->
+        <div class="absolute -top-24 -right-24 w-64 h-64 bg-indigo-500/20 rounded-full blur-3xl pointer-events-none"></div>
+
+        <!-- Left: copy -->
+        <div class="flex flex-col items-start gap-1 w-full md:w-2/3 z-10">
+          <span class="inline-flex items-center gap-1.5 px-3 py-1 mb-4 rounded-full bg-rose-500/10 border border-rose-500/20 text-rose-400 text-[10px] md:text-xs font-bold tracking-widest uppercase">${promo.badge}</span>
+          <h3 class="text-2xl md:text-3xl font-extrabold text-white tracking-tight leading-tight mb-2">${promo.title}</h3>
+          <p class="text-slate-400 text-sm md:text-base leading-relaxed max-w-xl">${promo.desc}</p>
+          <div class="flex items-center gap-3 mt-4 px-4 py-2 bg-slate-800/50 rounded-xl border border-slate-700/50">
+            <span class="text-slate-500 line-through text-sm font-medium">Rp ${promo.originalPrice.toLocaleString('id-ID')}</span>
+            <span class="text-2xl font-bold text-emerald-400">Rp ${promo.promoPrice.toLocaleString('id-ID')}</span>
+            <span class="text-[10px] font-bold text-emerald-400 bg-emerald-500/10 px-2 py-0.5 rounded-full">HEMAT ${discount}%</span>
           </div>
         </div>
+
         <!-- Right: CTA -->
-        <div class="w-full md:w-auto shrink-0">
-          <button onclick="App.router.navigate('products')" class="w-full md:w-auto block text-center bg-white text-indigo-900 font-bold px-8 py-4 rounded-xl hover:scale-105 transition-transform shadow-xl shadow-indigo-900/20">
-            ${promo.cta} <i class="fa-solid fa-arrow-right text-sm ml-1"></i>
+        <div class="w-full md:w-auto shrink-0 z-10">
+          <button onclick="App.router.navigate('products')" class="w-full md:w-auto inline-flex justify-center items-center px-8 py-4 bg-white hover:bg-slate-100 text-slate-900 font-extrabold text-lg rounded-2xl transition-all duration-300 hover:scale-105 hover:shadow-[0_0_20px_rgba(255,255,255,0.15)]">
+            ${promo.cta} <i class="fa-solid fa-arrow-right text-sm ml-2"></i>
           </button>
         </div>
-      </div>`;
+      </aside>`;
 
     // ISO date for <time datetime>
     const isoDate = article.createdAt ? article.createdAt.slice(0, 10) : '';
