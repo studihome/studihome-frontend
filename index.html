@@ -261,8 +261,9 @@
         .cd-digit { width:42px;height:44px;display:flex;align-items:center;justify-content:center;border-radius:10px;font-size:18px;font-weight:900;color:#fff;background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.08);backdrop-filter:blur(4px);letter-spacing:-.02em;line-height:1;transition:all .3s cubic-bezier(.4,0,.2,1) }
         .cd-secs .cd-digit { animation:cd-seconds-pulse 1s ease-in-out infinite; background:rgba(250,204,21,.12);border-color:rgba(250,204,21,.2);color:#facc15 }
         .cd-label { font-size:8px;font-weight:800;color:rgba(255,255,255,.45);text-transform:uppercase;letter-spacing:.08em;line-height:1 }
-        .cd-urgency-title { font-size:12px;font-weight:900;color:#fff;letter-spacing:.04em;text-transform:uppercase;line-height:1;text-shadow:0 1px 8px rgba(0,0,0,.3) }
-        @media(min-width:640px){ .cd-urgency-title{font-size:14px} }
+        .cd-urgency-title { font-family:'Barlow Condensed',system-ui,sans-serif;font-size:14px;font-weight:800;color:#fff;letter-spacing:.03em;text-transform:uppercase;line-height:1.1;text-shadow:0 1px 8px rgba(0,0,0,.3) }
+        .cd-urgency-title .cd-highlight{color:#facc15;font-size:1.6em;font-weight:900;line-height:1;vertical-align:baseline;text-shadow:0 1px 12px rgba(250,204,21,.4)}
+        @media(min-width:640px){ .cd-urgency-title{font-size:16px} }
         .cd-separator { font-size:16px;font-weight:900;color:rgba(255,255,255,.25);line-height:1;padding-bottom:14px }
         @media(min-width:640px){ .cd-digit{width:48px;height:50px;font-size:22px;border-radius:12px} .cd-label{font-size:9px} .cd-separator{font-size:20px} }
         #api-status-badge { width: 1rem; height: 1rem; border: 0 !important; background: transparent !important; box-shadow: none !important; }
@@ -2985,7 +2986,7 @@ App.router.bindCanonicalLinkGuard();
                         if (!cd || !cd.enabled || !cd.endDate) { cdContainer.classList.add('hidden'); return; }
                         var titleEl = document.getElementById('hero-countdown-title');
                         var expiredEl = document.getElementById('hero-countdown-expired-text');
-                        if (titleEl) titleEl.textContent = cd.title || 'Penawaran Berakhir dalam...';
+                        if (titleEl) titleEl.innerHTML = (cd.title || 'Penawaran Berakhir dalam...').replace(/#([^#]+)#/g, '<span class="cd-highlight">$1</span>');
                         if (expiredEl) expiredEl.textContent = cd.expiredMsg || 'Penawaran sudah berakhir!';
                         var target = new Date(cd.endDate + 'T' + (cd.endTime || '23:59') + ':00+07:00').getTime();
                         function pad(n) { return n < 10 ? '0' + n : '' + n; }
@@ -6676,6 +6677,7 @@ renderStudioAiControl: async () => {
                                                     <div>
                                                         <label class="block text-[10px] font-bold text-slate-600 mb-1">Judul Urgency</label>
                                                         <input type="text" id="hero-countdown-title" placeholder="Penawaran Berakhir dalam..." value="${App.utils.escapeHtml(heroCD.title || '')}" class="w-full card-3d px-3 py-2 rounded-xl text-xs bg-white">
+                                                        <p class="mt-1 text-[9px] text-slate-400">Format: gunakan <code class="bg-slate-100 px-1 rounded text-[#151c75] font-bold">#angka#</code> untuk highlight kuning, misal: TERSISA #12# KURSI LAGI!!</p>
                                                     </div>
                                                     <div class="grid grid-cols-2 gap-2">
                                                         <div>
