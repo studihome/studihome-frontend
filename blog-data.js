@@ -209,8 +209,8 @@
     const discount = Math.round((1 - promo.promoPrice / promo.originalPrice) * 100);
 
     let promoHTML = `
-      <aside aria-label="Penawaran Spesial" class="w-full max-w-4xl mx-auto my-8 rounded-2xl overflow-hidden shadow-xl" style="background:linear-gradient(135deg,#1a3a8a,#2d5be3);padding:1px">
-        <div class="rounded-2xl" style="background:linear-gradient(135deg,#1e3a8a,#3b5bdb);padding:20px 24px;display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:16px">
+      <aside aria-label="Penawaran Spesial" class="w-full max-w-4xl mx-auto my-5 rounded-2xl overflow-hidden shadow-xl" style="background:linear-gradient(135deg,#1a3a8a,#2d5be3);padding:1px">
+        <div class="rounded-2xl" style="background:linear-gradient(135deg,#1e3a8a,#3b5bdb);padding:16px 20px;display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:16px">
           <!-- Left: text -->
           <div style="flex:1 1 0;min-width:0;display:flex;flex-direction:column;align-items:flex-start">
             <span style="display:inline-flex;align-items:center;gap:6px;padding:4px 12px;border-radius:9999px;font-size:11px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;margin-bottom:8px;white-space:nowrap;background:rgba(250,204,21,.2);color:#facc15">${promo.badge}</span>
@@ -231,7 +231,7 @@
     const readMin = Math.ceil((article.content || '').replace(/<[^>]*>/g, '').split(/\s+/).length / 200);
 
     return `
-      <div class="max-w-4xl mx-auto px-4 sm:px-6 py-6 md:px-12 md:py-10">
+      <div class="max-w-4xl mx-auto px-3 sm:px-6 py-4 sm:py-6 md:px-12 md:py-10">
         <!-- Back button -->
         <button onclick="App.router.navigate('home')" class="inline-flex items-center gap-1.5 text-xs font-bold text-[#151c75] hover:text-[#3f48bf] transition-colors mb-6">
           <i class="fa-solid fa-arrow-left"></i> Kembali ke Beranda
@@ -239,7 +239,7 @@
 
         <!-- White Canvas Article Container -->
         <article class="bg-white rounded-3xl shadow-md border border-slate-100 overflow-hidden mb-16">
-          <div class="px-5 py-6 sm:px-8 sm:py-8 md:px-12 md:py-10">
+          <div class="px-4 py-5 sm:px-8 sm:py-8 md:px-12 md:py-10">
             <!-- Category (semantic) -->
             <nav aria-label="Kategori Artikel" class="mb-4">
               <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[11px] font-bold bg-blue-50 text-blue-700 border border-blue-100">
