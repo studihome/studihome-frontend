@@ -3201,7 +3201,6 @@ App.router.bindCanonicalLinkGuard();
 
                         // Menghidupkan Animasi Angka "Live Stats" di Hero
                         if (!App.studioAI._liveStatsBound) {
-                            App.studioAI._liveStatsBound = true;
                             // Smooth traffic curve: sinusoidal interpolation between time periods
                             // Creator: 8-27 | Visitor: 168-736
                             const trafficAt = (hour, minute) => {
@@ -3217,9 +3216,15 @@ App.router.bindCanonicalLinkGuard();
                                 const visitors = Math.round(168 + clamped * 568);
                                 return { c: creators, v: visitors };
                             };
+                            const now = new Date();
+                            let state = trafficAt(now.getHours(), now.getMinutes());
+                            const tick = () => {
+                                const cur = new Date();
+                                const target = trafficAt(cur.getHours(), cur.getMinutes());
+                                const driftC = target.c - state.c;
+                                const driftV = target.v - state.v;
                                 state.c += Math.sign(driftC) * (Math.abs(driftC) > 3 ? Math.ceil(Math.random() * 2) : (Math.random() < 0.3 ? Math.sign(driftC) : 0));
                                 state.v += Math.sign(driftV) * (Math.abs(driftV) > 8 ? Math.ceil(Math.random() * 5) : (Math.random() < 0.3 ? Math.sign(driftV) : 0));
-                                // Clamp to valid ranges
                                 state.c = Math.max(8, Math.min(27, state.c));
                                 state.v = Math.max(168, Math.min(736, state.v));
                                 const elC = document.getElementById('live-stat-creators');
