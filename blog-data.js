@@ -209,29 +209,18 @@
     const discount = Math.round((1 - promo.promoPrice / promo.originalPrice) * 100);
 
     let promoHTML = `
-      <aside aria-label="Penawaran Spesial" class="relative w-full max-w-4xl mx-auto mt-10 mb-6 rounded-2xl overflow-hidden border border-slate-200 shadow-lg" style="background:linear-gradient(135deg,#0f172a,#1e293b)">
-        <!-- Subtle accent line -->
-        <div class="absolute top-0 left-0 right-0 h-0.5" style="background:linear-gradient(90deg,#f43f5e,#8b5cf6,#06b6d4)"></div>
-
-        <div class="px-6 py-5 md:px-10 md:py-6 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-5">
-          <!-- Left: copy -->
-          <div class="flex-1 min-w-0">
-            <div class="flex items-center gap-2 mb-2">
-              <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-rose-500/15 text-rose-400 text-[10px] font-bold uppercase tracking-wider">${promo.badge}</span>
-            </div>
-            <h3 class="text-lg md:text-xl font-extrabold text-white leading-snug mb-1.5">${promo.title}</h3>
-            <p class="text-slate-400 text-xs md:text-sm leading-relaxed mb-3">${promo.desc}</p>
-            <div class="inline-flex items-center gap-2.5 px-3 py-1.5 rounded-lg" style="background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.06)">
-              <span class="text-slate-500 line-through text-xs">Rp ${promo.originalPrice.toLocaleString('id-ID')}</span>
-              <span class="text-lg font-bold text-emerald-400">Rp ${promo.promoPrice.toLocaleString('id-ID')}</span>
-              <span class="text-[9px] font-bold text-emerald-400 bg-emerald-500/15 px-1.5 py-0.5 rounded">HEMAT ${discount}%</span>
-            </div>
+      <aside aria-label="Penawaran Spesial" class="w-full max-w-4xl mx-auto my-10 rounded-2xl overflow-hidden shadow-xl" style="background:linear-gradient(to right,#123dab,#666fe5)">
+        <div class="flex flex-col md:flex-row items-center justify-between p-6 md:px-8 md:py-5 gap-4 md:gap-6">
+          <!-- Left: compact copy -->
+          <div class="flex flex-col items-start md:justify-center w-full md:w-auto flex-1 min-w-0">
+            <span class="text-yellow-300 text-xs md:text-sm font-bold tracking-widest uppercase mb-1">${promo.badge}</span>
+            <h3 class="text-white text-lg md:text-2xl font-extrabold leading-tight">${promo.title}</h3>
           </div>
 
           <!-- Right: CTA -->
-          <div class="shrink-0 w-full sm:w-auto">
-            <button onclick="App.router.navigate('products')" class="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-6 py-3 bg-white hover:bg-slate-50 text-slate-900 font-bold text-sm rounded-xl transition-all duration-200 hover:scale-[1.03] hover:shadow-lg">
-              ${promo.cta} <i class="fa-solid fa-arrow-right text-xs"></i>
+          <div class="w-full md:w-auto shrink-0 flex items-center">
+            <button onclick="App.router.navigate('products')" class="w-full md:w-auto px-6 py-3 bg-white text-[#123dab] hover:bg-slate-50 font-bold text-sm md:text-base rounded-xl transition-all duration-300 hover:scale-105 shadow-md whitespace-nowrap">
+              Ambil Promo <i class="fa-solid fa-arrow-right text-xs ml-1.5"></i>
             </button>
           </div>
         </div>
