@@ -53,7 +53,7 @@
                 <div class="h-full p-3 flex items-center min-w-0">
                   <div class="flex items-center justify-between gap-3 min-w-0 w-full">
                     <h3 class="min-w-0 flex-1 text-xs sm:text-sm font-extrabold text-[#151c75] leading-snug line-clamp-2">${esc(a.title)}</h3>
-                    <span class="featured-card-read shrink-0 inline-flex items-center gap-1 px-3 py-1 bg-blue-50 hover:bg-blue-100 text-blue-900 text-xs md:text-sm font-bold rounded-full transition-colors duration-200 shadow-sm hover:shadow">Cari tahu <i class="fad fa-mug-hot" aria-hidden="true"></i></span>
+                    <span class="featured-card-read shrink-0 inline-flex items-center gap-1 px-3 py-1 bg-blue-50 hover:bg-blue-100 text-blue-900 text-xs md:text-sm font-bold rounded-full transition-colors duration-200 shadow-sm hover:shadow">Cari tahu <i class="fa-solid fa-lightbulb" aria-hidden="true"></i></span>
                   </div>
                 </div>
               </div>
@@ -64,7 +64,7 @@
 
       return `
         <style>
-          #featured-post-slider{margin-bottom:6px;}
+          #featured-post-slider{margin-bottom:3px;}
           @media (min-width:640px){#featured-post-slider{margin-bottom:2.5rem;}}
           #featured-post-slider .featured-slide,#featured-post-slider .featured-slide-mobile{will-change:opacity,transform;transition:opacity .6s ease-in-out,transform .6s ease-in-out;}
           #featured-post-slider .featured-card{background:#fff;border:1px solid #dbe7ff;box-shadow:none;}
