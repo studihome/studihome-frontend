@@ -148,6 +148,35 @@
   }
 
   // ---- HTML helpers ----
+  function getArticleImageSrc(article) {
+    const source = String(article && article.image || '').trim();
+    if (source) return source;
+
+    // A deterministic, locally rendered cover for articles without an uploaded image.
+    // It uses only the article's existing public title/category and avoids remote stock assets.
+    const category = String(article && article.category || 'Artikel').replace(/[<>&"]/g, '').slice(0, 28);
+    const title = String(article && article.title || 'Studihome').replace(/[<>&"]/g, '').slice(0, 54);
+    const palette = category === 'Bisnis'
+      ? ['#0f766e', '#14b8a6']
+      : category === 'Tentang Kami'
+        ? ['#7c3aed', '#a78bfa']
+        : ['#151c75', '#3f48bf'];
+    const svg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 675" role="img" aria-label="${title}">
+      <defs>
+        <linearGradient id="b" x1="0" y1="0" x2="1" y2="1"><stop stop-color="${palette[0]}"/><stop offset="1" stop-color="${palette[1]}"/></linearGradient>
+        <filter id="s" x="-20%" y="-20%" width="140%" height="140%"><feGaussianBlur stdDeviation="28"/></filter>
+      </defs>
+      <rect width="1200" height="675" fill="url(#b)"/>
+      <circle cx="1040" cy="80" r="220" fill="#facc15" fill-opacity=".22" filter="url(#s)"/>
+      <circle cx="160" cy="610" r="260" fill="#fff" fill-opacity=".10" filter="url(#s)"/>
+      <path d="M0 510C250 410 520 680 1200 420V675H0Z" fill="#fff" fill-opacity=".10"/>
+      <text x="78" y="100" fill="#fff" fill-opacity=".88" font-family="Arial, sans-serif" font-size="30" font-weight="700" letter-spacing="4">STUDIHOME</text>
+      <text x="78" y="165" fill="#fef3c7" font-family="Arial, sans-serif" font-size="26" font-weight="700">${category.toUpperCase()}</text>
+      <text x="78" y="510" fill="#fff" font-family="Arial, sans-serif" font-size="52" font-weight="700">${title}</text>
+    </svg>`;
+    return 'data:image/svg+xml;charset=UTF-8,' + encodeURIComponent(svg);
+  }
+
   function renderCardHTML(article, showExcerpt) {
     const dateStr = new Date(article.createdAt).toLocaleDateString('id-ID', {
       day: 'numeric', month: 'short', year: 'numeric'
@@ -181,12 +210,12 @@
   }
 
   function renderBalkonCardHTML(article) {
-    const hasImage = article.image && article.image.trim();
+    const imageSrc = getArticleImageSrc(article);
 
     return `<article class="h-full">
       <a href="/balkon/${encodeURIComponent(article.slug)}" data-balkon-link data-balkon-slug="${esc(article.slug)}" class="block h-full cursor-pointer transition-transform hover:-translate-y-1 group">
         <div class="h-full overflow-hidden rounded-xl bg-white shadow-sm transition-shadow duration-200 hover:shadow-md">
-          ${hasImage ? `<img src="${esc(article.image)}" alt="${esc(article.title)}" class="block w-full h-48 md:h-56 object-cover rounded-t-xl md:rounded-t-2xl transition-transform duration-700 ease-in-out group-hover:scale-105" loading="lazy">` : `<div class="block w-full h-48 md:h-56 rounded-t-xl md:rounded-t-2xl bg-gradient-to-br from-[#151c75] to-[#3f48bf] flex items-center justify-center"><span class="text-4xl font-black text-white/80">${esc((article.title || 'S').charAt(0).toUpperCase())}</span></div>`}
+          <img src="${esc(imageSrc)}" alt="${esc(article.title)}" class="block w-full h-48 md:h-56 object-cover rounded-t-xl md:rounded-t-2xl transition-transform duration-700 ease-in-out group-hover:scale-105" loading="lazy">
           <div class="p-5">
             <h2 class="text-lg font-extrabold leading-snug text-slate-900 transition-colors group-hover:text-indigo-600">${esc(article.title)}</h2>
             <p class="mt-2 text-sm leading-relaxed text-slate-600 line-clamp-2">${esc(article.excerpt || '')}</p>
