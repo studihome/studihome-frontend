@@ -209,17 +209,17 @@
     const discount = Math.round((1 - promo.promoPrice / promo.originalPrice) * 100);
 
     let promoHTML = `
-      <aside aria-label="Penawaran Spesial" class="w-full max-w-none mx-auto my-7 rounded-2xl overflow-hidden shadow-xl" style="background:linear-gradient(135deg,#1a3a8a,#2d5be3);padding:1px">
-        <div class="rounded-2xl flex flex-col items-stretch gap-4 p-5 sm:p-6 md:flex-row md:items-center md:justify-between md:gap-6" style="background:linear-gradient(135deg,#1e3a8a,#3b5bdb)">
+      <aside aria-label="Penawaran Spesial" class="blog-article-promo rounded-2xl overflow-hidden shadow-xl" style="background:linear-gradient(135deg,#1a3a8a,#2d5be3);padding:1px">
+        <div class="rounded-2xl" style="display:flex;flex-wrap:wrap;align-items:center;gap:clamp(16px,2vw,28px);padding:clamp(20px,3vw,32px);background:linear-gradient(135deg,#1e3a8a,#3b5bdb)">
           <!-- Left: text -->
-          <div class="w-full md:flex-1" style="min-width:0;display:flex;flex-direction:column;align-items:flex-start">
+          <div style="flex:1 1 360px;min-width:0;display:flex;flex-direction:column;align-items:flex-start">
             <span style="display:inline-flex;align-items:center;gap:6px;padding:4px 12px;border-radius:9999px;font-size:11px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;margin-bottom:8px;white-space:nowrap;background:rgba(250,204,21,.2);color:#facc15">${promo.badge}</span>
             <h3 style="color:#fff;font-size:18px;font-weight:800;line-height:1.3;margin:0">${promo.title}</h3>
           </div>
 
           <!-- Right: CTA -->
-          <div class="w-full md:w-auto" style="flex-shrink:0">
-            <button onclick="App.router.navigate('products')" class="w-full md:w-auto" style="display:inline-flex;align-items:center;justify-content:center;gap:8px;padding:10px 24px;border-radius:12px;font-size:14px;font-weight:800;white-space:nowrap;cursor:pointer;border:none;transition:all .2s;background:linear-gradient(135deg,#f59e0b,#d97706);color:#1e3a8a;box-shadow:0 4px 14px rgba(245,158,11,.35)" onmouseover="this.style.transform='translateY(-1px)';this.style.boxShadow='0 6px 20px rgba(245,158,11,.45)'" onmouseout="this.style.transform='';this.style.boxShadow='0 4px 14px rgba(245,158,11,.35)'">
+          <div style="flex:1 1 260px;min-width:min(100%,260px);max-width:360px">
+            <button onclick="App.router.navigate('products')" style="width:100%;display:inline-flex;align-items:center;justify-content:center;gap:8px;padding:12px 24px;border-radius:12px;font-size:14px;font-weight:800;white-space:nowrap;cursor:pointer;border:none;transition:all .2s;background:linear-gradient(135deg,#f59e0b,#d97706);color:#1e3a8a;box-shadow:0 4px 14px rgba(245,158,11,.35)" onmouseover="this.style.transform='translateY(-1px)';this.style.boxShadow='0 6px 20px rgba(245,158,11,.45)'" onmouseout="this.style.transform='';this.style.boxShadow='0 4px 14px rgba(245,158,11,.35)'">
               ${promo.cta} <i class="fa-solid fa-arrow-right" style="font-size:12px"></i>
             </button>
           </div>
@@ -231,17 +231,24 @@
     const readMin = Math.ceil((article.content || '').replace(/<[^>]*>/g, '').split(/\s+/).length / 200);
 
     return `
-      <div class="w-full max-w-5xl mx-auto px-0 py-10 sm:py-11 md:py-12">
+      <style>
+        .blog-article-page{width:min(100%,80rem);margin:0 auto;padding:clamp(2.5rem,5vw,3rem) 0;box-sizing:border-box}
+        .blog-article-canvas,.blog-article-promo{width:100%;box-sizing:border-box}
+        .blog-article-inner{padding:clamp(3rem,7vw,4rem) clamp(.75rem,4vw,3rem) clamp(1.5rem,4vw,2.5rem)}
+        .blog-article-category{margin:0 0 clamp(1.5rem,3vw,2rem)}
+        @media (max-width:639px){.blog-article-canvas,.blog-article-promo{width:min(100vw,calc(100% + 16px));margin-left:50%;margin-right:0;transform:translateX(-50%)}.blog-article-inner{padding-inline:clamp(.875rem,4vw,1.25rem)}}
+      </style>
+      <div class="blog-article-page">
         <!-- Back button -->
         <button onclick="App.router.navigate('home')" class="inline-flex items-center gap-1.5 text-xs font-bold text-[#151c75] hover:text-[#3f48bf] transition-colors mb-6">
           <i class="fa-solid fa-arrow-left"></i> Kembali ke Teras
         </button>
 
         <!-- White Canvas Article Container -->
-        <article class="w-full bg-white rounded-3xl md:shadow-md md:border border-slate-100 overflow-hidden mb-8">
-          <div class="px-3 pt-12 pb-6 sm:px-6 sm:pt-12 sm:pb-8 md:px-12 md:pt-14 md:pb-10">
+        <article class="blog-article-canvas w-full bg-white rounded-3xl md:shadow-md md:border border-slate-100 overflow-hidden mb-8">
+          <div class="blog-article-inner">
             <!-- Category (semantic) -->
-            <nav aria-label="Kategori Artikel" class="mb-6 md:mb-7">
+            <nav aria-label="Kategori Artikel" class="blog-article-category">
               <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[11px] font-bold bg-blue-50 text-blue-700 border border-blue-100">
                 <i class="fa-solid fa-folder-open text-[9px]"></i>${esc(article.category || 'Artikel')}
               </span>
