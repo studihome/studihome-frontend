@@ -252,7 +252,7 @@
         .blog-article-inner{padding:clamp(1.25rem,3vw,2rem) clamp(.75rem,4vw,3rem) clamp(1.5rem,4vw,2.5rem)}
         .blog-article-back{margin-bottom:clamp(1.25rem,2.5vw,1.75rem)}
         .blog-article-category{margin:0 0 clamp(1.25rem,2.5vw,1.75rem)}
-        .blog-article-actions{margin:clamp(3.25rem,7vw,4.5rem) 0 clamp(.75rem,2vw,1.25rem);padding-top:clamp(1.5rem,3vw,2rem)}
+        .blog-article-actions{margin:clamp(3.625rem,7.5vw,5rem) 0 clamp(.75rem,2vw,1.25rem);padding-top:clamp(1.5rem,3vw,2rem)}
         @media (max-width:639px){.blog-article-canvas,.blog-article-promo{width:min(100vw,calc(100% + 16px));margin-left:50%;margin-right:0;transform:translateX(-50%)}.blog-article-inner{padding-inline:clamp(.875rem,4vw,1.25rem)}}
       </style>
       <div class="blog-article-page">
