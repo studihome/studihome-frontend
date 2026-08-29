@@ -68,7 +68,7 @@
           #featured-post-slider .featured-card-read{padding:.48rem .7rem;border:1px solid rgba(100,116,139,.35);border-radius:.7rem;background:linear-gradient(135deg,#e2e8f0 0%,#64748b 100%);color:#fff;box-shadow:0 5px 12px rgba(71,85,105,.2),inset 0 1px 0 rgba(255,255,255,.42);transition:transform .2s ease,box-shadow .2s ease;}
           #featured-post-slider .group:hover .featured-card-read{box-shadow:0 7px 16px rgba(71,85,105,.28),inset 0 1px 0 rgba(255,255,255,.48);transform:translateX(2px);}
         </style>
-        <div class="mb-8 sm:mb-10" id="featured-post-slider">
+        <div class="mb-5 sm:mb-10" id="featured-post-slider">
           <div class="flex items-center justify-between mb-4">
             <div>
               <h2 class="text-lg sm:text-xl font-extrabold text-[#151c75]">Insights &amp; tips seputar AI</h2>
