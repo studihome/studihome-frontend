@@ -101,13 +101,37 @@
     '</div>';
   }
 
+  function positionContainer(el) {
+    var mobile = window.matchMedia && window.matchMedia('(max-width: 767px)').matches;
+    if (mobile) {
+      el.style.bottom = 'calc(env(safe-area-inset-bottom, 0px) + 4.5rem)';
+      el.style.left = '50%';
+      el.style.right = 'auto';
+      el.style.width = 'min(calc(100% - 2rem), 24rem)';
+      el.style.maxWidth = '24rem';
+      el.style.transform = 'translateX(-50%)';
+      return;
+    }
+    el.style.bottom = '1rem';
+    el.style.left = '1rem';
+    el.style.right = 'auto';
+    el.style.width = '';
+    el.style.maxWidth = '20rem';
+    el.style.transform = '';
+  }
+
   function getContainer() {
     var el = document.getElementById(WIDGET_ID);
-    if (el) return el;
+    if (el) {
+      positionContainer(el);
+      return el;
+    }
     el = document.createElement('div');
     el.id = WIDGET_ID;
-    el.className = 'fixed z-50 flex flex-col-reverse gap-2.5 bottom-4 left-4 right-4 md:right-auto md:left-4 md:max-w-xs pointer-events-none';
+    el.className = 'fixed z-50 flex flex-col-reverse gap-2.5 pointer-events-none';
     el.setAttribute('aria-live', 'polite');
+    positionContainer(el);
+    window.addEventListener('resize', function() { positionContainer(el); }, { passive: true });
     document.body.appendChild(el);
     return el;
   }
