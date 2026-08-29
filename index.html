@@ -1734,10 +1734,14 @@ App.router.bindCanonicalLinkGuard();
                         'dapur-ambalan': '/dapur/ambalan',
                         'ruang-kerja': '/dapur',
                         'studio-ai': '/studio-ai',
-                        'blog': '/blog'
+                        'blog': '/blog',
+                        'balkon': '/balkon'
                     };
 
-                    const targetPath = routes[tab] || '/';
+                    let targetPath = routes[tab] || '/';
+                    if (tab === 'balkon' && options.slug) {
+                        targetPath = '/balkon/' + encodeURIComponent(String(options.slug));
+                    }
                     const canonicalUrl = new URL(targetPath, window.location.origin);
                     canonicalUrl.hash = '';
                     canonicalUrl.search = options.search || '';
@@ -1792,6 +1796,17 @@ App.router.bindCanonicalLinkGuard();
                             });
                             App.blog.renderPage();
                             break;
+                        case 'balkon':
+                            if (options.slug) App.blog.openBalkonArticle(options.slug);
+                            else {
+                                App.ui.updateSeo({
+                                    title: 'Insights & tips seputar AI | Balkon Studihome',
+                                    description: 'Insights, tips, dan artikel praktis seputar AI, pendidikan, dan otomatisasi dari Studihome.',
+                                    path: '/balkon'
+                                });
+                                App.blog.renderBalkonPage();
+                            }
+                            break;
                         default:
                             App.home.render();
                     }
@@ -1828,6 +1843,7 @@ App.router.bindCanonicalLinkGuard();
                     if (parts[0] === 'dashboard' || parts[0] === 'kamar') { App.state.routeType = 'dashboard'; return; }
                     if (parts[0] === 'admin') { App.state.routeType = 'admin'; return; }
                     if (parts[0] === 'blog') { App.state.routeType = 'blog'; App.state.blogSlug = parts[1] || ''; return; }
+                    if (parts[0] === 'balkon') { App.state.routeType = 'balkon'; App.state.balkonSlug = parts[1] || ''; return; }
                     if (/^(ai-|kursus-ai|jasa-ai|ai-untuk-)/i.test(parts[0])) { App.state.routeType = 'studio-ai'; App.state.studioAICategory = parts[0].toLowerCase(); return; }
                     if (parts.length === 1) { App.state.routeType = 'creator'; App.state.creatorUsername = parts[0].toLowerCase(); App.state.creatorAmbalanSlug = ''; return; }
                     if (parts.length >= 3 && parts[1] === 'portfolio') { App.state.routeType = 'creator'; App.state.creatorUsername = parts[0].toLowerCase(); App.state.creatorAmbalanSlug = parts.slice(2).join('-').toLowerCase(); return; }
@@ -1923,6 +1939,19 @@ App.router.bindCanonicalLinkGuard();
                                 App.blog.renderPage();
                             }
                             return true;
+                        case 'balkon':
+                            App.ui.renderNavigation();
+                            if (App.state.balkonSlug && App.blog) {
+                                App.blog.openBalkonArticle(App.state.balkonSlug);
+                            } else if (App.blog) {
+                                App.ui.updateSeo({
+                                    title: 'Insights & tips seputar AI | Balkon Studihome',
+                                    description: 'Insights, tips, dan artikel praktis seputar AI, pendidikan, dan otomatisasi dari Studihome.',
+                                    path: '/balkon'
+                                });
+                                App.blog.renderBalkonPage();
+                            }
+                            return true;
                         default:
                             return false;
                     }
@@ -1954,6 +1983,21 @@ App.router.bindCanonicalLinkGuard();
                     const normalizeAll = (root = document) => {
                         root.querySelectorAll?.('a[href^="#"]').forEach(normalizeAnchor);
                     };
+
+                    document.addEventListener('mouseover', (event) => {
+                        const anchor = event.target.closest?.('a[data-balkon-link]');
+                        const slug = anchor?.dataset?.balkonSlug;
+                        if (slug && App.blog) App.blog.prefetchBalkonArticle(slug);
+                    }, true);
+
+                    document.addEventListener('click', (event) => {
+                        const anchor = event.target.closest?.('a[data-balkon-link]');
+                        if (!anchor || event.defaultPrevented || event.button !== 0 || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return;
+                        const slug = anchor.dataset?.balkonSlug;
+                        if (!slug) return;
+                        event.preventDefault();
+                        App.router.navigate('balkon', { slug });
+                    }, true);
 
                     document.addEventListener('click', (event) => {
                         const anchor = event.target.closest?.('a[href^="#"]');
