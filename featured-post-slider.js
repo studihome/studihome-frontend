@@ -47,15 +47,17 @@
           };
           const catClass = categoryColors[a.category] || 'bg-slate-100 text-slate-600';
 
-          return `<article class="blog-slider-card flex-1 min-w-0 cursor-pointer group" onclick="App.blog.openArticle('${esc(a.slug)}')">
-            <div class="featured-card card-3d rounded-2xl overflow-hidden h-full relative" style="border-radius:1rem">
-              <div class="h-full p-3 flex items-center min-w-0">
-                <div class="flex items-center justify-between gap-3 min-w-0 w-full">
-                  <h3 class="min-w-0 flex-1 text-xs sm:text-sm font-extrabold text-[#151c75] leading-snug line-clamp-2">${esc(a.title)}</h3>
-                  <span class="featured-card-read shrink-0 inline-flex items-center gap-1.5 text-[10px] font-extrabold">Baca <i class="fa-solid fa-arrow-right text-[9px]" aria-hidden="true"></i></span>
+          return `<article class="blog-slider-card flex-1 min-w-0 group">
+            <a href="/balkon/${encodeURIComponent(a.slug)}" data-balkon-link data-balkon-slug="${esc(a.slug)}" class="block h-full cursor-pointer transition-transform hover:-translate-y-1">
+              <div class="featured-card card-3d rounded-2xl overflow-hidden h-full relative" style="border-radius:1rem">
+                <div class="h-full p-3 flex items-center min-w-0">
+                  <div class="flex items-center justify-between gap-3 min-w-0 w-full">
+                    <h3 class="min-w-0 flex-1 text-xs sm:text-sm font-extrabold text-[#151c75] leading-snug line-clamp-2">${esc(a.title)}</h3>
+                    <span class="featured-card-read shrink-0 inline-flex items-center gap-1.5 text-[10px] font-extrabold">Baca <i class="fa-solid fa-arrow-right text-[9px]" aria-hidden="true"></i></span>
+                  </div>
                 </div>
               </div>
-            </div>
+            </a>
           </article>`;        }).join('');
         return cards;
       };
@@ -73,12 +75,12 @@
         <div id="featured-post-slider">
           <div class="flex items-center justify-between mb-3">
             <div>
-              <h2 class="text-lg sm:text-xl font-extrabold text-[#151c75]">Insights &amp; tips seputar AI</h2>
+              <h2 class="text-lg sm:text-xl font-extrabold text-[#151c75]">Insights &amp; tips AI</h2>
             </div>
-            <button onclick="App.router.navigate('home')" class="text-xs font-bold text-[#151c75] hover:underline flex items-center gap-1">
+            <a href="/balkon" class="text-xs font-bold text-[#151c75] hover:underline flex items-center gap-1">
               <span>Semua</span>
-              <i class="fa-solid fa-chevron-right text-amber-500"></i>
-            </button>
+              <i class="fa-solid fa-chevron-right text-amber-500" aria-hidden="true"></i>
+            </a>
           </div>
           <!-- Desktop view: 2 cards side by side -->
           <div class="hidden md:block relative overflow-hidden rounded-2xl" style="min-height:clamp(4.75rem,4.5vw,5rem)">
