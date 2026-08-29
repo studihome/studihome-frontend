@@ -47,16 +47,9 @@
               ${hasImage ? `<img src="${esc(a.image)}" alt="${esc(a.title)}" class="featured-card-image absolute inset-0 w-full h-full object-cover transition-transform duration-700 group-hover:scale-105" loading="lazy">` : `<div class="absolute inset-0 bg-gradient-to-br from-[#151c75] via-[#25308d] to-[#3f48bf]"><div class="absolute inset-0 opacity-20" style="background:radial-gradient(circle at 75% 25%, rgba(250,204,21,.65) 0%, transparent 45%)"></div><span class="absolute right-5 top-1/2 -translate-y-1/2 text-white/25 text-6xl font-black">${(a.title || 'S').charAt(0).toUpperCase()}</span></div>`}
               <div class="featured-card-overlay absolute inset-0 pointer-events-none"></div>
               <div class="featured-card-sheen absolute inset-0 pointer-events-none"></div>
-              <div class="relative z-10 h-full p-3 sm:p-4 md:p-5 flex flex-col justify-between min-w-0">
-                <div class="flex items-start justify-between gap-3">
-                  <span class="featured-card-category inline-flex px-2.5 py-1 rounded-full text-[10px] font-extrabold text-white">${esc(a.category || 'Artikel')}</span>
-                  <span class="text-[10px] font-medium text-white/80">${dateStr}</span>
-                </div>
-                <div class="flex items-end justify-between gap-3 min-w-0">
-                  <div class="min-w-0 flex-1">
-                    <h3 class="text-xs sm:text-sm font-extrabold text-white leading-snug mb-1 line-clamp-2 drop-shadow-sm">${esc(a.title)}</h3>
-                    <p class="text-[11px] text-white/85 leading-relaxed line-clamp-1">${esc(a.excerpt || '')}</p>
-                  </div>
+              <div class="relative z-10 h-full p-3 sm:p-4 md:p-5 flex items-end min-w-0">
+                <div class="flex items-end justify-between gap-3 min-w-0 w-full">
+                  <h3 class="min-w-0 flex-1 text-xs sm:text-sm font-extrabold text-white leading-snug line-clamp-2 drop-shadow-sm">${esc(a.title)}</h3>
                   <span class="featured-card-read shrink-0 inline-flex items-center gap-1.5 text-[10px] font-extrabold text-white">Baca <i class="fa-solid fa-arrow-right text-[9px]" aria-hidden="true"></i></span>
                 </div>
               </div>
