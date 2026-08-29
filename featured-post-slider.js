@@ -69,12 +69,12 @@
           #featured-post-slider .featured-dot.is-active:hover .featured-dot-mark{transform:scaleX(1.04)}
           #featured-post-slider .featured-card{background:#151c75;border-color:rgba(255,255,255,.3);box-shadow:0 16px 34px rgba(21,28,117,.18),inset 0 1px 0 rgba(255,255,255,.28);}
           #featured-post-slider .featured-card:hover{box-shadow:0 22px 44px rgba(21,28,117,.26),inset 0 1px 0 rgba(255,255,255,.38);}
-          #featured-post-slider .featured-card-overlay{background:linear-gradient(180deg,rgba(8,15,45,.04) 0%,rgba(8,15,45,.12) 35%,rgba(8,15,45,.86) 100%),linear-gradient(90deg,rgba(8,15,45,.3) 0%,transparent 62%);}
+          #featured-post-slider .featured-card-overlay{background:linear-gradient(180deg,rgba(8,15,45,.08) 0%,rgba(8,15,45,.22) 38%,rgba(8,15,45,.96) 100%),linear-gradient(90deg,rgba(8,15,45,.52) 0%,rgba(8,15,45,.16) 62%,transparent 100%);}
           #featured-post-slider .featured-card-sheen{background:linear-gradient(115deg,transparent 34%,rgba(255,255,255,.16) 48%,transparent 62%);transform:translateX(-125%);transition:transform .8s cubic-bezier(.2,.8,.2,1);}
           #featured-post-slider .group:hover .featured-card-sheen{transform:translateX(125%);}
           #featured-post-slider .featured-card-category{border:1px solid rgba(255,255,255,.28);background:rgba(15,23,42,.28);box-shadow:inset 0 1px 0 rgba(255,255,255,.22);backdrop-filter:blur(10px);}
-          #featured-post-slider .featured-card-read{padding:.48rem .7rem;border:1px solid rgba(255,255,255,.2);border-radius:.7rem;background:rgba(15,23,42,.9);box-shadow:0 6px 14px rgba(2,6,23,.28),inset 0 1px 0 rgba(255,255,255,.12);transition:transform .2s ease,background-color .2s ease;}
-          #featured-post-slider .group:hover .featured-card-read{background:#111936;transform:translateX(2px);}
+          #featured-post-slider .featured-card-read{padding:.48rem .7rem;border:1px solid rgba(255,255,255,.34);border-radius:.7rem;background:linear-gradient(135deg,#EAB308 0%,#F59E0B 100%);color:#0F172A;box-shadow:0 6px 14px rgba(234,179,8,.28),inset 0 1px 0 rgba(255,255,255,.45);transition:transform .2s ease,box-shadow .2s ease;}
+          #featured-post-slider .group:hover .featured-card-read{box-shadow:0 8px 18px rgba(234,179,8,.42),inset 0 1px 0 rgba(255,255,255,.5);transform:translateX(2px);}
         </style>
         <div class="mb-8 sm:mb-10" id="featured-post-slider">
           <div class="flex items-center justify-between mb-4">
@@ -90,7 +90,7 @@
           <!-- Desktop view: 2 cards side by side -->
           <div class="hidden md:block relative overflow-hidden rounded-2xl" style="min-height:10rem">
             ${this._pairs.map((pair, idx) => `
-              <div class="featured-slide ${idx === 0 ? 'active' : ''} absolute inset-0 transition-opacity duration-700 ease-in-out" data-slide="${idx}">
+              <div class="featured-slide ${idx === 0 ? 'active opacity-100 pointer-events-auto' : 'opacity-0 pointer-events-none'} absolute inset-0 transition-opacity duration-700 ease-in-out" data-slide="${idx}">
                 <div class="grid grid-cols-2 gap-4 h-full">
                   ${renderPair(pair, idx)}
                 </div>
@@ -100,7 +100,7 @@
           <!-- Mobile view: 1 card at a time -->
           <div class="md:hidden relative overflow-hidden rounded-2xl" style="min-height:10rem">
             ${articles.map((a, idx) => `
-              <div class="featured-slide-mobile ${idx === 0 ? 'active' : ''} absolute inset-0 transition-opacity duration-700 ease-in-out" data-slide-m="${idx}">
+              <div class="featured-slide-mobile ${idx === 0 ? 'active opacity-100 pointer-events-auto' : 'opacity-0 pointer-events-none'} absolute inset-0 transition-opacity duration-700 ease-in-out" data-slide-m="${idx}">
                 ${renderPair([a], idx)}
               </div>
             `).join('')}
