@@ -9,7 +9,7 @@
 
   const STORAGE_KEY = 'studihome_blog_articles';
   const VERSION_KEY = 'studihome_blog_version';
-  const CURRENT_VERSION = 3;
+  const CURRENT_VERSION = 4;
 
   // ---- Seed articles (SEO/GEO optimized) ----
   const SEED_ARTICLES = [
@@ -19,7 +19,7 @@
       slug: 'agentic-ai-mangkas-beban-administrasi-guru',
       excerpt: 'Pelajari bagaimana platform AI mengubah cara guru membuat RPP dan modul ajar hanya dalam hitungan menit, bukan lagi berjam-jam.',
       content: '<p>Berdasarkan riset terbaru, implementasi <strong>Agentic AI</strong> dari Studihome terbukti memangkas waktu pengerjaan administrasi sekolah hingga 72%. Guru tidak perlu lagi menghabiskan waktu berjam-jam untuk membuat RPP manual.</p><p>Dengan <strong>Agentic AI</strong>, guru cukup memberikan instruksi singkat — misalnya "Buatkan RPP Tema Lingkungan untuk Kelas 4 SD, Kurikulum Merdeka" — dan AI akan membuatkan rencana pelaksanaan pembelajaran yang lengkap dan sesuai standar nasional.</p><p><strong>Keunggulan utama:</strong></p><ul><li>Otomatisasi pembuatan RPP, modul ajar, dan soal asesmen</li><li>Integrasi langsung dengan Kurikulum Merdeka terbaru</li><li>Gratis untuk guru aktif melalui Studihome</li><li>Hasil bisa diunduh dalam format PDF</li></ul><p>Mulai sekarang, bebaskan diri dari beban administrasi yang menguras waktu dan energi Anda.</p>',
-      image: '',
+      image: 'https://images.unsplash.com/photo-1516321318423-f06f85e504b3?auto=format&fit=crop&w=800&q=80',
       category: 'Pendidikan',
       tags: ['AI', 'Guru', 'Otomasi', 'Kurikulum Merdeka'],
       status: 'published',
@@ -32,7 +32,7 @@
       slug: 'supervisi-akademik-era-digital-panduan-ai-kepala-sekolah',
       excerpt: 'Evaluasi kinerja guru kini lebih objektif dan terukur. Temukan rahasia supervisi modern menggunakan Paket AI Kepala Sekolah Pro.',
       content: '<p>Kepala sekolah modern membutuhkan alat yang tepat untuk kepemimpinan instruksional. Dengan <strong>Paket AI Kepala Sekolah Pro</strong> dari Studihome, supervisi akademik menjadi lebih efektif dan terukur.</p><p>Fitur unggulan meliputi:</p><ul><li>Analisis otomatis data kinerja guru berdasarkan indikator kunci</li><li>Template supervisi yang bisa dikustomisasi sesuai kebutuhan sekolah</li><li>Laporan berkala yang langsung bisa digunakan untuk rapat komite</li><li>Sistem penilaian objektif yang bebas dari subjektivitas</li></ul><p>Dengan pendekatan data-driven, kepala sekolah bisa mengambil keputusan yang lebih tepat untuk pengembangan kualitas pengajaran di sekolahnya.</p>',
-      image: '',
+      image: 'https://images.unsplash.com/photo-1517245386807-bb43f82c33c4?auto=format&fit=crop&w=800&q=80',
       category: 'Pendidikan',
       tags: ['Kepala Sekolah', 'Supervisi', 'AI', 'Manajemen'],
       status: 'published',
@@ -45,7 +45,7 @@
       slug: 'umkm-laris-otomasi-konten-copywriting-ai',
       excerpt: 'Tinggalkan cara lama. Gunakan Kit Otomasi AI untuk memproduksi konten jualan, caption, dan follow-up pelanggan secara otomatis 24/7.',
       content: '<p>Pemilik usaha kecil sering kehabisan waktu untuk promosi. Melalui <strong>Kit Otomasi Penjualan & Konten AI UMKM</strong>, Anda bisa memproduksi konten berkualitas tinggi tanpa harus menjadi copywriter profesional.</p><p>Yang bisa Anda lakukan dengan Kit ini:</p><ul><li>Buat caption Instagram, TikTok, dan Facebook secara otomatis</li><li>Generate deskripsi produk yang menarik dan SEO-friendly</li><li>Otomasi follow-up email dan WhatsApp untuk pelanggan potensial</li><li>Buat script telepon sales yang efektif</li></ul><p>Lebih dari 500 UMKM di Indonesia sudah membuktikan peningkatan omzet hingga 3x lipat setelah menggunakan solusi otomasi dari Studihome.</p>',
-      image: '',
+      image: 'https://images.unsplash.com/photo-1531482615713-2afd69097998?auto=format&fit=crop&w=800&q=80',
       category: 'Bisnis',
       tags: ['UMKM', 'Otomasi', 'Copywriting', 'Digital Marketing'],
       status: 'published',
@@ -58,7 +58,7 @@
       slug: 'mengenal-studihome-platform-agentic-ai-indonesia',
       excerpt: 'Dari ruang Lobi hingga Studio, ketahui mengapa Studihome menjadi ekosistem wajib bagi pendidik dan kreator di era Generative AI.',
       content: '<p>Studihome hadir membebaskan Anda dari tugas repetitif. Kami menyediakan koleksi prompt, template, dan solusi <strong>Agentic AI</strong> yang dirancang khusus untuk kebutuhan pendidikan dan bisnis di Indonesia.</p><p><strong>Apa itu Studihome?</strong></p><ul><li>Platform all-in-one untuk produk digital, modul pembelajaran, dan tools AI</li><li>Dikelola oleh kreator-kreator terverifikasi dari berbagai bidang</li><li>Sistem membership fleksibel — beli per paket atau langganan bulanan</li><li>Dashboard creator untuk mengelola produk dan portofolio</li></ul><p>Mengapa harus Studihome?</p><p>Karena kami percaya bahwa teknologi AI seharusnya bisa diakses oleh semua orang — guru, UMKM, profesional, dan kreator. Bukan hanya untuk perusahaan besar.</p><p><strong>Saat ini Studihome memiliki lebih dari 50 produk digital aktif</strong> yang mencakup berbagai kategori: pendidikan, bisnis, kreatif, dan produktivitas.</p>',
-      image: '',
+      image: 'https://images.unsplash.com/photo-1503676260728-1c00da094a0b?auto=format&fit=crop&w=800&q=80',
       category: 'Tentang Kami',
       tags: ['Studihome', 'Platform AI', 'Agentic AI', 'Indonesia'],
       status: 'published',
@@ -127,10 +127,15 @@
       if (stored && Array.isArray(stored)) {
         if (storedVersion >= CURRENT_VERSION) return stored;
         const correctedLegacyImage = 'https://images.unsplash.com/photo-1556742049-0a67daf40955?auto=format&fit=crop&w=800&q=80';
-        const currentUmkmImage = SEED_ARTICLES.find(article => article.id === 'art-005').image;
+        const seedById = new Map(SEED_ARTICLES.map(article => [article.id, article]));
         const migrated = stored.map(article => {
-          if (article && article.id === 'art-005' && article.image === correctedLegacyImage) {
-            return Object.assign({}, article, { image: currentUmkmImage });
+          if (!article) return article;
+          const seed = seedById.get(article.id);
+          if (article.id === 'art-005' && article.image === correctedLegacyImage) {
+            return Object.assign({}, article, { image: seed.image });
+          }
+          if (seed && ['art-001', 'art-002', 'art-003', 'art-004'].includes(article.id) && !String(article.image || '').trim()) {
+            return Object.assign({}, article, { image: seed.image });
           }
           return article;
         });
@@ -293,14 +298,17 @@
     </a></article>`;
   }
 
-  function renderBalkonCardHTML(article) {
+  function renderBalkonCardHTML(article, index) {
     const imageSrc = getArticleImageSrc(article);
+    const prioritize = Number(index) < 4;
+    const loading = prioritize ? 'eager' : 'lazy';
+    const fetchPriority = Number(index) < 2 ? 'high' : 'auto';
 
     return `<article class="w-full">
       <a href="/balkon/${encodeURIComponent(article.slug)}" data-balkon-link data-balkon-slug="${esc(article.slug)}" class="block w-full cursor-pointer transition-transform hover:-translate-y-1 group">
         <div class="card-3d w-full rounded-2xl overflow-hidden flex flex-col bg-white p-3.5 sm:p-4 border border-slate-200/80 transition-all duration-200 hover:shadow-md">
           <div class="balkon-card-media relative aspect-video w-full rounded-xl overflow-hidden mb-2.5 card-3d-inset">
-            <img src="${esc(imageSrc)}" alt="${esc(article.title)}" class="balkon-card-image block w-full h-full object-cover object-center transition-transform duration-700 ease-in-out group-hover:scale-105" loading="eager" fetchpriority="high" referrerpolicy="no-referrer">
+            <img src="${esc(imageSrc)}" alt="${esc(article.title)}" class="balkon-card-image block w-full h-full object-cover object-center transition-transform duration-700 ease-in-out group-hover:scale-105" loading="${loading}" fetchpriority="${fetchPriority}" referrerpolicy="no-referrer">
           </div>
           <h2 class="font-extrabold text-sm sm:text-base leading-snug text-[#151c75] transition-colors group-hover:text-[#3f48bf]">${esc(article.title)}</h2>
           <p class="mt-1.5 text-xs leading-relaxed text-slate-600 line-clamp-2">${esc(article.excerpt || '')}</p>
@@ -314,12 +322,12 @@
     if (!main) return;
     const posts = getPublished();
     const featuredPosts = posts.slice(0, 2);
-    const regularPosts = posts.slice(2, 5);
-    const featuredCards = featuredPosts.map(renderBalkonCardHTML).join('');
-    const regularCards = regularPosts.map(renderBalkonCardHTML).join('');
+    const regularPosts = posts.slice(2);
+    const featuredCards = featuredPosts.map((article, index) => renderBalkonCardHTML(article, index)).join('');
+    const regularCards = regularPosts.map((article, index) => renderBalkonCardHTML(article, index + featuredPosts.length)).join('');
 
     main.innerHTML = `${renderBlogImageGuardStyles()}<section class="max-w-6xl mx-auto px-4 sm:px-6 py-8 sm:py-12">
-      <a href="/" class="inline-flex items-center gap-1.5 text-xs font-bold text-[#151c75] hover:text-[#3f48bf] transition-colors mb-6">
+      <a href="/" data-balkon-home-link class="inline-flex items-center gap-1.5 text-xs font-bold text-[#151c75] hover:text-[#3f48bf] transition-colors mb-6">
         <i class="fa-solid fa-arrow-left" aria-hidden="true"></i> Kembali ke Teras
       </a>
       <header class="mb-8 sm:mb-10">
@@ -349,7 +357,10 @@
     main.innerHTML = `<div class="max-w-6xl mx-auto px-2 sm:px-4 md:px-6 py-8 sm:py-12">${renderArticleDetail(article, data.products || [])}</div>`;
     const back = main.querySelector('.blog-article-back');
     if (back) {
-      back.onclick = () => App.router.navigate('balkon');
+      back.onclick = (event) => {
+        event.preventDefault();
+        App.router.navigate('balkon');
+      };
       back.innerHTML = '<i class="fa-solid fa-arrow-left" aria-hidden="true"></i> Kembali ke Balkon';
     }
     const canonicalPath = '/balkon/' + encodeURIComponent(article.slug);
