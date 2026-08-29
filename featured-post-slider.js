@@ -77,9 +77,8 @@
             <div>
               <h2 class="text-lg sm:text-xl font-extrabold text-[#151c75]">Insights &amp; tips AI</h2>
             </div>
-            <a href="/balkon" class="text-xs font-bold text-[#151c75] hover:underline flex items-center gap-1">
-              <span>Semua</span>
-              <i class="fa-solid fa-chevron-right text-amber-500" aria-hidden="true"></i>
+            <a href="/balkon" class="inline-flex items-center gap-1.5 px-4 py-1.5 bg-blue-50 hover:bg-blue-100 text-blue-900 text-sm md:text-base font-bold rounded-full transition-colors duration-200 shadow-sm hover:shadow">
+              Balkon <span class="text-xs" aria-hidden="true">➔</span>
             </a>
           </div>
           <!-- Desktop view: 2 cards side by side -->
