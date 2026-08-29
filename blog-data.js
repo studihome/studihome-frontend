@@ -71,7 +71,7 @@
       slug: 'cara-membuat-30-konten-jualan-umkm-dengan-prompt-ai',
       excerpt: 'Panduan praktis untuk pemilik UMKM mengotomatiskan pembuatan caption, ide jualan, dan skrip video pendek hanya menggunakan 1 Master Prompt.',
       content: '<h2>Konten konsisten tanpa menghabiskan hari kerja</h2><p>Pemilik UMKM sering mengetahui produknya dengan sangat baik, tetapi waktu untuk menulis caption, menentukan sudut promosi, dan membuat skrip video sangat terbatas. Prompt yang terstruktur membantu AI menjaga konteks produk, target pelanggan, dan tujuan penjualan dalam satu alur kerja.</p><h3>Mulai dari satu brief yang jelas</h3><p>Tentukan produk, manfaat utama, persona audiens, gaya bahasa, dan penawaran. Setelah itu, minta AI menyusun variasi konten agar pesan tetap konsisten tanpa terdengar berulang.</p><pre><code class="prompt-block">Anda adalah strategist konten untuk UMKM Indonesia. Buatkan 30 ide konten jualan untuk produk [NAMA PRODUK]. Target pelanggan: [TARGET]. Manfaat utama: [MANFAAT]. Gunakan gaya bahasa [GAYA]. Bagi hasil menjadi caption Instagram, hook video pendek, CTA, dan ide visual. Pastikan tiap ide memiliki sudut berbeda dan tidak membuat klaim yang tidak dapat dibuktikan.</code></pre><p>Tinjau hasil AI sebelum dipublikasikan. Sesuaikan harga, stok, promo, dan fakta produk dengan kondisi bisnis yang sebenarnya.</p>',
-      image: 'https://images.unsplash.com/photo-1556742049-0a67daf40955?auto=format&fit=crop&w=800&q=80',
+      image: 'https://images.unsplash.com/photo-1556740749-887f6717d7e4?auto=format&fit=crop&w=800&q=80',
       category: 'UMKM & Bisnis',
       tags: ['UMKM', 'Copywriting', 'Otomasi AI', 'Marketing'],
       status: 'published',
