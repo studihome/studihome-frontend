@@ -46,6 +46,22 @@
       "destination": "/index.html"
     },
     {
+      "source": "/balkon",
+      "destination": "/index.html"
+    },
+    {
+      "source": "/balkon/",
+      "destination": "/index.html"
+    },
+    {
+      "source": "/balkon/:slug",
+      "destination": "/index.html"
+    },
+    {
+      "source": "/balkon/:slug/",
+      "destination": "/index.html"
+    },
+    {
       "source": "/blog",
       "destination": "/index.html"
     },
