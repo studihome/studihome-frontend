@@ -43,24 +43,19 @@
           const catClass = categoryColors[a.category] || 'bg-slate-100 text-slate-600';
 
           return `<article class="blog-slider-card flex-1 min-w-0 cursor-pointer group" onclick="App.blog.openArticle('${esc(a.slug)}')">
-            <div class="card-3d rounded-2xl overflow-hidden bg-white border border-blue-50 transition-all duration-200 hover:shadow-md hover:-translate-y-0.5 h-full flex flex-row" style="border-radius:1.5rem">
-              ${hasImage ? `<div class="overflow-hidden bg-slate-100 shrink-0 self-stretch" style="flex:0 0 clamp(8.5rem,34%,18rem)">
-                <img src="${esc(a.image)}" alt="${esc(a.title)}" class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" loading="lazy">
-              </div>` : `<div class="bg-gradient-to-br from-[#151c75] to-[#3f48bf] flex items-center justify-center relative overflow-hidden shrink-0 self-stretch" style="flex:0 0 clamp(8.5rem,34%,18rem)">
-                <div class="absolute inset-0 opacity-10" style="background:radial-gradient(circle at 30% 40%, rgba(250,204,21,.4) 0%, transparent 60%)"></div>
-                <span class="text-white/80 text-3xl font-black relative z-10">${(a.title || 'S').charAt(0).toUpperCase()}</span>
-              </div>`}
-              <div class="p-3 sm:p-4 md:p-5 flex flex-col flex-1 min-w-0 justify-center">
+            <div class="card-3d rounded-2xl overflow-hidden border border-blue-50 transition-all duration-200 hover:shadow-md hover:-translate-y-0.5 h-full relative isolate" style="border-radius:1.5rem">
+              ${hasImage ? `<img src="${esc(a.image)}" alt="${esc(a.title)}" class="absolute inset-0 w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" loading="lazy">` : `<div class="absolute inset-0 bg-gradient-to-br from-[#151c75] via-[#25308d] to-[#3f48bf]"><div class="absolute inset-0 opacity-20" style="background:radial-gradient(circle at 75% 25%, rgba(250,204,21,.65) 0%, transparent 45%)"></div><span class="absolute right-5 top-1/2 -translate-y-1/2 text-white/25 text-6xl font-black">${(a.title || 'S').charAt(0).toUpperCase()}</span></div>`}
+              <div class="absolute inset-0 pointer-events-none" style="background:linear-gradient(90deg,rgba(15,23,42,.94) 0%,rgba(15,23,42,.8) 56%,rgba(15,23,42,.4) 100%)"></div>
+              <div class="relative z-10 h-full p-3 sm:p-4 md:p-5 flex flex-col justify-end min-w-0">
                 <div class="flex items-center gap-2 mb-1.5">
-                  <span class="inline-block px-2 py-0.5 rounded-md text-[10px] font-bold ${catClass}">${esc(a.category || 'Artikel')}</span>
-                  <span class="text-[10px] text-slate-400">${dateStr}</span>
+                  <span class="inline-flex px-2 py-0.5 rounded-md text-[10px] font-bold bg-white/15 text-white border border-white/25 backdrop-blur-sm">${esc(a.category || 'Artikel')}</span>
+                  <span class="text-[10px] text-white/75">${dateStr}</span>
                 </div>
-                <h3 class="text-xs sm:text-sm font-extrabold text-[#151c75] leading-snug mb-1.5 line-clamp-2 group-hover:text-[#3f48bf] transition-colors">${esc(a.title)}</h3>
-                <p class="text-[11px] text-slate-500 leading-relaxed line-clamp-2">${esc(a.excerpt || '')}</p>
+                <h3 class="text-xs sm:text-sm font-extrabold text-white leading-snug mb-1.5 line-clamp-2 drop-shadow-sm">${esc(a.title)}</h3>
+                <p class="text-[11px] text-white/85 leading-relaxed line-clamp-2">${esc(a.excerpt || '')}</p>
               </div>
             </div>
-          </article>`;
-        }).join('');
+          </article>`;        }).join('');
         return cards;
       };
 
