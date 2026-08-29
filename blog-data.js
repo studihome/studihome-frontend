@@ -158,12 +158,12 @@
 
   function renderBlogImageGuardStyles() {
     return `<style id="blog-mobile-image-guard">
-      .balkon-card-media{width:100%;height:200px;overflow:hidden}
-      .balkon-card-image{width:100%;height:200px;display:block;object-fit:cover;object-position:center}
+      .balkon-card-media{width:100%;aspect-ratio:16 / 9;height:auto;overflow:hidden}
+      .balkon-card-image{width:100%;height:100%;display:block;object-fit:cover;object-position:center}
       .blog-article-hero-image{width:100%;height:220px;display:block;object-fit:cover;object-position:center}
       .blog-article-content img{max-width:100%!important;height:auto!important;display:block!important;margin:1.5rem auto!important;border-radius:.75rem!important}
-      @media (min-width:640px){.balkon-card-media,.balkon-card-image{height:220px}.blog-article-hero-image{height:300px}}
-      @media (min-width:768px){.balkon-card-media,.balkon-card-image{height:240px}.blog-article-hero-image{height:400px}}
+      @media (min-width:640px){.blog-article-hero-image{height:300px}}
+      @media (min-width:768px){.blog-article-hero-image{height:400px}}
     </style>`;
   }
 
@@ -231,8 +231,8 @@
     return `<article class="w-full">
       <a href="/balkon/${encodeURIComponent(article.slug)}" data-balkon-link data-balkon-slug="${esc(article.slug)}" class="block w-full cursor-pointer transition-transform hover:-translate-y-1 group">
         <div class="w-full h-auto overflow-hidden rounded-2xl bg-white shadow-sm transition-shadow duration-200 hover:shadow-md">
-          <div class="balkon-card-media w-full h-auto overflow-hidden">
-            <img src="${esc(imageSrc)}" alt="${esc(article.title)}" class="balkon-card-image block w-full h-[200px] sm:h-[220px] md:h-[240px] object-cover object-center rounded-t-2xl transition-transform duration-700 ease-in-out group-hover:scale-105" loading="lazy">
+          <div class="balkon-card-media aspect-video w-full overflow-hidden">
+            <img src="${esc(imageSrc)}" alt="${esc(article.title)}" class="balkon-card-image block w-full h-full object-cover object-center rounded-t-2xl transition-transform duration-700 ease-in-out group-hover:scale-105" loading="lazy">
           </div>
           <div class="p-5">
             <h2 class="text-lg font-extrabold leading-snug text-slate-900 transition-colors group-hover:text-indigo-600">${esc(article.title)}</h2>
