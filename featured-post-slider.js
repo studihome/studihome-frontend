@@ -55,8 +55,8 @@
                   <span class="inline-block px-2 py-0.5 rounded-md text-[10px] font-bold ${catClass}">${esc(a.category || 'Artikel')}</span>
                   <span class="text-[10px] text-slate-400">${dateStr}</span>
                 </div>
-                <h3 class="text-xs sm:text-sm font-extrabold text-[#151c75] leading-snug mb-1.5 line-clamp-3 group-hover:text-[#3f48bf] transition-colors">${esc(a.title)}</h3>
-                <p class="text-[11px] text-slate-500 leading-relaxed line-clamp-3">${esc(a.excerpt || '')}</p>
+                <h3 class="text-xs sm:text-sm font-extrabold text-[#151c75] leading-snug mb-1.5 line-clamp-2 group-hover:text-[#3f48bf] transition-colors">${esc(a.title)}</h3>
+                <p class="text-[11px] text-slate-500 leading-relaxed line-clamp-2">${esc(a.excerpt || '')}</p>
               </div>
             </div>
           </article>`;
@@ -86,7 +86,7 @@
             </button>
           </div>
           <!-- Desktop view: 2 cards side by side -->
-          <div class="hidden md:block relative overflow-hidden rounded-2xl" style="min-height:20rem">
+          <div class="hidden md:block relative overflow-hidden rounded-2xl" style="min-height:10rem">
             ${this._pairs.map((pair, idx) => `
               <div class="featured-slide ${idx === 0 ? 'active' : ''} absolute inset-0 transition-opacity duration-700 ease-in-out" data-slide="${idx}">
                 <div class="grid grid-cols-2 gap-4 h-full">
@@ -96,7 +96,7 @@
             `).join('')}
           </div>
           <!-- Mobile view: 1 card at a time -->
-          <div class="md:hidden relative overflow-hidden rounded-2xl" style="min-height:17.5rem">
+          <div class="md:hidden relative overflow-hidden rounded-2xl" style="min-height:10rem">
             ${articles.map((a, idx) => `
               <div class="featured-slide-mobile ${idx === 0 ? 'active' : ''} absolute inset-0 transition-opacity duration-700 ease-in-out" data-slide-m="${idx}">
                 ${renderPair([a], idx)}
