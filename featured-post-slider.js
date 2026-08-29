@@ -43,19 +43,21 @@
           const catClass = categoryColors[a.category] || 'bg-slate-100 text-slate-600';
 
           return `<article class="blog-slider-card flex-1 min-w-0 cursor-pointer group" onclick="App.blog.openArticle('${esc(a.slug)}')">
-            <div class="featured-card card-3d rounded-2xl overflow-hidden border border-blue-50 transition-all duration-200 hover:-translate-y-0.5 h-full relative isolate" style="border-radius:1.5rem">
-              ${hasImage ? `<div class="featured-card-image-panel absolute inset-y-0 left-0 overflow-hidden"><img src="${esc(a.image)}" alt="${esc(a.title)}" class="featured-card-image w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" loading="lazy"></div><div class="featured-card-transition absolute inset-y-0 pointer-events-none"></div>` : `<div class="absolute inset-0 bg-gradient-to-br from-[#151c75] via-[#25308d] to-[#3f48bf]"><div class="absolute inset-0 opacity-20" style="background:radial-gradient(circle at 75% 25%, rgba(250,204,21,.65) 0%, transparent 45%)"></div><span class="absolute right-5 top-1/2 -translate-y-1/2 text-white/25 text-6xl font-black">${(a.title || 'S').charAt(0).toUpperCase()}</span></div>`}
+            <div class="featured-card card-3d rounded-2xl overflow-hidden border border-blue-50 transition-all duration-300 hover:-translate-y-0.5 h-full relative isolate" style="border-radius:1.5rem">
+              ${hasImage ? `<img src="${esc(a.image)}" alt="${esc(a.title)}" class="featured-card-image absolute inset-0 w-full h-full object-cover transition-transform duration-700 group-hover:scale-105" loading="lazy">` : `<div class="absolute inset-0 bg-gradient-to-br from-[#151c75] via-[#25308d] to-[#3f48bf]"><div class="absolute inset-0 opacity-20" style="background:radial-gradient(circle at 75% 25%, rgba(250,204,21,.65) 0%, transparent 45%)"></div><span class="absolute right-5 top-1/2 -translate-y-1/2 text-white/25 text-6xl font-black">${(a.title || 'S').charAt(0).toUpperCase()}</span></div>`}
+              <div class="featured-card-overlay absolute inset-0 pointer-events-none"></div>
               <div class="featured-card-sheen absolute inset-0 pointer-events-none"></div>
-              <div class="absolute inset-x-5 top-0 h-px bg-gradient-to-r from-transparent via-white/70 to-transparent pointer-events-none"></div>
-              <div class="relative z-10 h-full p-3 sm:p-4 md:p-5 flex flex-col min-w-0" style="margin-left:${hasImage ? '42%' : '0'}">
+              <div class="relative z-10 h-full p-3 sm:p-4 md:p-5 flex flex-col justify-between min-w-0">
                 <div class="flex items-start justify-between gap-3">
                   <span class="featured-card-category inline-flex px-2.5 py-1 rounded-full text-[10px] font-extrabold text-white">${esc(a.category || 'Artikel')}</span>
-                  <span class="featured-card-read inline-flex items-center gap-1 text-[10px] font-extrabold text-white/90">Baca <i class="fa-solid fa-arrow-up-right-from-square text-[9px]" aria-hidden="true"></i></span>
+                  <span class="text-[10px] font-medium text-white/80">${dateStr}</span>
                 </div>
-                <div class="mt-auto min-w-0">
-                  <div class="text-[10px] font-medium text-white/70 mb-1">${dateStr}</div>
-                  <h3 class="text-xs sm:text-sm font-extrabold text-white leading-snug mb-1 line-clamp-2 drop-shadow-sm">${esc(a.title)}</h3>
-                  <p class="text-[11px] text-white/85 leading-relaxed line-clamp-2">${esc(a.excerpt || '')}</p>
+                <div class="flex items-end justify-between gap-3 min-w-0">
+                  <div class="min-w-0 flex-1">
+                    <h3 class="text-xs sm:text-sm font-extrabold text-white leading-snug mb-1 line-clamp-2 drop-shadow-sm">${esc(a.title)}</h3>
+                    <p class="text-[11px] text-white/85 leading-relaxed line-clamp-1">${esc(a.excerpt || '')}</p>
+                  </div>
+                  <span class="featured-card-read shrink-0 inline-flex items-center gap-1.5 text-[10px] font-extrabold text-white">Baca <i class="fa-solid fa-arrow-right text-[9px]" aria-hidden="true"></i></span>
                 </div>
               </div>
             </div>
@@ -72,15 +74,14 @@
           #featured-post-slider .featured-dot-mark{display:block;width:.4rem;height:.4rem;border-radius:999px;background:#94a3b8;transition:width .25s ease,background-color .25s ease,transform .25s ease}
           #featured-post-slider .featured-dot.is-active .featured-dot-mark{width:1.5rem;background:#151c75}
           #featured-post-slider .featured-dot.is-active:hover .featured-dot-mark{transform:scaleX(1.04)}
-          #featured-post-slider .featured-card{background:linear-gradient(135deg,#151c75 0%,#202b88 52%,#3f48bf 100%);border-color:rgba(255,255,255,.26);box-shadow:0 14px 32px rgba(21,28,117,.18),inset 0 1px 0 rgba(255,255,255,.3);}
-          #featured-post-slider .featured-card:hover{box-shadow:0 20px 42px rgba(21,28,117,.28),inset 0 1px 0 rgba(255,255,255,.4);}
-          #featured-post-slider .featured-card-image-panel{width:48%;box-shadow:inset -1px 0 0 rgba(255,255,255,.16);}
-          #featured-post-slider .featured-card-transition{left:27%;width:32%;background:linear-gradient(90deg,rgba(21,28,117,0) 0%,rgba(21,28,117,.22) 34%,#151c75 100%);}
-          #featured-post-slider .featured-card-sheen{background:linear-gradient(118deg,transparent 31%,rgba(255,255,255,.17) 48%,transparent 64%);transform:translateX(-125%);transition:transform .75s cubic-bezier(.2,.8,.2,1);}
+          #featured-post-slider .featured-card{background:#151c75;border-color:rgba(255,255,255,.3);box-shadow:0 16px 34px rgba(21,28,117,.18),inset 0 1px 0 rgba(255,255,255,.28);}
+          #featured-post-slider .featured-card:hover{box-shadow:0 22px 44px rgba(21,28,117,.26),inset 0 1px 0 rgba(255,255,255,.38);}
+          #featured-post-slider .featured-card-overlay{background:linear-gradient(180deg,rgba(8,15,45,.04) 0%,rgba(8,15,45,.12) 35%,rgba(8,15,45,.86) 100%),linear-gradient(90deg,rgba(8,15,45,.3) 0%,transparent 62%);}
+          #featured-post-slider .featured-card-sheen{background:linear-gradient(115deg,transparent 34%,rgba(255,255,255,.16) 48%,transparent 62%);transform:translateX(-125%);transition:transform .8s cubic-bezier(.2,.8,.2,1);}
           #featured-post-slider .group:hover .featured-card-sheen{transform:translateX(125%);}
-          #featured-post-slider .featured-card-category{border:1px solid rgba(255,255,255,.24);background:rgba(255,255,255,.15);box-shadow:inset 0 1px 0 rgba(255,255,255,.25);backdrop-filter:blur(10px);}
-          #featured-post-slider .featured-card-read{padding:.32rem .5rem;border:1px solid rgba(255,255,255,.2);border-radius:.55rem;background:rgba(2,6,23,.18);backdrop-filter:blur(8px);transition:background-color .2s ease,transform .2s ease;}
-          #featured-post-slider .group:hover .featured-card-read{background:rgba(255,255,255,.16);transform:translateY(-1px);}
+          #featured-post-slider .featured-card-category{border:1px solid rgba(255,255,255,.28);background:rgba(15,23,42,.28);box-shadow:inset 0 1px 0 rgba(255,255,255,.22);backdrop-filter:blur(10px);}
+          #featured-post-slider .featured-card-read{padding:.48rem .7rem;border:1px solid rgba(255,255,255,.2);border-radius:.7rem;background:rgba(15,23,42,.9);box-shadow:0 6px 14px rgba(2,6,23,.28),inset 0 1px 0 rgba(255,255,255,.12);transition:transform .2s ease,background-color .2s ease;}
+          #featured-post-slider .group:hover .featured-card-read{background:#111936;transform:translateX(2px);}
         </style>
         <div class="mb-8 sm:mb-10" id="featured-post-slider">
           <div class="flex items-center justify-between mb-4">
