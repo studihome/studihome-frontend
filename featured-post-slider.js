@@ -43,20 +43,20 @@
           const catClass = categoryColors[a.category] || 'bg-slate-100 text-slate-600';
 
           return `<article class="blog-slider-card flex-1 min-w-0 cursor-pointer group" onclick="App.blog.openArticle('${esc(a.slug)}')">
-            <div class="card-3d rounded-2xl overflow-hidden bg-white border border-blue-50 transition-all duration-200 hover:shadow-md hover:-translate-y-0.5 h-full flex flex-col" style="border-radius:1.5rem">
-              ${hasImage ? `<div class="overflow-hidden bg-slate-100 shrink-0" style="height:clamp(11rem,16vw,15rem)">
+            <div class="card-3d rounded-2xl overflow-hidden bg-white border border-blue-50 transition-all duration-200 hover:shadow-md hover:-translate-y-0.5 h-full flex flex-row" style="border-radius:1.5rem">
+              ${hasImage ? `<div class="overflow-hidden bg-slate-100 shrink-0 self-stretch" style="flex:0 0 clamp(8.5rem,34%,18rem)">
                 <img src="${esc(a.image)}" alt="${esc(a.title)}" class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" loading="lazy">
-              </div>` : `<div class="bg-gradient-to-br from-[#151c75] to-[#3f48bf] flex items-center justify-center relative overflow-hidden shrink-0" style="height:clamp(11rem,16vw,15rem)">
+              </div>` : `<div class="bg-gradient-to-br from-[#151c75] to-[#3f48bf] flex items-center justify-center relative overflow-hidden shrink-0 self-stretch" style="flex:0 0 clamp(8.5rem,34%,18rem)">
                 <div class="absolute inset-0 opacity-10" style="background:radial-gradient(circle at 30% 40%, rgba(250,204,21,.4) 0%, transparent 60%)"></div>
                 <span class="text-white/80 text-3xl font-black relative z-10">${(a.title || 'S').charAt(0).toUpperCase()}</span>
               </div>`}
-              <div class="p-3 flex flex-col flex-1">
+              <div class="p-3 sm:p-4 md:p-5 flex flex-col flex-1 min-w-0 justify-center">
                 <div class="flex items-center gap-2 mb-1.5">
                   <span class="inline-block px-2 py-0.5 rounded-md text-[10px] font-bold ${catClass}">${esc(a.category || 'Artikel')}</span>
                   <span class="text-[10px] text-slate-400">${dateStr}</span>
                 </div>
-                <h3 class="text-xs sm:text-sm font-extrabold text-[#151c75] leading-snug mb-1 line-clamp-2 group-hover:text-[#3f48bf] transition-colors">${esc(a.title)}</h3>
-                <p class="text-[11px] text-slate-500 leading-relaxed line-clamp-2 mt-auto">${esc(a.excerpt || '')}</p>
+                <h3 class="text-xs sm:text-sm font-extrabold text-[#151c75] leading-snug mb-1.5 line-clamp-3 group-hover:text-[#3f48bf] transition-colors">${esc(a.title)}</h3>
+                <p class="text-[11px] text-slate-500 leading-relaxed line-clamp-3">${esc(a.excerpt || '')}</p>
               </div>
             </div>
           </article>`;
@@ -86,7 +86,7 @@
             </button>
           </div>
           <!-- Desktop view: 2 cards side by side -->
-          <div class="hidden md:block relative overflow-hidden rounded-2xl" style="min-height:23rem">
+          <div class="hidden md:block relative overflow-hidden rounded-2xl" style="min-height:20rem">
             ${this._pairs.map((pair, idx) => `
               <div class="featured-slide ${idx === 0 ? 'active' : ''} absolute inset-0 transition-opacity duration-700 ease-in-out" data-slide="${idx}">
                 <div class="grid grid-cols-2 gap-4 h-full">
@@ -96,7 +96,7 @@
             `).join('')}
           </div>
           <!-- Mobile view: 1 card at a time -->
-          <div class="md:hidden relative overflow-hidden rounded-2xl" style="min-height:21rem">
+          <div class="md:hidden relative overflow-hidden rounded-2xl" style="min-height:17.5rem">
             ${articles.map((a, idx) => `
               <div class="featured-slide-mobile ${idx === 0 ? 'active' : ''} absolute inset-0 transition-opacity duration-700 ease-in-out" data-slide-m="${idx}">
                 ${renderPair([a], idx)}
