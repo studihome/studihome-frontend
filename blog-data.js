@@ -206,16 +206,13 @@
       'Tentang Kami': 'bg-emerald-100 text-emerald-700'
     };
     const catClass = categoryColors[article.category] || 'bg-slate-100 text-slate-600';
-    const hasImage = article.image && article.image.trim();
+    const imageSrc = getArticleImageSrc(article);
 
     return `<article class="blog-card"><a href="/balkon/${encodeURIComponent(article.slug)}" data-balkon-link data-balkon-slug="${esc(article.slug)}" class="block h-full group">
       <div class="card-3d rounded-2xl overflow-hidden bg-white border border-blue-50 transition-all duration-200 hover:shadow-md hover:-translate-y-0.5">
-        ${hasImage ? `<div class="aspect-video overflow-hidden bg-slate-100">
-          <img src="${esc(article.image)}" alt="${esc(article.title)}" class="block w-full h-48 md:h-56 object-cover rounded-t-xl transition-transform duration-700 ease-in-out group-hover:scale-105" loading="lazy">
-        </div>` : `<div class="aspect-video bg-gradient-to-br from-[#151c75] to-[#3f48bf] flex items-center justify-center relative overflow-hidden">
-          <div class="absolute inset-0 opacity-10" style="background:radial-gradient(circle at 30% 40%, rgba(250,204,21,.4) 0%, transparent 60%)"></div>
-          <span class="text-white/80 text-4xl font-black relative z-10">${(article.title || 'S').charAt(0).toUpperCase()}</span>
-        </div>`}
+        <div class="w-full h-auto overflow-hidden rounded-t-2xl bg-slate-100">
+          <img src="${esc(imageSrc)}" alt="${esc(article.title)}" class="block w-full h-[200px] sm:h-[220px] md:h-[240px] object-cover object-center rounded-t-2xl transition-transform duration-700 ease-in-out group-hover:scale-105" loading="lazy">
+        </div>
         <div class="p-3">
           <div class="flex items-center gap-2 mb-1.5">
             <span class="inline-block px-2 py-0.5 rounded-md text-[10px] font-bold ${catClass}">${esc(article.category || 'Artikel')}</span>
