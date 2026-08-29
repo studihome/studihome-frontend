@@ -62,13 +62,15 @@
 
       return `
         <style>
+          #featured-post-slider{margin-bottom:6px;}
+          @media (min-width:640px){#featured-post-slider{margin-bottom:2.5rem;}}
           #featured-post-slider .featured-slide,#featured-post-slider .featured-slide-mobile{will-change:opacity,transform;transition:opacity .6s ease-in-out,transform .6s ease-in-out;}
           #featured-post-slider .featured-card{background:#fff;border:1px solid #dbe7ff;box-shadow:none;}
           #featured-post-slider .featured-card:hover{border-color:#c6d7ff;box-shadow:none;}
           #featured-post-slider .featured-card-read{padding:.48rem .7rem;border:1px solid rgba(100,116,139,.35);border-radius:.7rem;background:linear-gradient(135deg,#e2e8f0 0%,#64748b 100%);color:#fff;box-shadow:0 5px 12px rgba(71,85,105,.2),inset 0 1px 0 rgba(255,255,255,.42);transition:transform .2s ease,box-shadow .2s ease;}
           #featured-post-slider .group:hover .featured-card-read{box-shadow:0 7px 16px rgba(71,85,105,.28),inset 0 1px 0 rgba(255,255,255,.48);transform:translateX(2px);}
         </style>
-        <div class="mb-3 sm:mb-10" id="featured-post-slider">
+        <div id="featured-post-slider">
           <div class="flex items-center justify-between mb-3">
             <div>
               <h2 class="text-lg sm:text-xl font-extrabold text-[#151c75]">Insights &amp; tips seputar AI</h2>
