@@ -232,9 +232,9 @@
 
     return `
       <style>
-        .blog-article-page{width:min(100%,80rem);margin:0 auto;padding:clamp(1.25rem,3vw,2rem) 0 clamp(2.5rem,5vw,3rem);box-sizing:border-box}
+        .blog-article-page{width:min(100%,80rem);margin:0 auto;padding:clamp(.75rem,1.5vw,1.25rem) 0 clamp(2.5rem,5vw,3rem);box-sizing:border-box}
         .blog-article-canvas,.blog-article-promo{width:100%;box-sizing:border-box}
-        .blog-article-inner{padding:clamp(1.75rem,5vw,2.5rem) clamp(.75rem,4vw,3rem) clamp(1.5rem,4vw,2.5rem)}
+        .blog-article-inner{padding:clamp(1.5rem,4vw,2.25rem) clamp(.75rem,4vw,3rem) clamp(1.5rem,4vw,2.5rem)}
         .blog-article-back{margin-bottom:clamp(1.25rem,2.5vw,1.75rem)}
         .blog-article-category{margin:0 0 clamp(1.25rem,2.5vw,1.75rem)}
         .blog-article-actions{margin:clamp(3rem,6.5vw,4.25rem) 0 clamp(.75rem,2vw,1.25rem);padding-top:clamp(1.5rem,3vw,2rem)}
