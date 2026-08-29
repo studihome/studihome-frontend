@@ -43,10 +43,10 @@
           const catClass = categoryColors[a.category] || 'bg-slate-100 text-slate-600';
 
           return `<article class="blog-slider-card flex-1 min-w-0 cursor-pointer group" onclick="App.blog.openArticle('${esc(a.slug)}')">
-            <div class="card-3d rounded-2xl overflow-hidden bg-white border border-blue-50 transition-all duration-200 hover:shadow-md hover:-translate-y-0.5 h-full flex flex-col">
-              ${hasImage ? `<div class="aspect-video overflow-hidden bg-slate-100">
+            <div class="card-3d rounded-2xl overflow-hidden bg-white border border-blue-50 transition-all duration-200 hover:shadow-md hover:-translate-y-0.5 h-full flex flex-col" style="border-radius:1.5rem">
+              ${hasImage ? `<div class="overflow-hidden bg-slate-100 shrink-0" style="height:clamp(11rem,16vw,15rem)">
                 <img src="${esc(a.image)}" alt="${esc(a.title)}" class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" loading="lazy">
-              </div>` : `<div class="aspect-[16/7] bg-gradient-to-br from-[#151c75] to-[#3f48bf] flex items-center justify-center relative overflow-hidden shrink-0">
+              </div>` : `<div class="bg-gradient-to-br from-[#151c75] to-[#3f48bf] flex items-center justify-center relative overflow-hidden shrink-0" style="height:clamp(11rem,16vw,15rem)">
                 <div class="absolute inset-0 opacity-10" style="background:radial-gradient(circle at 30% 40%, rgba(250,204,21,.4) 0%, transparent 60%)"></div>
                 <span class="text-white/80 text-3xl font-black relative z-10">${(a.title || 'S').charAt(0).toUpperCase()}</span>
               </div>`}
@@ -65,6 +65,15 @@
       };
 
       return `
+        <style>
+          #featured-post-slider .featured-slider-pagination{display:flex;align-items:center;justify-content:center;gap:.25rem;width:max-content;margin-inline:auto;padding:.25rem .35rem;border:1px solid rgba(203,213,225,.72);border-radius:999px;background:rgba(255,255,255,.72);box-shadow:0 6px 18px rgba(21,28,117,.08);backdrop-filter:blur(8px)}
+          #featured-post-slider .featured-dot{display:inline-flex;align-items:center;justify-content:center;width:1.75rem;height:1.75rem;border-radius:999px;transition:background-color .2s ease,transform .2s ease;outline:none}
+          #featured-post-slider .featured-dot:hover{background:rgba(226,232,240,.75)}
+          #featured-post-slider .featured-dot:focus-visible{box-shadow:0 0 0 3px rgba(63,72,191,.25)}
+          #featured-post-slider .featured-dot-mark{display:block;width:.4rem;height:.4rem;border-radius:999px;background:#94a3b8;transition:width .25s ease,background-color .25s ease,transform .25s ease}
+          #featured-post-slider .featured-dot.is-active .featured-dot-mark{width:1.5rem;background:#151c75}
+          #featured-post-slider .featured-dot.is-active:hover .featured-dot-mark{transform:scaleX(1.04)}
+        </style>
         <div class="mb-8 sm:mb-10" id="featured-post-slider">
           <div class="flex items-center justify-between mb-4">
             <div>
@@ -77,7 +86,7 @@
             </button>
           </div>
           <!-- Desktop view: 2 cards side by side -->
-          <div class="hidden md:block relative overflow-hidden rounded-2xl" style="min-height:260px">
+          <div class="hidden md:block relative overflow-hidden rounded-2xl" style="min-height:23rem">
             ${this._pairs.map((pair, idx) => `
               <div class="featured-slide ${idx === 0 ? 'active' : ''} absolute inset-0 transition-opacity duration-700 ease-in-out" data-slide="${idx}">
                 <div class="grid grid-cols-2 gap-4 h-full">
@@ -87,17 +96,19 @@
             `).join('')}
           </div>
           <!-- Mobile view: 1 card at a time -->
-          <div class="md:hidden relative overflow-hidden rounded-2xl" style="min-height:220px">
+          <div class="md:hidden relative overflow-hidden rounded-2xl" style="min-height:21rem">
             ${articles.map((a, idx) => `
               <div class="featured-slide-mobile ${idx === 0 ? 'active' : ''} absolute inset-0 transition-opacity duration-700 ease-in-out" data-slide-m="${idx}">
                 ${renderPair([a], idx)}
               </div>
             `).join('')}
           </div>
-          <!-- Dots indicator -->
-          <div class="flex items-center justify-center gap-2 mt-4">
+          <!-- Slider pagination -->
+          <div class="featured-slider-pagination mt-4" role="group" aria-label="Navigasi artikel terbaru">
             ${this._pairs.map((_, idx) => `
-              <button class="featured-dot w-2 h-2 rounded-full transition-all duration-300 ${idx === 0 ? 'bg-[#151c75] w-6' : 'bg-slate-300'}" data-dot="${idx}" onclick="App.featuredSlider.goTo(${idx})"></button>
+              <button class="featured-dot ${idx === 0 ? 'is-active' : ''}" data-dot="${idx}" onclick="App.featuredSlider.goTo(${idx})" aria-label="Tampilkan artikel ${idx + 1}" aria-current="${idx === 0 ? 'true' : 'false'}">
+                <span class="featured-dot-mark" aria-hidden="true"></span>
+              </button>
             `).join('')}
           </div>
         </div>`;
@@ -142,13 +153,9 @@
       // Dots
       document.querySelectorAll('.featured-dot').forEach(el => {
         const dotIdx = parseInt(el.dataset.dot, 10);
-        if (dotIdx === this._currentPair) {
-          el.classList.add('bg-[#151c75]', 'w-6');
-          el.classList.remove('bg-slate-300');
-        } else {
-          el.classList.remove('bg-[#151c75]', 'w-6');
-          el.classList.add('bg-slate-300');
-        }
+        const isActive = dotIdx === this._currentPair;
+        el.classList.toggle('is-active', isActive);
+        el.setAttribute('aria-current', isActive ? 'true' : 'false');
       });
     }
   };
