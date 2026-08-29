@@ -9,7 +9,7 @@
 
   const STORAGE_KEY = 'studihome_blog_articles';
   const VERSION_KEY = 'studihome_blog_version';
-  const CURRENT_VERSION = 2;
+  const CURRENT_VERSION = 3;
 
   // ---- Seed articles (SEO/GEO optimized) ----
   const SEED_ARTICLES = [
@@ -126,9 +126,17 @@
       const storedVersion = parseInt(localStorage.getItem(VERSION_KEY) || '0', 10);
       if (stored && Array.isArray(stored)) {
         if (storedVersion >= CURRENT_VERSION) return stored;
-        const existingKeys = new Set(stored.filter(Boolean).flatMap(article => [article.id, article.slug]));
+        const correctedLegacyImage = 'https://images.unsplash.com/photo-1556742049-0a67daf40955?auto=format&fit=crop&w=800&q=80';
+        const currentUmkmImage = SEED_ARTICLES.find(article => article.id === 'art-005').image;
+        const migrated = stored.map(article => {
+          if (article && article.id === 'art-005' && article.image === correctedLegacyImage) {
+            return Object.assign({}, article, { image: currentUmkmImage });
+          }
+          return article;
+        });
+        const existingKeys = new Set(migrated.filter(Boolean).flatMap(article => [article.id, article.slug]));
         const additions = SEED_ARTICLES.filter(article => !existingKeys.has(article.id) && !existingKeys.has(article.slug));
-        const merged = stored.concat(additions);
+        const merged = migrated.concat(additions);
         localStorage.setItem(STORAGE_KEY, JSON.stringify(merged));
         localStorage.setItem(VERSION_KEY, String(CURRENT_VERSION));
         return merged;
