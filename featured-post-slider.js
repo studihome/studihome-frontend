@@ -53,7 +53,7 @@
                 <div class="h-full p-3 flex items-center min-w-0">
                   <div class="flex items-center justify-between gap-3 min-w-0 w-full">
                     <h3 class="min-w-0 flex-1 text-xs sm:text-sm font-extrabold text-[#151c75] leading-snug line-clamp-2">${esc(a.title)}</h3>
-                    <span class="featured-card-read shrink-0 inline-flex items-center gap-1.5 text-[10px] font-extrabold">Baca <i class="fa-solid fa-arrow-right text-[9px]" aria-hidden="true"></i></span>
+                    <span class="featured-card-read shrink-0 inline-flex items-center gap-1.5 text-[10px] font-extrabold">Cari tahu <i class="fa-solid fa-magnifying-glass-sparkles text-[9px]" aria-hidden="true"></i></span>
                   </div>
                 </div>
               </div>
@@ -69,16 +69,16 @@
           #featured-post-slider .featured-slide,#featured-post-slider .featured-slide-mobile{will-change:opacity,transform;transition:opacity .6s ease-in-out,transform .6s ease-in-out;}
           #featured-post-slider .featured-card{background:#fff;border:1px solid #dbe7ff;box-shadow:none;}
           #featured-post-slider .featured-card:hover{border-color:#c6d7ff;box-shadow:none;}
-          #featured-post-slider .featured-card-read{padding:.48rem .7rem;border:1px solid rgba(100,116,139,.35);border-radius:.7rem;background:linear-gradient(135deg,#e2e8f0 0%,#64748b 100%);color:#fff;box-shadow:0 5px 12px rgba(71,85,105,.2),inset 0 1px 0 rgba(255,255,255,.42);transition:transform .2s ease,box-shadow .2s ease;}
-          #featured-post-slider .group:hover .featured-card-read{box-shadow:0 7px 16px rgba(71,85,105,.28),inset 0 1px 0 rgba(255,255,255,.48);transform:translateX(2px);}
+          #featured-post-slider .featured-card-read{padding:.48rem .7rem;border:1px solid rgba(147,197,253,.9);border-radius:.7rem;background:linear-gradient(135deg,#fff 0%,#eff6ff 48%,#bfdbfe 100%);color:#111827;box-shadow:0 4px 10px rgba(59,130,246,.12),inset 0 1px 0 rgba(255,255,255,.8);transition:transform .2s ease,box-shadow .2s ease,background .2s ease;}
+          #featured-post-slider .group:hover .featured-card-read{background:linear-gradient(135deg,#fff 0%,#dbeafe 100%);box-shadow:0 6px 14px rgba(59,130,246,.18),inset 0 1px 0 rgba(255,255,255,.9);transform:translateX(2px);}
         </style>
         <div id="featured-post-slider">
           <div class="flex items-center justify-between mb-3">
             <div>
               <h2 class="text-lg sm:text-xl font-extrabold text-[#151c75]">Insights &amp; tips AI</h2>
             </div>
-            <a href="/balkon" class="inline-flex items-center gap-1.5 px-4 py-1.5 bg-blue-50 hover:bg-blue-100 text-blue-900 text-sm md:text-base font-bold rounded-full transition-colors duration-200 shadow-sm hover:shadow">
-              Balkon <span class="text-xs" aria-hidden="true">➔</span>
+            <a href="/balkon" class="inline-flex items-center gap-1 px-3 py-1 bg-blue-50 hover:bg-blue-100 text-blue-900 text-xs md:text-sm font-bold rounded-full transition-colors duration-200 shadow-sm hover:shadow">
+              Balkon <i class="fa-solid fa-chevron-right text-amber-500" aria-hidden="true"></i>
             </a>
           </div>
           <!-- Desktop view: 2 cards side by side -->
