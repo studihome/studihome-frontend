@@ -49,8 +49,8 @@
 
           return `<article class="blog-slider-card flex-1 min-w-0 cursor-pointer group" onclick="App.blog.openArticle('${esc(a.slug)}')">
             <div class="featured-card card-3d rounded-2xl overflow-hidden h-full relative" style="border-radius:1rem">
-              <div class="h-full p-3 sm:p-4 md:p-5 flex items-end min-w-0">
-                <div class="flex items-end justify-between gap-3 min-w-0 w-full">
+              <div class="h-full p-3 flex items-center min-w-0">
+                <div class="flex items-center justify-between gap-3 min-w-0 w-full">
                   <h3 class="min-w-0 flex-1 text-xs sm:text-sm font-extrabold text-[#151c75] leading-snug line-clamp-2">${esc(a.title)}</h3>
                   <span class="featured-card-read shrink-0 inline-flex items-center gap-1.5 text-[10px] font-extrabold">Baca <i class="fa-solid fa-arrow-right text-[9px]" aria-hidden="true"></i></span>
                 </div>
@@ -71,8 +71,7 @@
         <div class="mb-8 sm:mb-10" id="featured-post-slider">
           <div class="flex items-center justify-between mb-4">
             <div>
-              <h2 class="text-lg sm:text-xl font-extrabold text-[#151c75]">Artikel Terbaru</h2>
-              <p class="text-xs text-slate-500">Insights & tips seputar AI dan pendidikan</p>
+              <h2 class="text-lg sm:text-xl font-extrabold text-[#151c75]">Insights &amp; tips seputar AI</h2>
             </div>
             <button onclick="App.router.navigate('home')" class="text-xs font-bold text-[#151c75] hover:underline flex items-center gap-1">
               <span>Semua</span>
@@ -80,7 +79,7 @@
             </button>
           </div>
           <!-- Desktop view: 2 cards side by side -->
-          <div class="hidden md:block relative overflow-hidden rounded-2xl" style="min-height:clamp(5rem,6vw,6.25rem)">
+          <div class="hidden md:block relative overflow-hidden rounded-2xl" style="min-height:clamp(4.75rem,4.5vw,5rem)">
             ${this._pairs.map((pair, idx) => `
               <div class="featured-slide testimonial-fade ${idx === 0 ? 'active opacity-100 pointer-events-auto' : 'opacity-0 pointer-events-none'} absolute inset-0" data-slide="${idx}">
                 <div class="grid grid-cols-2 gap-4 h-full">
