@@ -149,11 +149,11 @@
 
   // ---- HTML helpers ----
   function normalizeArticleImageSrc(value) {
-    const source = String(value || '').trim().replace(/\\/g, '/');
+    const source = String(value || '').trim().split('\\').join('/');
     if (!source) return '';
-    if (/^data:image\\//i.test(source) || /^blob:/i.test(source) || /^https?:\\//i.test(source)) return source;
+    if (source.startsWith('data:image/') || source.startsWith('blob:') || source.startsWith('https://') || source.startsWith('http://')) return source;
     if (source.startsWith('//')) return 'https:' + source;
-    return '/' + source.replace(/^(?:\\.\\/?|\\/)+/, '');
+    return '/' + source.replace(/^[./]+/, '');
   }
 
   function renderBlogImageGuardStyles() {
