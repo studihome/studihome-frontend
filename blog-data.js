@@ -209,17 +209,17 @@
     const discount = Math.round((1 - promo.promoPrice / promo.originalPrice) * 100);
 
     let promoHTML = `
-      <aside aria-label="Penawaran Spesial" class="w-full max-w-4xl mx-auto my-3 rounded-2xl overflow-hidden shadow-xl" style="background:linear-gradient(135deg,#1a3a8a,#2d5be3);padding:1px">
-        <div class="rounded-2xl" style="background:linear-gradient(135deg,#1e3a8a,#3b5bdb);padding:16px 20px;display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:16px">
+      <aside aria-label="Penawaran Spesial" class="w-full max-w-4xl mx-auto my-6 rounded-2xl overflow-hidden shadow-xl" style="background:linear-gradient(135deg,#1a3a8a,#2d5be3);padding:1px">
+        <div class="rounded-2xl flex flex-col items-stretch gap-4 p-4 sm:p-5 md:flex-row md:items-center md:justify-between md:gap-6" style="background:linear-gradient(135deg,#1e3a8a,#3b5bdb)">
           <!-- Left: text -->
-          <div style="flex:1 1 0;min-width:0;display:flex;flex-direction:column;align-items:flex-start">
+          <div class="w-full md:flex-1" style="min-width:0;display:flex;flex-direction:column;align-items:flex-start">
             <span style="display:inline-flex;align-items:center;gap:6px;padding:4px 12px;border-radius:9999px;font-size:11px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;margin-bottom:8px;white-space:nowrap;background:rgba(250,204,21,.2);color:#facc15">${promo.badge}</span>
             <h3 style="color:#fff;font-size:18px;font-weight:800;line-height:1.3;margin:0">${promo.title}</h3>
           </div>
 
           <!-- Right: CTA -->
-          <div style="flex-shrink:0">
-            <button onclick="App.router.navigate('products')" style="display:inline-flex;align-items:center;gap:8px;padding:10px 24px;border-radius:12px;font-size:14px;font-weight:800;white-space:nowrap;cursor:pointer;border:none;transition:all .2s;background:linear-gradient(135deg,#f59e0b,#d97706);color:#1e3a8a;box-shadow:0 4px 14px rgba(245,158,11,.35)" onmouseover="this.style.transform='translateY(-1px)';this.style.boxShadow='0 6px 20px rgba(245,158,11,.45)'" onmouseout="this.style.transform='';this.style.boxShadow='0 4px 14px rgba(245,158,11,.35)'">
+          <div class="w-full md:w-auto" style="flex-shrink:0">
+            <button onclick="App.router.navigate('products')" class="w-full md:w-auto" style="display:inline-flex;align-items:center;justify-content:center;gap:8px;padding:10px 24px;border-radius:12px;font-size:14px;font-weight:800;white-space:nowrap;cursor:pointer;border:none;transition:all .2s;background:linear-gradient(135deg,#f59e0b,#d97706);color:#1e3a8a;box-shadow:0 4px 14px rgba(245,158,11,.35)" onmouseover="this.style.transform='translateY(-1px)';this.style.boxShadow='0 6px 20px rgba(245,158,11,.45)'" onmouseout="this.style.transform='';this.style.boxShadow='0 4px 14px rgba(245,158,11,.35)'">
               ${promo.cta} <i class="fa-solid fa-arrow-right" style="font-size:12px"></i>
             </button>
           </div>
@@ -231,7 +231,7 @@
     const readMin = Math.ceil((article.content || '').replace(/<[^>]*>/g, '').split(/\s+/).length / 200);
 
     return `
-      <div class="w-full md:max-w-4xl mx-auto px-0 py-8 sm:px-0 sm:py-8 md:px-12 md:py-12">
+      <div class="w-full max-w-4xl mx-auto px-0 py-10 sm:py-10 md:py-12">
         <!-- Back button -->
         <button onclick="App.router.navigate('home')" class="inline-flex items-center gap-1.5 text-xs font-bold text-[#151c75] hover:text-[#3f48bf] transition-colors mb-6">
           <i class="fa-solid fa-arrow-left"></i> Kembali ke Teras
@@ -239,7 +239,7 @@
 
         <!-- White Canvas Article Container -->
         <article class="w-full bg-white rounded-3xl md:shadow-md md:border border-slate-100 overflow-hidden mb-8">
-          <div class="px-4 pt-8 pb-5 sm:px-6 sm:pt-10 sm:pb-7 md:px-10 md:pt-10 md:pb-9">
+          <div class="px-4 pt-10 pb-6 sm:px-6 sm:pt-10 sm:pb-8 md:px-10 md:pt-12 md:pb-9">
             <!-- Category (semantic) -->
             <nav aria-label="Kategori Artikel" class="mb-5 md:mb-6">
               <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[11px] font-bold bg-blue-50 text-blue-700 border border-blue-100">
@@ -298,7 +298,7 @@
       return '<figure class="my-6 relative rounded-2xl overflow-hidden border border-slate-700/50" style="background:linear-gradient(145deg,#0f172a,#1e293b)">' +
         '<figcaption class="flex items-center justify-between px-5 py-3 border-b border-white/5">' +
           '<span class="inline-flex items-center gap-1.5 text-[11px] font-bold text-emerald-400 uppercase tracking-wider"><i class="fa-solid fa-terminal text-[10px]"></i>Prompt AI</span>' +
-          '<button onclick="App.blog.copyPrompt(this, \''+id+'\')" class="absolute top-3 right-3 z-10 inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium text-white backdrop-blur-sm transition-all duration-200" style="background:rgba(255,255,255,.1);backdrop-filter:blur(8px);border:1px solid rgba(255,255,255,.12)" data-id="'+id+'">' +
+          '<button onclick="App.blog.copyPrompt(this, \' '+id+'\')" class="absolute top-3 right-3 z-10 inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium text-white backdrop-blur-sm transition-all duration-200" style="background:rgba(255,255,255,.1);backdrop-filter:blur(8px);border:1px solid rgba(255,255,255,.12)" data-id="'+id+'">' +
             '<i class="fa-regular fa-copy text-[11px]"></i> <span class="btn-label">Salin Prompt</span>' +
           '</button>' +
         '</figcaption>' +
@@ -410,7 +410,7 @@
       if (!main) return;
       const data = App.state.publicData || {};
       const products = data.products || [];
-      main.innerHTML = `<div class="max-w-6xl mx-auto px-4 sm:px-6 py-8 sm:py-12">${renderArticleDetail(article, products)}</div>`;
+      main.innerHTML = `<div class="max-w-6xl mx-auto px-2 sm:px-4 md:px-6 py-8 sm:py-12">${renderArticleDetail(article, products)}</div>`;
       window.scrollTo({ top: 0, behavior: 'smooth' });
       // Update SEO
       App.ui.updateSeo({
