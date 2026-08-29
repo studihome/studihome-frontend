@@ -53,7 +53,7 @@
                 <div class="h-full p-3 flex items-center min-w-0">
                   <div class="flex items-center justify-between gap-3 min-w-0 w-full">
                     <h3 class="min-w-0 flex-1 text-xs sm:text-sm font-extrabold text-[#151c75] leading-snug line-clamp-2">${esc(a.title)}</h3>
-                    <span class="featured-card-read shrink-0 inline-flex items-center gap-1 px-3 py-1 bg-blue-50 hover:bg-blue-100 text-blue-900 text-xs font-bold rounded-full transition-colors duration-200 shadow-sm hover:shadow">Cari tahu <i class="fad fa-mug-hot" aria-hidden="true"></i></span>
+                    <span class="featured-card-read shrink-0 inline-flex items-center gap-1 px-3 py-1 bg-blue-50 hover:bg-blue-100 text-blue-900 text-xs md:text-sm font-bold rounded-full transition-colors duration-200 shadow-sm hover:shadow">Cari tahu <i class="fad fa-mug-hot" aria-hidden="true"></i></span>
                   </div>
                 </div>
               </div>
