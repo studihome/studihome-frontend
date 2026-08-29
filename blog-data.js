@@ -427,8 +427,8 @@
   function processContent(html) {
     if (!html) return '';
     const articleImageClass = 'block w-full h-auto max-h-[400px] object-cover rounded-xl my-6';
-    const normalizedHtml = html.replace(/<img\\b([^>]*)>/gi, function(match, attrs) {
-      const withoutClass = attrs.replace(/\\sclass=(["'])[^"']*\\1/gi, '');
+    const normalizedHtml = html.replace(/<img\b([^>]*)>/gi, function(match, attrs) {
+      const withoutClass = attrs.replace(/\sclass=(["'])[^"']*\1/gi, '');
       return '<img' + withoutClass + ' class="' + articleImageClass + '">';
     });
     return normalizedHtml.replace(/<pre><code(?:\s+class="prompt-block")?>([\s\S]*?)<\/code><\/pre>/gi, function(match, code) {
