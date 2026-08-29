@@ -232,15 +232,17 @@
 
     return `
       <style>
-        .blog-article-page{width:min(100%,80rem);margin:0 auto;padding:clamp(2.5rem,5vw,3rem) 0;box-sizing:border-box}
+        .blog-article-page{width:min(100%,80rem);margin:0 auto;padding:clamp(1.75rem,4vw,2.5rem) 0 clamp(2.5rem,5vw,3rem);box-sizing:border-box}
         .blog-article-canvas,.blog-article-promo{width:100%;box-sizing:border-box}
-        .blog-article-inner{padding:clamp(3rem,7vw,4rem) clamp(.75rem,4vw,3rem) clamp(1.5rem,4vw,2.5rem)}
-        .blog-article-category{margin:0 0 clamp(1.5rem,3vw,2rem)}
+        .blog-article-inner{padding:clamp(2.25rem,6vw,3.5rem) clamp(.75rem,4vw,3rem) clamp(1.5rem,4vw,2.5rem)}
+        .blog-article-back{margin-bottom:clamp(1.25rem,2.5vw,1.75rem)}
+        .blog-article-category{margin:0 0 clamp(1.25rem,2.5vw,1.75rem)}
+        .blog-article-actions{margin:clamp(2.75rem,6vw,4rem) 0 clamp(1.25rem,3vw,1.75rem);padding-top:clamp(1.5rem,3vw,2rem)}
         @media (max-width:639px){.blog-article-canvas,.blog-article-promo{width:min(100vw,calc(100% + 16px));margin-left:50%;margin-right:0;transform:translateX(-50%)}.blog-article-inner{padding-inline:clamp(.875rem,4vw,1.25rem)}}
       </style>
       <div class="blog-article-page">
         <!-- Back button -->
-        <button onclick="App.router.navigate('home')" class="inline-flex items-center gap-1.5 text-xs font-bold text-[#151c75] hover:text-[#3f48bf] transition-colors mb-6">
+        <button onclick="App.router.navigate('home')" class="blog-article-back inline-flex items-center gap-1.5 text-xs font-bold text-[#151c75] hover:text-[#3f48bf] transition-colors">
           <i class="fa-solid fa-arrow-left"></i> Kembali ke Teras
         </button>
 
@@ -274,7 +276,7 @@
             </div>
 
             <!-- Tags + Share (inline) -->
-            <div class="flex flex-wrap items-center justify-between gap-4 mt-12 mb-4 pt-8 border-t border-slate-100/80">
+            <div class="blog-article-actions flex flex-wrap items-center justify-between gap-4 border-t border-slate-100/80">
               <!-- Left: tags -->
               ${article.tags && article.tags.length ? '<div class="flex flex-wrap gap-2">' + article.tags.map(t => '<span class="inline-flex items-center px-2.5 py-1 rounded-lg text-[11px] font-bold bg-slate-50 text-slate-600 border border-slate-100 hover:bg-slate-100 transition-colors">#' + esc(t) + '</span>').join('') + '</div>' : ''}
               <!-- Right: single share button -->
