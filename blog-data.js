@@ -148,8 +148,27 @@
   }
 
   // ---- HTML helpers ----
+  function normalizeArticleImageSrc(value) {
+    const source = String(value || '').trim().replace(/\\/g, '/');
+    if (!source) return '';
+    if (/^data:image\\//i.test(source) || /^blob:/i.test(source) || /^https?:\\//i.test(source)) return source;
+    if (source.startsWith('//')) return 'https:' + source;
+    return '/' + source.replace(/^(?:\\.\\/?|\\/)+/, '');
+  }
+
+  function renderBlogImageGuardStyles() {
+    return `<style id="blog-mobile-image-guard">
+      .balkon-card-media{width:100%;height:200px;overflow:hidden}
+      .balkon-card-image{width:100%;height:200px;display:block;object-fit:cover;object-position:center}
+      .blog-article-hero-image{width:100%;height:220px;display:block;object-fit:cover;object-position:center}
+      .blog-article-content img{max-width:100%!important;height:auto!important;display:block!important;margin:1.5rem auto!important;border-radius:.75rem!important}
+      @media (min-width:640px){.balkon-card-media,.balkon-card-image{height:220px}.blog-article-hero-image{height:300px}}
+      @media (min-width:768px){.balkon-card-media,.balkon-card-image{height:240px}.blog-article-hero-image{height:400px}}
+    </style>`;
+  }
+
   function getArticleImageSrc(article) {
-    const source = String(article && article.image || '').trim();
+    const source = normalizeArticleImageSrc(article && article.image);
     if (source) return source;
 
     // A deterministic, locally rendered cover for articles without an uploaded image.
@@ -187,7 +206,7 @@
       'Tentang Kami': 'bg-emerald-100 text-emerald-700'
     };
     const catClass = categoryColors[article.category] || 'bg-slate-100 text-slate-600';
-    const hasImage = article.image && article.image.trim();
+    const imageSrc = getArticleImageSrc(article);
 
     return `<article class="blog-card"><a href="/balkon/${encodeURIComponent(article.slug)}" data-balkon-link data-balkon-slug="${esc(article.slug)}" class="block h-full group">
       <div class="card-3d rounded-2xl overflow-hidden bg-white border border-blue-50 transition-all duration-200 hover:shadow-md hover:-translate-y-0.5">
@@ -212,10 +231,12 @@
   function renderBalkonCardHTML(article) {
     const imageSrc = getArticleImageSrc(article);
 
-    return `<article class="h-full">
-      <a href="/balkon/${encodeURIComponent(article.slug)}" data-balkon-link data-balkon-slug="${esc(article.slug)}" class="block h-full cursor-pointer transition-transform hover:-translate-y-1 group">
-        <div class="h-full overflow-hidden rounded-xl bg-white shadow-sm transition-shadow duration-200 hover:shadow-md">
-          <img src="${esc(imageSrc)}" alt="${esc(article.title)}" class="block w-full h-48 md:h-56 object-cover rounded-t-xl transition-transform duration-700 ease-in-out group-hover:scale-105" loading="lazy">
+    return `<article class="w-full">
+      <a href="/balkon/${encodeURIComponent(article.slug)}" data-balkon-link data-balkon-slug="${esc(article.slug)}" class="block w-full cursor-pointer transition-transform hover:-translate-y-1 group">
+        <div class="w-full h-auto overflow-hidden rounded-2xl bg-white shadow-sm transition-shadow duration-200 hover:shadow-md">
+          <div class="balkon-card-media w-full h-auto overflow-hidden">
+            <img src="${esc(imageSrc)}" alt="${esc(article.title)}" class="balkon-card-image block w-full h-[200px] sm:h-[220px] md:h-[240px] object-cover object-center rounded-t-2xl transition-transform duration-700 ease-in-out group-hover:scale-105" loading="lazy">
+          </div>
           <div class="p-5">
             <h2 class="text-lg font-extrabold leading-snug text-slate-900 transition-colors group-hover:text-indigo-600">${esc(article.title)}</h2>
             <p class="mt-2 text-sm leading-relaxed text-slate-600 line-clamp-2">${esc(article.excerpt || '')}</p>
@@ -234,7 +255,7 @@
     const featuredCards = featuredPosts.map(renderBalkonCardHTML).join('');
     const regularCards = regularPosts.map(renderBalkonCardHTML).join('');
 
-    main.innerHTML = `<section class="max-w-6xl mx-auto px-4 sm:px-6 py-8 sm:py-12">
+    main.innerHTML = `${renderBlogImageGuardStyles()}<section class="max-w-6xl mx-auto px-4 sm:px-6 py-8 sm:py-12">
       <a href="/" class="inline-flex items-center gap-1.5 text-xs font-bold text-[#151c75] hover:text-[#3f48bf] transition-colors mb-6">
         <i class="fa-solid fa-arrow-left" aria-hidden="true"></i> Kembali ke Teras
       </a>
@@ -355,7 +376,7 @@
     const isoDate = article.createdAt ? article.createdAt.slice(0, 10) : '';
     const readMin = Math.ceil((article.content || '').replace(/<[^>]*>/g, '').split(/\s+/).length / 200);
 
-    return `
+    return `${renderBlogImageGuardStyles()}
       <style>
         .blog-article-page{width:min(100%,80rem);margin:0 auto;padding:0 0 clamp(2.5rem,5vw,3rem);box-sizing:border-box}
         .blog-article-canvas,.blog-article-promo{width:100%;box-sizing:border-box}
@@ -391,9 +412,9 @@
             </div>
 
             <!-- Hero image -->
-            ${hasImage ? `<figure class="rounded-2xl overflow-hidden mb-8 bg-slate-50 border border-slate-100">
-              <img src="${esc(article.image)}" alt="${esc(article.title)}" class="block w-full h-auto max-h-[400px] object-cover rounded-xl my-6" loading="eager">
-            </figure>` : ''}
+            <figure class="rounded-2xl overflow-hidden mb-8 bg-slate-50 border border-slate-100">
+              <img src="${esc(imageSrc)}" alt="${esc(article.title)}" class="blog-article-hero-image block w-full h-[220px] sm:h-[300px] md:h-[400px] object-cover object-center rounded-2xl my-6 shadow-md" loading="eager">
+            </figure>
 
             <!-- Article body -->
             <div class="prose prose-sm max-w-none text-slate-700 leading-relaxed" style="font-size:15px;line-height:1.85">
@@ -426,10 +447,15 @@
   // Process article content: wrap prompt blocks with styled container + copy button
   function processContent(html) {
     if (!html) return '';
-    const articleImageClass = 'block w-full h-auto max-h-[400px] object-cover rounded-xl my-6';
+    const articleImageClass = 'blog-article-content-image block w-full h-auto object-cover rounded-xl my-6';
     const normalizedHtml = html.replace(/<img\b([^>]*)>/gi, function(match, attrs) {
-      const withoutClass = attrs.replace(/\sclass=(["'])[^"']*\1/gi, '');
-      return '<img' + withoutClass + ' class="' + articleImageClass + '">';
+      const sourceMatch = attrs.match(/\ssrc=(["'])(.*?)\1/i);
+      const normalizedSource = normalizeArticleImageSrc(sourceMatch ? sourceMatch[2] : '');
+      const withoutClass = attrs
+        .replace(/\sclass=(["'])[^"']*\1/gi, '')
+        .replace(/\ssrc=(["'])(.*?)\1/gi, '');
+      const srcAttr = normalizedSource ? ' src="' + esc(normalizedSource) + '"' : '';
+      return '<img' + withoutClass + srcAttr + ' class="' + articleImageClass + '" style="max-width:100%;height:auto;display:block;margin:1.5rem auto;border-radius:0.75rem;">';
     });
     return normalizedHtml.replace(/<pre><code(?:\s+class="prompt-block")?>([\s\S]*?)<\/code><\/pre>/gi, function(match, code) {
       const decoded = code.replace(/&amp;/g,'&').replace(/&lt;/g,'<').replace(/&gt;/g,'>').replace(/&quot;/g,'"').replace(/&#39;/g,"'");
