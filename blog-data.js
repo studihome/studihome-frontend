@@ -192,7 +192,7 @@
     return `<article class="blog-card"><a href="/balkon/${encodeURIComponent(article.slug)}" data-balkon-link data-balkon-slug="${esc(article.slug)}" class="block h-full group">
       <div class="card-3d rounded-2xl overflow-hidden bg-white border border-blue-50 transition-all duration-200 hover:shadow-md hover:-translate-y-0.5">
         ${hasImage ? `<div class="aspect-video overflow-hidden bg-slate-100">
-          <img src="${esc(article.image)}" alt="${esc(article.title)}" class="w-full h-full object-cover transition-transform duration-700 ease-in-out group-hover:scale-105" loading="lazy">
+          <img src="${esc(article.image)}" alt="${esc(article.title)}" class="block w-full h-48 md:h-56 object-cover rounded-t-xl transition-transform duration-700 ease-in-out group-hover:scale-105" loading="lazy">
         </div>` : `<div class="aspect-video bg-gradient-to-br from-[#151c75] to-[#3f48bf] flex items-center justify-center relative overflow-hidden">
           <div class="absolute inset-0 opacity-10" style="background:radial-gradient(circle at 30% 40%, rgba(250,204,21,.4) 0%, transparent 60%)"></div>
           <span class="text-white/80 text-4xl font-black relative z-10">${(article.title || 'S').charAt(0).toUpperCase()}</span>
@@ -215,7 +215,7 @@
     return `<article class="h-full">
       <a href="/balkon/${encodeURIComponent(article.slug)}" data-balkon-link data-balkon-slug="${esc(article.slug)}" class="block h-full cursor-pointer transition-transform hover:-translate-y-1 group">
         <div class="h-full overflow-hidden rounded-xl bg-white shadow-sm transition-shadow duration-200 hover:shadow-md">
-          <img src="${esc(imageSrc)}" alt="${esc(article.title)}" class="block w-full h-48 md:h-56 object-cover rounded-t-xl md:rounded-t-2xl transition-transform duration-700 ease-in-out group-hover:scale-105" loading="lazy">
+          <img src="${esc(imageSrc)}" alt="${esc(article.title)}" class="block w-full h-48 md:h-56 object-cover rounded-t-xl transition-transform duration-700 ease-in-out group-hover:scale-105" loading="lazy">
           <div class="p-5">
             <h2 class="text-lg font-extrabold leading-snug text-slate-900 transition-colors group-hover:text-indigo-600">${esc(article.title)}</h2>
             <p class="mt-2 text-sm leading-relaxed text-slate-600 line-clamp-2">${esc(article.excerpt || '')}</p>
@@ -392,7 +392,7 @@
 
             <!-- Hero image -->
             ${hasImage ? `<figure class="rounded-2xl overflow-hidden mb-8 bg-slate-50 border border-slate-100">
-              <img src="${esc(article.image)}" alt="${esc(article.title)}" class="w-full object-cover" style="max-height:440px" loading="eager">
+              <img src="${esc(article.image)}" alt="${esc(article.title)}" class="block w-full h-auto max-h-[400px] object-cover rounded-xl my-6" loading="eager">
             </figure>` : ''}
 
             <!-- Article body -->
@@ -426,7 +426,12 @@
   // Process article content: wrap prompt blocks with styled container + copy button
   function processContent(html) {
     if (!html) return '';
-    return html.replace(/<pre><code(?:\s+class="prompt-block")?>([\s\S]*?)<\/code><\/pre>/gi, function(match, code) {
+    const articleImageClass = 'block w-full h-auto max-h-[400px] object-cover rounded-xl my-6';
+    const normalizedHtml = html.replace(/<img\\b([^>]*)>/gi, function(match, attrs) {
+      const withoutClass = attrs.replace(/\\sclass=(["'])[^"']*\\1/gi, '');
+      return '<img' + withoutClass + ' class="' + articleImageClass + '">';
+    });
+    return normalizedHtml.replace(/<pre><code(?:\s+class="prompt-block")?>([\s\S]*?)<\/code><\/pre>/gi, function(match, code) {
       const decoded = code.replace(/&amp;/g,'&').replace(/&lt;/g,'<').replace(/&gt;/g,'>').replace(/&quot;/g,'"').replace(/&#39;/g,"'");
       const id = 'pb-' + Math.random().toString(36).slice(2, 8);
       return '<figure class="my-6 relative rounded-2xl overflow-hidden border border-slate-700/50" style="background:linear-gradient(145deg,#0f172a,#1e293b)">' +
