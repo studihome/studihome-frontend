@@ -180,21 +180,45 @@
     </a></article>`;
   }
 
+  function renderBalkonCardHTML(article) {
+    const hasImage = article.image && article.image.trim();
+
+    return `<article class="h-full">
+      <a href="/balkon/${encodeURIComponent(article.slug)}" data-balkon-link data-balkon-slug="${esc(article.slug)}" class="block h-full cursor-pointer transition-transform hover:-translate-y-1 group">
+        <div class="h-full overflow-hidden rounded-xl bg-white shadow-sm transition-shadow duration-200 hover:shadow-md">
+          ${hasImage ? `<img src="${esc(article.image)}" alt="${esc(article.title)}" class="block w-full h-48 md:h-56 object-cover rounded-t-xl transition-transform duration-700 ease-in-out group-hover:scale-105" loading="lazy">` : `<div class="block w-full h-48 md:h-56 rounded-t-xl bg-gradient-to-br from-[#151c75] to-[#3f48bf] flex items-center justify-center"><span class="text-4xl font-black text-white/80">${esc((article.title || 'S').charAt(0).toUpperCase())}</span></div>`}
+          <div class="p-5">
+            <h2 class="text-lg font-extrabold leading-snug text-slate-900 transition-colors group-hover:text-indigo-600">${esc(article.title)}</h2>
+            <p class="mt-2 text-sm leading-relaxed text-slate-600 line-clamp-2">${esc(article.excerpt || '')}</p>
+          </div>
+        </div>
+      </a>
+    </article>`;
+  }
+
   function renderBalkonPage() {
     const main = document.getElementById('main-content');
     if (!main) return;
-    const articles = getPublished();
-    const cards = articles.map((article, index) => '<div class="' + (index === 0 ? 'sm:col-span-2' : '') + '">' + renderCardHTML(article) + '</div>').join('');
+    const posts = getPublished();
+    const featuredPosts = posts.slice(0, 2);
+    const regularPosts = posts.slice(2, 5);
+    const featuredCards = featuredPosts.map(renderBalkonCardHTML).join('');
+    const regularCards = regularPosts.map(renderBalkonCardHTML).join('');
+
     main.innerHTML = `<section class="max-w-6xl mx-auto px-4 sm:px-6 py-8 sm:py-12">
       <a href="/" class="inline-flex items-center gap-1.5 text-xs font-bold text-[#151c75] hover:text-[#3f48bf] transition-colors mb-6">
         <i class="fa-solid fa-arrow-left" aria-hidden="true"></i> Kembali ke Teras
       </a>
-      <header class="max-w-3xl mb-8 sm:mb-10">
-        <p class="text-[11px] font-extrabold tracking-[.18em] uppercase text-indigo-600 mb-2">Balkon Studihome</p>
-        <h1 class="text-3xl sm:text-4xl font-black tracking-tight text-slate-900">Insights &amp; tips seputar AI</h1>
-        <p class="mt-3 text-sm sm:text-base leading-relaxed text-slate-500">Catatan praktis tentang AI, pendidikan, otomatisasi, dan produktivitas.</p>
+      <header class="mb-8 sm:mb-10">
+        <h1 class="text-4xl md:text-5xl font-extrabold text-slate-900 tracking-tight mb-4">Balkon Studihome</h1>
+        <p class="text-xl font-bold text-indigo-600 mb-2">Insights &amp; tips seputar AI</p>
+        <p class="text-slate-600 text-base md:text-lg max-w-2xl">Catatan praktis tentang AI, pendidikan, otomatisasi, dan produktivitas.</p>
       </header>
-      ` + (articles.length ? `<div class="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6">${cards}</div>` : `<div class="rounded-2xl bg-white px-6 py-16 text-center shadow-sm"><i class="fa-regular fa-newspaper text-4xl text-slate-300" aria-hidden="true"></i><h2 class="mt-4 text-lg font-bold text-slate-700">Belum ada artikel</h2><p class="mt-1 text-sm text-slate-500">Artikel baru akan segera hadir.</p></div>`) + `</section>`;
+      ${posts.length ? `
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">${featuredCards}</div>
+        ${regularPosts.length ? `<div class="grid grid-cols-1 md:grid-cols-3 gap-6">${regularCards}</div>` : ''}
+      ` : `<div class="rounded-2xl bg-white px-6 py-16 text-center shadow-sm"><i class="fa-regular fa-newspaper text-4xl text-slate-300" aria-hidden="true"></i><h2 class="mt-4 text-lg font-bold text-slate-700">Belum ada artikel</h2><p class="mt-1 text-sm text-slate-500">Artikel baru akan segera hadir.</p></div>`}
+    </section>`;
     window.scrollTo({ top: 0, behavior: 'auto' });
   }
 
