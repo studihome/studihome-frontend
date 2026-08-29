@@ -44,11 +44,10 @@
 
           return `<article class="blog-slider-card flex-1 min-w-0 cursor-pointer group" onclick="App.blog.openArticle('${esc(a.slug)}')">
             <div class="featured-card card-3d rounded-2xl overflow-hidden border border-blue-50 transition-all duration-200 hover:-translate-y-0.5 h-full relative isolate" style="border-radius:1.5rem">
-              ${hasImage ? `<img src="${esc(a.image)}" alt="${esc(a.title)}" class="featured-card-image absolute inset-0 w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" loading="lazy">` : `<div class="absolute inset-0 bg-gradient-to-br from-[#151c75] via-[#25308d] to-[#3f48bf]"><div class="absolute inset-0 opacity-20" style="background:radial-gradient(circle at 75% 25%, rgba(250,204,21,.65) 0%, transparent 45%)"></div><span class="absolute right-5 top-1/2 -translate-y-1/2 text-white/25 text-6xl font-black">${(a.title || 'S').charAt(0).toUpperCase()}</span></div>`}
-              <div class="featured-card-overlay absolute inset-0 pointer-events-none"></div>
+              ${hasImage ? `<div class="featured-card-image-panel absolute inset-y-0 left-0 overflow-hidden"><img src="${esc(a.image)}" alt="${esc(a.title)}" class="featured-card-image w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" loading="lazy"></div><div class="featured-card-transition absolute inset-y-0 pointer-events-none"></div>` : `<div class="absolute inset-0 bg-gradient-to-br from-[#151c75] via-[#25308d] to-[#3f48bf]"><div class="absolute inset-0 opacity-20" style="background:radial-gradient(circle at 75% 25%, rgba(250,204,21,.65) 0%, transparent 45%)"></div><span class="absolute right-5 top-1/2 -translate-y-1/2 text-white/25 text-6xl font-black">${(a.title || 'S').charAt(0).toUpperCase()}</span></div>`}
               <div class="featured-card-sheen absolute inset-0 pointer-events-none"></div>
               <div class="absolute inset-x-5 top-0 h-px bg-gradient-to-r from-transparent via-white/70 to-transparent pointer-events-none"></div>
-              <div class="relative z-10 h-full p-3 sm:p-4 md:p-5 flex flex-col min-w-0">
+              <div class="relative z-10 h-full p-3 sm:p-4 md:p-5 flex flex-col min-w-0" style="margin-left:${hasImage ? '42%' : '0'}">
                 <div class="flex items-start justify-between gap-3">
                   <span class="featured-card-category inline-flex px-2.5 py-1 rounded-full text-[10px] font-extrabold text-white">${esc(a.category || 'Artikel')}</span>
                   <span class="featured-card-read inline-flex items-center gap-1 text-[10px] font-extrabold text-white/90">Baca <i class="fa-solid fa-arrow-up-right-from-square text-[9px]" aria-hidden="true"></i></span>
@@ -73,9 +72,10 @@
           #featured-post-slider .featured-dot-mark{display:block;width:.4rem;height:.4rem;border-radius:999px;background:#94a3b8;transition:width .25s ease,background-color .25s ease,transform .25s ease}
           #featured-post-slider .featured-dot.is-active .featured-dot-mark{width:1.5rem;background:#151c75}
           #featured-post-slider .featured-dot.is-active:hover .featured-dot-mark{transform:scaleX(1.04)}
-          #featured-post-slider .featured-card{background:#151c75;border-color:rgba(255,255,255,.26);box-shadow:0 14px 32px rgba(21,28,117,.18),inset 0 1px 0 rgba(255,255,255,.3);}
+          #featured-post-slider .featured-card{background:linear-gradient(135deg,#151c75 0%,#202b88 52%,#3f48bf 100%);border-color:rgba(255,255,255,.26);box-shadow:0 14px 32px rgba(21,28,117,.18),inset 0 1px 0 rgba(255,255,255,.3);}
           #featured-post-slider .featured-card:hover{box-shadow:0 20px 42px rgba(21,28,117,.28),inset 0 1px 0 rgba(255,255,255,.4);}
-          #featured-post-slider .featured-card-overlay{background:linear-gradient(120deg,rgba(8,15,45,.96) 0%,rgba(15,29,77,.82) 48%,rgba(19,31,87,.32) 100%),linear-gradient(0deg,rgba(2,6,23,.35),transparent 58%);}
+          #featured-post-slider .featured-card-image-panel{width:48%;box-shadow:inset -1px 0 0 rgba(255,255,255,.16);}
+          #featured-post-slider .featured-card-transition{left:27%;width:32%;background:linear-gradient(90deg,rgba(21,28,117,0) 0%,rgba(21,28,117,.22) 34%,#151c75 100%);}
           #featured-post-slider .featured-card-sheen{background:linear-gradient(118deg,transparent 31%,rgba(255,255,255,.17) 48%,transparent 64%);transform:translateX(-125%);transition:transform .75s cubic-bezier(.2,.8,.2,1);}
           #featured-post-slider .group:hover .featured-card-sheen{transform:translateX(125%);}
           #featured-post-slider .featured-card-category{border:1px solid rgba(255,255,255,.24);background:rgba(255,255,255,.15);box-shadow:inset 0 1px 0 rgba(255,255,255,.25);backdrop-filter:blur(10px);}
