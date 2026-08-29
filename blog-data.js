@@ -209,8 +209,8 @@
     const discount = Math.round((1 - promo.promoPrice / promo.originalPrice) * 100);
 
     let promoHTML = `
-      <aside aria-label="Penawaran Spesial" class="w-full max-w-4xl mx-auto my-6 rounded-2xl overflow-hidden shadow-xl" style="background:linear-gradient(135deg,#1a3a8a,#2d5be3);padding:1px">
-        <div class="rounded-2xl flex flex-col items-stretch gap-4 p-4 sm:p-5 md:flex-row md:items-center md:justify-between md:gap-6" style="background:linear-gradient(135deg,#1e3a8a,#3b5bdb)">
+      <aside aria-label="Penawaran Spesial" class="w-full max-w-none mx-auto my-7 rounded-2xl overflow-hidden shadow-xl" style="background:linear-gradient(135deg,#1a3a8a,#2d5be3);padding:1px">
+        <div class="rounded-2xl flex flex-col items-stretch gap-4 p-5 sm:p-6 md:flex-row md:items-center md:justify-between md:gap-6" style="background:linear-gradient(135deg,#1e3a8a,#3b5bdb)">
           <!-- Left: text -->
           <div class="w-full md:flex-1" style="min-width:0;display:flex;flex-direction:column;align-items:flex-start">
             <span style="display:inline-flex;align-items:center;gap:6px;padding:4px 12px;border-radius:9999px;font-size:11px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;margin-bottom:8px;white-space:nowrap;background:rgba(250,204,21,.2);color:#facc15">${promo.badge}</span>
@@ -231,7 +231,7 @@
     const readMin = Math.ceil((article.content || '').replace(/<[^>]*>/g, '').split(/\s+/).length / 200);
 
     return `
-      <div class="w-full max-w-4xl mx-auto px-0 py-10 sm:py-10 md:py-12">
+      <div class="w-full max-w-5xl mx-auto px-0 py-10 sm:py-11 md:py-12">
         <!-- Back button -->
         <button onclick="App.router.navigate('home')" class="inline-flex items-center gap-1.5 text-xs font-bold text-[#151c75] hover:text-[#3f48bf] transition-colors mb-6">
           <i class="fa-solid fa-arrow-left"></i> Kembali ke Teras
@@ -239,9 +239,9 @@
 
         <!-- White Canvas Article Container -->
         <article class="w-full bg-white rounded-3xl md:shadow-md md:border border-slate-100 overflow-hidden mb-8">
-          <div class="px-4 pt-10 pb-6 sm:px-6 sm:pt-10 sm:pb-8 md:px-10 md:pt-12 md:pb-9">
+          <div class="px-3 pt-12 pb-6 sm:px-6 sm:pt-12 sm:pb-8 md:px-12 md:pt-14 md:pb-10">
             <!-- Category (semantic) -->
-            <nav aria-label="Kategori Artikel" class="mb-5 md:mb-6">
+            <nav aria-label="Kategori Artikel" class="mb-6 md:mb-7">
               <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[11px] font-bold bg-blue-50 text-blue-700 border border-blue-100">
                 <i class="fa-solid fa-folder-open text-[9px]"></i>${esc(article.category || 'Artikel')}
               </span>
