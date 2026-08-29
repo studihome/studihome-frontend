@@ -48,7 +48,7 @@
           const catClass = categoryColors[a.category] || 'bg-slate-100 text-slate-600';
 
           return `<article class="blog-slider-card flex-1 min-w-0 cursor-pointer group" onclick="App.blog.openArticle('${esc(a.slug)}')">
-            <div class="featured-card card-3d rounded-2xl overflow-hidden h-full relative" style="border-radius:1.5rem">
+            <div class="featured-card card-3d rounded-2xl overflow-hidden h-full relative" style="border-radius:1rem">
               <div class="h-full p-3 sm:p-4 md:p-5 flex items-end min-w-0">
                 <div class="flex items-end justify-between gap-3 min-w-0 w-full">
                   <h3 class="min-w-0 flex-1 text-xs sm:text-sm font-extrabold text-[#151c75] leading-snug line-clamp-2">${esc(a.title)}</h3>
@@ -63,8 +63,8 @@
       return `
         <style>
           #featured-post-slider .featured-slide,#featured-post-slider .featured-slide-mobile{will-change:opacity,transform;transition:opacity .6s ease-in-out,transform .6s ease-in-out;}
-          #featured-post-slider .featured-card{background:#fff;border:1px solid #dbe7ff;box-shadow:0 10px 24px rgba(21,28,117,.08),inset 0 1px 0 rgba(255,255,255,.95);}
-          #featured-post-slider .featured-card:hover{border-color:#c6d7ff;box-shadow:0 16px 30px rgba(21,28,117,.13);}
+          #featured-post-slider .featured-card{background:#fff;border:1px solid #dbe7ff;box-shadow:none;}
+          #featured-post-slider .featured-card:hover{border-color:#c6d7ff;box-shadow:none;}
           #featured-post-slider .featured-card-read{padding:.48rem .7rem;border:1px solid rgba(100,116,139,.35);border-radius:.7rem;background:linear-gradient(135deg,#e2e8f0 0%,#64748b 100%);color:#fff;box-shadow:0 5px 12px rgba(71,85,105,.2),inset 0 1px 0 rgba(255,255,255,.42);transition:transform .2s ease,box-shadow .2s ease;}
           #featured-post-slider .group:hover .featured-card-read{box-shadow:0 7px 16px rgba(71,85,105,.28),inset 0 1px 0 rgba(255,255,255,.48);transform:translateX(2px);}
         </style>
@@ -80,7 +80,7 @@
             </button>
           </div>
           <!-- Desktop view: 2 cards side by side -->
-          <div class="hidden md:block relative overflow-hidden rounded-2xl" style="min-height:clamp(7.5rem,11vw,9rem)">
+          <div class="hidden md:block relative overflow-hidden rounded-2xl" style="min-height:clamp(5rem,6vw,6.25rem)">
             ${this._pairs.map((pair, idx) => `
               <div class="featured-slide testimonial-fade ${idx === 0 ? 'active opacity-100 pointer-events-auto' : 'opacity-0 pointer-events-none'} absolute inset-0" data-slide="${idx}">
                 <div class="grid grid-cols-2 gap-4 h-full">
@@ -90,7 +90,7 @@
             `).join('')}
           </div>
           <!-- Mobile view: 1 card at a time -->
-          <div class="md:hidden relative overflow-hidden rounded-2xl" style="min-height:8rem">
+          <div class="md:hidden relative overflow-hidden rounded-2xl" style="min-height:7rem">
             ${articles.map((a, idx) => `
               <div class="featured-slide-mobile testimonial-fade ${idx === 0 ? 'active opacity-100 pointer-events-auto' : 'opacity-0 pointer-events-none'} absolute inset-0" data-slide-m="${idx}">
                 ${renderPair([a], idx)}
