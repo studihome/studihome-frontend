@@ -163,7 +163,7 @@
     return `<article class="blog-card"><a href="/balkon/${encodeURIComponent(article.slug)}" data-balkon-link data-balkon-slug="${esc(article.slug)}" class="block h-full group">
       <div class="card-3d rounded-2xl overflow-hidden bg-white border border-blue-50 transition-all duration-200 hover:shadow-md hover:-translate-y-0.5">
         ${hasImage ? `<div class="aspect-video overflow-hidden bg-slate-100">
-          <img src="${esc(article.image)}" alt="${esc(article.title)}" class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" loading="lazy">
+          <img src="${esc(article.image)}" alt="${esc(article.title)}" class="w-full h-full object-cover transition-transform duration-700 ease-in-out group-hover:scale-105" loading="lazy">
         </div>` : `<div class="aspect-video bg-gradient-to-br from-[#151c75] to-[#3f48bf] flex items-center justify-center relative overflow-hidden">
           <div class="absolute inset-0 opacity-10" style="background:radial-gradient(circle at 30% 40%, rgba(250,204,21,.4) 0%, transparent 60%)"></div>
           <span class="text-white/80 text-4xl font-black relative z-10">${(article.title || 'S').charAt(0).toUpperCase()}</span>
