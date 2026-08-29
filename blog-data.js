@@ -186,7 +186,7 @@
     return `<article class="h-full">
       <a href="/balkon/${encodeURIComponent(article.slug)}" data-balkon-link data-balkon-slug="${esc(article.slug)}" class="block h-full cursor-pointer transition-transform hover:-translate-y-1 group">
         <div class="h-full overflow-hidden rounded-xl bg-white shadow-sm transition-shadow duration-200 hover:shadow-md">
-          ${hasImage ? `<img src="${esc(article.image)}" alt="${esc(article.title)}" class="block w-full h-48 md:h-56 object-cover rounded-t-xl transition-transform duration-700 ease-in-out group-hover:scale-105" loading="lazy">` : `<div class="block w-full h-48 md:h-56 rounded-t-xl bg-gradient-to-br from-[#151c75] to-[#3f48bf] flex items-center justify-center"><span class="text-4xl font-black text-white/80">${esc((article.title || 'S').charAt(0).toUpperCase())}</span></div>`}
+          ${hasImage ? `<img src="${esc(article.image)}" alt="${esc(article.title)}" class="block w-full h-48 md:h-56 object-cover rounded-t-xl md:rounded-t-2xl transition-transform duration-700 ease-in-out group-hover:scale-105" loading="lazy">` : `<div class="block w-full h-48 md:h-56 rounded-t-xl md:rounded-t-2xl bg-gradient-to-br from-[#151c75] to-[#3f48bf] flex items-center justify-center"><span class="text-4xl font-black text-white/80">${esc((article.title || 'S').charAt(0).toUpperCase())}</span></div>`}
           <div class="p-5">
             <h2 class="text-lg font-extrabold leading-snug text-slate-900 transition-colors group-hover:text-indigo-600">${esc(article.title)}</h2>
             <p class="mt-2 text-sm leading-relaxed text-slate-600 line-clamp-2">${esc(article.excerpt || '')}</p>
@@ -210,9 +210,10 @@
         <i class="fa-solid fa-arrow-left" aria-hidden="true"></i> Kembali ke Teras
       </a>
       <header class="mb-8 sm:mb-10">
-        <h1 class="text-4xl md:text-5xl font-extrabold text-slate-900 tracking-tight mb-4">Balkon Studihome</h1>
-        <p class="text-xl font-bold text-indigo-600 mb-2">Insights &amp; tips seputar AI</p>
-        <p class="text-slate-600 text-base md:text-lg max-w-2xl">Catatan praktis tentang AI, pendidikan, otomatisasi, dan produktivitas.</p>
+        <h1 class="balkon-title text-2xl sm:text-3xl md:text-5xl font-extrabold tracking-tight mb-8 flex items-center gap-2 whitespace-nowrap">
+          <span class="text-amber-500">Balkon</span>
+          <span class="text-blue-900">Studihome</span>
+        </h1>
       </header>
       ${posts.length ? `
         <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">${featuredCards}</div>
