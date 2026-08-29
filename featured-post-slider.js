@@ -43,14 +43,11 @@
           const catClass = categoryColors[a.category] || 'bg-slate-100 text-slate-600';
 
           return `<article class="blog-slider-card flex-1 min-w-0 cursor-pointer group" onclick="App.blog.openArticle('${esc(a.slug)}')">
-            <div class="featured-card card-3d rounded-2xl overflow-hidden border border-blue-50 transition-all duration-300 hover:-translate-y-0.5 h-full relative isolate" style="border-radius:1.5rem">
-              ${hasImage ? `<img src="${esc(a.image)}" alt="${esc(a.title)}" class="featured-card-image absolute inset-0 w-full h-full object-cover transition-transform duration-700 group-hover:scale-105" loading="lazy">` : `<div class="absolute inset-0 bg-gradient-to-br from-[#151c75] via-[#25308d] to-[#3f48bf]"><div class="absolute inset-0 opacity-20" style="background:radial-gradient(circle at 75% 25%, rgba(250,204,21,.65) 0%, transparent 45%)"></div><span class="absolute right-5 top-1/2 -translate-y-1/2 text-white/25 text-6xl font-black">${(a.title || 'S').charAt(0).toUpperCase()}</span></div>`}
-              <div class="featured-card-overlay absolute inset-0 pointer-events-none"></div>
-              <div class="featured-card-sheen absolute inset-0 pointer-events-none"></div>
-              <div class="relative z-10 h-full p-3 sm:p-4 md:p-5 flex items-end min-w-0">
+            <div class="featured-card card-3d rounded-2xl overflow-hidden h-full relative" style="border-radius:1.5rem">
+              <div class="h-full p-3 sm:p-4 md:p-5 flex items-end min-w-0">
                 <div class="flex items-end justify-between gap-3 min-w-0 w-full">
-                  <h3 class="min-w-0 flex-1 text-xs sm:text-sm font-extrabold text-white leading-snug line-clamp-2 drop-shadow-sm">${esc(a.title)}</h3>
-                  <span class="featured-card-read shrink-0 inline-flex items-center gap-1.5 text-[10px] font-extrabold text-white">Baca <i class="fa-solid fa-arrow-right text-[9px]" aria-hidden="true"></i></span>
+                  <h3 class="min-w-0 flex-1 text-xs sm:text-sm font-extrabold text-[#151c75] leading-snug line-clamp-2">${esc(a.title)}</h3>
+                  <span class="featured-card-read shrink-0 inline-flex items-center gap-1.5 text-[10px] font-extrabold">Baca <i class="fa-solid fa-arrow-right text-[9px]" aria-hidden="true"></i></span>
                 </div>
               </div>
             </div>
@@ -67,14 +64,10 @@
           #featured-post-slider .featured-dot-mark{display:block;width:.4rem;height:.4rem;border-radius:999px;background:#94a3b8;transition:width .25s ease,background-color .25s ease,transform .25s ease}
           #featured-post-slider .featured-dot.is-active .featured-dot-mark{width:1.5rem;background:#151c75}
           #featured-post-slider .featured-dot.is-active:hover .featured-dot-mark{transform:scaleX(1.04)}
-          #featured-post-slider .featured-card{background:#151c75;border-color:rgba(255,255,255,.3);box-shadow:0 16px 34px rgba(21,28,117,.18),inset 0 1px 0 rgba(255,255,255,.28);}
-          #featured-post-slider .featured-card:hover{box-shadow:0 22px 44px rgba(21,28,117,.26),inset 0 1px 0 rgba(255,255,255,.38);}
-          #featured-post-slider .featured-card-overlay{background:linear-gradient(180deg,rgba(8,15,45,.08) 0%,rgba(8,15,45,.22) 38%,rgba(8,15,45,.96) 100%),linear-gradient(90deg,rgba(8,15,45,.52) 0%,rgba(8,15,45,.16) 62%,transparent 100%);}
-          #featured-post-slider .featured-card-sheen{background:linear-gradient(115deg,transparent 34%,rgba(255,255,255,.16) 48%,transparent 62%);transform:translateX(-125%);transition:transform .8s cubic-bezier(.2,.8,.2,1);}
-          #featured-post-slider .group:hover .featured-card-sheen{transform:translateX(125%);}
-          #featured-post-slider .featured-card-category{border:1px solid rgba(255,255,255,.28);background:rgba(15,23,42,.28);box-shadow:inset 0 1px 0 rgba(255,255,255,.22);backdrop-filter:blur(10px);}
-          #featured-post-slider .featured-card-read{padding:.48rem .7rem;border:1px solid rgba(255,255,255,.34);border-radius:.7rem;background:linear-gradient(135deg,#EAB308 0%,#F59E0B 100%);color:#0F172A;box-shadow:0 6px 14px rgba(234,179,8,.28),inset 0 1px 0 rgba(255,255,255,.45);transition:transform .2s ease,box-shadow .2s ease;}
-          #featured-post-slider .group:hover .featured-card-read{box-shadow:0 8px 18px rgba(234,179,8,.42),inset 0 1px 0 rgba(255,255,255,.5);transform:translateX(2px);}
+          #featured-post-slider .featured-card{background:#fff;border:1px solid #dbe7ff;box-shadow:0 10px 24px rgba(21,28,117,.08),inset 0 1px 0 rgba(255,255,255,.95);}
+          #featured-post-slider .featured-card:hover{border-color:#c6d7ff;box-shadow:0 16px 30px rgba(21,28,117,.13);}
+          #featured-post-slider .featured-card-read{padding:.48rem .7rem;border:1px solid rgba(100,116,139,.35);border-radius:.7rem;background:linear-gradient(135deg,#e2e8f0 0%,#64748b 100%);color:#fff;box-shadow:0 5px 12px rgba(71,85,105,.2),inset 0 1px 0 rgba(255,255,255,.42);transition:transform .2s ease,box-shadow .2s ease;}
+          #featured-post-slider .group:hover .featured-card-read{box-shadow:0 7px 16px rgba(71,85,105,.28),inset 0 1px 0 rgba(255,255,255,.48);transform:translateX(2px);}
         </style>
         <div class="mb-8 sm:mb-10" id="featured-post-slider">
           <div class="flex items-center justify-between mb-4">
