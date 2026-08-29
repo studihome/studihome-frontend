@@ -6798,6 +6798,13 @@ renderStudioAiControl: async () => {
                                                 </div>
                                             </div>
                                             <div>
+                                                <label for="blog-article-tags" class="block text-[10px] font-bold text-slate-600 mb-1">Tag</label>
+                                                <input type="text" id="blog-article-tags" list="blog-tag-suggestions" placeholder="Contoh: AI, Guru, Produktivitas" class="w-full card-3d px-3 py-2 rounded-xl text-xs bg-white" autocomplete="off" oninput="App.admin.updateBlogTagPreview()">
+                                                <datalist id="blog-tag-suggestions"></datalist>
+                                                <p class="mt-1 text-[10px] text-slate-500">Pisahkan dengan koma. Pilih saran yang ada atau tulis tag custom.</p>
+                                                <output id="blog-tag-preview" class="block mt-1 text-[10px] font-medium text-[#151c75]" aria-live="polite"></output>
+                                            </div>
+                                            <div>
                                                 <label class="block text-[10px] font-bold text-slate-600 mb-1">Gambar URL (opsional)</label>
                                                 <input type="text" id="blog-article-image" placeholder="https://..." class="w-full card-3d px-3 py-2 rounded-xl text-xs bg-white font-mono">
                                             </div>
@@ -7507,6 +7514,7 @@ renderStudioAiControl: async () => {
                     const idEl = document.getElementById('blog-article-id');
                     const titleEl = document.getElementById('blog-article-title');
                     const catEl = document.getElementById('blog-article-category');
+                    const tagsEl = document.getElementById('blog-article-tags');
                     const imgEl = document.getElementById('blog-article-image');
                     const excerptEl = document.getElementById('blog-article-excerpt');
                     const contentEl = document.getElementById('blog-article-content');
@@ -7517,6 +7525,7 @@ renderStudioAiControl: async () => {
                             idEl.value = a.id;
                             titleEl.value = a.title || '';
                             catEl.value = a.category || 'Pendidikan';
+                            tagsEl.value = App.blog.normalizeTags(a.tags).join(', ');
                             imgEl.value = a.image || '';
                             excerptEl.value = a.excerpt || '';
                             contentEl.value = a.content || '';
@@ -7526,11 +7535,14 @@ renderStudioAiControl: async () => {
                         idEl.value = '';
                         titleEl.value = '';
                         catEl.value = 'Pendidikan';
+                        tagsEl.value = '';
                         imgEl.value = '';
                         excerptEl.value = '';
                         contentEl.value = '';
                         statusEl.value = 'published';
                     }
+                    App.admin.refreshBlogTagSuggestions();
+                    App.admin.updateBlogTagPreview();
                     box.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
                 },
 
@@ -7539,6 +7551,27 @@ renderStudioAiControl: async () => {
                 },
 
                 // ---- Blog Editor Helpers ----
+                refreshBlogTagSuggestions: () => {
+                    const list = document.getElementById('blog-tag-suggestions');
+                    if (!list || !App.blog) return;
+                    const defaults = ['AI', 'Pendidikan', 'Bisnis', 'Teknologi', 'Produktivitas', 'Guru', 'UMKM'];
+                    const existing = App.blog.getAll().flatMap(article => App.blog.normalizeTags(article.tags));
+                    const tags = App.blog.normalizeTags([...defaults, ...existing]).sort((a, b) => a.localeCompare(b, 'id-ID'));
+                    list.replaceChildren(...tags.map(tag => {
+                        const option = document.createElement('option');
+                        option.value = tag;
+                        return option;
+                    }));
+                },
+
+                updateBlogTagPreview: () => {
+                    const input = document.getElementById('blog-article-tags');
+                    const preview = document.getElementById('blog-tag-preview');
+                    if (!input || !preview || !App.blog) return;
+                    const tags = App.blog.normalizeTags(input.value);
+                    preview.textContent = tags.length ? 'Akan disimpan: ' + tags.map(tag => '#' + tag).join(' ') : 'Belum ada tag.';
+                },
+
                 blogInsertTag: (tag) => {
                     const ta = document.getElementById('blog-article-content');
                     if (!ta) return;
@@ -7596,6 +7629,7 @@ renderStudioAiControl: async () => {
                     const id = document.getElementById('blog-article-id').value;
                     const title = (document.getElementById('blog-article-title').value || '').trim();
                     const category = document.getElementById('blog-article-category').value;
+                    const tags = App.blog ? App.blog.normalizeTags(document.getElementById('blog-article-tags').value) : [];
                     const image = (document.getElementById('blog-article-image').value || '').trim();
                     const excerpt = (document.getElementById('blog-article-excerpt').value || '').trim();
                     const articleContent = (document.getElementById('blog-article-content').value || '').trim();
@@ -7606,6 +7640,7 @@ renderStudioAiControl: async () => {
                         id: id || undefined,
                         title,
                         category,
+                        tags,
                         image,
                         excerpt,
                         content: articleContent,
