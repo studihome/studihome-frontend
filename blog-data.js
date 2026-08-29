@@ -292,7 +292,7 @@
       <a href="/balkon/${encodeURIComponent(article.slug)}" data-balkon-link data-balkon-slug="${esc(article.slug)}" class="block w-full cursor-pointer transition-transform hover:-translate-y-1 group">
         <div class="card-3d w-full rounded-2xl overflow-hidden flex flex-col bg-white p-3.5 sm:p-4 border border-slate-200/80 transition-all duration-200 hover:shadow-md">
           <div class="balkon-card-media relative aspect-video w-full rounded-xl overflow-hidden mb-2.5 card-3d-inset">
-            <img src="${esc(imageSrc)}" alt="${esc(article.title)}" class="balkon-card-image block w-full h-full object-cover object-center transition-transform duration-700 ease-in-out group-hover:scale-105" loading="eager" fetchpriority="high">
+            <img src="${esc(imageSrc)}" alt="${esc(article.title)}" class="balkon-card-image block w-full h-full object-cover object-center transition-transform duration-700 ease-in-out group-hover:scale-105" loading="eager" fetchpriority="high" referrerpolicy="no-referrer">
           </div>
           <h2 class="font-extrabold text-sm sm:text-base leading-snug text-[#151c75] transition-colors group-hover:text-[#3f48bf]">${esc(article.title)}</h2>
           <p class="mt-1.5 text-xs leading-relaxed text-slate-600 line-clamp-2">${esc(article.excerpt || '')}</p>
