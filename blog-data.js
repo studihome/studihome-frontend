@@ -160,7 +160,7 @@
     const catClass = categoryColors[article.category] || 'bg-slate-100 text-slate-600';
     const hasImage = article.image && article.image.trim();
 
-    return `<article class="blog-card group cursor-pointer" onclick="App.blog.openArticle('${article.slug}')">
+    return `<article class="blog-card"><a href="/balkon/${encodeURIComponent(article.slug)}" data-balkon-link data-balkon-slug="${esc(article.slug)}" class="block h-full group">
       <div class="card-3d rounded-2xl overflow-hidden bg-white border border-blue-50 transition-all duration-200 hover:shadow-md hover:-translate-y-0.5">
         ${hasImage ? `<div class="aspect-video overflow-hidden bg-slate-100">
           <img src="${esc(article.image)}" alt="${esc(article.title)}" class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" loading="lazy">
@@ -177,9 +177,65 @@
           ${showExcerpt !== false ? `<p class="text-xs text-slate-500 leading-relaxed line-clamp-2">${esc(article.excerpt || '')}</p>` : ''}
         </div>
       </div>
-    </article>`;
+    </a></article>`;
   }
 
+  function renderBalkonPage() {
+    const main = document.getElementById('main-content');
+    if (!main) return;
+    const articles = getPublished();
+    const cards = articles.map((article, index) => '<div class="' + (index === 0 ? 'sm:col-span-2' : '') + '">' + renderCardHTML(article) + '</div>').join('');
+    main.innerHTML = `<section class="max-w-6xl mx-auto px-4 sm:px-6 py-8 sm:py-12">
+      <a href="/" class="inline-flex items-center gap-1.5 text-xs font-bold text-[#151c75] hover:text-[#3f48bf] transition-colors mb-6">
+        <i class="fa-solid fa-arrow-left" aria-hidden="true"></i> Kembali ke Teras
+      </a>
+      <header class="max-w-3xl mb-8 sm:mb-10">
+        <p class="text-[11px] font-extrabold tracking-[.18em] uppercase text-indigo-600 mb-2">Balkon Studihome</p>
+        <h1 class="text-3xl sm:text-4xl font-black tracking-tight text-slate-900">Insights &amp; tips seputar AI</h1>
+        <p class="mt-3 text-sm sm:text-base leading-relaxed text-slate-500">Catatan praktis tentang AI, pendidikan, otomatisasi, dan produktivitas.</p>
+      </header>
+      ` + (articles.length ? `<div class="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6">${cards}</div>` : `<div class="rounded-2xl bg-white px-6 py-16 text-center shadow-sm"><i class="fa-regular fa-newspaper text-4xl text-slate-300" aria-hidden="true"></i><h2 class="mt-4 text-lg font-bold text-slate-700">Belum ada artikel</h2><p class="mt-1 text-sm text-slate-500">Artikel baru akan segera hadir.</p></div>`) + `</section>`;
+    window.scrollTo({ top: 0, behavior: 'auto' });
+  }
+
+  function prefetchBalkonArticle(slug) {
+    return getBySlug(slug) || null;
+  }
+
+  function openBalkonArticle(slug) {
+    const article = getBySlug(slug);
+    if (!article) { App.router.navigate('balkon'); return; }
+    const main = document.getElementById('main-content');
+    if (!main) return;
+    const data = App.state.publicData || {};
+    main.innerHTML = `<div class="max-w-6xl mx-auto px-2 sm:px-4 md:px-6 py-8 sm:py-12">${renderArticleDetail(article, data.products || [])}</div>`;
+    const back = main.querySelector('.blog-article-back');
+    if (back) {
+      back.onclick = () => App.router.navigate('balkon');
+      back.innerHTML = '<i class="fa-solid fa-arrow-left" aria-hidden="true"></i> Kembali ke Balkon';
+    }
+    const canonicalPath = '/balkon/' + encodeURIComponent(article.slug);
+    App.ui.updateSeo({
+      title: article.title + ' | Balkon Studihome',
+      description: article.excerpt || article.title,
+      path: canonicalPath,
+      ogType: 'article',
+      image: article.image || 'https://studihome.id/assets/og-image.png',
+      jsonLd: {
+        '@context': 'https://schema.org',
+        '@type': 'BlogPosting',
+        headline: article.title,
+        description: article.excerpt || article.title,
+        image: [article.image || 'https://studihome.id/assets/og-image.png'],
+        datePublished: article.createdAt || null,
+        dateModified: article.updatedAt || article.createdAt || null,
+        author: { '@type': 'Organization', name: 'Studihome' },
+        publisher: { '@type': 'Organization', name: 'Studihome', url: 'https://studihome.id/' },
+        mainEntityOfPage: 'https://studihome.id' + canonicalPath
+      }
+    });
+    window.scrollTo({ top: 0, behavior: 'auto' });
+  }
   function renderArticleDetail(article, products) {
     const dateStr = new Date(article.createdAt).toLocaleDateString('id-ID', {
       day: 'numeric', month: 'long', year: 'numeric'
@@ -385,6 +441,9 @@
     save,
     remove,
     renderCardHTML,
+    renderBalkonPage,
+    openBalkonArticle,
+    prefetchBalkonArticle,
     renderArticleDetail,
     slugify,
     processContent,
