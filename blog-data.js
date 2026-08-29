@@ -231,7 +231,7 @@
     const readMin = Math.ceil((article.content || '').replace(/<[^>]*>/g, '').split(/\s+/).length / 200);
 
     return `
-      <div class="w-full md:max-w-4xl mx-auto px-4 py-5 sm:px-6 sm:py-6 md:px-12 md:py-10">
+      <div class="w-full md:max-w-4xl mx-auto px-0 py-8 sm:px-0 sm:py-8 md:px-12 md:py-12">
         <!-- Back button -->
         <button onclick="App.router.navigate('home')" class="inline-flex items-center gap-1.5 text-xs font-bold text-[#151c75] hover:text-[#3f48bf] transition-colors mb-6">
           <i class="fa-solid fa-arrow-left"></i> Kembali ke Teras
@@ -241,7 +241,7 @@
         <article class="w-full bg-white rounded-3xl md:shadow-md md:border border-slate-100 overflow-hidden mb-8">
           <div class="px-4 pt-8 pb-5 sm:px-6 sm:pt-10 sm:pb-7 md:px-10 md:pt-10 md:pb-9">
             <!-- Category (semantic) -->
-            <nav aria-label="Kategori Artikel" class="mb-4">
+            <nav aria-label="Kategori Artikel" class="mb-5 md:mb-6">
               <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[11px] font-bold bg-blue-50 text-blue-700 border border-blue-100">
                 <i class="fa-solid fa-folder-open text-[9px]"></i>${esc(article.category || 'Artikel')}
               </span>
@@ -267,7 +267,7 @@
             </div>
 
             <!-- Tags + Share (inline) -->
-            <div class="flex flex-wrap items-center justify-between gap-4 mt-5 pt-4 border-t border-slate-100">
+            <div class="flex flex-wrap items-center justify-between gap-4 mt-12 mb-4 pt-8 border-t border-slate-100/80">
               <!-- Left: tags -->
               ${article.tags && article.tags.length ? '<div class="flex flex-wrap gap-2">' + article.tags.map(t => '<span class="inline-flex items-center px-2.5 py-1 rounded-lg text-[11px] font-bold bg-slate-50 text-slate-600 border border-slate-100 hover:bg-slate-100 transition-colors">#' + esc(t) + '</span>').join('') + '</div>' : ''}
               <!-- Right: single share button -->
@@ -298,7 +298,7 @@
       return '<figure class="my-6 relative rounded-2xl overflow-hidden border border-slate-700/50" style="background:linear-gradient(145deg,#0f172a,#1e293b)">' +
         '<figcaption class="flex items-center justify-between px-5 py-3 border-b border-white/5">' +
           '<span class="inline-flex items-center gap-1.5 text-[11px] font-bold text-emerald-400 uppercase tracking-wider"><i class="fa-solid fa-terminal text-[10px]"></i>Prompt AI</span>' +
-          '<button onclick="App.blog.copyPrompt(this, \''+id+'\')" class="absolute top-3 right-3 z-10 inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium text-white backdrop-blur-sm transition-all duration-200" style="background:rgba(255,255,255,.1);backdrop-filter:blur(8px);border:1px solid rgba(255,255,255,.12)" data-id="'+id+'">' +
+          '<button onclick="App.blog.copyPrompt(this, \'\'+id+'\')" class="absolute top-3 right-3 z-10 inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium text-white backdrop-blur-sm transition-all duration-200" style="background:rgba(255,255,255,.1);backdrop-filter:blur(8px);border:1px solid rgba(255,255,255,.12)" data-id="'+id+'">' +
             '<i class="fa-regular fa-copy text-[11px]"></i> <span class="btn-label">Salin Prompt</span>' +
           '</button>' +
         '</figcaption>' +
