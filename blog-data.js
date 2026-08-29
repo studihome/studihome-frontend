@@ -94,6 +94,20 @@
     return getAll().find(a => a.id === id) || null;
   }
 
+  function normalizeTags(value) {
+    const raw = Array.isArray(value) ? value : String(value || '').split(',');
+    const seen = new Set();
+    return raw.reduce((tags, item) => {
+      const tag = String(item || '').trim().replace(/^#+/, '').slice(0, 40);
+      const key = tag.toLocaleLowerCase('id-ID');
+      if (tag && !seen.has(key) && tags.length < 12) {
+        seen.add(key);
+        tags.push(tag);
+      }
+      return tags;
+    }, []);
+  }
+
   function save(article) {
     const articles = getAll();
     if (!article.id) {
@@ -104,6 +118,7 @@
       article.slug = slugify(article.title);
       delete article.titleChanged;
     }
+    article.tags = normalizeTags(article.tags);
     article.updatedAt = new Date().toISOString();
     if (!article.createdAt) article.createdAt = article.updatedAt;
 
@@ -366,6 +381,7 @@
     getPublished,
     getBySlug,
     getById,
+    normalizeTags,
     save,
     remove,
     renderCardHTML,
