@@ -9,7 +9,7 @@
 
   const STORAGE_KEY = 'studihome_blog_articles';
   const VERSION_KEY = 'studihome_blog_version';
-  const CURRENT_VERSION = 1;
+  const CURRENT_VERSION = 2;
 
   // ---- Seed articles (SEO/GEO optimized) ----
   const SEED_ARTICLES = [
@@ -64,6 +64,58 @@
       status: 'published',
       createdAt: '2026-08-26T07:00:00Z',
       updatedAt: '2026-08-26T07:00:00Z'
+    },
+    {
+      id: 'art-005',
+      title: 'Cara Membuat 30 Konten Jualan UMKM dalam 5 Menit dengan Prompt AI',
+      slug: 'cara-membuat-30-konten-jualan-umkm-dengan-prompt-ai',
+      excerpt: 'Panduan praktis untuk pemilik UMKM mengotomatiskan pembuatan caption, ide jualan, dan skrip video pendek hanya menggunakan 1 Master Prompt.',
+      content: '<h2>Konten konsisten tanpa menghabiskan hari kerja</h2><p>Pemilik UMKM sering mengetahui produknya dengan sangat baik, tetapi waktu untuk menulis caption, menentukan sudut promosi, dan membuat skrip video sangat terbatas. Prompt yang terstruktur membantu AI menjaga konteks produk, target pelanggan, dan tujuan penjualan dalam satu alur kerja.</p><h3>Mulai dari satu brief yang jelas</h3><p>Tentukan produk, manfaat utama, persona audiens, gaya bahasa, dan penawaran. Setelah itu, minta AI menyusun variasi konten agar pesan tetap konsisten tanpa terdengar berulang.</p><pre><code class="prompt-block">Anda adalah strategist konten untuk UMKM Indonesia. Buatkan 30 ide konten jualan untuk produk [NAMA PRODUK]. Target pelanggan: [TARGET]. Manfaat utama: [MANFAAT]. Gunakan gaya bahasa [GAYA]. Bagi hasil menjadi caption Instagram, hook video pendek, CTA, dan ide visual. Pastikan tiap ide memiliki sudut berbeda dan tidak membuat klaim yang tidak dapat dibuktikan.</code></pre><p>Tinjau hasil AI sebelum dipublikasikan. Sesuaikan harga, stok, promo, dan fakta produk dengan kondisi bisnis yang sebenarnya.</p>',
+      image: 'https://images.unsplash.com/photo-1556742049-0a67daf40955?auto=format&fit=crop&w=800&q=80',
+      category: 'UMKM & Bisnis',
+      tags: ['UMKM', 'Copywriting', 'Otomasi AI', 'Marketing'],
+      status: 'published',
+      createdAt: '2026-08-29T08:00:00Z',
+      updatedAt: '2026-08-29T08:00:00Z'
+    },
+    {
+      id: 'art-006',
+      title: 'Script Prompt AI Balas Chat Pelanggan 10x Lebih Cepat & Auto-Closing',
+      slug: 'script-prompt-ai-balas-chat-pelanggan-auto-closing',
+      excerpt: 'Ubah AI menjadi Asisten Admin WhatsApp 24/7 yang mampu menjawab pertanyaan pelanggan, menangani komplain, dan meningkatkan konversi penjualan.',
+      content: '<h2>Respons cepat tetap harus terasa manusiawi</h2><p>Chat pelanggan yang terlambat dibalas dapat membuat peluang penjualan hilang. AI dapat membantu menyiapkan draf jawaban, tetapi admin tetap perlu memeriksa stok, harga, kebijakan pengiriman, dan nada komunikasi sebelum mengirimkan pesan.</p><h3>Struktur untuk menangani keberatan</h3><p>Mulai dengan mengakui pertanyaan pelanggan, jelaskan manfaat yang relevan, sampaikan bukti atau detail yang tersedia, lalu arahkan ke langkah berikutnya. Untuk komplain, jangan menjanjikan solusi yang belum disetujui tim operasional.</p><pre><code class="prompt-block">Bertindak sebagai admin WhatsApp untuk [NAMA BISNIS]. Buatkan 3 draf balasan yang ramah, singkat, dan akurat untuk pesan pelanggan berikut: [PESAN PELANGGAN]. Gunakan data produk ini: [DATA PRODUK]. Jika informasi tidak tersedia, minta klarifikasi dan jangan mengarang. Akhiri dengan CTA yang sesuai: katalog, checkout, atau konsultasi singkat.</code></pre><p>Gunakan draf sebagai bantuan kerja, bukan pengganti verifikasi manusia untuk harga, pembayaran, retur, atau keluhan sensitif.</p>',
+      image: 'https://images.unsplash.com/photo-1534536281715-e28d76689b4d?auto=format&fit=crop&w=800&q=80',
+      category: 'UMKM & Bisnis',
+      tags: ['UMKM', 'Customer Service', 'Sales', 'Otomasi'],
+      status: 'published',
+      createdAt: '2026-08-29T08:05:00Z',
+      updatedAt: '2026-08-29T08:05:00Z'
+    },
+    {
+      id: 'art-007',
+      title: 'Master Prompt Pembuat Modul Ajar & RPP Kurikulum Merdeka 2026',
+      slug: 'master-prompt-pembuat-modul-ajar-rpp-kurikulum-merdeka',
+      excerpt: 'Pangkas waktu administrasi mengajar hingga 70%. Cukup masukkan topik pelajaran, AI akan menyusun modul ajar lengkap dengan rubrik penilaian.',
+      content: '<h2>Administrasi mengajar perlu ringkas, bukan asal cepat</h2><p>Guru memerlukan waktu untuk memahami kebutuhan murid, menyusun aktivitas, dan menilai pembelajaran. AI dapat mempercepat draf modul ajar, tetapi hasilnya tetap perlu ditelaah agar sesuai fase, konteks sekolah, capaian pembelajaran, dan kebutuhan peserta didik.</p><h3>Gunakan parameter pembelajaran yang lengkap</h3><p>Masukkan mata pelajaran, fase, topik, alokasi waktu, profil murid, tujuan pembelajaran, serta bentuk asesmen. Dengan parameter tersebut, AI dapat menyusun struktur awal yang lebih mudah diperiksa dan disempurnakan.</p><pre><code class="prompt-block">Buatkan draf modul ajar Kurikulum Merdeka untuk mata pelajaran [MAPEL], fase [FASE], topik [TOPIK], durasi [ALOKASI WAKTU]. Sertakan tujuan pembelajaran, pemahaman bermakna, langkah kegiatan, diferensiasi, asesmen diagnostik-formatif-sumatif, dan rubrik penilaian. Gunakan bahasa Indonesia yang jelas. Tandai bagian yang harus diverifikasi guru terhadap kebijakan sekolah dan kebutuhan murid.</code></pre><p>Gunakan output sebagai draf kerja. Guru tetap menjadi penanggung jawab akhir atas akurasi materi, asesmen, dan keputusan pedagogis.</p>',
+      image: 'https://images.unsplash.com/photo-1509062522246-3755977927d7?auto=format&fit=crop&w=800&q=80',
+      category: 'Pendidikan & Guru',
+      tags: ['Guru Produktif', 'Kurikulum Merdeka', 'RPP AI', 'Pendidikan'],
+      status: 'published',
+      createdAt: '2026-08-29T08:10:00Z',
+      updatedAt: '2026-08-29T08:10:00Z'
+    },
+    {
+      id: 'art-008',
+      title: 'Era Agentic AI 2026: Mengapa Chatbot Biasa Ketinggalan Zaman?',
+      slug: 'era-agentic-ai-2026-mengapa-chatbot-biasa-ketinggalan-zaman',
+      excerpt: 'Simak revolusi AI terbaru di mana Agentic AI tidak sekadar menjawab pertanyaan, tetapi mampu mengeksekusi alur kerja kompleks secara mandiri.',
+      content: '<h2>Dari jawaban menjadi orkestrasi pekerjaan</h2><p>Chatbot konvensional umumnya merespons satu pertanyaan pada satu waktu. Agentic AI dirancang untuk membantu mengurai tujuan menjadi langkah kerja, menggunakan alat yang diizinkan, dan meminta konfirmasi ketika keputusan berisiko diperlukan.</p><h3>Chatbot dan AI Agent memiliki peran berbeda</h3><p>Chatbot cocok untuk tanya jawab, pencarian informasi, dan draf singkat. AI Agent lebih relevan saat pekerjaan membutuhkan urutan tindakan, konteks lintas langkah, dan pengawasan manusia. Keduanya tetap memerlukan batas akses, evaluasi kualitas, serta data yang tepat.</p><h3>Penerapan yang bertanggung jawab di Studihome</h3><p>Di Studihome, pendekatan agentic diarahkan untuk membantu penyusunan materi, ide konten, dan alur kerja produktivitas. Output perlu diverifikasi sebelum dipakai untuk keputusan penting, komunikasi eksternal, atau aktivitas yang menyentuh data pribadi.</p><pre><code class="prompt-block">Petakan alur kerja [NAMA PROSES] menjadi langkah yang dapat dibantu AI. Untuk setiap langkah, jelaskan input, output, risiko, data yang tidak boleh diekspos, dan titik persetujuan manusia. Jangan mengeksekusi tindakan eksternal tanpa konfirmasi.</code></pre><p>Masa depan AI bukan sekadar kecepatan respons, tetapi kemampuan membantu pekerjaan secara terukur, aman, dan dapat diaudit.</p>',
+      image: 'https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?auto=format&fit=crop&w=800&q=80',
+      category: 'Teknologi AI',
+      tags: ['Agentic AI', 'Otomasi AI', 'Teknologi 2026', 'Trend AI'],
+      status: 'published',
+      createdAt: '2026-08-29T08:15:00Z',
+      updatedAt: '2026-08-29T08:15:00Z'
     }
   ];
 
@@ -72,11 +124,16 @@
     try {
       const stored = JSON.parse(localStorage.getItem(STORAGE_KEY) || 'null');
       const storedVersion = parseInt(localStorage.getItem(VERSION_KEY) || '0', 10);
-      if (stored && Array.isArray(stored) && storedVersion >= CURRENT_VERSION) {
-        return stored;
+      if (stored && Array.isArray(stored)) {
+        if (storedVersion >= CURRENT_VERSION) return stored;
+        const existingKeys = new Set(stored.filter(Boolean).flatMap(article => [article.id, article.slug]));
+        const additions = SEED_ARTICLES.filter(article => !existingKeys.has(article.id) && !existingKeys.has(article.slug));
+        const merged = stored.concat(additions);
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(merged));
+        localStorage.setItem(VERSION_KEY, String(CURRENT_VERSION));
+        return merged;
       }
     } catch (e) { /* fall through */ }
-    // Initialize with seed data
     localStorage.setItem(STORAGE_KEY, JSON.stringify(SEED_ARTICLES));
     localStorage.setItem(VERSION_KEY, String(CURRENT_VERSION));
     return SEED_ARTICLES.slice();
