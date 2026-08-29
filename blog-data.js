@@ -206,7 +206,7 @@
       'Tentang Kami': 'bg-emerald-100 text-emerald-700'
     };
     const catClass = categoryColors[article.category] || 'bg-slate-100 text-slate-600';
-    const imageSrc = getArticleImageSrc(article);
+    const hasImage = article.image && article.image.trim();
 
     return `<article class="blog-card"><a href="/balkon/${encodeURIComponent(article.slug)}" data-balkon-link data-balkon-slug="${esc(article.slug)}" class="block h-full group">
       <div class="card-3d rounded-2xl overflow-hidden bg-white border border-blue-50 transition-all duration-200 hover:shadow-md hover:-translate-y-0.5">
@@ -315,7 +315,7 @@
     const dateStr = new Date(article.createdAt).toLocaleDateString('id-ID', {
       day: 'numeric', month: 'long', year: 'numeric'
     });
-    const hasImage = article.image && article.image.trim();
+    const imageSrc = getArticleImageSrc(article);
 
     // Contextual promo banner logic
     const cat = (article.category || '').toLowerCase();
