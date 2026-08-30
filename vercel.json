@@ -5,6 +5,10 @@
       "destination": "/api/sitemap"
     },
     {
+      "source": "/(.*)\\.md",
+      "destination": "/api/markdown?path=$1"
+    },
+    {
       "source": "/(.*)",
       "destination": "/index.html"
     }

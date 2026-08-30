@@ -1611,6 +1611,22 @@ App.router.bindCanonicalLinkGuard();
                     document.head.appendChild(script);
                 },
 
+                updateMarkdownAlternate: (markdownPath = '') => {
+                    const alternateId = 'creator-markdown-alternate';
+                    const existing = document.getElementById(alternateId);
+                    if (!markdownPath) {
+                        if (existing) existing.remove();
+                        return;
+                    }
+                    const href = new URL(String(markdownPath), 'https://studihome.id').href;
+                    const link = existing || document.createElement('link');
+                    link.id = alternateId;
+                    link.rel = 'alternate';
+                    link.type = 'text/markdown';
+                    link.href = href;
+                    if (!existing) document.head.appendChild(link);
+                },
+
                 organizationSchema: () => ({
                     '@context': 'https://schema.org',
                     '@type': ['Organization', 'ProfessionalService'],
@@ -1736,6 +1752,7 @@ App.router.bindCanonicalLinkGuard();
 
                     const schema = meta.jsonLd || ((path === '/' || path === '/foyer') ? App.ui.organizationSchema() : null);
                     App.ui.injectSchema(schema);
+                    App.ui.updateMarkdownAlternate(meta.markdownPath || '');
                 },
 
                 renderNavigation: () => {
@@ -5275,6 +5292,7 @@ App.router.bindCanonicalLinkGuard();
                             path: creatorPath,
                             image: c.cover_url || c.avatar_url || 'https://studihome.id/assets/og-image.png',
                             ogType: 'profile',
+                            markdownPath: `/${encodeURIComponent(String(c.username || '').toLowerCase())}.md`,
                             jsonLd: App.ui.generateCreatorSchema(
                                 c,
                                 creatorPath,
@@ -5298,6 +5316,7 @@ App.router.bindCanonicalLinkGuard();
                                 path: creatorPath,
                                 image: targetPortfolio.media_url || c.cover_url || c.avatar_url || '',
                                 ogType: 'article',
+                                markdownPath: `/${encodeURIComponent(String(c.username || '').toLowerCase())}.md`,
                                 jsonLd: App.ui.generatePortfolioSchema(
                                     targetPortfolio,
                                     c,
