@@ -2368,7 +2368,12 @@ App.router.bindCanonicalLinkGuard();
                                 supabaseClient.from('creator_ratings').select('rating').eq('creator_id', creator.id).eq('is_visible', true),
                                 supabaseClient.rpc('get_creator_trust_metrics', { p_creator_id: creator.id })
                             ]);
-                            for (const r of [catRes, svcRes, pfRes, likeRes, ratingRes, trustRes]) if (r.error) throw r.error;
+                            for (const r of [catRes, svcRes, pfRes, trustRes]) {
+                                if (r.error) throw r.error;
+                            }
+                            // Public profile remains readable if an optional engagement query is RLS-restricted.
+                            if (ratingRes?.error) ratingRes.data = [];
+                            if (likeRes?.error) likeRes.data = [];
                             let liked = false;
                             if (App.state.user?.id) {
                                 const { data: ownLike, error: ownLikeErr } = await supabaseClient.from('creator_likes').select('id').eq('creator_id', creator.id).eq('user_id', App.state.user.id).maybeSingle();
@@ -5319,7 +5324,7 @@ renderCreatorStandardSummary: (creator, data, categories, services, portfolios) 
                 },
                 togglePortfolioLike: async (portfolioId, currentLiked, btnElement) => {
                     if (!App.state.user) {
-                        App.ui.toast('Masuk dulu ya, biar kamu bisa menyukai karya ini. ❤️', 'info');
+                        App.ui.toast('Yuk masuk atau daftar dulu untuk memberikan Like ❤️', 'info');
                         App.ui.toggleModal('auth-modal', true);
                         return;
                     }
@@ -5360,7 +5365,7 @@ renderCreatorStandardSummary: (creator, data, categories, services, portfolios) 
                     try {
                         if (!App.state.user) {
                             App.state.routeAfterLogin = window.location.pathname;
-                            App.ui.toast('Masuk dulu ya, biar kamu bisa menyukai Creator ini. ❤️', 'info');
+                            App.ui.toast('Yuk masuk atau daftar dulu untuk memberikan Like ❤️', 'info');
                             App.ui.toggleModal('auth-modal', true);
                             return;
                         }
