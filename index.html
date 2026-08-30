@@ -5368,8 +5368,25 @@ App.router.bindCanonicalLinkGuard();
                         `;
                         window.scrollTo({ top: 0, behavior: 'smooth' });
                     } catch (e) {
-                        document.title = 'Studihome - Studio AI';
-                        main.innerHTML = `<div class="card-3d p-8 rounded-3xl text-center max-w-lg mx-auto"><div class="text-4xl mb-3">✦</div><h2 class="text-base font-extrabold text-[#151c75]">Halaman Creator belum siap</h2><p class="text-xs text-slate-500 mt-1">${App.utils.escapeHtml(e?.message || 'Profil ini belum tersedia.')}</p><button onclick="App.router.navigate('studio-ai')" class="btn-brand-gradient px-4 py-2.5 rounded-xl text-xs font-bold mt-4">Kembali ke Studio AI</button></div>`;
+                        document.title = 'Studihome - Halaman Belum Tersedia';
+                        main.innerHTML = `
+                            <div class="card-3d p-6 sm:p-10 rounded-3xl text-center max-w-lg mx-auto my-12 bg-white border border-blue-100 shadow-xl">
+                                <div class="w-16 h-16 bg-gradient-to-br from-blue-50 to-indigo-50 text-[#151c75] rounded-2xl flex items-center justify-center mx-auto mb-5 border border-blue-100 shadow-inner">
+                                    <i class="fa-solid fa-store-slash text-2xl"></i>
+                                </div>
+                                <h2 class="text-lg sm:text-xl font-black text-[#151c75] mb-2 tracking-tight">Halaman Belum Tersedia</h2>
+                                <p class="text-xs sm:text-sm text-slate-500 leading-relaxed mb-6">
+                                    Creator yang kamu tuju mungkin belum mempublikasikan halamannya atau tautan sudah kedaluwarsa.<br><br>
+                                    <span class="font-bold text-slate-700">Namun jangan khawatir!</span> Sambil menunggu, yuk intip berbagai modul dan tools AI menarik (beberapa ada yang gratis lho!) di Foyer kami.
+                                </p>
+                                <button type="button" onclick="App.router.navigate('products')" class="btn-brand-gradient px-6 py-3 rounded-xl text-sm font-extrabold shadow-md hover:-translate-y-1 transition-all flex items-center justify-center gap-2 mx-auto w-full sm:w-auto">
+                                    <i class="fa-solid fa-box-open text-[#FACC15]"></i> Ambil Promo Sekarang!
+                                </button>
+                            </div>
+                        `;
+                        if (App.ui && typeof App.ui.updateApiStatus === 'function') {
+                            App.ui.updateApiStatus('online');
+                        }
                     }
                 },
 
