@@ -2306,14 +2306,38 @@ App.router.bindCanonicalLinkGuard();
                                 (servicesByCreator[svc.creator_id] ||= []).push(svc);
                             });
                             const publishedIds = new Set((creatorRes.data || []).map(c => c.id));
-                            const categoryCounts = {};
-                            (memberRes.data || []).forEach(m => {
-                                if (!publishedIds.has(m.creator_id)) return;
-                                categoryCounts[m.category_id] = (categoryCounts[m.category_id] || 0) + 1;
+                            // Normalize display names and route-safe slugs only in the public Studio AI payload.
+                            const categoryDictionary = {
+                                'Digital Operations': { name: 'Operasi Digital', slug: 'ai-operasi-digital' },
+                                'E-Commerce': { name: 'Toko Online', slug: 'ai-toko-online' },
+                                'Finance AI': { name: 'AI Keuangan', slug: 'ai-keuangan' },
+                                'HR Workflow': { name: 'Sistem SDM', slug: 'ai-sistem-sdm' },
+                                'Local Business': { name: 'Bisnis Lokal', slug: 'ai-bisnis-lokal' },
+                                'Motion Design': { name: 'Desain Animasi', slug: 'ai-desain-animasi' },
+                                'No-Code': { name: 'Tanpa Kode', slug: 'ai-no-code' },
+                                'Photography': { name: 'Fotografi', slug: 'ai-fotografi' },
+                                'Professional Visual': { name: 'Visual Profesional', slug: 'ai-visual-profesional' },
+                                'Research': { name: 'Riset & Analisa', slug: 'ai-riset-analisa' },
+                                'Education Media': { name: 'Media Edukasi', slug: 'ai-media-edukasi' },
+                                'Event Creative': { name: 'Kreatif Acara', slug: 'ai-kreatif-acara' },
+                                'AI Website': { name: 'Website AI', slug: 'ai-website' }
+                            };
+                            const normalizedCategories = (catRes.data || []).map(category => {
+                                const normalized = categoryDictionary[category.name];
+                                return normalized ? { ...category, ...normalized } : category;
                             });
-                            const categories = (catRes.data || []).map(c => ({
-                                ...c,
-                                creatorCount: Number(categoryCounts[c.id] || 0)
+                            const categoryById = new Map(normalizedCategories.map(category => [category.id, category]));
+                            // A Creator is counted once per category across explicit memberships and active services.
+                            const creatorIdsByCategory = {};
+                            const addCreatorToCategory = (creatorId, categoryId) => {
+                                if (!publishedIds.has(creatorId) || !categoryById.has(categoryId)) return;
+                                (creatorIdsByCategory[categoryId] ||= new Set()).add(creatorId);
+                            };
+                            (memberRes.data || []).forEach(member => addCreatorToCategory(member.creator_id, member.category_id));
+                            (serviceRes.data || []).forEach(service => addCreatorToCategory(service.creator_id, service.category_id));
+                            const categories = normalizedCategories.map(category => ({
+                                ...category,
+                                creatorCount: creatorIdsByCategory[category.id]?.size || 0
                             }));
                             const portfolioRes = await supabaseClient.from('creator_portfolios').select('creator_id, title, description').eq('is_active', true).limit(1000);
                             if (portfolioRes.error) throw portfolioRes.error;
@@ -2324,9 +2348,17 @@ App.router.bindCanonicalLinkGuard();
                                 (portfoliosByCreator[x.creator_id] ||= []).push(x);
                             });
                             const categoryNamesByCreator = {};
-                            (memberRes.data || []).forEach(m => {
-                                const cat = (catRes.data || []).find(x => x.id === m.category_id);
-                                if (cat) (categoryNamesByCreator[m.creator_id] ||= []).push(cat.name);
+                            (memberRes.data || []).forEach(member => {
+                                const category = categoryById.get(member.category_id);
+                                if (!category) return;
+                                const names = (categoryNamesByCreator[member.creator_id] ||= []);
+                                if (!names.includes(category.name)) names.push(category.name);
+                            });
+                            (serviceRes.data || []).forEach(service => {
+                                const category = categoryById.get(service.category_id);
+                                if (!category) return;
+                                const names = (categoryNamesByCreator[service.creator_id] ||= []);
+                                if (!names.includes(category.name)) names.push(category.name);
                             });
                             const creators = (creatorRes.data || []).map(c => ({
                                 ...c,
