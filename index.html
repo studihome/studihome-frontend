@@ -523,10 +523,7 @@
             content: '';
             position: absolute;
             inset: -30%;
-            background:
-                radial-gradient(circle at 20% 30%, rgba(255,255,255,.06) 0 1px, transparent 2px),
-                radial-gradient(circle at 70% 60%, rgba(255,255,255,.05) 0 1px, transparent 2px);
-            background-size: 34px 34px, 48px 48px;
+            background: none;
             animation: studioAiDrift 26s linear infinite;
             pointer-events: none;
         }
@@ -4978,8 +4975,8 @@ App.router.bindCanonicalLinkGuard();
                                 </div>
                                 <h4 class="mt-3 text-sm font-extrabold text-[#151c75] leading-snug">${portfolioTitle}</h4>
                                 <p class="mt-1.5 text-[11px] text-slate-600 leading-relaxed line-clamp-2">${description}</p>
-                                <a href="/${username}/portfolio/${slug}" onclick="event.preventDefault(); App.router.goCreator('${username}', '${slug}')" class="inline-flex items-center gap-1.5 mt-4 text-[10px] font-extrabold text-[#151c75] hover:text-[#3f48bf]">
-                                    Lihat karya <i class="fa-solid fa-arrow-up-right-from-square text-[8px]"></i>
+                                <a href="/${username}/portfolio/${slug}" onclick="event.preventDefault(); App.router.goCreator('${username}', '${slug}')" class="inline-flex items-center gap-1.5 mt-4 px-3 py-1.5 text-[10px] sm:text-xs font-extrabold text-[#151c75] bg-blue-50/80 border border-blue-200 hover:bg-blue-100 hover:border-blue-300 rounded-full transition-all shadow-sm">
+                                    Lihat contohnya <i class="fa-solid fa-arrow-up-right-from-square text-[8px]"></i>
                                 </a>
                             </div>
                         </article>`;
