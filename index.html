@@ -2253,7 +2253,16 @@ App.router.bindCanonicalLinkGuard();
                             const { data: result, error } = await supabaseClient.rpc('admin_set_creator_verified', { p_creator_id: payload.creatorId, p_verified: !!payload.verified });
                             if (error) throw error;
                             data = result || {success:true};
-                        } else if (action === 'ADMIN_ADD_CREATOR_LIKE_ADJUSTMENT') { if (!App.state.user || String(App.state.user.role).toLowerCase() !== 'admin') throw new Error('Akses Admin diperlukan.'); const {data: result,error}=await supabaseClient.rpc('admin_add_creator_like_adjustment',{p_creator_id:payload.creatorId,p_delta_count:Number(payload.delta),p_reason:String(payload.reason||'')}); if(error)throw error; data=result||{success:true}; } else if (action === 'ADMIN_ADD_CREATOR_EXTERNAL_RATING') { if (!App.state.user || String(App.state.user.role).toLowerCase() !== 'admin') throw new Error('Akses Admin diperlukan.'); const {data: result,error}=await supabaseClient.rpc('admin_add_creator_external_rating',{p_creator_id:payload.creatorId,p_reviewer_name:String(payload.reviewerName||''),p_rating:Number(payload.rating),p_review:String(payload.review||''),p_source_label:String(payload.sourceLabel||'')}); if(error)throw error; data=result||{success:true}; } else if (action === 'ADMIN_MODERATE_CREATOR_LIKES') {
+                        } else if (action === 'ADMIN_ADD_CREATOR_LIKE_ADJUSTMENT') { if (!App.state.user || String(App.state.user.role).toLowerCase() !== 'admin') throw new Error('Akses Admin diperlukan.'); const {data: result,error}=await supabaseClient.rpc('admin_add_creator_like_adjustment',{p_creator_id:payload.creatorId,p_delta_count:Number(payload.delta),p_reason:String(payload.reason||'')}); if(error)throw error; data=result||{success:true}; } else if (action === 'ADMIN_ADD_PORTFOLIO_LIKE_ADJUSTMENT') {
+                            if (!App.state.user || String(App.state.user.role).toLowerCase() !== 'admin') throw new Error('Akses Admin diperlukan.');
+                            const { data: result, error } = await supabaseClient.rpc('admin_add_portfolio_like_adjustment', {
+                                p_portfolio_id: payload.portfolioId,
+                                p_delta_count: Number(payload.delta),
+                                p_reason: String(payload.reason || '')
+                            });
+                            if (error) throw error;
+                            data = result || { success: true };
+                        } else if (action === 'ADMIN_ADD_CREATOR_EXTERNAL_RATING') { if (!App.state.user || String(App.state.user.role).toLowerCase() !== 'admin') throw new Error('Akses Admin diperlukan.'); const {data: result,error}=await supabaseClient.rpc('admin_add_creator_external_rating',{p_creator_id:payload.creatorId,p_reviewer_name:String(payload.reviewerName||''),p_rating:Number(payload.rating),p_review:String(payload.review||''),p_source_label:String(payload.sourceLabel||'')}); if(error)throw error; data=result||{success:true}; } else if (action === 'ADMIN_MODERATE_CREATOR_LIKES') {
                             if (!App.state.user || String(App.state.user.role).toLowerCase() !== 'admin') throw new Error('Akses Admin diperlukan.');
                             const { error } = await supabaseClient.rpc('admin_delete_creator_like', { p_like_id: payload.likeId });
                             if (error) throw error;
