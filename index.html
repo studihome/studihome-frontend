@@ -3183,14 +3183,14 @@ App.router.bindCanonicalLinkGuard();
                     const calculate = () => {
                         const base = App.studioAI.calculateVisualIndex();
                         const phase = Math.floor(Date.now() / 8000);
-                        const perturb = (range, salt, magnitude) => {
+                        const perturb = (salt, magnitude) => {
                             const shift = Math.round((App.studioAI._visualIndexUnit(phase + salt) * 2 - 1) * magnitude);
-                            return Math.max(range[0], Math.min(range[1], shift));
+                            return Math.max(-magnitude, Math.min(magnitude, shift));
                         };
                         return {
                             ...base,
-                            creatorIndex: Math.max(base.creatorRange[0], Math.min(base.creatorRange[1], base.creatorIndex + perturb(base.creatorRange, 19, 1))),
-                            visitorIndex: Math.max(base.visitorRange[0], Math.min(base.visitorRange[1], base.visitorIndex + perturb(base.visitorRange, 61, 4)))
+                            creatorIndex: Math.max(base.creatorRange[0], Math.min(base.creatorRange[1], base.creatorIndex + perturb(19, 1))),
+                            visitorIndex: Math.max(base.visitorRange[0], Math.min(base.visitorRange[1], base.visitorIndex + perturb(61, 4)))
                         };
                     };
                     App.studioAI._visualIndexState = calculate();
