@@ -2360,12 +2360,19 @@ App.router.bindCanonicalLinkGuard();
                                 .maybeSingle();
                             if (cErr) throw cErr;
                             if (!creator || !creator.is_published) throw new Error('Halaman Creator belum tersedia.');
+                            const isAnon = !App.state.user;
+                            const likePromise = isAnon
+                                ? Promise.resolve({ data: [], error: null })
+                                : supabaseClient.from('creator_likes').select('id').eq('creator_id', creator.id);
+                            const ratingPromise = isAnon
+                                ? Promise.resolve({ data: [], error: null })
+                                : supabaseClient.from('creator_ratings').select('rating').eq('creator_id', creator.id).eq('is_visible', true);
                             const [catRes, svcRes, pfRes, likeRes, ratingRes, trustRes] = await Promise.all([
                                 supabaseClient.from('creator_category_members').select('category_id,is_primary,ai_categories(id,slug,name,description,icon)').eq('creator_id', creator.id),
                                 supabaseClient.from('creator_services').select('id,creator_id,category_id,title,description,price_from,price_to,delivery_days,is_active').eq('creator_id', creator.id).eq('is_active', true).order('created_at', { ascending: false }),
                                 supabaseClient.from('creator_portfolios').select('id,creator_id,service_id,title,description,media_type,media_url,sort_order,is_active,created_at, creator_portfolio_likes(user_id)').eq('creator_id', creator.id).eq('is_active', true).order('sort_order', { ascending: true }).order('created_at', { ascending: false }),
-                                supabaseClient.from('creator_likes').select('id').eq('creator_id', creator.id),
-                                supabaseClient.from('creator_ratings').select('rating').eq('creator_id', creator.id).eq('is_visible', true),
+                                likePromise,
+                                ratingPromise,
                                 supabaseClient.rpc('get_creator_trust_metrics', { p_creator_id: creator.id })
                             ]);
                             for (const r of [catRes, svcRes, pfRes, trustRes]) {
