@@ -1,0 +1,146 @@
+openapi: 3.1.0
+info:
+  title: Studihome AI Action API
+  description: API resmi Studihome untuk mencari layanan AI, otomatisasi, dan Creator digital publik di Indonesia.
+  version: 1.0.0
+  license:
+    name: Proprietary
+    url: https://studihome.id
+servers:
+  - url: https://studihome.id
+paths:
+  /api/agent-search:
+    get:
+      summary: Cari layanan dan Creator Studihome
+      description: Mengembalikan maksimal lima layanan aktif milik Creator yang telah dipublikasikan.
+      operationId: searchStudihomeServices
+      security: []
+      parameters:
+        - name: q
+          in: query
+          description: Kata kunci layanan atau Creator, misalnya whatsapp, video AI, atau UMKM.
+          required: false
+          schema:
+            type: string
+            maxLength: 120
+          examples:
+            whatsapp:
+              value: whatsapp
+            umkm:
+              value: umkm
+      responses:
+        '200':
+          description: Daftar layanan publik berhasil diperoleh.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SearchResponse'
+        '400':
+          description: Parameter pencarian tidak valid.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '405':
+          description: Metode HTTP tidak didukung.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '502':
+          description: Sumber data publik sementara tidak tersedia.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '503':
+          description: Konfigurasi layanan sementara tidak tersedia.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+components:
+  schemas:
+    SearchResponse:
+      type: object
+      additionalProperties: false
+      required:
+        - status
+        - source
+        - query
+        - count
+        - results
+      properties:
+        status:
+          type: string
+          const: success
+        source:
+          type: string
+          const: Studihome AI Action
+        query:
+          type: string
+        count:
+          type: integer
+          minimum: 0
+          maximum: 5
+        results:
+          type: array
+          maxItems: 5
+          items:
+            $ref: '#/components/schemas/ServiceResult'
+        message:
+          type: string
+    ServiceResult:
+      type: object
+      additionalProperties: false
+      required:
+        - layanan
+        - deskripsi
+        - creator
+        - username
+        - harga
+        - harga_idr
+        - estimasi_hari
+        - link_profil
+      properties:
+        layanan:
+          type: string
+        deskripsi:
+          type: string
+        creator:
+          type: string
+        username:
+          type: string
+        harga:
+          type: string
+        harga_idr:
+          type: object
+          additionalProperties: false
+          required:
+            - minimum
+            - maximum
+          properties:
+            minimum:
+              type:
+                - number
+                - 'null'
+            maximum:
+              type:
+                - number
+                - 'null'
+        estimasi_hari:
+          type:
+            - number
+            - 'null'
+        link_profil:
+          type: string
+          format: uri
+    ErrorResponse:
+      type: object
+      additionalProperties: false
+      required:
+        - error
+      properties:
+        error:
+          type: string
+

@@ -15,3 +15,8 @@ Website ini mendukung RAG Markdown Injection. Untuk mendapatkan data terstruktur
 - [Cara AI Memangkas Beban Guru](https://studihome.id/balkon/agentic-ai-mangkas-beban-administrasi-guru.md)
 - [Rahasia UMKM Laris dengan Otomasi](https://studihome.id/balkon/umkm-laris-otomasi-konten-copywriting-ai.md)
 - [Otomasi Konten UMKM](https://studihome.id/balkon/cara-membuat-30-konten-jualan-umkm-dengan-prompt-ai.md)
+
+## API Eksekusi (Untuk Custom GPTs & Agents)
+
+- OpenAPI Specification: `https://studihome.id/openapi.yaml`
+
