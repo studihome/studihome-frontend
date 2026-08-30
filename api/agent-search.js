@@ -84,6 +84,7 @@ module.exports = async (req, res) => {
 
   const supabaseUrl = process.env.VITE_SUPABASE_URL || process.env.SUPABASE_URL;
   const supabaseAnonKey = process.env.VITE_SUPABASE_ANON_KEY || process.env.SUPABASE_ANON_KEY;
+  const supabaseWriteKey = process.env.SUPABASE_SECRET_KEY || process.env.SUPABASE_SERVICE_ROLE_KEY;
   if (!supabaseUrl || !supabaseAnonKey) {
     return sendJson(res, 503, { error: 'Service temporarily unavailable' }, isHead);
   }
@@ -93,6 +94,26 @@ module.exports = async (req, res) => {
     return sendJson(res, 400, {
       error: `Parameter q maksimal ${MAX_QUERY_LENGTH} karakter.`
     }, isHead);
+  }
+
+  if (query.length > 2 && supabaseWriteKey) {
+    const loggingTask = fetch(`${supabaseUrl}/rest/v1/ai_search_logs`, {
+      method: 'POST',
+      headers: {
+        apikey: supabaseWriteKey,
+        Authorization: `Bearer ${supabaseWriteKey}`,
+        'Content-Type': 'application/json',
+        Prefer: 'return=minimal'
+      },
+      body: JSON.stringify({ query_text: query, source: 'agent_search' })
+    })
+      .then(response => {
+        if (!response.ok) console.warn('[agent-search] Intent logging failed', response.status);
+      })
+      .catch(error => console.warn('[agent-search] Intent logging failed', error?.message || error));
+
+    if (typeof res.waitUntil === 'function') res.waitUntil(loggingTask);
+    else void loggingTask;
   }
 
   const normalizedQuery = normalizeText(query);
