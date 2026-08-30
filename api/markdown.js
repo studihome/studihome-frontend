@@ -19,9 +19,15 @@ module.exports = async (req, res) => {
   res.setHeader('X-Content-Type-Options', 'nosniff');
   res.setHeader('X-Robots-Tag', 'index, follow');
 
+  const sendError = (status, markdown) => {
+    res.setHeader('Cache-Control', 'no-store');
+    res.setHeader('X-Robots-Tag', 'noindex, nofollow');
+    return res.status(status).send(markdown);
+  };
+
   if (req.method !== 'GET' && req.method !== 'HEAD') {
     res.setHeader('Allow', 'GET, HEAD');
-    return res.status(405).send('# Method Not Allowed\n');
+    return sendError(405, '# Method Not Allowed\n');
   }
 
   const supabaseUrl = String(process.env.SUPABASE_URL || process.env.VITE_SUPABASE_URL || '').replace(/\/$/, '');
@@ -40,7 +46,7 @@ module.exports = async (req, res) => {
     username.length > MAX_USERNAME_LENGTH ||
     !/^[a-z0-9](?:[a-z0-9._-]{0,62}[a-z0-9])?$/.test(username)
   ) {
-    return res.status(400).send('# Error\n\nParameter profil tidak valid.\n');
+    return sendError(400, '# Error\n\nParameter profil tidak valid.\n');
   }
 
   const headers = {
@@ -72,7 +78,7 @@ module.exports = async (req, res) => {
     const creator = profiles[0];
 
     if (!creator) {
-      return res.status(404).send('# 404 Not Found\n\nCreator tidak ditemukan atau belum dipublikasikan.\n');
+      return sendError(404, '# 404 Not Found\n\nCreator tidak ditemukan atau belum dipublikasikan.\n');
     }
 
     const portfolioQuery = new URLSearchParams({
@@ -111,6 +117,6 @@ module.exports = async (req, res) => {
     return res.status(200).send(markdown);
   } catch (error) {
     console.error('[markdown] Request failed', error?.message || error);
-    return res.status(502).send('# Error\n\nGagal mengambil data profil.\n');
+    return sendError(502, '# Error\n\nGagal mengambil data profil.\n');
   }
 };
