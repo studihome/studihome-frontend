@@ -37,7 +37,7 @@
     <meta name="twitter:image" content="https://studihome.id/assets/og-image.png">
 
     <!-- Structured Data / Schema.org (JSON-LD) -->
-    <script type="application/ld+json">
+    <script id="geo-schema-markup" type="application/ld+json">
     {
       "@context": "https://schema.org",
       "@graph": [
@@ -1595,6 +1595,88 @@ App.router.bindCanonicalLinkGuard();
                     }
                 },
 
+                injectSchema: (schemaData) => {
+                    ['geo-schema-markup', 'dynamic-seo-jsonld'].forEach(id => {
+                        const existing = document.getElementById(id);
+                        if (existing) existing.remove();
+                    });
+                    if (!schemaData || typeof schemaData !== 'object') return;
+                    const script = document.createElement('script');
+                    script.id = 'geo-schema-markup';
+                    script.type = 'application/ld+json';
+                    script.textContent = JSON.stringify(schemaData);
+                    document.head.appendChild(script);
+                },
+
+                organizationSchema: () => ({
+                    '@context': 'https://schema.org',
+                    '@type': ['Organization', 'ProfessionalService'],
+                    '@id': 'https://studihome.id/#organization',
+                    'name': 'Studihome',
+                    'url': 'https://studihome.id/',
+                    'logo': 'https://studihome.id/assets/logo.png',
+                    'description': 'Platform Pembelajaran Digital, Otomasi dan Agentic AI terdepan di Indonesia.',
+                    'sameAs': [
+                        'https://x.com/studihome',
+                        'https://tiktok.com/@studihome'
+                    ]
+                }),
+
+                generateCreatorSchema: (creator = {}, path = '', categoryName = '', categories = []) => {
+                    const displayName = String(creator.display_name || creator.username || 'Creator Studihome');
+                    const description = String(creator.bio || `Profil ahli AI dan kreator ${displayName} di Studihome.`);
+                    return {
+                        '@context': 'https://schema.org',
+                        '@type': 'ProfilePage',
+                        'name': `${displayName} | Creator Studihome`,
+                        'url': `https://studihome.id${path || '/' + String(creator.username || '').toLowerCase()}`,
+                        'mainEntity': {
+                            '@type': 'Person',
+                            'name': displayName,
+                            'alternateName': String(creator.username || ''),
+                            'image': String(creator.avatar_url || ''),
+                            'description': description,
+                            'jobTitle': String(categoryName || 'AI Creator & Consultant'),
+                            'knowsAbout': (categories || []).map(item => String(item?.name || '')).filter(Boolean),
+                            'worksFor': {
+                                '@type': 'Organization',
+                                '@id': 'https://studihome.id/#organization',
+                                'name': 'Studihome',
+                                'url': 'https://studihome.id/'
+                            }
+                        }
+                    };
+                },
+
+                generatePortfolioSchema: (portfolio = {}, creator = {}, path = '', categoryName = '') => {
+                    const title = String(portfolio.title || 'Portofolio AI');
+                    const creatorName = String(creator.display_name || creator.username || 'Creator Studihome');
+                    return {
+                        '@context': 'https://schema.org',
+                        '@type': 'Service',
+                        'name': title,
+                        'url': `https://studihome.id${path || '/'}`,
+                        'image': String(portfolio.media_url || ''),
+                        'provider': {
+                            '@type': 'Person',
+                            'name': creatorName,
+                            'alternateName': String(creator.username || ''),
+                            'image': String(creator.avatar_url || '')
+                        },
+                        'areaServed': {
+                            '@type': 'Country',
+                            'name': 'Indonesia'
+                        },
+                        'description': String(portfolio.description || `Layanan dan portofolio ${title} oleh ${creatorName}.`),
+                        'brand': {
+                            '@type': 'Organization',
+                            '@id': 'https://studihome.id/#organization',
+                            'name': 'Studihome'
+                        },
+                        'category': String(categoryName || 'AI Automation & Digital Operations')
+                    };
+                },
+
                 updateSeo: (meta = {}) => {
                     const title = String(meta.title || 'Studihome - Platform Pembelajaran Digital, Otomasi dan Agentic AI');
                     const description = String(meta.description || 'Studihome adalah platform produk digital, modul pembelajaran, serta layanan AI dan otomasi untuk guru, profesional, kreator, bisnis, dan UMKM di Indonesia.');
@@ -1633,15 +1715,8 @@ App.router.bindCanonicalLinkGuard();
                     }
                     link.href = canonical;
 
-                    const old = document.getElementById('dynamic-seo-jsonld');
-                    if (old) old.remove();
-                    if (meta.jsonLd) {
-                        const script = document.createElement('script');
-                        script.id = 'dynamic-seo-jsonld';
-                        script.type = 'application/ld+json';
-                        script.textContent = JSON.stringify(meta.jsonLd);
-                        document.head.appendChild(script);
-                    }
+                    const schema = meta.jsonLd || ((path === '/' || path === '/foyer') ? App.ui.organizationSchema() : null);
+                    App.ui.injectSchema(schema);
                 },
 
                 renderNavigation: () => {
@@ -5173,22 +5248,12 @@ App.router.bindCanonicalLinkGuard();
                             path: creatorPath,
                             image: c.cover_url || c.avatar_url || 'https://studihome.id/assets/og-image.png',
                             ogType: 'profile',
-                            jsonLd: {
-                                '@context': 'https://schema.org',
-                                '@type': 'ProfilePage',
-                                'name': creatorTitle,
-                                'url': `https://studihome.id${creatorPath}`,
-                                'description': creatorDescription,
-                                'mainEntity': {
-                                    '@type': 'Person',
-                                    'name': c.display_name || c.username,
-                                    'jobTitle': (primaryCategory?.name || 'Creator AI'),
-                                    'url': `https://studihome.id${creatorPath}`,
-                                    'image': c.avatar_url || 'https://studihome.id/assets/og-image.png',
-                                    'description': creatorDescription,
-                                    'knowsAbout': (data.categories || []).map(x => x.name || '')
-                                }
-                            }
+                            jsonLd: App.ui.generateCreatorSchema(
+                                c,
+                                creatorPath,
+                                primaryCategory?.name || 'AI Creator & Consultant',
+                                data.categories || []
+                            )
                         });
                         const defaultWa = App.creator._waUrl(c.whatsapp, c.display_name || 'Creator');
                         const initials = String(c.display_name || c.username || 'C').trim().charAt(0).toUpperCase();
@@ -5206,18 +5271,12 @@ App.router.bindCanonicalLinkGuard();
                                 path: creatorPath,
                                 image: targetPortfolio.media_url || c.cover_url || c.avatar_url || '',
                                 ogType: 'article',
-                                jsonLd: {
-                                    '@context': 'https://schema.org',
-                                    '@type': 'CreativeWork',
-                                    'name': portfolioTitle,
-                                    'description': portfolioDescription || '',
-                                    'url': `https://studihome.id${creatorPath}`,
-                                    'image': targetPortfolio.media_url || '',
-                                    'author': {
-                                        '@type': 'Person',
-                                        'name': c.display_name || c.username || ''
-                                    }
-                                }
+                                jsonLd: App.ui.generatePortfolioSchema(
+                                    targetPortfolio,
+                                    c,
+                                    creatorPath,
+                                    primaryCategory?.name || ''
+                                )
                             });
                         }
                         const categories = data.categories || [];
