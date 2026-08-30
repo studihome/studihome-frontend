@@ -827,7 +827,7 @@
             <!-- Top Right Utilities -->
             <div class="flex items-center gap-2 sm:gap-3">
                 <!-- Global Search — Desktop Icon -->
-                <button type="button" onclick="App.search.openModal()" aria-label="Buka pencarian" title="Cari di Lobi" class="hidden lg:flex w-9 h-9 items-center justify-center rounded-xl text-[#151c75] hover:bg-blue-50 transition-all">
+                <button type="button" onclick="App.search.openModal()" aria-label="Buka pencarian" title="Cari di Foyer" class="hidden lg:flex w-9 h-9 items-center justify-center rounded-xl text-[#151c75] hover:bg-blue-50 transition-all">
                     <i class="fa-solid fa-magnifying-glass text-sm"></i>
                 </button>
 
@@ -1336,7 +1336,7 @@ const App = {
                 }
                 const initialPath = window.location.pathname.toLowerCase().replace(/\/$/, '') || '/';
                 if (!window.location.hash && initialPath !== '/') {
-                    const knownPaths = ['/', '/products', '/kamar', '/dashboard', '/admin', '/studio-ai', '/dapur', '/ruang-kerja', '/creator-studio', '/blog', '/balkon'];
+                    const knownPaths = ['/', '/foyer', '/products', '/kamar', '/dashboard', '/admin', '/studio-ai', '/dapur', '/ruang-kerja', '/creator-studio', '/blog', '/balkon'];
                     const isCategoryPath = /^(\/ai-|\/kursus-ai|\/jasa-ai|\/ai-untuk-)/i.test(initialPath);
                     const isCreatorPath = /^\/[a-z0-9][a-z0-9-]{2,39}(?:\/portfolio\/[a-z0-9][a-z0-9-]{0,120})?$/i.test(initialPath) && !knownPaths.includes(initialPath) && !isCategoryPath;
                     if (initialPath === '/studio-ai') { App.router.routePath('/studio-ai'); }
@@ -1656,7 +1656,7 @@ App.router.bindCanonicalLinkGuard();
 
                     let items = [
                         { key: 'home', label: 'Teras', icon: 'fa-house' },
-                        { key: 'products', label: 'Lobi', icon: 'fa-box-open' },
+                        { key: 'products', label: 'Foyer', icon: 'fa-box-open' },
                         { key: 'studio-ai', label: 'Studio', icon: 'fa-wand-magic-sparkles' }
                     ];
 
@@ -1725,7 +1725,7 @@ App.router.bindCanonicalLinkGuard();
                 navigate: (tab, options = {}) => {
                     const routes = {
                         home: '/',
-                        products: '/products',
+                        products: '/foyer',
                         dashboard: '/kamar',
                         admin: '/admin',
                         dapur: '/dapur',
@@ -1770,7 +1770,7 @@ App.router.bindCanonicalLinkGuard();
                             App.ui.updateSeo({
                                 title: 'Produk Digital & AI | Studihome',
                                 description: 'Temukan produk digital, modul pembelajaran, prompt, dan tools AI praktis dari Studihome.',
-                                path: '/products'
+                                path: '/foyer'
                             });
                             App.products.render();
                             break;
@@ -1831,13 +1831,13 @@ App.router.bindCanonicalLinkGuard();
                     App.state.routePath = clean;
                     if (!parts.length) { App.state.routeType = 'home'; return; }
                     if (parts[0] === 'studio-ai') { App.state.routeType = 'studio-ai'; App.state.studioAICategory = ''; return; }
-                    if (parts[0] === 'dapur' || parts[0] === 'ruang-kerja' || parts[0] === 'creator-studio' || ['foyer','menu','hidangan','ambalan'].includes(parts[0])) {
+                    if (parts[0] === 'foyer' || parts[0] === 'products') { App.state.routeType = 'products'; return; }
+                    if (parts[0] === 'dapur' || parts[0] === 'ruang-kerja' || parts[0] === 'creator-studio' || ['menu','hidangan','ambalan'].includes(parts[0])) {
                         App.state.routeType = 'dapur';
-                        const sec = parts[0] === 'dapur' ? (parts[1] || '') : (['foyer','menu','hidangan','ambalan'].includes(parts[0]) ? parts[0] : '');
+                        const sec = parts[0] === 'dapur' ? (parts[1] || '') : (['menu','hidangan','ambalan'].includes(parts[0]) ? parts[0] : '');
                         App.state.dapurSection = ['foyer','menu','hidangan','ambalan'].includes(String(sec).toLowerCase()) ? String(sec).toLowerCase() : '';
                         return;
                     }
-                    if (parts[0] === 'products') { App.state.routeType = 'products'; return; }
                     if (parts[0] === 'dashboard' || parts[0] === 'kamar') { App.state.routeType = 'dashboard'; return; }
                     if (parts[0] === 'admin') { App.state.routeType = 'admin'; return; }
                     if (parts[0] === 'blog') { App.state.routeType = 'blog'; App.state.blogSlug = parts[1] || ''; return; }
@@ -1851,7 +1851,7 @@ App.router.bindCanonicalLinkGuard();
                 handlePath: () => {
                     const legacyRoutes = {
                         home: '/',
-                        products: '/products',
+                        products: '/foyer',
                         dashboard: '/kamar',
                         admin: '/admin',
                         dapur: '/dapur',
@@ -1873,7 +1873,7 @@ App.router.bindCanonicalLinkGuard();
                         '/dashboard': '/kamar',
                         '/creator-studio': '/dapur',
                         '/ruang-kerja': '/dapur',
-                        '/foyer': '/dapur/foyer',
+                        '/products': '/foyer',
                         '/menu': '/dapur/menu',
                         '/hidangan': '/dapur/hidangan',
                         '/ambalan': '/dapur/ambalan'
@@ -1960,7 +1960,7 @@ App.router.bindCanonicalLinkGuard();
                     App.router._canonicalLinkGuardBound = true;
                     const routeMap = {
                         home: '/',
-                        products: '/products',
+                        products: '/foyer',
                         dashboard: '/kamar',
                         admin: '/admin',
                         dapur: '/dapur',
@@ -2036,7 +2036,7 @@ App.router.bindCanonicalLinkGuard();
                     const rawHash = window.location.hash.replace(/^#/, '').toLowerCase();
                     const legacyRoutes = {
                         home: '/',
-                        products: '/products',
+                        products: '/foyer',
                         dashboard: '/kamar',
                         admin: '/admin',
                         dapur: '/dapur',
@@ -2069,7 +2069,7 @@ App.router.bindCanonicalLinkGuard();
                             App.ui.updateSeo({
                                 title: 'Produk Digital & AI | Studihome',
                                 description: 'Temukan produk digital, modul pembelajaran, prompt, dan tools AI praktis dari Studihome.',
-                                path: '/products'
+                                path: '/foyer'
                             });
                             App.products.render();
                         } else if (rawHash === 'dashboard') { window.history.replaceState({}, '', '/kamar'); App.router.routePath('/kamar'); }
@@ -2099,7 +2099,7 @@ App.router.bindCanonicalLinkGuard();
                         App.ui.updateSeo({
                             title: 'Produk Digital & AI | Studihome',
                             description: 'Temukan produk digital, modul pembelajaran, prompt, dan tools AI praktis dari Studihome.',
-                            path: '/products'
+                            path: '/foyer'
                         });
                         App.products.render();
                     } else if (hash === 'dashboard') App.dashboard.render();
@@ -8886,7 +8886,7 @@ window.StudihomeRegressionGuard = {
   version: 'AA.1',
   run(){
     const path = (window.location.pathname || '/').replace(/\/$/,'') || '/';
-    const known = new Set(['','/','/products','/kamar','/admin','/studio-ai','/dapur','/dapur/foyer','/dapur/menu','/dapur/hidangan','/dapur/ambalan','/ruang-kerja','/dashboard','/creator-studio']);
+    const known = new Set(['','/','/foyer','/products','/kamar','/admin','/studio-ai','/dapur','/dapur/foyer','/dapur/menu','/dapur/hidangan','/dapur/ambalan','/ruang-kerja','/dashboard','/creator-studio']);
     const creatorPath = /^\/[a-z0-9][a-z0-9-]{2,39}(?:\/portfolio\/[a-z0-9][a-z0-9-]{0,120})?$/i.test(path) && !known.has(path);
     const checks = {
       canonicalPath: known.has(path) || creatorPath,
@@ -8914,7 +8914,7 @@ try{
   document.addEventListener('click',()=>setTimeout(()=>window.StudihomeRegressionGuard.syncWorkspaceNotice(),80),{passive:true});
 }catch(_){}
 
-window.StudihomeVisualNavigationGuard = {expectedMenuLabel:'Lobi',expectedFaviconGlyph:'✦',noticePosition:'center-below-header',popupScrollbar:'hidden-visual-only'};
+window.StudihomeVisualNavigationGuard = {expectedMenuLabel:'Foyer',expectedFaviconGlyph:'✦',noticePosition:'center-below-header',popupScrollbar:'hidden-visual-only'};
 window.StudihomeQALock = {version:'RC4',callout:'blue-outline-no-rail-no-tail',favicon:'✦-hero-gradient',navigation:'canonical-routes'};
 </script>
 <script id="studihome-visual-contract-guard">
@@ -8945,7 +8945,7 @@ window.StudihomeProductionAcceptanceGate = {
     const checks = {};
     const app = window.App;
     const path = (window.location.pathname || '/').replace(/\/{2,}/g,'/').replace(/\/$/,'') || '/';
-    const knownRoutes = new Set(['','/','/products','/kamar','/admin','/studio-ai','/dapur','/dapur/foyer','/dapur/menu','/dapur/hidangan','/dapur/ambalan','/ruang-kerja','/dashboard','/creator-studio']);
+    const knownRoutes = new Set(['','/','/foyer','/products','/kamar','/admin','/studio-ai','/dapur','/dapur/foyer','/dapur/menu','/dapur/hidangan','/dapur/ambalan','/ruang-kerja','/dashboard','/creator-studio']);
     const creatorPath = /^\/[a-z0-9][a-z0-9-]{2,39}(?:\/portfolio\/[a-z0-9][a-z0-9-]{0,120})?$/i.test(path) && !knownRoutes.has(path);
 
     checks.appBootstrapped = !!app;
@@ -9013,7 +9013,7 @@ window.StudihomeProductionPilotSimulation = {
     const pass = (id, label, detail) => results.push({id,label,ok:true,detail});
     const fail = (id, label, detail) => results.push({id,label,ok:false,detail});
     const routeMap = {
-      home: '/', products: '/products', kamar: '/kamar', studio: '/studio-ai',
+      home: '/', products: '/foyer', kamar: '/kamar', studio: '/studio-ai',
       workspace: '/dapur', admin: '/admin'
     };
 
@@ -9054,7 +9054,7 @@ window.StudihomeProductionPilotSimulation = {
     // Scenario D — Canonical navigation / legacy compatibility.
     const canonical = /\/dashboard\s*.*\/kamar|\/creator-studio\s*.*\/ruang-kerja/s.test(html);
     const routes = typeof app?.router?.navigate === 'function' && typeof app?.router?.routePath === 'function';
-    if (canonical && routes && routeMap.products === '/products' && routeMap.kamar === '/kamar') {
+    if (canonical && routes && routeMap.products === '/foyer' && routeMap.kamar === '/kamar') {
       pass('navigation.canonical', 'Canonical navigation chain', 'Canonical routes and legacy redirects remain wired.');
     } else {
       fail('navigation.canonical', 'Canonical navigation chain', 'Canonical navigation contract is incomplete.');
