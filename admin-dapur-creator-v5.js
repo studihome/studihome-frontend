@@ -95,18 +95,16 @@
   async function adjustCreatorLike(creatorId, type) {
     try {
       const inputEl = document.getElementById(`like-input-${creatorId}`);
-      const parsed = inputEl ? parseInt(inputEl.value, 10) : 1;
-      const amount = Number.isFinite(parsed) && parsed > 0 ? parsed : 1;
+      const amount = inputEl ? (parseInt(inputEl.value, 10) || 1) : 1;
       const finalDelta = type === 'minus' ? -amount : amount;
 
-      if (typeof window.App?.api?.post !== 'function') throw new Error('Layanan penyesuaian Like belum siap.');
-      await window.App.api.post('ADMIN_ADD_CREATOR_LIKE_ADJUSTMENT', {
-        creatorId,
+      await App.api.post('ADMIN_ADD_CREATOR_LIKE_ADJUSTMENT', {
+        creatorId: creatorId,
         delta: finalDelta,
         reason: 'Admin manual adjustment'
       });
 
-      if (inputEl) inputEl.value = '1';
+      if (inputEl) inputEl.value = 1;
 
       const countEl = document.getElementById(`admin-like-count-${creatorId}`);
       if (countEl) {
@@ -117,13 +115,11 @@
         countEl.classList.add('text-amber-500', 'scale-110');
         setTimeout(() => countEl.classList.remove('text-amber-500', 'scale-110'), 400);
       }
-
-      toast(`${amount} like ${type === 'minus' ? 'dikurangi.' : 'ditambahkan.'}`, 'success');
-      return true;
     } catch (error) {
       console.error('[Admin Like Error]', error);
-      toast('Gagal memperbarui Like. Cek koneksi.', 'error');
-      return false;
+      if (window.App && window.App.ui && typeof window.App.ui.toast === 'function') {
+        window.App.ui.toast(error.message || 'Gagal memperbarui Like. Cek koneksi.', 'error');
+      }
     }
   }
 
@@ -143,7 +139,7 @@
           </div>
           <div class="grid xl:grid-cols-2 gap-3">
             <section class="rounded-2xl p-4 bg-white border border-slate-100"><div class="flex items-center justify-between mb-3"><h4 class="text-xs font-black text-[#151c75]">Profil</h4><span class="text-[9px] text-slate-400">${creator.review_status || 'DRAFT'}</span></div><div class="grid sm:grid-cols-2 gap-2 text-[10px]"><span class="text-slate-500">Nama</span><b class="text-right">${esc(creator.display_name || '-')}</b><span class="text-slate-500">Lokasi</span><b class="text-right">${esc(creator.location || '-')}</b><span class="text-slate-500">WhatsApp</span><b class="text-right">${esc(creator.whatsapp || '-')}</b></div></section>
-            <section class="rounded-2xl p-4 bg-white border border-slate-100"><div class="flex items-center justify-between mb-3"><h4 class="text-xs font-black text-[#151c75]">Status & Like</h4><span id="admin-like-count-${creator.id}" class="font-bold text-sm text-[#151c75] transition-all duration-300">♥ ${creator.likeCount}</span></div><div class="flex flex-wrap items-center gap-2"><div class="flex items-center gap-1.5"><button type="button" data-action="minus" class="px-2.5 py-1.5 bg-rose-50 text-rose-600 hover:bg-rose-100 rounded-lg text-[10px] font-extrabold transition-all">− Like</button><input type="number" id="like-input-${creator.id}" data-like-input value="1" min="1" step="1" inputmode="numeric" class="w-16 px-2 py-1.5 text-[10px] font-bold text-center border border-slate-300 rounded-lg outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500" title="Jumlah Like" aria-label="Jumlah penyesuaian Like"><button type="button" data-action="plus" class="px-2.5 py-1.5 bg-emerald-50 text-emerald-600 hover:bg-emerald-100 rounded-lg text-[10px] font-extrabold transition-all">+ Like</button></div><span class="px-3 py-2 rounded-xl ${creator.is_verified ? 'bg-emerald-50 text-emerald-700' : 'bg-slate-100 text-slate-600'} text-[10px] font-bold">${creator.is_verified ? 'Verified' : 'Belum Verified'}</span><span class="px-3 py-2 rounded-xl ${creator.is_published ? 'bg-blue-50 text-[#151c75]' : 'bg-slate-100 text-slate-600'} text-[10px] font-bold">${creator.is_published ? 'Published' : 'Draft'}</span></div></section>
+            <section class="rounded-2xl p-4 bg-white border border-slate-100"><div class="flex items-center justify-between mb-3"><h4 class="text-xs font-black text-[#151c75]">Status & Like</h4><span id="admin-like-count-${creator.id}" class="font-bold text-sm text-[#151c75] transition-all duration-300">♥ ${creator.likeCount}</span></div><div class="flex flex-wrap items-center gap-2"><div class="flex items-center gap-1.5 mt-2"><button type="button" onclick="App.admin.adjustCreatorLike('${creator.id}', 'minus')" class="px-2.5 py-1.5 bg-rose-50 text-rose-600 hover:bg-rose-100 rounded-lg text-[10px] font-extrabold">− Like</button><input type="number" id="like-input-${creator.id}" value="1" min="1" class="w-16 px-2 py-1.5 text-[10px] font-bold text-center border border-slate-300 rounded-lg outline-none"><button type="button" onclick="App.admin.adjustCreatorLike('${creator.id}', 'plus')" class="px-2.5 py-1.5 bg-emerald-50 text-emerald-600 hover:bg-emerald-100 rounded-lg text-[10px] font-extrabold">+ Like</button></div><span class="px-3 py-2 rounded-xl ${creator.is_verified ? 'bg-emerald-50 text-emerald-700' : 'bg-slate-100 text-slate-600'} text-[10px] font-bold">${creator.is_verified ? 'Verified' : 'Belum Verified'}</span><span class="px-3 py-2 rounded-xl ${creator.is_published ? 'bg-blue-50 text-[#151c75]' : 'bg-slate-100 text-slate-600'} text-[10px] font-bold">${creator.is_published ? 'Published' : 'Draft'}</span></div></section>
             <section class="rounded-2xl p-4 bg-white border border-slate-100"><div class="flex items-center justify-between mb-2"><h4 class="text-xs font-black text-[#151c75]">Menu</h4><span class="text-[9px] text-slate-400">${bundle.categories.length} kategori</span></div><div class="flex flex-wrap gap-1.5">${bundle.categories.length ? bundle.categories.map(c => `<span class="px-2 py-1 rounded-lg bg-blue-50 text-[#151c75] text-[9px] font-bold">${esc(c.ai_categories?.name || c.category_id)}${c.is_primary ? ' · utama' : ''}</span>`).join('') : '<span class="text-[10px] text-slate-400">Belum ada kategori.</span>'}</div></section>
             <section class="rounded-2xl p-4 bg-white border border-slate-100"><div class="flex items-center justify-between mb-2"><h4 class="text-xs font-black text-[#151c75]">Hidangan</h4><span class="text-[9px] text-slate-400">${bundle.services.length} jasa</span></div><div class="space-y-1.5">${bundle.services.slice(0,4).map(s => `<div class="flex items-center justify-between gap-2 rounded-xl bg-slate-50 px-3 py-2"><span class="text-[10px] font-bold text-slate-700 truncate">${esc(s.title)}</span><span class="text-[9px] text-slate-400">${s.is_active ? 'Aktif' : 'Off'}</span></div>`).join('') || '<span class="text-[10px] text-slate-400">Belum ada jasa.</span>'}</div></section>
             <section class="rounded-2xl p-4 bg-white border border-slate-100 xl:col-span-2"><div class="flex items-center justify-between mb-2"><h4 class="text-xs font-black text-[#151c75]">Ambalan</h4><span class="text-[9px] text-slate-400">${bundle.portfolios.length} portfolio</span></div><div class="grid md:grid-cols-2 gap-2">${bundle.portfolios.slice(0,6).map(p => `<a href="${esc(p.media_url)}" target="_blank" rel="noopener" class="rounded-xl bg-slate-50 border border-slate-100 px-3 py-2"><div class="text-[10px] font-bold text-[#151c75] truncate">${esc(p.title)}</div><div class="text-[9px] text-slate-400 mt-0.5">${esc(p.media_type)}</div></a>`).join('') || '<span class="text-[10px] text-slate-400">Belum ada portfolio.</span>'}</div></section>
@@ -152,8 +148,7 @@
       const run = async (fn, ok, fail) => { try { await fn(); toast(ok, 'success'); await render(); } catch (e) { toast(e?.message || fail, 'error'); } };
       row.querySelector('[data-action="verify"]').onclick = () => run(() => patchProfile(creator.id, { is_verified: !creator.is_verified }), creator.is_verified ? 'Verifikasi Creator dicabut.' : 'Creator berhasil diverifikasi.', 'Verifikasi gagal diubah.');
       row.querySelector('[data-action="publish"]').onclick = () => run(() => patchProfile(creator.id, { is_published: !creator.is_published, review_status: !creator.is_published ? 'APPROVED' : 'DRAFT' }), creator.is_published ? 'Creator ditarik dari publik.' : 'Creator dipublikasikan.', 'Status publish gagal diubah.');
-      row.querySelector('[data-action="plus"]').onclick = () => adjustCreatorLike(creator.id, 'plus');
-      row.querySelector('[data-action="minus"]').onclick = () => adjustCreatorLike(creator.id, 'minus');
+
     }).catch(e => {
       row.innerHTML = `<div class="p-4 rounded-xl bg-red-50 border border-red-100 text-[10px] text-red-700">${esc(e?.message || 'Workspace Creator belum dapat dimuat.')}</div>`;
     });
@@ -181,9 +176,7 @@
   }
 
   function open() {
-    try {
-      if (window.App?.admin) window.App.admin.adjustCreatorLike = adjustCreatorLike;
-    } catch (_) {}
+    App.admin.adjustCreatorLike = adjustCreatorLike;
     if (isAdmin()) render();
   }
   window.StudihomeAdminDapurCreatorV5 = { open, render, adjustCreatorLike };
