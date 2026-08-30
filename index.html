@@ -1826,6 +1826,7 @@ App.router.bindCanonicalLinkGuard();
                     App.state.activeTab = tab;
                     App.state.routePath = canonicalUrl.pathname;
                     App.router.routePath(canonicalUrl.pathname);
+                    App.ui.injectSchema(null);
                     App.ui.renderNavigation();
 
                     switch (tab) {
@@ -1892,6 +1893,7 @@ App.router.bindCanonicalLinkGuard();
                     App.state.routeType = 'creator';
                     App.state.creatorUsername = safeUsername;
                     App.state.creatorAmbalanSlug = safeSlug;
+                    App.ui.injectSchema(null);
                     App.ui.renderNavigation();
                     App.creator.render(safeUsername, safeSlug);
                     window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -1981,6 +1983,7 @@ App.router.bindCanonicalLinkGuard();
                         return false;
                     }
 
+                    App.ui.injectSchema(null);
                     switch (App.state.routeType) {
                         case 'creator':
                             App.ui.renderNavigation();
@@ -1996,6 +1999,11 @@ App.router.bindCanonicalLinkGuard();
                             return true;
                         case 'products':
                             App.ui.renderNavigation();
+                            App.ui.updateSeo({
+                                title: 'Produk Digital & AI | Studihome',
+                                description: 'Temukan produk digital, modul pembelajaran, prompt, dan tools AI praktis dari Studihome.',
+                                path: '/foyer'
+                            });
                             App.products.render();
                             return true;
                         case 'dashboard':
