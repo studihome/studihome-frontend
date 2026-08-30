@@ -6,10 +6,6 @@
       "destination": "/api/sitemap"
     },
     {
-      "source": "/a383b6cbcb704c04bf1dcb60f201d1af.txt",
-      "destination": "/public/a383b6cbcb704c04bf1dcb60f201d1af.txt"
-    },
-    {
       "source": "/studio-ai",
       "destination": "/index.html"
     },
