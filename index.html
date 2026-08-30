@@ -2348,13 +2348,35 @@ App.router.bindCanonicalLinkGuard();
                                 ...category,
                                 creatorCount: creatorIdsByCategory[category.id]?.size || 0
                             }));
-                            const portfolioRes = await supabaseClient.from('creator_portfolios').select('creator_id, title, description').eq('is_active', true).limit(1000);
+                            const portfolioRes = await supabaseClient.from('creator_portfolios')
+                                .select('id,creator_id,service_id,title,description,media_type,media_url,sort_order,is_active,created_at,creator_portfolio_likes(user_id)')
+                                .eq('is_active', true)
+                                .limit(1000);
                             if (portfolioRes.error) throw portfolioRes.error;
+
+                            const pfIds = (portfolioRes.data || []).map(portfolio => portfolio.id).filter(Boolean);
+                            let pfAdjRes = { data: [] };
+                            if (pfIds.length > 0) {
+                                pfAdjRes = await supabaseClient.from('creator_portfolio_like_adjustments')
+                                    .select('portfolio_id,delta_count')
+                                    .in('portfolio_id', pfIds);
+                                if (pfAdjRes.error) pfAdjRes.data = [];
+                            }
+
+                            const pfAdjMap = {};
+                            (pfAdjRes.data || []).forEach(adjustment => {
+                                pfAdjMap[adjustment.portfolio_id] = (pfAdjMap[adjustment.portfolio_id] || 0) + Number(adjustment.delta_count || 0);
+                            });
+
                             const portfolioCounts = {};
                             const portfoliosByCreator = {};
-                            (portfolioRes.data || []).forEach(x => {
-                                portfolioCounts[x.creator_id] = (portfolioCounts[x.creator_id] || 0) + 1;
-                                (portfoliosByCreator[x.creator_id] ||= []).push(x);
+                            (portfolioRes.data || []).forEach(portfolio => {
+                                const organicLikes = (portfolio.creator_portfolio_likes || []).length;
+                                const adjustmentLikes = pfAdjMap[portfolio.id] || 0;
+                                portfolio.likes_count = Math.max(0, organicLikes + adjustmentLikes);
+
+                                portfolioCounts[portfolio.creator_id] = (portfolioCounts[portfolio.creator_id] || 0) + 1;
+                                (portfoliosByCreator[portfolio.creator_id] ||= []).push(portfolio);
                             });
                             const categoryNamesByCreator = {};
                             (memberRes.data || []).forEach(member => {
