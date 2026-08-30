@@ -2398,6 +2398,7 @@ App.router.bindCanonicalLinkGuard();
                                 .maybeSingle();
                             if (cErr) throw cErr;
                             if (!creator || !creator.is_published) throw new Error('Halaman Creator belum tersedia.');
+
                             const isAnon = !App.state.user;
                             const likePromise = isAnon
                                 ? Promise.resolve({ data: [], error: null })
@@ -2405,42 +2406,69 @@ App.router.bindCanonicalLinkGuard();
                             const ratingPromise = isAnon
                                 ? Promise.resolve({ data: [], error: null })
                                 : supabaseClient.from('creator_ratings').select('rating').eq('creator_id', creator.id).eq('is_visible', true);
-                            const [catRes, svcRes, pfRes, likeRes, ratingRes, trustRes] = await Promise.all([
+                            const likeAdjPromise = supabaseClient.from('creator_like_adjustments').select('delta_count').eq('creator_id', creator.id);
+
+                            const [catRes, svcRes, pfRes, likeRes, ratingRes, trustRes, likeAdjRes] = await Promise.all([
                                 supabaseClient.from('creator_category_members').select('category_id,is_primary,ai_categories(id,slug,name,description,icon)').eq('creator_id', creator.id),
                                 supabaseClient.from('creator_services').select('id,creator_id,category_id,title,description,price_from,price_to,delivery_days,is_active').eq('creator_id', creator.id).eq('is_active', true).order('created_at', { ascending: false }),
                                 supabaseClient.from('creator_portfolios').select('id,creator_id,service_id,title,description,media_type,media_url,sort_order,is_active,created_at, creator_portfolio_likes(user_id)').eq('creator_id', creator.id).eq('is_active', true).order('sort_order', { ascending: true }).order('created_at', { ascending: false }),
                                 likePromise,
                                 ratingPromise,
-                                supabaseClient.rpc('get_creator_trust_metrics', { p_creator_id: creator.id })
+                                supabaseClient.rpc('get_creator_trust_metrics', { p_creator_id: creator.id }),
+                                likeAdjPromise
                             ]);
-                            for (const r of [catRes, svcRes, pfRes, trustRes]) {
-                                if (r.error) throw r.error;
+                            for (const result of [catRes, svcRes, pfRes, trustRes]) {
+                                if (result.error) throw result.error;
                             }
-                            // Public profile remains readable if an optional engagement query is RLS-restricted.
                             if (ratingRes?.error) ratingRes.data = [];
                             if (likeRes?.error) likeRes.data = [];
+                            if (likeAdjRes?.error) likeAdjRes.data = [];
+
+                            const portfolioIds = (pfRes.data || []).map(portfolio => portfolio.id);
+                            let pfAdjRes = { data: [], error: null };
+                            if (portfolioIds.length) {
+                                pfAdjRes = await supabaseClient.from('creator_portfolio_like_adjustments')
+                                    .select('portfolio_id,delta_count')
+                                    .in('portfolio_id', portfolioIds);
+                                if (pfAdjRes.error) pfAdjRes.data = [];
+                            }
+                            const pfAdjMap = {};
+                            (pfAdjRes.data || []).forEach(adjustment => {
+                                pfAdjMap[adjustment.portfolio_id] = (pfAdjMap[adjustment.portfolio_id] || 0) + Number(adjustment.delta_count || 0);
+                            });
+
+                            const creatorAdjustmentTotal = (likeAdjRes.data || []).reduce((sum, row) => sum + Number(row.delta_count || 0), 0);
+                            const organicCreatorLikes = (likeRes.data || []).length;
+                            const finalCreatorLikes = Math.max(0, organicCreatorLikes + creatorAdjustmentTotal);
+
                             let liked = false;
                             if (App.state.user?.id) {
                                 const { data: ownLike, error: ownLikeErr } = await supabaseClient.from('creator_likes').select('id').eq('creator_id', creator.id).eq('user_id', App.state.user.id).maybeSingle();
                                 if (ownLikeErr) throw ownLikeErr;
                                 liked = !!ownLike;
                             }
+
                             data = {
                                 creator,
-                                categories: (catRes.data || []).map(x => ({ ...(x.ai_categories || {}), isPrimary: !!x.is_primary })),
+                                categories: (catRes.data || []).map(item => ({ ...(item.ai_categories || {}), isPrimary: !!item.is_primary })),
                                 services: svcRes.data || [],
-                                portfolios: (pfRes.data || []).map(p => {
-    const lArr = p.creator_portfolio_likes || [];
-    const isL = App.state.user ? lArr.some(l => l.user_id === App.state.user.id) : false;
-    return { ...p, likes_count: lArr.length, is_liked: isL };
-}),
-                                likes: Number((trustRes.data?.[0]?.likes ?? (likeRes.data || []).length)),
+                                portfolios: (pfRes.data || []).map(portfolio => {
+                                    const organicPortfolioLikes = (portfolio.creator_portfolio_likes || []).length;
+                                    return {
+                                        ...portfolio,
+                                        likes_count: Math.max(0, organicPortfolioLikes + Number(pfAdjMap[portfolio.id] || 0)),
+                                        is_liked: App.state.user ? (portfolio.creator_portfolio_likes || []).some(like => like.user_id === App.state.user.id) : false
+                                    };
+                                }),
+                                likes: finalCreatorLikes,
                                 liked,
                                 ratingCount: Number((trustRes.data?.[0]?.ratingCount ?? (ratingRes.data || []).length)),
-                                ratingAvg: trustRes.data?.[0]?.ratingAvg == null ? ((ratingRes.data || []).length ? Number(((ratingRes.data || []).reduce((sum,r)=>sum+Number(r.rating||0),0)/(ratingRes.data || []).length).toFixed(1)) : null) : Number(trustRes.data[0].ratingAvg),
+                                ratingAvg: trustRes.data?.[0]?.ratingAvg == null
+                                    ? ((ratingRes.data || []).length ? Number(((ratingRes.data || []).reduce((sum, rating) => sum + Number(rating.rating || 0), 0) / ratingRes.data.length).toFixed(1)) : null)
+                                    : Number(trustRes.data[0].ratingAvg),
                                 activityCount: (svcRes.data || []).length + (pfRes.data || []).length
                             };
-                            } else if (action === 'TOGGLE_PORTFOLIO_LIKE') {
+                        } else if (action === 'TOGGLE_PORTFOLIO_LIKE') {
                             if (!App.state.user?.id) throw new Error('Masuk dulu ya untuk memberi Like.');
                             const portfolioId = payload.portfolioId;
                             const liked = !!payload.liked;
