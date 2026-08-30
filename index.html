@@ -3122,6 +3122,33 @@ App.router.bindCanonicalLinkGuard();
 
             studioAI: {
                 _searchTimer: null,
+                _activityStatsCacheKey: 'studihome-studio-ai-activity-v1',
+                _activityStatsCacheTtl: 5 * 60 * 1000,
+                hydrateLiveActivityStats: () => {
+                    try {
+                        const cached = JSON.parse(sessionStorage.getItem(App.studioAI._activityStatsCacheKey) || 'null');
+                        if (!cached || !Number.isFinite(cached.creatorCount) || (Date.now() - cached.updatedAt) > App.studioAI._activityStatsCacheTtl) return;
+                        App.studioAI.setLiveActivityStats({ creatorCount: cached.creatorCount }, false);
+                    } catch (_) {
+                        // A missing or inaccessible session cache must not block the Studio page.
+                    }
+                },
+                setLiveActivityStats: (stats = {}, persist = true) => {
+                    const creatorCount = Math.max(0, Number(stats.creatorCount) || 0);
+                    const creatorEl = document.getElementById('live-stat-creators');
+                    const activityEl = document.getElementById('live-studio-activity');
+                    if (creatorEl) creatorEl.textContent = String(creatorCount);
+                    if (activityEl) activityEl.textContent = 'Aktif';
+                    if (!persist) return;
+                    try {
+                        sessionStorage.setItem(App.studioAI._activityStatsCacheKey, JSON.stringify({
+                            creatorCount,
+                            updatedAt: Date.now()
+                        }));
+                    } catch (_) {
+                        // Cache is an enhancement only; the verified API response is still rendered.
+                    }
+                },
                 _query: '',
                 _category: '',
                 render: async (categorySlug = '') => {
@@ -3160,14 +3187,14 @@ App.router.bindCanonicalLinkGuard();
                                     <div class="flex items-center gap-2.5">
                                         <div class="flex items-center gap-1.5">
                                             <span class="relative flex items-center justify-center w-3 h-3"><span class="absolute inset-0 rounded-full bg-emerald-400/30 animate-ping"></span><span class="relative w-2 h-2 rounded-full bg-emerald-400 shadow-[0_0_6px_rgba(52,211,153,.6)]"></span></span>
-                                            <span class="text-[11px] sm:text-xs font-bold text-white" id="live-stat-creators">18</span>
-                                            <span class="text-[10px] sm:text-[11px] font-semibold text-white/60">Creator</span><span class="inline-flex items-center px-1.5 py-0.5 rounded-md text-[8px] sm:text-[9px] font-black uppercase tracking-wider border border-emerald-400/60 text-emerald-300 bg-emerald-400/10 leading-none">ON</span>
+                                            <span class="text-[11px] sm:text-xs font-bold text-white" id="live-stat-creators" aria-live="polite">—</span>
+                                            <span class="text-[10px] sm:text-[11px] font-semibold text-white/60">Creator tersedia</span><span class="inline-flex items-center px-1.5 py-0.5 rounded-md text-[8px] sm:text-[9px] font-black uppercase tracking-wider border border-emerald-400/60 text-emerald-300 bg-emerald-400/10 leading-none">LIVE</span>
                                         </div>
                                         <span class="w-px h-3 bg-white/15"></span>
                                         <div class="flex items-center gap-1.5">
                                             <span class="relative flex items-center justify-center w-3 h-3"><span class="absolute inset-0 rounded-full bg-sky-400/30 animate-ping" style="animation-delay:.3s"></span><span class="relative w-2 h-2 rounded-full bg-sky-400 shadow-[0_0_6px_rgba(56,189,248,.6)]"></span></span>
-                                            <span class="text-[11px] sm:text-xs font-bold text-white" id="live-stat-visitors">245</span>
-                                            <span class="text-[10px] sm:text-[11px] font-semibold text-white/60">Pengunjung</span><span class="inline-flex items-center px-1.5 py-0.5 rounded-md text-[8px] sm:text-[9px] font-black uppercase tracking-wider border border-sky-400/60 text-sky-300 bg-sky-400/10 leading-none">ON</span>
+                                            <span class="text-[11px] sm:text-xs font-bold text-white" id="live-studio-activity" aria-live="polite">Memuat</span>
+                                            <span class="text-[10px] sm:text-[11px] font-semibold text-white/60">Aktivitas Studio</span><span class="inline-flex items-center px-1.5 py-0.5 rounded-md text-[8px] sm:text-[9px] font-black uppercase tracking-wider border border-sky-400/60 text-sky-300 bg-sky-400/10 leading-none">LIVE</span>
                                         </div>
                                     </div>
                                     <!-- Separator -->
@@ -3213,6 +3240,7 @@ App.router.bindCanonicalLinkGuard();
                             </div>
                         </section>
                     `;
+                    App.studioAI.hydrateLiveActivityStats();
                     try {
                         const data = await App.api.post('GET_STUDIO_AI');
                         App.state.studioAI = data;
@@ -3272,42 +3300,8 @@ App.router.bindCanonicalLinkGuard();
                             });
                         }
 
-                        // Menghidupkan Animasi Angka "Live Stats" di Hero
-                        if (!App.studioAI._liveStatsBound) {
-                            // Smooth traffic curve: sinusoidal interpolation between time periods
-                            // Creator: 8-27 | Visitor: 168-736
-                            const trafficAt = (hour, minute) => {
-                                // WIB Indonesian traffic pattern (UTC+7)
-                                // Dini hari(0-4): sepi | Pagi(5-9): bangun | Siang(10-14): peak kerja
-                                // Sore(15-18): masih aktif | Malam(19-23): peak leisure
-                                const t = hour + minute / 60;
-                                // Dual-peak curve: morning work peak (11:00) + evening leisure peak (20:00)
-                                const morning = Math.exp(-0.5 * Math.pow((t - 11) / 3, 2));
-                                const evening = Math.exp(-0.5 * Math.pow((t - 20) / 2.8, 2));
-                                const clamped = Math.max(0, Math.min(1, morning * 0.85 + evening));
-                                const creators = Math.round(8 + clamped * 19);
-                                const visitors = Math.round(168 + clamped * 568);
-                                return { c: creators, v: visitors };
-                            };
-                            const now = new Date();
-                            let state = trafficAt(now.getHours(), now.getMinutes());
-                            const tick = () => {
-                                const cur = new Date();
-                                const target = trafficAt(cur.getHours(), cur.getMinutes());
-                                const driftC = target.c - state.c;
-                                const driftV = target.v - state.v;
-                                state.c += Math.sign(driftC) * (Math.abs(driftC) > 3 ? Math.ceil(Math.random() * 2) : (Math.random() < 0.3 ? Math.sign(driftC) : 0));
-                                state.v += Math.sign(driftV) * (Math.abs(driftV) > 8 ? Math.ceil(Math.random() * 5) : (Math.random() < 0.3 ? Math.sign(driftV) : 0));
-                                state.c = Math.max(8, Math.min(27, state.c));
-                                state.v = Math.max(168, Math.min(736, state.v));
-                                const elC = document.getElementById('live-stat-creators');
-                                const elV = document.getElementById('live-stat-visitors');
-                                if (elC) elC.textContent = state.c;
-                                if (elV) elV.textContent = state.v;
-                                setTimeout(tick, 4000 + Math.floor(Math.random() * 4000));
-                            };
-                            setTimeout(tick, 2000);
-                        }
+                        // Render only verifiable Studio activity. Do not synthesize visitor or creator counts.
+                        App.studioAI.setLiveActivityStats(data.stats);
 
                     } catch (e) {
                         App.ui.toast('Studio AI belum bisa dimuat. Coba lagi sebentar, ya.', 'error');
