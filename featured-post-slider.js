@@ -53,7 +53,7 @@
                 <div class="h-full p-3 flex items-center min-w-0">
                   <div class="flex items-center justify-between gap-3 min-w-0 w-full">
                     <h3 class="min-w-0 flex-1 text-xs sm:text-sm font-extrabold text-[#151c75] leading-snug line-clamp-2">${esc(a.title)}</h3>
-                    <span class="featured-card-read shrink-0 inline-flex items-center gap-1 px-3 py-1 bg-blue-50 hover:bg-blue-100 text-blue-900 text-xs md:text-sm font-bold rounded-full transition-colors duration-200 shadow-sm hover:shadow">Cari tahu <i class="fa-solid fa-lightbulb" aria-hidden="true"></i></span>
+                    <span class="featured-card-read shrink-0 inline-flex items-center px-3 py-1 bg-blue-50 hover:bg-blue-100 text-blue-900 text-xs md:text-sm font-bold rounded-xl transition-colors duration-200 shadow-sm hover:shadow">Cari tahu</span>
                   </div>
                 </div>
               </div>
@@ -76,7 +76,7 @@
               <h2 class="text-lg sm:text-xl font-extrabold text-[#151c75]">Insights &amp; tips AI</h2>
             </div>
             <a href="/balkon" class="inline-flex items-center gap-1.5 px-4 py-1.5 bg-blue-50 hover:bg-blue-100 text-blue-900 text-sm md:text-base font-bold rounded-full transition-colors duration-200 shadow-sm">
-              Balkon <span class="text-xs" aria-hidden="true">➔</span>
+              Balkon <i class="fa-solid fa-chevron-right text-[10px] text-amber-500" aria-hidden="true"></i>
             </a>
           </div>
           <!-- Desktop view: 2 cards side by side -->
