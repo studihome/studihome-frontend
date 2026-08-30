@@ -240,7 +240,12 @@
           <div class="absolute -right-16 -top-16 h-44 w-44 rounded-full bg-blue-200/40 blur-3xl"></div>
           <div class="relative z-10 flex flex-col lg:flex-row lg:items-center lg:justify-between gap-5">
             <div class="max-w-3xl"><div class="text-[9px] font-black uppercase tracking-[.14em] text-amber-600">GUDANG · ADMIN CONTROL CENTER</div><h2 class="mt-1 text-lg sm:text-xl font-black text-[#151c75]">Studio AI + Governance, satu pintu</h2><p class="mt-1.5 text-[10px] sm:text-xs text-slate-600 leading-relaxed">Pilih ruang kerja sesuai tujuan. Studio AI mengelola master AI; Governance menjaga kesehatan ekosistem dan tindakan kontrol.</p></div>
-            <div class="grid grid-cols-2 gap-2"><button data-g-open="studio-ai" class="rounded-2xl border border-blue-100 bg-white px-4 py-3 text-left hover:border-blue-200"><div class="text-[9px] text-slate-400">MASTER DATA</div><div class="text-xs font-black text-[#151c75] mt-0.5">Studio AI</div><div class="text-[9px] text-slate-500 mt-1">Kategori & platform</div></button><button data-g-open="governance" class="rounded-2xl border border-amber-100 bg-white px-4 py-3 text-left hover:border-amber-200"><div class="text-[9px] text-slate-400">CONTROL CENTER</div><div class="text-xs font-black text-[#151c75] mt-0.5">Governance</div><div class="text-[9px] text-slate-500 mt-1">Review & kontrol</div></button></div>
+            <div class="flex flex-col items-stretch lg:items-end gap-3">
+              <button type="button" onclick="if(window.App && window.App.sitemapBuilder) { window.App.sitemapBuilder.generateAndDownload(); } else { alert('Sitemap Builder belum termuat. Silakan refresh halaman.'); }" class="inline-flex items-center justify-center gap-2 bg-[#151c75] hover:bg-blue-800 text-white px-4 py-2 rounded-xl text-sm font-bold transition-all shadow-md lg:ml-auto">
+                <i class="fa-solid fa-file-code"></i> Unduh Sitemap XML
+              </button>
+              <div class="grid grid-cols-2 gap-2"><button data-g-open="studio-ai" class="rounded-2xl border border-blue-100 bg-white px-4 py-3 text-left hover:border-blue-200"><div class="text-[9px] text-slate-400">MASTER DATA</div><div class="text-xs font-black text-[#151c75] mt-0.5">Studio AI</div><div class="text-[9px] text-slate-500 mt-1">Kategori & platform</div></button><button data-g-open="governance" class="rounded-2xl border border-amber-100 bg-white px-4 py-3 text-left hover:border-amber-200"><div class="text-[9px] text-slate-400">CONTROL CENTER</div><div class="text-xs font-black text-[#151c75] mt-0.5">Governance</div><div class="text-[9px] text-slate-400 mt-1">Review & kontrol</div></button></div>
+            </div>
           </div>
         </div>
         <div id="gudang-workspace-area"></div>
