@@ -5316,7 +5316,7 @@ App.router.bindCanonicalLinkGuard();
                                 path: creatorPath,
                                 image: targetPortfolio.media_url || c.cover_url || c.avatar_url || '',
                                 ogType: 'article',
-                                markdownPath: `/${encodeURIComponent(String(c.username || '').toLowerCase())}.md`,
+                                markdownPath: `/${encodeURIComponent(String(c.username || '').toLowerCase())}/portfolio/${encodeURIComponent(App.creator._slugify(targetPortfolio.title))}.md`,
                                 jsonLd: App.ui.generatePortfolioSchema(
                                     targetPortfolio,
                                     c,

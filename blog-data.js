@@ -119,6 +119,12 @@
     }
   ];
 
+  // Server-side read-only export for the Markdown endpoint. Browser execution continues unchanged.
+  if (typeof module !== 'undefined' && module.exports) {
+    module.exports = { SEED_ARTICLES };
+    return;
+  }
+
   // ---- Data helpers ----
   function getAll() {
     try {
@@ -368,6 +374,7 @@
       path: canonicalPath,
       ogType: 'article',
       image: article.image || 'https://studihome.id/assets/og-image.png',
+      markdownPath: canonicalPath + '.md',
       jsonLd: {
         '@context': 'https://schema.org',
         '@type': 'BlogPosting',
