@@ -5560,7 +5560,7 @@ renderCreatorStandardSummary: (creator, data, categories, services, portfolios) 
                             <div>
                                 <div onclick="App.products.openDetailModal('${p.id}')" class="relative aspect-[2/1] rounded-xl overflow-hidden mb-2.5 card-3d-inset cursor-pointer group">
                                     <img src="${p.imgUrl}" alt="${App.utils.escapeHtml(p.title)}" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300">
-                                    <span class="absolute top-3 right-3 px-2.5 py-1 rounded-xl text-[10px] font-black shadow-md ${
+                                    <span class="absolute bottom-3 right-3 px-2.5 py-1 rounded-xl text-[10px] font-black shadow-md ${
                                         p.isFree ? 'bg-emerald-500 text-white' : 'bg-[#151c75] text-[#FACC15]'
                                     }">
                                         ${p.badge || (p.isFree ? 'GRATIS' : 'PREMIUM')}
