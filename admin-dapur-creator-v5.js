@@ -83,7 +83,23 @@
     if (services.error) throw services.error;
     if (portfolios.error) throw portfolios.error;
     if (categories.error) throw categories.error;
-    return { services: services.data || [], portfolios: portfolios.data || [], categories: categories.data || [] };
+    const portfolioRows = portfolios.data || [];
+    const portfolioIds = portfolioRows.map(portfolio => portfolio.id).filter(Boolean);
+    if (!portfolioIds.length) return { services: services.data || [], portfolios: [], categories: categories.data || [] };
+    const [organicLikes, adjustments] = await Promise.all([
+      db.from('creator_portfolio_likes').select('portfolio_id').in('portfolio_id', portfolioIds),
+      db.from('creator_portfolio_like_adjustments').select('portfolio_id,delta_count').in('portfolio_id', portfolioIds)
+    ]);
+    if (organicLikes.error) throw organicLikes.error;
+    if (adjustments.error) throw adjustments.error;
+    const likeCounts = new Map();
+    (organicLikes.data || []).forEach(like => likeCounts.set(like.portfolio_id, (likeCounts.get(like.portfolio_id) || 0) + 1));
+    (adjustments.data || []).forEach(adjustment => likeCounts.set(adjustment.portfolio_id, (likeCounts.get(adjustment.portfolio_id) || 0) + Number(adjustment.delta_count || 0)));
+    return {
+      services: services.data || [],
+      portfolios: portfolioRows.map(portfolio => ({ ...portfolio, likes_count: Math.max(0, likeCounts.get(portfolio.id) || 0) })),
+      categories: categories.data || []
+    };
   }
 
   async function patchProfile(id, patch) {
@@ -123,6 +139,37 @@
     }
   }
 
+  async function adjustPortfolioLike(portfolioId, type) {
+    try {
+      const inputEl = document.getElementById(`pf-like-input-${portfolioId}`);
+      const amount = inputEl ? (parseInt(inputEl.value, 10) || 1) : 1;
+      const finalDelta = type === 'minus' ? -amount : amount;
+
+      await App.api.post('ADMIN_ADD_PORTFOLIO_LIKE_ADJUSTMENT', {
+        portfolioId: portfolioId,
+        delta: finalDelta,
+        reason: 'Admin manual portfolio adjustment'
+      });
+
+      if (inputEl) inputEl.value = 1;
+
+      const countEl = document.getElementById(`admin-pf-like-count-${portfolioId}`);
+      if (countEl) {
+        const currentText = countEl.innerText || '';
+        const currentNumber = parseInt(currentText.replace(/[^0-9-]/g, ''), 10) || 0;
+        const newNumber = currentNumber + finalDelta;
+        countEl.innerHTML = `♥ ${newNumber}`;
+        countEl.classList.add('text-amber-500', 'scale-110');
+        setTimeout(() => countEl.classList.remove('text-amber-500', 'scale-110'), 400);
+      }
+    } catch (error) {
+      console.error('[Admin Portfolio Like Error]', error);
+      if (window.App?.ui?.toast) {
+        window.App.ui.toast(error.message || 'Gagal memperbarui Like.', 'error');
+      }
+    }
+  }
+
   function renderDetail(row, creator) {
     row.innerHTML = '<div class="p-4 text-xs text-slate-500"><i class="fa-solid fa-spinner fa-spin mr-2"></i>Memuat workspace Creator…</div>';
     loadBundle(creator.id).then(bundle => {
@@ -142,7 +189,7 @@
             <section class="rounded-2xl p-4 bg-white border border-slate-100"><div class="flex items-center justify-between mb-3"><h4 class="text-xs font-black text-[#151c75]">Status & Like</h4><span id="admin-like-count-${creator.id}" class="font-bold text-sm text-[#151c75] transition-all duration-300">♥ ${creator.likeCount}</span></div><div class="flex flex-wrap items-center gap-2"><div class="flex items-center gap-1.5 mt-2"><button type="button" onclick="App.admin.adjustCreatorLike('${creator.id}', 'minus')" class="px-2.5 py-1.5 bg-rose-50 text-rose-600 hover:bg-rose-100 rounded-lg text-[10px] font-extrabold">− Like</button><input type="number" id="like-input-${creator.id}" value="1" min="1" class="w-16 px-2 py-1.5 text-[10px] font-bold text-center border border-slate-300 rounded-lg outline-none"><button type="button" onclick="App.admin.adjustCreatorLike('${creator.id}', 'plus')" class="px-2.5 py-1.5 bg-emerald-50 text-emerald-600 hover:bg-emerald-100 rounded-lg text-[10px] font-extrabold">+ Like</button></div><span class="px-3 py-2 rounded-xl ${creator.is_verified ? 'bg-emerald-50 text-emerald-700' : 'bg-slate-100 text-slate-600'} text-[10px] font-bold">${creator.is_verified ? 'Verified' : 'Belum Verified'}</span><span class="px-3 py-2 rounded-xl ${creator.is_published ? 'bg-blue-50 text-[#151c75]' : 'bg-slate-100 text-slate-600'} text-[10px] font-bold">${creator.is_published ? 'Published' : 'Draft'}</span></div></section>
             <section class="rounded-2xl p-4 bg-white border border-slate-100"><div class="flex items-center justify-between mb-2"><h4 class="text-xs font-black text-[#151c75]">Menu</h4><span class="text-[9px] text-slate-400">${bundle.categories.length} kategori</span></div><div class="flex flex-wrap gap-1.5">${bundle.categories.length ? bundle.categories.map(c => `<span class="px-2 py-1 rounded-lg bg-blue-50 text-[#151c75] text-[9px] font-bold">${esc(c.ai_categories?.name || c.category_id)}${c.is_primary ? ' · utama' : ''}</span>`).join('') : '<span class="text-[10px] text-slate-400">Belum ada kategori.</span>'}</div></section>
             <section class="rounded-2xl p-4 bg-white border border-slate-100"><div class="flex items-center justify-between mb-2"><h4 class="text-xs font-black text-[#151c75]">Hidangan</h4><span class="text-[9px] text-slate-400">${bundle.services.length} jasa</span></div><div class="space-y-1.5">${bundle.services.slice(0,4).map(s => `<div class="flex items-center justify-between gap-2 rounded-xl bg-slate-50 px-3 py-2"><span class="text-[10px] font-bold text-slate-700 truncate">${esc(s.title)}</span><span class="text-[9px] text-slate-400">${s.is_active ? 'Aktif' : 'Off'}</span></div>`).join('') || '<span class="text-[10px] text-slate-400">Belum ada jasa.</span>'}</div></section>
-            <section class="rounded-2xl p-4 bg-white border border-slate-100 xl:col-span-2"><div class="flex items-center justify-between mb-2"><h4 class="text-xs font-black text-[#151c75]">Ambalan</h4><span class="text-[9px] text-slate-400">${bundle.portfolios.length} portfolio</span></div><div class="grid md:grid-cols-2 gap-2">${bundle.portfolios.slice(0,6).map(p => `<a href="${esc(p.media_url)}" target="_blank" rel="noopener" class="rounded-xl bg-slate-50 border border-slate-100 px-3 py-2"><div class="text-[10px] font-bold text-[#151c75] truncate">${esc(p.title)}</div><div class="text-[9px] text-slate-400 mt-0.5">${esc(p.media_type)}</div></a>`).join('') || '<span class="text-[10px] text-slate-400">Belum ada portfolio.</span>'}</div></section>
+            <section class="rounded-2xl p-4 bg-white border border-slate-100 xl:col-span-2"><div class="flex items-center justify-between mb-2"><h4 class="text-xs font-black text-[#151c75]">Ambalan</h4><span class="text-[9px] text-slate-400">${bundle.portfolios.length} portfolio</span></div><div class="grid md:grid-cols-2 gap-2">${bundle.portfolios.slice(0,6).map(pf => `<div class="rounded-xl bg-slate-50 border border-slate-100 p-2 mb-2"><a href="${esc(pf.media_url || '#')}" target="_blank" rel="noopener" class="block mb-2 hover:opacity-80"><div class="text-[10px] font-bold text-[#151c75] truncate">${esc(pf.title)}</div><div class="text-[9px] text-slate-400 mt-0.5">${esc(pf.media_type || 'link')}</div></a><div class="flex items-center justify-between border-t border-slate-200 pt-2 mt-2"><span id="admin-pf-like-count-${pf.id}" class="text-[10px] font-black text-slate-600 transition-all duration-300">♥ ${pf.likes_count || 0}</span><div class="flex items-center gap-1"><button type="button" onclick="App.admin.adjustPortfolioLike('${pf.id}', 'minus')" class="px-2 py-1 bg-rose-50 text-rose-600 hover:bg-rose-100 rounded-lg text-[9px] font-extrabold transition-all">-</button><input type="number" id="pf-like-input-${pf.id}" value="1" min="1" class="w-10 px-1 py-1 text-[9px] font-bold text-center border border-slate-300 rounded-lg outline-none"><button type="button" onclick="App.admin.adjustPortfolioLike('${pf.id}', 'plus')" class="px-2 py-1 bg-emerald-50 text-emerald-600 hover:bg-emerald-100 rounded-lg text-[9px] font-extrabold transition-all">+</button></div></div></div>`).join('') || '<span class="text-[10px] text-slate-400">Belum ada portfolio.</span>'}</div></section>
           </div>
         </div>`;
       const run = async (fn, ok, fail) => { try { await fn(); toast(ok, 'success'); await render(); } catch (e) { toast(e?.message || fail, 'error'); } };
@@ -177,7 +224,8 @@
 
   function open() {
     App.admin.adjustCreatorLike = adjustCreatorLike;
+    App.admin.adjustPortfolioLike = adjustPortfolioLike;
     if (isAdmin()) render();
   }
-  window.StudihomeAdminDapurCreatorV5 = { open, render, adjustCreatorLike };
+  window.StudihomeAdminDapurCreatorV5 = { open, render, adjustCreatorLike, adjustPortfolioLike };
 })();
