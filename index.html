@@ -6639,9 +6639,14 @@ renderStudioAiControl: async () => {
                                     <div class="text-[11px] font-extrabold text-[#151c75]">${App.utils.escapeHtml(r.name)}</div>
                                     <div class="text-[9px] text-slate-400 mt-0.5">${App.utils.escapeHtml(r.slug)}</div>
                                 </div>
-                                <button onclick="App.admin.toggleStudioAiCategory('${r.id}',${!r.is_active})" class="text-[10px] font-extrabold px-2.5 py-1.5 rounded-lg ${r.is_active?'bg-emerald-50 text-emerald-700':'bg-slate-100 text-slate-500'}">
-                                    ${r.is_active?'Aktif':'Nonaktif'}
-                                </button>
+                                <div class="flex items-center gap-2 shrink-0">
+                                    <button onclick="App.admin.toggleStudioAiCategory('${r.id}',${!r.is_active})" class="text-[10px] font-extrabold px-2.5 py-1.5 rounded-lg ${r.is_active?'bg-emerald-50 text-emerald-700':'bg-slate-100 text-slate-500'}">
+                                        ${r.is_active?'Aktif':'Nonaktif'}
+                                    </button>
+                                    <button type="button" data-category-id="${App.utils.escapeHtml(r.id)}" data-category-name="${encodeURIComponent(String(r.name || ''))}" data-category-slug="${encodeURIComponent(String(r.slug || ''))}" data-category-description="${encodeURIComponent(String(r.description || ''))}" data-category-icon="${encodeURIComponent(String(r.icon || 'fa-solid fa-sparkles'))}" onclick="App.admin.editStudioAiCategoryFromButton(this)" class="w-7 h-7 rounded-lg bg-blue-50 text-[#151c75] hover:bg-blue-100 flex items-center justify-center transition-all" title="Edit Kategori" aria-label="Edit kategori ${App.utils.escapeHtml(r.name)}">
+                                        <i class="fa-solid fa-pen text-[10px]" aria-hidden="true"></i>
+                                    </button>
+                                </div>
                             </div>
                         `).join('');
                     } catch (e) {
@@ -6659,12 +6664,13 @@ renderStudioAiControl: async () => {
                                         <i class="fa-solid fa-xmark"></i>
                                     </button>
                                 </div>
-                                <form class="mt-4 space-y-3" onsubmit="App.admin.saveStudioAiCategory(event)">
+                                <form id="sai-cat-form" class="mt-4 space-y-3" onsubmit="App.admin.saveStudioAiCategory(event)">
+                                    <input type="hidden" id="sai-cat-id" value="">
                                     <input id="sai-cat-name" required maxlength="80" placeholder="Mis. AI Video" class="w-full card-3d-inset px-3.5 py-2.5 rounded-xl text-xs outline-none">
                                     <input id="sai-cat-slug" required maxlength="80" placeholder="ai-video" pattern="[a-z0-9-]+" class="w-full card-3d-inset px-3.5 py-2.5 rounded-xl text-xs outline-none">
                                     <input id="sai-cat-icon" maxlength="120" placeholder="fa-solid fa-video" class="w-full card-3d-inset px-3.5 py-2.5 rounded-xl text-xs outline-none">
                                     <textarea id="sai-cat-desc" maxlength="300" placeholder="Deskripsi singkat kategori..." class="w-full card-3d-inset px-3.5 py-2.5 rounded-xl text-xs outline-none min-h-[90px]"></textarea>
-                                    <button class="w-full btn-brand-gradient py-3 rounded-xl text-xs font-extrabold">Simpan Menu</button>
+                                    <button id="sai-cat-submit-btn" class="w-full btn-brand-gradient py-3 rounded-xl text-xs font-extrabold">+ Tambah Kategori</button>
                                 </form>
                             </div>
                         </div>
@@ -6673,19 +6679,54 @@ renderStudioAiControl: async () => {
                     setTimeout(() => document.getElementById('sai-cat-name')?.focus(), 30);
                 },
 
+                editStudioAiCategoryFromButton: (button) => {
+                    if (!button) return;
+                    const decode = value => {
+                        try { return decodeURIComponent(value || ''); } catch (_) { return ''; }
+                    };
+                    App.admin.editStudioAiCategory(button.dataset.categoryId || '', decode(button.dataset.categoryName), decode(button.dataset.categorySlug), decode(button.dataset.categoryDescription), decode(button.dataset.categoryIcon));
+                },
+
+                editStudioAiCategory: (id, name, slug, description, icon) => {
+                    if (!App.state.user || App.state.user.role !== 'admin') {
+                        App.ui.toast('Akses Admin diperlukan.','error');
+                        return;
+                    }
+                    App.admin.openStudioAiCategoryForm();
+                    document.getElementById('sai-cat-id').value = id || '';
+                    document.getElementById('sai-cat-name').value = name || '';
+                    document.getElementById('sai-cat-slug').value = slug || '';
+                    document.getElementById('sai-cat-desc').value = description || '';
+                    document.getElementById('sai-cat-icon').value = icon || 'fa-solid fa-sparkles';
+                    const heading = document.querySelector('#studio-ai-category-modal h3');
+                    if (heading) heading.textContent = 'Edit kategori AI';
+                    const submit = document.getElementById('sai-cat-submit-btn');
+                    if (submit) submit.textContent = 'Simpan Perubahan';
+                    document.getElementById('sai-cat-name')?.focus();
+                },
+
                 saveStudioAiCategory: async (event) => {
                     event.preventDefault();
                     try {
                         if (!App.state.user || App.state.user.role !== 'admin') throw new Error('Akses Admin diperlukan.');
+                        const id = String(document.getElementById('sai-cat-id')?.value || '').trim();
                         const name = String(document.getElementById('sai-cat-name')?.value || '').trim();
                         const slug = String(document.getElementById('sai-cat-slug')?.value || '').trim().toLowerCase();
                         const icon = String(document.getElementById('sai-cat-icon')?.value || 'fa-solid fa-sparkles').trim();
                         const description = String(document.getElementById('sai-cat-desc')?.value || '').trim();
                         if (!name || !/^[a-z0-9-]+$/.test(slug)) throw new Error('Nama dan slug kategori belum valid.');
-                        const { error } = await supabaseClient.from('ai_categories').insert({ name, slug, icon, description, is_active: true });
+                        const categoryQuery = id
+                            ? supabaseClient.from('ai_categories').update({ name, slug, description }).eq('id', id)
+                            : supabaseClient.from('ai_categories').insert({ name, slug, icon, description, is_active: true });
+                        const { error } = await categoryQuery;
                         if (error) throw error;
+                        document.getElementById('sai-cat-form')?.reset();
+                        const hiddenId = document.getElementById('sai-cat-id');
+                        if (hiddenId) hiddenId.value = '';
+                        const submit = document.getElementById('sai-cat-submit-btn');
+                        if (submit) submit.textContent = '+ Tambah Kategori';
                         document.getElementById('studio-ai-category-modal')?.remove();
-                        App.ui.toast('Kategori berhasil ditambahkan.','success');
+                        App.ui.toast(id ? 'Kategori berhasil diperbarui.' : 'Kategori berhasil ditambahkan.','success');
                         await App.admin.loadStudioAiCategories();
                     } catch (e) {
                         App.ui.toast(e.message || 'Kategori belum bisa disimpan.','error');
