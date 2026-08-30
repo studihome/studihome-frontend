@@ -4773,6 +4773,7 @@ App.router.bindCanonicalLinkGuard();
                     if (!grid) return;
                     const data = App.state.studioAI || { creators: [] };
                     const q = App.studioAI._query.toLowerCase();
+                    const tokens = q.split(/\s+/).filter(Boolean);
                     const category = App.studioAI._category;
                     const activeCategory = (data.categories || []).find(x => String(x.slug || '').toLowerCase() === String(category || '').toLowerCase());
                     
@@ -4786,11 +4787,10 @@ App.router.bindCanonicalLinkGuard();
                             catNames.includes(String(activeCategory.name || '').toLowerCase()) ||
                             catNames.includes(String(activeCategory.slug || '').toLowerCase());
                             
-                        const tokens = q.split(/\s+/).filter(Boolean);
                         let score = 0;
                         let isRelevant = false;
                         
-                        if (activeCategory && matchCategory) score += 40;
+                        if (!q && activeCategory && matchCategory) score += 40;
                         
                         if (q) {
                             let matchQuery = false;
@@ -4830,15 +4830,22 @@ App.router.bindCanonicalLinkGuard();
                         return { c, score, categoryMatch: matchCategory, isRelevant };
                     }).filter(item => {
                         if (q && !item.isRelevant) return false;
-                        if (activeCategory && !item.categoryMatch) return false;
+                        if (!q && activeCategory && !item.categoryMatch) return false;
                         return true;
                     }).sort((a, b) => b.score - a.score || String(a.c.display_name || '').localeCompare(String(b.c.display_name || '')))
                       .map(item => item.c);
 
+                    const matchedPortfolios = q ? (data.creators || []).flatMap(creator =>
+                        (creator.portfolios || []).filter(portfolio => {
+                            const portfolioHaystack = [portfolio.title || '', portfolio.description || ''].join(' ').toLowerCase();
+                            return tokens.every(token => portfolioHaystack.includes(token));
+                        }).map(portfolio => ({ creator, portfolio }))
+                    ) : [];
+
                     const title = document.getElementById('studio-ai-results-title');
                     if (title) title.textContent = q || category ? 'Yang paling nyambung buatmu' : 'Creator yang siap membantu';
                     
-                    if (!creators.length) {
+                    if (!creators.length && (!q || !matchedPortfolios.length)) {
                         const hasPublishedCreators = Array.isArray(data.creators) && data.creators.length > 0;
                         if (!hasPublishedCreators) {
                             grid.innerHTML = `<div class="studio-ai-empty card-3d p-7 sm:p-9 rounded-3xl text-center md:col-span-2 xl:col-span-3">
@@ -4862,18 +4869,18 @@ App.router.bindCanonicalLinkGuard();
                     }
 
                     const limit = App.studioAI._creatorDisplayLimit || 6;
-                    const visibleCreators = creators.slice(0, limit);
+                    const visibleCreators = q ? creators : creators.slice(0, limit);
 
                     const loadMoreWrap = document.getElementById('studio-ai-load-more-wrap');
                     if (loadMoreWrap) {
-                        if (creators.length > limit) {
+                        if (!q && creators.length > limit) {
                             loadMoreWrap.classList.remove('hidden');
                         } else {
                             loadMoreWrap.classList.add('hidden');
                         }
                     }
 
-                    grid.innerHTML = visibleCreators.map(c => {
+                    const renderCreatorCardHTML = c => {
                         const loc = String(c.location || '').trim();
                         const service = (c.services || [])[0];
                         const fallbackIcon = `<span class="text-xl">✦</span>`;
@@ -4954,7 +4961,40 @@ App.router.bindCanonicalLinkGuard();
                                     </div>
                                 </div>
                             </article>`;
-                }).join('');
+                };
+
+                const creatorCardsHTML = visibleCreators.map(renderCreatorCardHTML).join('');
+                const renderPortfolioCardHTML = ({ creator, portfolio }) => {
+                    const username = App.utils.escapeHtml(creator.username || '');
+                    const portfolioTitle = App.utils.escapeHtml(portfolio.title || 'Portfolio');
+                    const description = App.utils.escapeHtml(portfolio.description || 'Karya dari Creator Studihome.');
+                    const slug = App.utils.escapeHtml(App.creator._slugify(portfolio.title || 'portfolio'));
+                    return `
+                        <article class="creator-portfolio-card card-3d rounded-2xl overflow-hidden bg-white border border-slate-200/80 transition-transform hover:-translate-y-1">
+                            <div class="p-4 sm:p-5">
+                                <div class="flex items-center justify-between gap-3">
+                                    <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-amber-50 text-amber-700 text-[9px] font-black tracking-wide"><i class="fa-solid fa-images"></i> PORTOFOLIO</span>
+                                    <span class="text-[9px] font-bold text-slate-400">@${username}</span>
+                                </div>
+                                <h4 class="mt-3 text-sm font-extrabold text-[#151c75] leading-snug">${portfolioTitle}</h4>
+                                <p class="mt-1.5 text-[11px] text-slate-600 leading-relaxed line-clamp-2">${description}</p>
+                                <a href="/${username}/portfolio/${slug}" onclick="event.preventDefault(); App.router.goCreator('${username}', '${slug}')" class="inline-flex items-center gap-1.5 mt-4 text-[10px] font-extrabold text-[#151c75] hover:text-[#3f48bf]">
+                                    Lihat karya <i class="fa-solid fa-arrow-up-right-from-square text-[8px]"></i>
+                                </a>
+                            </div>
+                        </article>`;
+                };
+
+                if (q) {
+                    const creatorSection = creators.length ? `<div class="mb-8"><h3 class="text-sm font-extrabold text-[#151c75] mb-4">Creator (${creators.length})</h3><div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4 sm:gap-6">${creatorCardsHTML}</div></div>` : '';
+                    const portfolioSection = matchedPortfolios.length ? `<div><h3 class="text-sm font-extrabold text-[#151c75] mb-4">Portofolio (${matchedPortfolios.length})</h3><div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4 sm:gap-6">${matchedPortfolios.map(renderPortfolioCardHTML).join('')}</div></div>` : '';
+                    grid.className = 'space-y-8';
+                    grid.innerHTML = creatorSection + portfolioSection;
+                    return;
+                }
+
+                grid.className = 'grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4 sm:gap-6';
+                grid.innerHTML = creatorCardsHTML;
             }
         },
 
