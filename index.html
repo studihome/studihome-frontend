@@ -5246,7 +5246,9 @@ App.router.bindCanonicalLinkGuard();
                                         <!-- Tombol Pil Rata Kiri, Lebar Menyesuaikan Teks di Desktop, Tanpa Garis Atas -->
                                         <div class="flex flex-row items-center justify-start w-full gap-2 sm:gap-3 mt-6">
                                             <button type="button" onclick="App.creator.togglePortfolioLike('${targetPortfolio.id}', ${targetPortfolio.is_liked ? 'true' : 'false'}, this)" class="flex-1 sm:flex-none sm:w-fit py-2.5 px-3 sm:px-6 rounded-full text-[11px] sm:text-xs font-extrabold border transition-all shadow-sm flex items-center justify-center gap-1.5 sm:gap-2 whitespace-nowrap overflow-hidden ${targetPortfolio.is_liked ? 'bg-rose-50 border-rose-200 text-rose-600 hover:bg-rose-100' : 'bg-white border-slate-200 text-slate-700 hover:bg-slate-50'}">
-                                                ${targetPortfolio.is_liked ? '<i class="fa-solid fa-heart text-sm shrink-0"></i> <span class="truncate">Disukai</span>' : '<i class="fa-regular fa-heart text-sm shrink-0"></i> <span class="truncate">Suka</span>'}
+                                                <i class="${targetPortfolio.is_liked ? 'fa-solid' : 'fa-regular'} fa-heart text-sm shrink-0"></i>
+                                                <span class="truncate">${targetPortfolio.is_liked ? 'Disukai' : 'Suka'}</span>
+                                                <span class="ml-1 px-1.5 py-0.5 rounded-md text-[10px] ${targetPortfolio.is_liked ? 'bg-rose-100' : 'bg-slate-100'}" id="pf-modal-like-count-${targetPortfolio.id}">${targetPortfolio.likes_count || 0}</span>
                                             </button>
 
                                             ${c.whatsapp ? `<a href="${App.creator._waUrl(c.whatsapp, c.display_name, 'Halo ' + (c.display_name || 'Creator') + ', saya sangat tertarik dengan karya Anda yang berjudul: ' + targetPortfolio.title + '. Bisa kita ngobrol lebih lanjut?')}" target="_blank" rel="noopener noreferrer" class="flex-1 sm:flex-none sm:w-fit py-2.5 px-3 sm:px-6 rounded-full bg-yellow-100/70 backdrop-blur-md border border-yellow-200/80 text-yellow-900 text-[11px] sm:text-xs font-extrabold hover:bg-yellow-200/80 hover:border-yellow-300 transition-all shadow-sm flex items-center justify-center gap-1.5 sm:gap-2 whitespace-nowrap overflow-hidden"><i class="fa-brands fa-whatsapp text-sm sm:text-base text-emerald-600 shrink-0"></i> <span class="truncate">Ngobrol</span></a>` : ''}
@@ -5331,9 +5333,10 @@ App.router.bindCanonicalLinkGuard();
                                                     <div class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full border border-slate-200 bg-slate-50 text-[#151c75] text-[10px] font-extrabold whitespace-nowrap group-hover:bg-[#151c75] group-hover:text-white group-hover:border-[#151c75] transition-all shadow-sm">
                                                         Detail Ambalan <i class="fa-solid fa-arrow-right" aria-hidden="true"></i>
                                                     </div>
-                                                    <div class="flex items-center gap-1.5 text-[11px] sm:text-xs font-bold ${p.is_liked ? 'text-rose-500' : 'text-slate-400'} group-hover:text-rose-500 transition-colors">
-                                                        <i class="${p.is_liked ? 'fa-solid' : 'fa-regular'} fa-heart" aria-hidden="true"></i> ${p.likes_count || 0}
-                                                    </div>
+                                                    <span class="inline-flex items-center gap-1.5 font-bold text-slate-600">
+                                                        <i class="${p.is_liked ? 'fa-solid text-rose-500' : 'fa-regular text-slate-400'} fa-heart" aria-hidden="true"></i>
+                                                        <span id="pf-card-like-count-${p.id}">${p.likes_count || 0}</span>
+                                                    </span>
                                                 </div>
                                             </div>
                                         </article>`;
@@ -5442,20 +5445,32 @@ renderCreatorStandardSummary: (creator, data, categories, services, portfolios) 
                         return;
                     }
                     const isLikedNow = !currentLiked;
-                    if (btnElement) {
-                        btnElement.setAttribute('onclick', `App.creator.togglePortfolioLike('${portfolioId}', ${isLikedNow}, this)`);
-                        if (isLikedNow) {
-                            btnElement.className = "flex-1 sm:flex-none sm:w-fit py-2.5 px-3 sm:px-6 rounded-full text-[11px] sm:text-xs font-extrabold border transition-all shadow-sm flex items-center justify-center gap-1.5 sm:gap-2 whitespace-nowrap overflow-hidden bg-rose-50 border-rose-200 text-rose-600 hover:bg-rose-100";
-                            btnElement.innerHTML = '<i class="fa-solid fa-heart text-sm shrink-0"></i> <span class="truncate">Disukai</span>';
-                        } else {
-                            btnElement.className = "flex-1 sm:flex-none sm:w-fit py-2.5 px-3 sm:px-6 rounded-full text-[11px] sm:text-xs font-extrabold border transition-all shadow-sm flex items-center justify-center gap-1.5 sm:gap-2 whitespace-nowrap overflow-hidden bg-white border-slate-200 text-slate-700 hover:bg-slate-50";
-                            btnElement.innerHTML = '<i class="fa-regular fa-heart text-sm shrink-0"></i> <span class="truncate">Suka</span>';
-                        }
-                    }
                     try {
                         await App.api.post('TOGGLE_PORTFOLIO_LIKE', { portfolioId, liked: currentLiked });
+                        const delta = isLikedNow ? 1 : -1;
                         const pf = App.state.creatorProfile?.portfolios?.find(p => p.id === portfolioId);
-                        if (pf) { pf.is_liked = isLikedNow; pf.likes_count = (pf.likes_count || 0) + (isLikedNow ? 1 : -1); }
+                        if (pf) {
+                            pf.is_liked = isLikedNow;
+                            pf.likes_count = Math.max(0, Number(pf.likes_count || 0) + delta);
+                        }
+                        const cardCount = document.getElementById(`pf-card-like-count-${portfolioId}`);
+                        if (cardCount) {
+                            const current = parseInt(cardCount.innerText, 10) || 0;
+                            cardCount.innerText = Math.max(0, current + delta);
+                        }
+                        const modalCount = document.getElementById(`pf-modal-like-count-${portfolioId}`);
+                        if (modalCount) {
+                            const current = parseInt(modalCount.innerText, 10) || 0;
+                            modalCount.innerText = Math.max(0, current + delta);
+                        }
+                        if (btnElement) {
+                            btnElement.setAttribute('onclick', `App.creator.togglePortfolioLike('${portfolioId}', ${isLikedNow}, this)`);
+                            btnElement.className = isLikedNow
+                                ? "flex-1 sm:flex-none sm:w-fit py-2.5 px-3 sm:px-6 rounded-full text-[11px] sm:text-xs font-extrabold border transition-all shadow-sm flex items-center justify-center gap-1.5 sm:gap-2 whitespace-nowrap overflow-hidden bg-rose-50 border-rose-200 text-rose-600 hover:bg-rose-100"
+                                : "flex-1 sm:flex-none sm:w-fit py-2.5 px-3 sm:px-6 rounded-full text-[11px] sm:text-xs font-extrabold border transition-all shadow-sm flex items-center justify-center gap-1.5 sm:gap-2 whitespace-nowrap overflow-hidden bg-white border-slate-200 text-slate-700 hover:bg-slate-50";
+                            const count = pf ? pf.likes_count : (parseInt(modalCount?.innerText, 10) || 0);
+                            btnElement.innerHTML = `<i class="${isLikedNow ? 'fa-solid' : 'fa-regular'} fa-heart text-sm shrink-0"></i> <span class="truncate">${isLikedNow ? 'Disukai' : 'Suka'}</span> <span class="ml-1 px-1.5 py-0.5 rounded-md text-[10px] ${isLikedNow ? 'bg-rose-100' : 'bg-slate-100'}" id="pf-modal-like-count-${portfolioId}">${count}</span>`;
+                        }
                         App.ui.toast(isLikedNow ? 'Mantap! Karya ini disukai. ❤️' : 'Like kamu sudah dilepas.', 'success');
                     } catch (e) {
                         App.ui.toast(e?.message || 'Like belum berhasil diproses.', 'error');
