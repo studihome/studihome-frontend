@@ -53,7 +53,10 @@
             "Otomasi AI",
             "Agency AI",
             "Pengembangan Prompt AI",
-            "Otomasi Bisnis & UMKM"
+            "Otomasi Bisnis & UMKM",
+            "https://www.wikidata.org/wiki/Q11660",
+            "https://www.wikidata.org/wiki/Q184199",
+            "https://www.wikidata.org/wiki/Q1068473"
           ],
           "sameAs": [
             "https://x.com/studihome",
@@ -1616,6 +1619,11 @@ App.router.bindCanonicalLinkGuard();
                     'url': 'https://studihome.id/',
                     'logo': 'https://studihome.id/assets/logo.png',
                     'description': 'Platform Pembelajaran Digital, Otomasi dan Agentic AI terdepan di Indonesia.',
+                    'knowsAbout': [
+                        'https://www.wikidata.org/wiki/Q11660',
+                        'https://www.wikidata.org/wiki/Q184199',
+                        'https://www.wikidata.org/wiki/Q1068473'
+                    ],
                     'sameAs': [
                         'https://x.com/studihome',
                         'https://tiktok.com/@studihome'
@@ -1625,6 +1633,12 @@ App.router.bindCanonicalLinkGuard();
                 generateCreatorSchema: (creator = {}, path = '', categoryName = '', categories = []) => {
                     const displayName = String(creator.display_name || creator.username || 'Creator Studihome');
                     const description = String(creator.bio || `Profil ahli AI dan kreator ${displayName} di Studihome.`);
+                    const knowledgeEntities = [
+                        ...(categories || []).map(item => String(item?.name || '')).filter(Boolean),
+                        'https://www.wikidata.org/wiki/Q11660',
+                        'https://www.wikidata.org/wiki/Q184199',
+                        'https://www.wikidata.org/wiki/Q1068473'
+                    ];
                     return {
                         '@context': 'https://schema.org',
                         '@type': 'ProfilePage',
@@ -1637,7 +1651,12 @@ App.router.bindCanonicalLinkGuard();
                             'image': String(creator.avatar_url || ''),
                             'description': description,
                             'jobTitle': String(categoryName || 'AI Creator & Consultant'),
-                            'knowsAbout': (categories || []).map(item => String(item?.name || '')).filter(Boolean),
+                            'knowsAbout': [...new Set(knowledgeEntities)],
+                            'hasOccupation': {
+                                '@type': 'Occupation',
+                                'name': 'Content creator',
+                                'sameAs': 'https://www.wikidata.org/wiki/Q109459317'
+                            },
                             'worksFor': {
                                 '@type': 'Organization',
                                 '@id': 'https://studihome.id/#organization',
