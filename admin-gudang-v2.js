@@ -54,16 +54,49 @@
     if (error) throw error;
   }
 
-  async function addCategory(form) {
+  const decodeCategoryValue = (value) => {
+    try { return decodeURIComponent(value || ''); } catch (_) { return ''; }
+  };
+
+  function editCategory(form, button) {
+    if (!form || !button) return;
+    form.querySelector('#admin-cat-id').value = button.dataset.categoryId || '';
+    form.querySelector('[name=name]').value = decodeCategoryValue(button.dataset.categoryName);
+    form.querySelector('[name=slug]').value = decodeCategoryValue(button.dataset.categorySlug);
+    form.querySelector('[name=description]').value = decodeCategoryValue(button.dataset.categoryDescription);
+    const submit = form.querySelector('#admin-cat-submit-btn');
+    if (submit) {
+      submit.textContent = 'Simpan Perubahan';
+      submit.dataset.editing = 'true';
+    }
+    form.querySelector('[name=name]')?.focus();
+  }
+
+  function resetCategoryForm(form) {
+    form?.reset();
+    const id = form?.querySelector('#admin-cat-id');
+    if (id) id.value = '';
+    const submit = form?.querySelector('#admin-cat-submit-btn');
+    if (submit) {
+      submit.textContent = '+ Tambah Kategori';
+      delete submit.dataset.editing;
+    }
+  }
+
+  async function saveCategory(form) {
     const client = await requireAdmin();
+    const id = String(form.querySelector('#admin-cat-id')?.value || '').trim();
     const name = String(form.querySelector('[name=name]').value || '').trim();
     const slug = String(form.querySelector('[name=slug]').value || '').trim().toLowerCase();
     const description = String(form.querySelector('[name=description]').value || '').trim();
     if (!name || !slug) throw new Error('Nama dan slug kategori wajib diisi.');
-    const { error } = await client.from('ai_categories').insert({ name, slug, description, is_active: true });
+    const request = id
+      ? client.from('ai_categories').update({ name, slug, description }).eq('id', id)
+      : client.from('ai_categories').insert({ name, slug, description, is_active: true });
+    const { error } = await request;
     if (error) throw error;
-    toast('Kategori AI ditambahkan.', 'success');
-    form.reset();
+    toast(id ? 'Kategori AI diperbarui.' : 'Kategori AI ditambahkan.', 'success');
+    resetCategoryForm(form);
   }
 
   async function addAiLink(form) {
@@ -120,8 +153,8 @@
         <div class="grid xl:grid-cols-2 gap-4">
           <section class="rounded-3xl border border-blue-100 bg-white p-4 sm:p-5 shadow-sm">
             <div class="flex items-center justify-between gap-3 mb-3"><div><div class="text-[9px] font-black uppercase tracking-[.1em] text-blue-600">KATALOG</div><h3 class="text-sm font-black text-[#151c75]">Kategori AI</h3></div><button data-g-action="refresh" class="px-3 py-2 rounded-xl bg-blue-50 text-[#151c75] text-[10px] font-bold">Refresh</button></div>
-            <form data-g-form="category" class="grid sm:grid-cols-3 gap-2 mb-3"><input name="name" placeholder="Nama kategori" class="w-full rounded-xl border border-slate-200 px-3 py-2 text-xs outline-none"><input name="slug" placeholder="slug" class="w-full rounded-xl border border-slate-200 px-3 py-2 text-xs outline-none"><input name="description" placeholder="Deskripsi singkat" class="w-full rounded-xl border border-slate-200 px-3 py-2 text-xs outline-none"><button class="sm:col-span-3 btn-brand-gradient rounded-xl px-3 py-2 text-[10px] font-extrabold">+ Tambah Kategori</button></form>
-            <div class="space-y-2 max-h-[420px] overflow-auto pr-1">${data.categories.map(c => `<div class="flex items-center justify-between gap-3 rounded-xl border border-slate-100 bg-slate-50/60 px-3 py-2.5"><div class="min-w-0"><div class="text-[10px] font-extrabold text-slate-700 truncate">${esc(c.name)}</div><div class="text-[9px] text-slate-400 truncate">${esc(c.slug)} · ${c.is_active ? 'Aktif' : 'Nonaktif'}</div></div><button data-toggle-cat="${c.id}" data-next="${c.is_active ? 'false' : 'true'}" class="shrink-0 px-2.5 py-1.5 rounded-lg ${c.is_active ? 'bg-emerald-50 text-emerald-700' : 'bg-slate-200 text-slate-600'} text-[9px] font-bold">${c.is_active ? 'Aktif' : 'Aktifkan'}</button></div>`).join('') || '<div class="text-[10px] text-slate-400">Belum ada kategori.</div>'}</div>
+            <form data-g-form="category" class="grid sm:grid-cols-3 gap-2 mb-3"><input type="hidden" id="admin-cat-id" value=""><input name="name" placeholder="Nama kategori" class="w-full rounded-xl border border-slate-200 px-3 py-2 text-xs outline-none"><input name="slug" placeholder="slug" class="w-full rounded-xl border border-slate-200 px-3 py-2 text-xs outline-none"><input name="description" placeholder="Deskripsi singkat" class="w-full rounded-xl border border-slate-200 px-3 py-2 text-xs outline-none"><button id="admin-cat-submit-btn" class="sm:col-span-3 btn-brand-gradient rounded-xl px-3 py-2 text-[10px] font-extrabold">+ Tambah Kategori</button></form>
+            <div class="space-y-2 max-h-[420px] overflow-auto pr-1">${data.categories.map(c => `<div class="flex items-center justify-between gap-3 rounded-xl border border-slate-100 bg-slate-50/60 px-3 py-2.5"><div class="min-w-0"><div class="text-[10px] font-extrabold text-slate-700 truncate">${esc(c.name)}</div><div class="text-[9px] text-slate-400 truncate">${esc(c.slug)} · ${c.is_active ? 'Aktif' : 'Nonaktif'}</div></div><div class="flex items-center gap-2 shrink-0"><button data-toggle-cat="${c.id}" data-next="${c.is_active ? 'false' : 'true'}" class="px-2.5 py-1.5 rounded-lg ${c.is_active ? 'bg-emerald-50 text-emerald-700' : 'bg-slate-200 text-slate-600'} text-[9px] font-bold">${c.is_active ? 'Aktif' : 'Aktifkan'}</button><button type="button" data-edit-category="${esc(c.id)}" data-category-id="${esc(c.id)}" data-category-name="${encodeURIComponent(String(c.name || ''))}" data-category-slug="${encodeURIComponent(String(c.slug || ''))}" data-category-description="${encodeURIComponent(String(c.description || ''))}" class="w-7 h-7 rounded-lg bg-blue-50 text-[#151c75] hover:bg-blue-100 flex items-center justify-center transition-all" title="Edit Kategori" aria-label="Edit kategori ${esc(c.name)}"><i class="fa-solid fa-pen text-[10px]" aria-hidden="true"></i></button></div></div>`).join('') || '<div class="text-[10px] text-slate-400">Belum ada kategori.</div>'}</div>
           </section>
 
           <section class="rounded-3xl border border-amber-100 bg-white p-4 sm:p-5 shadow-sm">
@@ -184,8 +217,10 @@
 
   function bindStudio(area) {
     area.querySelectorAll('[data-toggle-cat]').forEach(b => b.onclick = async () => { try { await toggleCategory(b.dataset.toggleCat, b.dataset.next === 'true'); await renderStudio(area); toast('Status kategori diperbarui.', 'success'); } catch (e) { toast(e.message || 'Kategori gagal diubah.', 'error'); } });
+    const categoryForm = area.querySelector('[data-g-form="category"]');
+    area.querySelectorAll('[data-edit-category]').forEach(button => button.onclick = () => editCategory(categoryForm, button));
     area.querySelectorAll('[data-delete-link]').forEach(b => b.onclick = async () => { try { await deleteAiLink(b.dataset.deleteLink); await renderStudio(area); } catch (e) { toast(e.message || 'Platform gagal dihapus.', 'error'); } });
-    area.querySelector('[data-g-form="category"]')?.addEventListener('submit', async e => { e.preventDefault(); try { await addCategory(e.currentTarget); await renderStudio(area); } catch (err) { toast(err.message || 'Kategori gagal ditambahkan.', 'error'); } });
+    categoryForm?.addEventListener('submit', async e => { e.preventDefault(); try { await saveCategory(e.currentTarget); await renderStudio(area); } catch (err) { toast(err.message || 'Kategori gagal disimpan.', 'error'); } });
     area.querySelector('[data-g-form="link"]')?.addEventListener('submit', async e => { e.preventDefault(); try { await addAiLink(e.currentTarget); await renderStudio(area); } catch (err) { toast(err.message || 'Platform gagal ditambahkan.', 'error'); } });
     area.querySelectorAll('[data-g-action="refresh"]').forEach(b => b.onclick = () => renderStudio(area));
   }
