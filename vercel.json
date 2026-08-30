@@ -9,6 +9,14 @@
       "destination": "/api/markdown?path=$1"
     },
     {
+      "source": "/dapur",
+      "destination": "/dapur.html"
+    },
+    {
+      "source": "/dapur/:username",
+      "destination": "/dapur.html"
+    },
+    {
       "source": "/(.*)",
       "destination": "/index.html"
     }
