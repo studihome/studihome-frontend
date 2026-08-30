@@ -7,6 +7,84 @@ const MAX_USERNAME_LENGTH = 64;
 const MAX_SLUG_LENGTH = 160;
 const CACHE_CONTROL = 'public, s-maxage=3600, stale-while-revalidate=86400';
 
+
+const PSEO_SERVICES = {
+  'otomasi-whatsapp': {
+    name: 'Otomasi WhatsApp',
+    summary: 'Merapikan alur respons, tindak lanjut, dan pencatatan percakapan dengan tetap memberi ruang verifikasi manusia.',
+    checklist: ['petakan pertanyaan berulang dan jalur eskalasi', 'siapkan sumber jawaban yang akurat', 'uji persetujuan manusia sebelum pesan penting dikirim'],
+    keywords: ['whatsapp', 'automation', 'otomasi', 'workflow', 'customer service', 'sales']
+  },
+  'ai-content': {
+    name: 'Konten dengan AI',
+    summary: 'Membantu riset ide, penyusunan draf, dan adaptasi format konten tanpa menghilangkan proses editorial.',
+    checklist: ['tetapkan audiens dan tujuan konten', 'susun panduan suara merek', 'verifikasi fakta dan klaim sebelum publikasi'],
+    keywords: ['content', 'konten', 'copywriting', 'social media', 'caption', 'marketing']
+  },
+  'ai-video': {
+    name: 'Video dengan AI',
+    summary: 'Mempercepat pengembangan konsep, naskah, aset visual, dan variasi video dengan kontrol kualitas yang jelas.',
+    checklist: ['tentukan format dan kanal distribusi', 'siapkan naskah serta referensi visual', 'periksa hak penggunaan aset dan hasil akhir'],
+    keywords: ['video', 'motion', 'animasi', 'visual', 'affiliate']
+  },
+  'ai-chatbot': {
+    name: 'Chatbot AI',
+    summary: 'Menyediakan jalur tanya jawab terstruktur yang merujuk pada sumber resmi dan mengalihkan kasus sensitif kepada manusia.',
+    checklist: ['tentukan cakupan pertanyaan yang boleh dijawab', 'hubungkan basis pengetahuan terverifikasi', 'siapkan fallback dan jalur eskalasi'],
+    keywords: ['chatbot', 'ai agent', 'agentic', 'customer service', 'support', 'chat']
+  },
+  'webapp-tanpa-coding': {
+    name: 'Webapp Tanpa Coding',
+    summary: 'Membangun alur kerja dan aplikasi web ringan melalui alat no-code dengan struktur data serta hak akses yang terencana.',
+    checklist: ['petakan pengguna dan proses inti', 'rancang data serta izin akses', 'uji alur utama sebelum digunakan lebih luas'],
+    keywords: ['no-code', 'nocode', 'webapp', 'website', 'aplikasi', 'digital operations']
+  }
+};
+
+const PSEO_INDUSTRIES = {
+  umkm: {
+    name: 'UMKM',
+    context: 'UMKM membutuhkan proses yang hemat waktu, mudah dipelihara, dan tetap sesuai dengan kapasitas tim.',
+    priority: 'Mulai dari satu pekerjaan berulang yang paling sering menyita waktu, lalu ukur hasilnya sebelum memperluas otomasi.',
+    keywords: ['umkm', 'bisnis lokal', 'usaha', 'sales']
+  },
+  sekolah: {
+    name: 'Sekolah',
+    context: 'Sekolah memerlukan solusi yang membantu administrasi dan pembelajaran tanpa mengabaikan kebijakan, privasi, serta keputusan pendidik.',
+    priority: 'Tentukan penanggung jawab, sumber data resmi, dan tahap pemeriksaan manusia pada setiap keluaran yang dipakai sekolah.',
+    keywords: ['sekolah', 'education', 'edukasi', 'guru', 'pembelajaran']
+  },
+  klinik: {
+    name: 'Klinik',
+    context: 'Klinik membutuhkan alur yang menjaga kerahasiaan data serta tidak menggantikan penilaian tenaga kesehatan.',
+    priority: 'Batasi otomasi pada proses administratif yang aman dan lakukan telaah privasi sebelum memakai data pasien.',
+    keywords: ['klinik', 'health', 'kesehatan', 'administrasi']
+  },
+  kreator: {
+    name: 'Kreator',
+    context: 'Kreator membutuhkan produksi yang konsisten sekaligus menjaga orisinalitas, hak penggunaan aset, dan identitas personal.',
+    priority: 'Bangun alur dari ide hingga publikasi dengan tahap kurasi agar kualitas dan suara kreator tetap terjaga.',
+    keywords: ['creator', 'kreator', 'content', 'video', 'visual']
+  },
+  'toko-online': {
+    name: 'Toko Online',
+    context: 'Toko online memerlukan informasi produk, layanan pelanggan, dan tindak lanjut yang konsisten di berbagai kanal.',
+    priority: 'Sinkronkan sumber harga, stok, dan kebijakan toko sebelum mengotomatiskan respons atau materi promosi.',
+    keywords: ['e-commerce', 'toko online', 'produk', 'sales', 'marketing']
+  }
+};
+
+const parsePseoSlug = slug => {
+  const value = String(slug || '').toLowerCase();
+  for (const serviceKey of Object.keys(PSEO_SERVICES)) {
+    const prefix = `${serviceKey}-untuk-`;
+    if (!value.startsWith(prefix)) continue;
+    const industryKey = value.slice(prefix.length);
+    if (PSEO_INDUSTRIES[industryKey]) return { serviceKey, industryKey };
+  }
+  return null;
+};
+
 const escapeMarkdown = value => String(value || '')
   .replace(/\\/g, '\\\\')
   .replace(/</g, '&lt;')
@@ -102,8 +180,12 @@ module.exports = async (req, res) => {
   const isArticleRoute = segments.length === 2 && segments[0] === 'balkon' && isSlug(segments[1]);
   const isPortfolioRoute = segments.length === 3 && segments[1] === 'portfolio' && isUsername(segments[0]) && isSlug(segments[2]);
   const isCreatorRoute = segments.length === 1 && isUsername(segments[0]);
+  const pseoRoute = segments.length === 2 && segments[0] === 'solusi' && isSlug(segments[1])
+    ? parsePseoSlug(segments[1])
+    : null;
+  const isPseoRoute = Boolean(pseoRoute);
 
-  if (!isArticleRoute && !isPortfolioRoute && !isCreatorRoute) {
+  if (!isArticleRoute && !isPortfolioRoute && !isCreatorRoute && !isPseoRoute) {
     return sendError(404, '# 404 Not Found\n\nDokumen Markdown tidak ditemukan.\n');
   }
 
@@ -142,6 +224,79 @@ module.exports = async (req, res) => {
   };
 
   try {
+    if (isPseoRoute) {
+      const service = PSEO_SERVICES[pseoRoute.serviceKey];
+      const industry = PSEO_INDUSTRIES[pseoRoute.industryKey];
+      const solutionSlug = `${pseoRoute.serviceKey}-untuk-${pseoRoute.industryKey}`;
+
+      let portfolioRows = [];
+      let creatorRows = [];
+      try {
+        const portfolioQuery = new URLSearchParams({
+          is_active: 'eq.true',
+          select: 'id,creator_id,title,description,media_type,media_url,created_at',
+          order: 'created_at.desc',
+          limit: '500'
+        });
+        const creatorQuery = new URLSearchParams({
+          is_published: 'eq.true',
+          select: 'id,username,display_name',
+          limit: '500'
+        });
+        [portfolioRows, creatorRows] = await Promise.all([
+          readJson(`${supabaseUrl}/rest/v1/creator_portfolios?${portfolioQuery}`),
+          readJson(`${supabaseUrl}/rest/v1/creator_profiles?${creatorQuery}`)
+        ]);
+      } catch (error) {
+        console.warn('[markdown] pSEO recommendations unavailable', error?.message || error);
+        portfolioRows = [];
+        creatorRows = [];
+      }
+
+      const creatorsById = new Map(
+        creatorRows
+          .filter(creator => creator?.id && creator?.username)
+          .map(creator => [creator.id, creator])
+      );
+      const serviceKeywords = service.keywords.map(keyword => keyword.toLowerCase());
+      const industryKeywords = industry.keywords.map(keyword => keyword.toLowerCase());
+      const recommendations = portfolioRows
+        .map(portfolio => {
+          const creator = creatorsById.get(portfolio.creator_id);
+          if (!creator) return null;
+          const haystack = `${portfolio.title || ''} ${portfolio.description || ''}`.toLowerCase();
+          const serviceScore = serviceKeywords.reduce((score, keyword) => score + (haystack.includes(keyword) ? 1 : 0), 0);
+          if (!serviceScore) return null;
+          const industryScore = industryKeywords.reduce((score, keyword) => score + (haystack.includes(keyword) ? 1 : 0), 0);
+          return { portfolio, creator, score: (serviceScore * 3) + industryScore };
+        })
+        .filter(Boolean)
+        .sort((a, b) => b.score - a.score || String(a.portfolio.title).localeCompare(String(b.portfolio.title), 'id'))
+        .slice(0, 3);
+
+      const title = `${service.name} untuk ${industry.name}`;
+      let markdown = `# Solusi ${textBlock(title)}\n\n`;
+      markdown += `> Panduan awal Studihome untuk memilih dan menerapkan **${textBlock(service.name)}** pada kebutuhan **${textBlock(industry.name)}** secara terukur.\n\n`;
+      markdown += `## Kebutuhan ${textBlock(industry.name)}\n\n${textBlock(industry.context)}\n\n`;
+      markdown += `## Pendekatan ${textBlock(service.name)}\n\n${textBlock(service.summary)}\n\n`;
+      markdown += `## Prioritas Implementasi\n\n${textBlock(industry.priority)}\n\n`;
+      markdown += '## Checklist Awal\n\n';
+      service.checklist.forEach(item => { markdown += `- ${textBlock(item)}\n`; });
+      markdown += '\n## Rekomendasi Portofolio Publik\n\n';
+      if (recommendations.length) {
+        recommendations.forEach(({ portfolio, creator }) => {
+          const portfolioSlug = slugify(portfolio.title);
+          const detailUrl = `https://studihome.id/${encodeURIComponent(creator.username)}/portfolio/${encodeURIComponent(portfolioSlug)}`;
+          markdown += `- [${textBlock(portfolio.title)} oleh ${textBlock(creator.display_name || creator.username)}](${detailUrl})\n`;
+        });
+      } else {
+        markdown += 'Belum ada portofolio publik yang cocok secara langsung dengan topik ini. Gunakan [Studio AI](https://studihome.id/studio-ai) untuk menjelajahi Creator berdasarkan kebutuhanmu.\n';
+      }
+      markdown += `\n---\n\nSumber resmi: [Studihome](https://studihome.id/solusi/${solutionSlug}.md)\n`;
+      if (req.method === 'HEAD') return res.status(200).end();
+      return res.status(200).send(markdown);
+    }
+
     const username = segments[0];
     const profileQuery = new URLSearchParams({
       username: `eq.${username}`,

@@ -13,6 +13,9 @@ const STATIC_PAGES = [
   ['/ai-untuk-umkm', 'weekly', '0.8']
 ];
 
+const PSEO_SERVICES = ['otomasi-whatsapp', 'ai-content', 'ai-video', 'ai-chatbot', 'webapp-tanpa-coding'];
+const PSEO_INDUSTRIES = ['umkm', 'sekolah', 'klinik', 'kreator', 'toko-online'];
+
 const escapeXml = value => String(value || '')
   .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
   .replace(/"/g, '&quot;').replace(/'/g, '&apos;');
@@ -81,6 +84,11 @@ module.exports = async (req, res) => {
   ]);
 
   let entries = STATIC_PAGES.map(([path, freq, priority]) => buildUrl(path, today, freq, priority)).join('');
+  PSEO_SERVICES.forEach(service => {
+    PSEO_INDUSTRIES.forEach(industry => {
+      entries += buildUrl(`/solusi/${service}-untuk-${industry}.md`, today, 'weekly', '0.8');
+    });
+  });
   const creatorMap = new Map();
 
   creators.forEach(creator => {
