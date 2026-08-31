@@ -2,7 +2,7 @@
   'use strict';
 
   // ============================================================
-  // STUDIHOME Social Proof Widget v9
+  // STUDIHOME Social Proof Widget v12
   // ============================================================
   // Queries v_social_proof_recent VIEW (Migration 16).
   // VIEW joins orders + products + profiles, bypasses RLS,
@@ -42,40 +42,20 @@
   // ---- Data ----
   async function fetchItems() {
     var c = db();
-    if (!c || !c.from) return [];
+    if (!c || !c.rpc) return [];
     try {
-      // Primary: query the public VIEW (real data, bypasses RLS)
-      var res = await c
-        .from('v_social_proof_recent')
-        .select('member_name, product_title, created_at')
-        .order('created_at', { ascending: false })
-        .limit(MAX_ITEMS);
-
+      // Public contract: server-verified paid orders, privacy-masked in the RPC.
+      var res = await c.rpc('get_public_social_proof_recent', {
+        p_limit: MAX_ITEMS
+      });
       if (res.error) {
-        // Fallback: query social_proof_items (seed data)
-        console.warn('[SP] VIEW query failed, falling back to seed data:', res.error.message);
-        var fb = await c
-          .from('social_proof_items')
-          .select('name, brand_name, package_name, created_at')
-          .eq('is_active', true)
-          .order('created_at', { ascending: false })
-          .limit(MAX_ITEMS);
-        if (fb.error) {
-          console.warn('[SP] fallback also failed:', fb.error.message);
-          return [];
-        }
-        return (fb.data || []).map(function(r) {
-          return {
-            name: r.name || 'Member Studihome',
-            product_title: r.brand_name ? r.brand_name + ' \u2014 ' + r.package_name : r.package_name || 'Paket Premium'
-          };
-        });
+        console.warn('[SP] verified social proof query failed:', res.error.message);
+        return [];
       }
-
       return (res.data || []).map(function(r) {
         return {
           name: r.member_name || 'Member Studihome',
-          product_title: r.product_title || 'Paket Premium'
+          product_title: r.product_title || 'Produk Studihome'
         };
       });
     } catch (e) {
