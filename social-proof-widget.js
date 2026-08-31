@@ -4,11 +4,7 @@
   // ============================================================
   // STUDIHOME Social Proof Widget v12
   // ============================================================
-  // Queries v_social_proof_recent VIEW (Migration 16).
-  // VIEW joins orders + products + profiles, bypasses RLS,
-  // exposes only: member_name, product_title, created_at.
-  //
-  // Timing: 4s initial delay, 5s display, 12-25s random interval
+  // Queries get_public_social_proof_recent RPC.\n  // Server returns only verified paid orders with privacy-masked names.\n  // No seed or fabricated-data fallback is permitted.\n  //\n  // Timing: 4s initial delay, 5s display, 12-25s random interval
   // Boot: polls for supabaseClient every 200ms (bulletproof)
   // ============================================================
 
