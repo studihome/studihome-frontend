@@ -95,8 +95,9 @@ module.exports = async (req, res) => {
     }, isHead);
   }
 
+  let loggingTask = Promise.resolve();
   if (query.length > 2) {
-    const loggingTask = fetch(`${supabaseUrl}/rest/v1/rpc/record_ai_search`, {
+    loggingTask = fetch(`${supabaseUrl}/rest/v1/rpc/record_ai_search`, {
       method: 'POST',
       headers: {
         apikey: supabaseAnonKey,
@@ -111,8 +112,6 @@ module.exports = async (req, res) => {
       })
       .catch(error => console.warn('[agent-search] Intent logging failed', error?.message || error));
 
-    if (typeof res.waitUntil === 'function') res.waitUntil(loggingTask);
-    else void loggingTask;
   }
 
   const normalizedQuery = normalizeText(query);
@@ -131,7 +130,10 @@ module.exports = async (req, res) => {
       order: 'created_at.desc',
       limit: String(MAX_SOURCE_ROWS)
     });
-    const response = await fetch(`${supabaseUrl}/rest/v1/creator_services?${params}`, { headers });
+    const [, response] = await Promise.all([
+      loggingTask,
+      fetch(`${supabaseUrl}/rest/v1/creator_services?${params}`, { headers })
+    ]);
     if (!response.ok) {
       console.error('[agent-search] Supabase read failed', response.status);
       return sendJson(res, 502, { error: 'Upstream data source unavailable' }, isHead);
