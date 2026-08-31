@@ -2778,6 +2778,14 @@ App.router.bindCanonicalLinkGuard();
                                 productTitle: product?.title || '',
                                 modules: (mods || []).map(m => ({ id: m.id, title: m.title, yt_url: m.youtube_url, markdown: m.markdown, download_url: m.download_url, links: Array.isArray(m.links_json) ? m.links_json : [] }))
                             };
+                        } else if (action === 'RECORD_SMART_DEMAND') {
+                            const { data: recorded, error } = await supabaseClient.rpc('record_smart_demand', {
+                                p_intent_key: String(payload?.intent_key || 'general'),
+                                p_category_key: String(payload?.category_key || 'general-ai'),
+                                p_session_key: payload?.session_key || null
+                            });
+                            if (error) throw error;
+                            data = { recorded: recorded === true };
                         } else if (action === 'GET_SMART_DEMAND_SUMMARY') {
                             if (!App.state.user || String(App.state.user.role || '').toLowerCase() !== 'admin') throw new Error('Akses Admin diperlukan.');
                             const { data: result, error } = await supabaseClient.rpc('get_smart_demand_summary', { p_days: Number(payload?.days || 7) });
@@ -8789,11 +8797,23 @@ window.addEventListener('DOMContentLoaded', App.init);
   function safeStorageSet(key,val){
     try { sessionStorage.setItem(key,val); return true; } catch(_) { return false; }
   }
+  function newSessionUuid(){
+    if(globalThis.crypto?.randomUUID) return globalThis.crypto.randomUUID();
+    const bytes=new Uint8Array(16);
+    if(globalThis.crypto?.getRandomValues) globalThis.crypto.getRandomValues(bytes);
+    else for(let i=0;i<bytes.length;i+=1) bytes[i]=Math.floor(Math.random()*256);
+    bytes[6]=(bytes[6]&15)|64;
+    bytes[8]=(bytes[8]&63)|128;
+    const hex=Array.from(bytes,b=>b.toString(16).padStart(2,'0')).join('');
+    return `${hex.slice(0,8)}-${hex.slice(8,12)}-${hex.slice(12,16)}-${hex.slice(16,20)}-${hex.slice(20)}`;
+  }
+
   function sessionKey(){
     const key='studihome_smart_session';
+    const uuidPattern=/^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
     let v=safeStorageGet(key);
-    if(!v){
-      v=(crypto?.randomUUID ? crypto.randomUUID() : ('s_'+Date.now()+'_'+Math.random().toString(36).slice(2)));
+    if(!uuidPattern.test(v)){
+      v=newSessionUuid();
       safeStorageSet(key,v);
     }
     return v;
@@ -8835,7 +8855,7 @@ window.addEventListener('DOMContentLoaded', App.init);
     if(/website|webapp|landing/.test(text)) return 'web';
     if(/guru|pendidikan|modul|asesmen/.test(text)) return 'education';
     if(/umkm|jualan|bisnis|sales|marketing|promosi/.test(text)) return 'business-growth';
-    return text || 'general';
+    return 'general';
   }
 
   function renderDemandNote(){
