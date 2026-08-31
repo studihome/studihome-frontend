@@ -26,14 +26,13 @@
 
   async function studioData() {
     const client = await requireAdmin();
-    const [cats, links, creators, services] = await Promise.all([
+    const [cats, creators, services] = await Promise.all([
       client.from('ai_categories').select('id,name,slug,description,icon,is_active,updated_at').order('name', { ascending: true }),
-      client.from('ai_links').select('id,name,icon,sort_order,created_at').order('sort_order', { ascending: true }).order('name', { ascending: true }),
       client.from('creator_profiles').select('id').eq('is_published', true),
       client.from('creator_services').select('id').eq('is_active', true)
     ]);
-    for (const r of [cats, links, creators, services]) if (r.error) throw r.error;
-    return { categories: cats.data || [], links: links.data || [], creators: creators.data || [], services: services.data || [] };
+    for (const r of [cats, creators, services]) if (r.error) throw r.error;
+    return { categories: cats.data || [], creators: creators.data || [], services: services.data || [] };
   }
 
   async function governanceData() {
@@ -99,26 +98,6 @@
     resetCategoryForm(form);
   }
 
-  async function addAiLink(form) {
-    const client = await requireAdmin();
-    const name = String(form.querySelector('[name=name]').value || '').trim();
-    const icon = String(form.querySelector('[name=icon]').value || '').trim();
-    const sortOrder = Number(form.querySelector('[name=sort_order]').value || 0);
-    if (!name) throw new Error('Nama platform AI wajib diisi.');
-    const { error } = await client.from('ai_links').insert({ name, icon, sort_order: Number.isFinite(sortOrder) ? sortOrder : 0 });
-    if (error) throw error;
-    toast('Platform AI ditambahkan.', 'success');
-    form.reset();
-  }
-
-  async function deleteAiLink(id) {
-    const client = await requireAdmin();
-    if (!confirm('Hapus platform AI ini dari katalog?')) return;
-    const { error } = await client.from('ai_links').delete().eq('id', id);
-    if (error) throw error;
-    toast('Platform AI dihapus.', 'success');
-  }
-
   async function patchCreator(id, patch) {
     const client = await requireAdmin();
     const { data: userData } = await client.auth.getUser();
@@ -141,30 +120,24 @@
   function studioView(data) {
     return `
       <div class="space-y-5">
-        <div class="grid grid-cols-2 lg:grid-cols-4 gap-3">
+        <div class="grid grid-cols-2 lg:grid-cols-3 gap-3">
           ${[
             ['Kategori AI', data.categories.length, 'fa-layer-group', 'blue'],
-            ['Platform AI', data.links.length, 'fa-link', 'amber'],
             ['Creator aktif', data.creators.length, 'fa-user-astronaut', 'blue'],
             ['Hidangan aktif', data.services.length, 'fa-bowl-food', 'amber']
           ].map(([label,val,icon,tone]) => `<div class="rounded-2xl border ${tone==='amber'?'border-amber-100':'border-blue-100'} bg-white p-4 shadow-sm"><div class="flex items-center justify-between gap-2"><span class="text-[9px] font-bold text-slate-500">${label}</span><i class="fa-solid ${icon} text-[11px] ${tone==='amber'?'text-amber-600':'text-[#151c75]'}"></i></div><div class="mt-1.5 text-xl font-black text-[#151c75]">${fmt(val)}</div></div>`).join('')}
         </div>
 
-        <div class="grid xl:grid-cols-2 gap-4">
+        <div>
           <section class="rounded-3xl border border-blue-100 bg-white p-4 sm:p-5 shadow-sm">
             <div class="flex items-center justify-between gap-3 mb-3"><div><div class="text-[9px] font-black uppercase tracking-[.1em] text-blue-600">KATALOG</div><h3 class="text-sm font-black text-[#151c75]">Kategori AI</h3></div><button data-g-action="refresh" class="px-3 py-2 rounded-xl bg-blue-50 text-[#151c75] text-[10px] font-bold">Refresh</button></div>
             <form data-g-form="category" class="grid sm:grid-cols-3 gap-2 mb-3"><input type="hidden" id="admin-cat-id" value=""><input name="name" placeholder="Nama kategori" class="w-full rounded-xl border border-slate-200 px-3 py-2 text-xs outline-none"><input name="slug" placeholder="slug" class="w-full rounded-xl border border-slate-200 px-3 py-2 text-xs outline-none"><input name="description" placeholder="Deskripsi singkat" class="w-full rounded-xl border border-slate-200 px-3 py-2 text-xs outline-none"><button id="admin-cat-submit-btn" class="sm:col-span-3 btn-brand-gradient rounded-xl px-3 py-2 text-[10px] font-extrabold">+ Tambah Kategori</button></form>
             <div class="space-y-2 max-h-[420px] overflow-auto pr-1">${data.categories.map(c => `<div class="flex items-center justify-between gap-3 rounded-xl border border-slate-100 bg-slate-50/60 px-3 py-2.5"><div class="min-w-0"><div class="text-[10px] font-extrabold text-slate-700 truncate">${esc(c.name)}</div><div class="text-[9px] text-slate-400 truncate">${esc(c.slug)} · ${c.is_active ? 'Aktif' : 'Nonaktif'}</div></div><div class="flex items-center gap-2 shrink-0"><button data-toggle-cat="${c.id}" data-next="${c.is_active ? 'false' : 'true'}" class="px-2.5 py-1.5 rounded-lg ${c.is_active ? 'bg-emerald-50 text-emerald-700' : 'bg-slate-200 text-slate-600'} text-[9px] font-bold">${c.is_active ? 'Aktif' : 'Aktifkan'}</button><button type="button" data-edit-category="${esc(c.id)}" data-category-id="${esc(c.id)}" data-category-name="${encodeURIComponent(String(c.name || ''))}" data-category-slug="${encodeURIComponent(String(c.slug || ''))}" data-category-description="${encodeURIComponent(String(c.description || ''))}" class="w-7 h-7 rounded-lg bg-blue-50 text-[#151c75] hover:bg-blue-100 flex items-center justify-center transition-all" title="Edit Kategori" aria-label="Edit kategori ${esc(c.name)}"><i class="fa-solid fa-pen text-[10px]" aria-hidden="true"></i></button></div></div>`).join('') || '<div class="text-[10px] text-slate-400">Belum ada kategori.</div>'}</div>
           </section>
 
-          <section class="rounded-3xl border border-amber-100 bg-white p-4 sm:p-5 shadow-sm">
-            <div class="mb-3"><div class="text-[9px] font-black uppercase tracking-[.1em] text-amber-600">INTEGRASI</div><h3 class="text-sm font-black text-[#151c75]">Platform AI</h3><p class="text-[9px] text-slate-500 mt-1">Atur nama, ikon, dan urutan platform yang ditampilkan.</p></div>
-            <form data-g-form="link" class="grid sm:grid-cols-3 gap-2 mb-3"><input name="name" placeholder="Nama platform" class="w-full rounded-xl border border-slate-200 px-3 py-2 text-xs outline-none"><input name="icon" placeholder="fa-solid fa-bolt" class="w-full rounded-xl border border-slate-200 px-3 py-2 text-xs outline-none"><input name="sort_order" type="number" value="0" placeholder="Urutan" class="w-full rounded-xl border border-slate-200 px-3 py-2 text-xs outline-none"><button class="sm:col-span-3 bg-amber-50 text-amber-800 border border-amber-100 rounded-xl px-3 py-2 text-[10px] font-extrabold">+ Tambah Platform</button></form>
-            <div class="space-y-2 max-h-[420px] overflow-auto pr-1">${data.links.map(l => `<div class="flex items-center justify-between gap-3 rounded-xl border border-slate-100 bg-slate-50/60 px-3 py-2.5"><div class="min-w-0"><div class="text-[10px] font-extrabold text-slate-700 truncate"><i class="${esc(l.icon || 'fa-solid fa-link')} mr-1 text-amber-600"></i>${esc(l.name)}</div><div class="text-[9px] text-slate-400">Urutan ${fmt(l.sort_order)}</div></div><button data-delete-link="${l.id}" class="shrink-0 px-2.5 py-1.5 rounded-lg bg-red-50 text-red-700 text-[9px] font-bold">Hapus</button></div>`).join('') || '<div class="text-[10px] text-slate-400">Belum ada platform AI.</div>'}</div>
-          </section>
         </div>
 
-        <div class="rounded-2xl border border-blue-100 bg-blue-50/60 p-4 text-[10px] text-slate-600 leading-relaxed"><b class="text-[#151c75]">Logic Studio AI:</b> katalog AI dan kategorinya menjadi master data yang dipakai halaman Studio AI. Perubahan di sini langsung memengaruhi data yang dibaca frontend publik setelah refresh.</div>
+        <div class="rounded-2xl border border-blue-100 bg-blue-50/60 p-4 text-[10px] text-slate-600 leading-relaxed"><b class="text-[#151c75]">Logic Studio AI:</b> kategori AI menjadi master data yang dipakai halaman Studio AI. Perubahan di sini langsung memengaruhi data yang dibaca frontend publik setelah refresh.</div>
       </div>`;
   }
 
@@ -219,9 +192,7 @@
     area.querySelectorAll('[data-toggle-cat]').forEach(b => b.onclick = async () => { try { await toggleCategory(b.dataset.toggleCat, b.dataset.next === 'true'); await renderStudio(area); toast('Status kategori diperbarui.', 'success'); } catch (e) { toast(e.message || 'Kategori gagal diubah.', 'error'); } });
     const categoryForm = area.querySelector('[data-g-form="category"]');
     area.querySelectorAll('[data-edit-category]').forEach(button => button.onclick = () => editCategory(categoryForm, button));
-    area.querySelectorAll('[data-delete-link]').forEach(b => b.onclick = async () => { try { await deleteAiLink(b.dataset.deleteLink); await renderStudio(area); } catch (e) { toast(e.message || 'Platform gagal dihapus.', 'error'); } });
     categoryForm?.addEventListener('submit', async e => { e.preventDefault(); try { await saveCategory(e.currentTarget); await renderStudio(area); } catch (err) { toast(err.message || 'Kategori gagal disimpan.', 'error'); } });
-    area.querySelector('[data-g-form="link"]')?.addEventListener('submit', async e => { e.preventDefault(); try { await addAiLink(e.currentTarget); await renderStudio(area); } catch (err) { toast(err.message || 'Platform gagal ditambahkan.', 'error'); } });
     area.querySelectorAll('[data-g-action="refresh"]').forEach(b => b.onclick = () => renderStudio(area));
   }
 
