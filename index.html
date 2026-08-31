@@ -1049,29 +1049,6 @@
             </div>
         </div>
     </div>
-    <!-- AI LINK EDIT MODAL (ADMIN) -->
-    <div id="ai-link-modal" class="fixed inset-0 z-50 hidden bg-slate-900/50 backdrop-blur-sm flex items-center justify-center p-3 sm:p-4">
-        <div class="card-3d w-full max-w-md p-5 sm:p-6 rounded-3xl relative bg-white my-auto">
-            <button onclick="App.ui.toggleModal('ai-link-modal', false)" class="modal-close-btn absolute top-4 right-4 w-8 h-8 rounded-full flex items-center justify-center font-extrabold shadow-md hover:brightness-110 z-20">
-                <i class="fa-solid fa-xmark"></i>
-            </button>
-            <h3 id="ai-link-modal-title" class="text-base font-extrabold text-[#151c75] mb-4">Kelola Tautan AI</h3>
-            <form onsubmit="App.admin.saveAiLinkFromModal(event)" class="space-y-4">
-                <input type="hidden" id="ai-link-index" value="-1">
-                <div>
-                    <label class="block text-xs font-bold text-slate-700 mb-1">Nama Platform AI</label>
-                    <input type="text" id="ai-link-name" required placeholder="mis. Perplexity AI" class="w-full card-3d-inset px-3.5 py-2.5 rounded-xl text-xs sm:text-sm outline-none">
-                </div>
-                <div>
-                    <label class="block text-xs font-bold text-slate-700 mb-1">Class Icon FontAwesome & Warna</label>
-                    <input type="text" id="ai-link-icon" required placeholder="fa-solid fa-robot text-emerald-500" class="w-full card-3d-inset px-3.5 py-2.5 rounded-xl text-xs sm:text-sm outline-none">
-                </div>
-                <div class="flex items-center gap-2 pt-2">
-                    <button type="submit" class="btn-brand-gradient px-4 py-2.5 rounded-xl text-xs font-bold w-full">Simpan Tautan AI</button>
-                </div>
-            </form>
-        </div>
-    </div>
     <script>
         // SUPABASE CLIENT BOOTSTRAP
         const SUPABASE_URL = window.STUDIHOME_SUPABASE_URL || '';
@@ -1220,7 +1197,6 @@ const App = {
                 },
                 demo: {
                     hero: {},
-                    aiLinks: [],
                     testimonials: [
                         { id: 'demo-t1', name: 'Raka Prasetyo', role: 'Dosen Perguruan Tinggi', demoOnly: true, text: 'Alur kerja AI-nya membantu saya merapikan bahan ajar, materi kuliah, dan pekerjaan akademik tanpa harus mulai dari nol setiap kali.' },
                         { id: 'demo-t2', name: 'Novi Lestari', role: 'Guru SD', demoOnly: true, text: 'Prompt-nya praktis dan gampang disesuaikan dengan kebutuhan kelas. Jadi lebih cepat menyiapkan materi dan aktivitas pembelajaran.' },
@@ -1448,7 +1424,6 @@ App.router.bindCanonicalLinkGuard();
                         [/^Modul berhasil disimpan/i, 'Modul berhasil disimpan. Mantap!'],
                         [/^Modul dihapus/i, 'Modul berhasil dihapus.'],
                         [/^Tampilan Hero berhasil/i, 'Tampilan utama berhasil diperbarui.'],
-                        [/^Tautan Marquee AI berhasil/i, 'Daftar AI berhasil diperbarui.'],
                         [/^Testimoni berhasil disimpan/i, 'Testimoni berhasil disimpan.'],
                         [/^Testimoni dihapus/i, 'Testimoni berhasil dihapus.'],
                         [/^Harga QRIS & Master Data tersimpan/i, 'Pengaturan QRIS sudah tersimpan.'],
@@ -2273,18 +2248,17 @@ App.router.bindCanonicalLinkGuard();
                     return { ...data, email: data.email || user.email || '', registeredAt: data.created_at };
                 },
                 _public: async () => {
-                    const [settingsRes, productsRes, aiRes, testimonialsRes] = await withTimeout(
+                    const [settingsRes, productsRes, testimonialsRes] = await withTimeout(
                         Promise.all([
                             supabaseClient.from('site_settings').select('*').eq('id', 1).maybeSingle(),
                             supabaseClient.from('products').select('id,title,description,price,price_original,badge,category,image_url,features,is_free,is_active,is_featured,created_at,updated_at').eq('is_active', true).order('created_at', { ascending: false }),
-                            supabaseClient.from('ai_links').select('id,name,icon,sort_order,created_at').order('sort_order', { ascending: true }),
                             supabaseClient.from('testimonials').select('id,name,role,text,created_at').order('created_at', { ascending: false })
                         ]),
                         10000,
                         'Data publik Supabase terlalu lama dimuat.'
                     );
 
-                    for (const r of [settingsRes, productsRes, aiRes, testimonialsRes]) {
+                    for (const r of [settingsRes, productsRes, testimonialsRes]) {
                         if (r.error) throw r.error;
                     }
 
@@ -2299,7 +2273,6 @@ App.router.bindCanonicalLinkGuard();
                             ctaSecondaryLabel: s.cta_secondary_label || 'Klaim Produk Gratis',
                             ctaSecondaryUrl: s.cta_secondary_url || '#products'
                         },
-                        aiLinks: (aiRes.data || []).map(x => ({ id: x.id, name: x.name, icon: x.icon, sortOrder: x.sort_order })),
                         products: (productsRes.data || []).map(App.api._mapProduct),
                         testimonials: testimonialsRes.data || [],
                         master: { qrisSlots: Array.isArray(s.qris_slots) ? s.qris_slots : [], underConstruction: s.under_construction || {} }
@@ -2310,7 +2283,7 @@ App.router.bindCanonicalLinkGuard();
                     badge: p.badge, category: p.category, imgUrl: p.image_url, features: p.features,
                     isFree: !!p.is_free, isActive: !!p.is_active, isFeatured: !!p.is_featured
                 }),
-                getMockData: () => App.state.publicData || { hero: {}, aiLinks: [], products: [], testimonials: [], master: { qrisSlots: [] } },
+                getMockData: () => App.state.publicData || { hero: {}, products: [], testimonials: [], master: { qrisSlots: [] } },
                 post: async (action, payload = {}) => {
                     App.api._requireConfig();
                     App.ui.updateApiStatus('connecting');
@@ -2800,26 +2773,25 @@ App.router.bindCanonicalLinkGuard();
                             if (error) throw error;
                             data = { rows: result || [] };
                         } else if (action === 'GET_ADMIN_DATA') {
-                            const [sRes,pRes,mRes,aRes,tRes,oRes,uRes] = await Promise.all([
+                            const [sRes,pRes,mRes,tRes,oRes,uRes] = await Promise.all([
                                 supabaseClient.from('site_settings').select('*').eq('id',1).single(),
                                 supabaseClient.from('products').select('*').order('created_at',{ascending:false}),
                                 supabaseClient.from('modules').select('*').order('created_at',{ascending:true}),
-                                supabaseClient.from('ai_links').select('*').order('sort_order',{ascending:true}),
                                 supabaseClient.from('testimonials').select('*').order('created_at',{ascending:false}),
                                 supabaseClient.from('orders').select('id,user_id,product_id,unit_price,total_amount,status,payment_status,payment_confirmed_at,created_at,products(title),profiles!orders_user_id_fkey(name,email,phone)').order('created_at',{ascending:false}),
                                 supabaseClient.from('profiles').select('id,name,email,phone,role,status,created_at').order('created_at',{ascending:false})
                             ]);
-                            for (const r of [sRes,pRes,mRes,aRes,tRes,oRes,uRes]) if (r.error) throw r.error;
+                            for (const r of [sRes,pRes,mRes,tRes,oRes,uRes]) if (r.error) throw r.error;
                             const s=sRes.data||{};
                             const grouped={}; (mRes.data||[]).forEach(m => { (grouped[m.product_id] ||= []).push({id:m.id,title:m.title,yt_url:m.youtube_url,markdown:m.markdown,download_url:m.download_url,links:m.links_json||[]}); });
                             data={
                                 hero:{badge:s.badge||'',title:s.hero_title||'',subtitle:s.hero_subtitle||'',ctaPrimaryLabel:s.cta_primary_label||'',ctaPrimaryUrl:s.cta_primary_url||'#products',ctaSecondaryLabel:s.cta_secondary_label||'',ctaSecondaryUrl:s.cta_secondary_url||'#p4'},
-                                master:{qrisSlots:s.qris_slots||[],underConstruction:s.under_construction||{}}, aiLinks:(aRes.data||[]).map(x=>({id:x.id,name:x.name,icon:x.icon,sortOrder:x.sort_order})),
+                                master:{qrisSlots:s.qris_slots||[],underConstruction:s.under_construction||{}},
                                 testimonials:tRes.data||[], products:(pRes.data||[]).map(App.api._mapProduct), modules:grouped,
                                 orders:(oRes.data||[]).map(o=>({id:o.id,userId:o.user_id,userName:o.profiles?.name||'',userEmail:o.profiles?.email||'',userPhone:o.profiles?.phone||'',productId:o.product_id,productTitle:o.products?.title||'',price:Number(o.total_amount||o.unit_price),status:o.status,paymentStatus:o.payment_status,paymentConfirmedAt:o.payment_confirmed_at||null,createdAt:o.created_at})),
                                 users:uRes.data||[]
                             };
-                            App.state.demo.hero=data.hero; App.state.demo.master=data.master; App.state.demo.aiLinks=data.aiLinks; App.state.demo.testimonials=data.testimonials; App.state.demo.products=data.products; App.state.demo.modules=data.modules; App.state.demo.orders=data.orders; App.state.demo.users=data.users;
+                            App.state.demo.hero=data.hero; App.state.demo.master=data.master; App.state.demo.testimonials=data.testimonials; App.state.demo.products=data.products; App.state.demo.modules=data.modules; App.state.demo.orders=data.orders; App.state.demo.users=data.users;
                         } else if (action === 'CREATE_ORDER') {
                             const { data: rpc, error } = await withTimeout(supabaseClient.rpc('create_order', { p_product_id: payload.productId, p_name: payload.name, p_phone: payload.phone }), 10000, 'Pembuatan order terlalu lama.');
                             if (error) throw error; data = rpc;
@@ -2858,9 +2830,6 @@ App.router.bindCanonicalLinkGuard();
                             const {error}=await supabaseClient.from('modules').delete().eq('id',payload.moduleId); if(error)throw error; data={success:true};
                         } else if (action === 'ADMIN_SAVE_HERO') {
                             const cd=typeof payload.countdown==='object'&&payload.countdown?payload.countdown:{};const uc=App.state.publicData?.master?.underConstruction||{};uc.heroCountdown=cd;const {error:heroErr}=await supabaseClient.from('site_settings').upsert({id:1,badge:payload.badge||'',hero_title:payload.title||'',hero_subtitle:payload.subtitle||'',cta_primary_label:payload.ctaPrimaryLabel||'Jelajahi Produk',cta_primary_url:payload.ctaPrimaryUrl||'#products',cta_secondary_label:payload.ctaSecondaryLabel||'Klaim Produk Gratis',cta_secondary_url:payload.ctaSecondaryUrl||'#products',qris_slots:App.state.publicData?.master?.qrisSlots || [],under_construction:uc,updated_at:new Date().toISOString()},{onConflict:'id'}); if(heroErr)throw heroErr; data={success:true};
-                        } else if (action === 'ADMIN_SAVE_AI_LINKS') {
-                            const links=payload.aiLinks||[]; const {error:dErr}=await supabaseClient.from('ai_links').delete().neq('id','00000000-0000-0000-0000-000000000000'); if(dErr)throw dErr;
-                            const rows=links.map((x,i)=>({name:x.name,icon:x.icon,sort_order:i+1})); if(rows.length){const {error:iErr}=await supabaseClient.from('ai_links').insert(rows);if(iErr)throw iErr;} data={success:true};
                         } else if (action === 'ADMIN_SAVE_TESTIMONIAL') {
                             const t=payload.testimonial; const row={name:t.name,role:t.role,text:t.text}; if(t.id)row.id=t.id; const {data:r,error}=await supabaseClient.from('testimonials').upsert(row).select().single(); if(error)throw error; data={testimonial:r};
                         } else if (action === 'ADMIN_DELETE_TESTIMONIAL') {
@@ -3155,7 +3124,6 @@ App.router.bindCanonicalLinkGuard();
                     const data = App.state.publicData || App.api.getMockData('GET_PUBLIC');
 
                     const hero = data.hero || App.state.demo.hero;
-                    const aiLinks = data.aiLinks || App.state.demo.aiLinks;
                     const featuredProducts = (data.products || []).filter(p => p.isFeatured).slice(0, 3);
 
                     const heroPromoMods = JSON.parse(localStorage.getItem('studihome_hero_promo_modules') || '[]');
@@ -7233,7 +7201,6 @@ renderStudioAiControl: async () => {
                             const hero = adminData.hero || App.state.demo.hero;
                             const heroUC = adminData.master?.underConstruction || {};
                             const heroCD = heroUC.heroCountdown || {};
-                            const aiLinks = adminData.aiLinks || App.state.demo.aiLinks;
                             const testimonials = adminData.testimonials || App.state.demo.testimonials;
                             const heroPromoModsDB3 = await App.admin._loadHeroPromoModsFromDB();
                             const heroPromoMods = (heroPromoModsDB3 !== null && heroPromoModsDB3.length > 0) ? heroPromoModsDB3 : JSON.parse(localStorage.getItem('studihome_hero_promo_modules') || '[]');
@@ -7993,22 +7960,6 @@ renderStudioAiControl: async () => {
                     App.ui.toast('Tampilan Hero berhasil diperbarui!', 'success');
                 },
 
-                openAiLinkModal: (index = -1) => {
-                    const aiLinks = App.state.demo.aiLinks || [];
-                    document.getElementById('ai-link-index').value = index;
-
-                    if (index >= 0 && aiLinks[index]) {
-                        document.getElementById('ai-link-modal-title').textContent = "Edit Tautan AI";
-                        document.getElementById('ai-link-name').value = aiLinks[index].name;
-                        document.getElementById('ai-link-icon').value = aiLinks[index].icon;
-                    } else {
-                        document.getElementById('ai-link-modal-title').textContent = "Tambah Tautan AI";
-                        document.getElementById('ai-link-name').value = "";
-                        document.getElementById('ai-link-icon').value = "fa-solid fa-robot text-emerald-500";
-                    }
-                    App.ui.toggleModal('ai-link-modal', true);
-                },
-
                 reviewCreator: async (creatorId, decision) => {
                     try {
                         const note = decision === 'REJECTED' ? (window.prompt('Catatan singkat untuk Creator:', '') || '') : '';
@@ -8017,33 +7968,6 @@ renderStudioAiControl: async () => {
                         await App.admin.renderSubTab();
                     } catch(e) { App.ui.toast(e.message || 'Review Creator belum berhasil. Coba lagi, ya.', 'error'); }
                 },
-                saveAiLinkFromModal: async (e) => {
-                    e.preventDefault();
-                    const index = parseInt(document.getElementById('ai-link-index').value, 10);
-                    const name = document.getElementById('ai-link-name').value;
-                    const icon = document.getElementById('ai-link-icon').value;
-
-                    const current = App.state.demo.aiLinks || [];
-                    if (index >= 0 && index < current.length) {
-                        current[index] = { name, icon };
-                    } else {
-                        current.push({ name, icon });
-                    }
-
-                    await App.api.post('ADMIN_SAVE_AI_LINKS', { aiLinks: current });
-                    App.ui.toggleModal('ai-link-modal', false);
-                    App.ui.toast('Tautan Marquee AI berhasil disimpan!', 'success');
-                    App.admin.renderSubTab();
-                },
-
-                deleteAiLink: async (index) => {
-                    const current = App.state.demo.aiLinks || [];
-                    current.splice(index, 1);
-                    await App.api.post('ADMIN_SAVE_AI_LINKS', { aiLinks: current });
-                    App.ui.toast('Link AI dihapus.', 'info');
-                    App.admin.renderSubTab();
-                },
-
                 // ---- Blog Article CRUD ----
                 openBlogArticleForm: (editId) => {
                     const box = document.getElementById('blog-article-form-box');
