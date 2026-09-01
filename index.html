@@ -6482,18 +6482,24 @@ ${(() => { const rs=String(p.review_status||'DRAFT').toUpperCase(); const map={D
                     if(host==='instagram.com'||host.endsWith('.instagram.com')) return {ok:true,provider:'instagram'};
                     return {ok:false,provider:''};
                 },
-                triggerIndexNow(username, portfolioSlug){
+                async triggerIndexNow(username, portfolioSlug){
                     try {
                         const safeUsername=String(username||'').trim().toLowerCase();
                         const safeSlug=String(portfolioSlug||'').trim().toLowerCase();
                         if(!safeUsername||!safeSlug)return;
+                        const {data:sessionData,error:sessionError}=await supabaseClient.auth.getSession();
+                        const accessToken=sessionData?.session?.access_token||'';
+                        if(sessionError||!accessToken)return;
                         const targetUrl=`https://studihome.id/${encodeURIComponent(safeUsername)}/portfolio/${encodeURIComponent(safeSlug)}`;
-                        fetch('/api/index-push',{
+                        await fetch('/api/index-push',{
                             method:'POST',
-                            headers:{'Content-Type':'application/json'},
+                            headers:{
+                                'Content-Type':'application/json',
+                                'Authorization':`Bearer ${accessToken}`
+                            },
                             body:JSON.stringify({url:targetUrl}),
                             keepalive:true
-                        }).catch(error=>console.warn('[IndexNow] Portfolio push failed silently:',error));
+                        });
                     } catch(error) {
                         console.warn('[IndexNow] Portfolio trigger skipped:',error);
                     }
@@ -6508,7 +6514,7 @@ ${(() => { const rs=String(p.review_status||'DRAFT').toUpperCase(); const map={D
                 portfolioForm(id=''){const p=(this.data?.portfolios||[]).find(x=>x.id===id)||{};const services=this.data?.services||[];const vt=p.media_type||'';return `<div class="card-3d-inset p-4 rounded-xl mb-3"><input id="cp-title" value="${App.utils.escapeHtml(p.title||'')}" placeholder="Judul ambalan" class="w-full card-3d-inset px-3 py-2.5 rounded-xl text-xs outline-none"><textarea id="cp-desc" rows="2" placeholder="Deskripsi singkat karya" class="w-full card-3d-inset px-3 py-2.5 rounded-xl text-xs outline-none mt-2">${App.utils.escapeHtml(p.description||'')}</textarea><div class="grid sm:grid-cols-2 gap-2 mt-2"><select id="cp-service" class="w-full card-3d-inset px-3 py-2.5 rounded-xl text-xs outline-none"><option value="">Hidangan terkait (opsional)</option>${services.map(s=>`<option value="${s.id}" ${p.service_id===s.id?'selected':''}>${App.utils.escapeHtml(s.title)}</option>`).join('')}</select><select id="cp-type" class="w-full card-3d-inset px-3 py-2.5 rounded-xl text-xs outline-none"><option value="youtube" ${vt==='youtube'?'selected':''}>YouTube</option><option value="drive" ${vt==='drive'?'selected':''}>Google Drive</option><option value="tiktok" ${vt==='tiktok'?'selected':''}>TikTok</option><option value="instagram" ${vt==='instagram'?'selected':''}>Instagram</option></select></div><input id="cp-url" value="${App.utils.escapeHtml(p.media_url||'')}" placeholder="Tempel tautan YouTube / Drive / TikTok / Instagram" class="w-full card-3d-inset px-3 py-2.5 rounded-xl text-xs outline-none mt-2"><p class="creator-media-note mt-2">Foto/video tidak diunggah langsung. Gunakan tautan publik dari YouTube, Google Drive, TikTok, atau Instagram. Sistem akan memeriksa domain sebelum menyimpan.</p><div class="flex gap-2 mt-2"><button onclick="App.creatorStudio.savePortfolio('${id}')" class="btn-brand-gradient px-3.5 py-2 rounded-xl text-xs font-bold">Simpan Ambalan</button><button onclick="App.creatorStudio.reload()" class="px-3.5 py-2 rounded-xl text-xs font-bold bg-slate-100">Batal</button></div></div>`;},
                 addPortfolioForm(){const box=document.getElementById('creator-portfolio-list');if(box)box.innerHTML=this.portfolioForm()+this.portfolioList();},
                 editPortfolio(id){const box=document.getElementById('creator-portfolio-list');if(box)box.innerHTML=this.portfolioForm(id)+this.portfolioList();},
-                async savePortfolio(id=''){try{const url=String(document.getElementById('cp-url')?.value||'').trim();const v=this.validatePortfolioUrl(url);if(!v.ok)throw new Error('Tautan harus berasal dari YouTube, Google Drive, TikTok, atau Instagram.');const title=String(document.getElementById('cp-title')?.value||'').trim();await App.api.post('CREATOR_SAVE_PORTFOLIO',{id,serviceId:document.getElementById('cp-service').value||null,title,description:document.getElementById('cp-desc').value,mediaType:v.provider,mediaUrl:url,sortOrder:0,isActive:true});if(this.data?.profile?.is_published)this.triggerIndexNow(this.data.profile.username,App.creator._slugify(title));App.ui.toast('Ambalan berhasil disimpan.','success');await this.reload();}catch(e){App.ui.toast(e.message||'Ambalan belum bisa disimpan.','error');}},
+                async savePortfolio(id=''){try{const url=String(document.getElementById('cp-url')?.value||'').trim();const v=this.validatePortfolioUrl(url);if(!v.ok)throw new Error('Tautan harus berasal dari YouTube, Google Drive, TikTok, atau Instagram.');const title=String(document.getElementById('cp-title')?.value||'').trim();await App.api.post('CREATOR_SAVE_PORTFOLIO',{id,serviceId:document.getElementById('cp-service').value||null,title,description:document.getElementById('cp-desc').value,mediaType:v.provider,mediaUrl:url,sortOrder:0,isActive:true});if(this.data?.profile?.is_published)void this.triggerIndexNow(this.data.profile.username,App.creator._slugify(title));App.ui.toast('Ambalan berhasil disimpan.','success');await this.reload();}catch(e){App.ui.toast(e.message||'Ambalan belum bisa disimpan.','error');}},
                 async deletePortfolio(id){if(!confirm('Portfolio ini mau dihapus?'))return;try{await App.api.post('CREATOR_DELETE_PORTFOLIO',{id});App.ui.toast('Portfolio dihapus.','info');await this.reload();}catch(e){App.ui.toast(e.message||'Portfolio belum bisa dihapus.','error');}},
                 async copyPublicLink(url){ try{ await navigator.clipboard.writeText(url); App.ui.toast('Link profilmu sudah disalin. Tinggal tempel di bio 😎','success'); } catch(e){ App.ui.toast('Link belum bisa disalin otomatis. Coba salin manual ya.','info'); } },
                 async shareProfile(url){ const text=`Lihat profil saya di Studihome: ${url}`; try{ if(navigator.share){ await navigator.share({title:'Profil Studihome',text,url}); } else { await navigator.clipboard.writeText(url); App.ui.toast('Link profilmu sudah disalin. Tinggal dibagikan ✨','success'); } } catch(e){ if(e?.name!=='AbortError') App.ui.toast('Belum berhasil membagikan. Link-nya tetap siap kamu salin.','info'); } },
