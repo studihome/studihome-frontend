@@ -2611,24 +2611,42 @@ App.router.bindCanonicalLinkGuard();
                             const liked = !!payload.liked;
                             if (liked) {
                                 const { error } = await supabaseClient.from('creator_portfolio_likes').delete().eq('portfolio_id', portfolioId).eq('user_id', App.state.user.id);
-                                if (error) throw error;
+                                if (error) {
+                                    if (error.code === '23505' || (error.httpStatusCode === 409)) {
+                                        const { data: existing } = await supabaseClient.from('creator_portfolio_likes').select('id').eq('portfolio_id', portfolioId).eq('user_id', App.state.user.id).maybeSingle();
+                                        if (existing) { data = { liked: true }; } else throw error;
+                                    } else throw error;
+                                } else { data = { liked: false }; }
                             } else {
                                 const { error } = await supabaseClient.from('creator_portfolio_likes').insert({ portfolio_id: portfolioId, user_id: App.state.user.id });
-                                if (error) throw error;
+                                if (error) {
+                                    if (error.code === '23505' || (error.httpStatusCode === 409)) {
+                                        const { data: existing } = await supabaseClient.from('creator_portfolio_likes').select('id').eq('portfolio_id', portfolioId).eq('user_id', App.state.user.id).maybeSingle();
+                                        if (existing) { data = { liked: true }; } else throw error;
+                                    } else throw error;
+                                } else { data = { liked: true }; }
                             }
-                            data = { liked: !liked };
                         } else if (action === 'TOGGLE_CREATOR_LIKE') {
                             if (!App.state.user?.id) throw new Error('Masuk dulu ya untuk memberi Like.');
                             const creatorId = payload.creatorId;
                             const liked = !!payload.liked;
                             if (liked) {
                                 const { error } = await supabaseClient.from('creator_likes').delete().eq('creator_id', creatorId).eq('user_id', App.state.user.id);
-                                if (error) throw error;
+                                if (error) {
+                                    if (error.code === '23505' || (error.httpStatusCode === 409)) {
+                                        const { data: existing } = await supabaseClient.from('creator_likes').select('id').eq('creator_id', creatorId).eq('user_id', App.state.user.id).maybeSingle();
+                                        if (existing) { data = { liked: true }; } else throw error;
+                                    } else throw error;
+                                } else { data = { liked: false }; }
                             } else {
                                 const { error } = await supabaseClient.from('creator_likes').insert({ creator_id: creatorId, user_id: App.state.user.id });
-                                if (error) throw error;
+                                if (error) {
+                                    if (error.code === '23505' || (error.httpStatusCode === 409)) {
+                                        const { data: existing } = await supabaseClient.from('creator_likes').select('id').eq('creator_id', creatorId).eq('user_id', App.state.user.id).maybeSingle();
+                                        if (existing) { data = { liked: true }; } else throw error;
+                                    } else throw error;
+                                } else { data = { liked: true }; }
                             }
-                            data = { liked: !liked };
 
                         } else if (action === 'GET_CREATOR_STUDIO') {
                             const user = await App.api._profile();
@@ -5681,14 +5699,17 @@ renderCreatorStandardSummary: (creator, data, categories, services, portfolios) 
                         }
                     } catch (_) {}
                 },
+                _pfLikeInFlight: false,
                 togglePortfolioLike: async (portfolioId, currentLiked, btnElement) => {
-                    if (!App.state.user) {
-                        App.ui.toast('Yuk masuk atau daftar dulu untuk memberikan Like ❤️', 'info');
-                        App.ui.toggleModal('auth-modal', true);
-                        return;
-                    }
-                    const isLikedNow = !currentLiked;
+                    if (App.creator._pfLikeInFlight) return;
+                    App.creator._pfLikeInFlight = true;
                     try {
+                        if (!App.state.user) {
+                            App.ui.toast('Yuk masuk atau daftar dulu untuk memberikan Like ❤️', 'info');
+                            App.ui.toggleModal('auth-modal', true);
+                            return;
+                        }
+                        const isLikedNow = !currentLiked;
                         await App.api.post('TOGGLE_PORTFOLIO_LIKE', { portfolioId, liked: currentLiked });
                         const delta = isLikedNow ? 1 : -1;
                         const pf = App.state.creatorProfile?.portfolios?.find(p => p.id === portfolioId);
@@ -5718,6 +5739,8 @@ renderCreatorStandardSummary: (creator, data, categories, services, portfolios) 
                     } catch (e) {
                         App.ui.toast(e?.message || 'Like belum berhasil diproses.', 'error');
                         await App.creator.render(App.state.creatorUsername, App.state.creatorAmbalanSlug);
+                    } finally {
+                        App.creator._pfLikeInFlight = false;
                     }
                 },
                 sharePortfolio: async (username, slug, title) => {
@@ -5732,7 +5755,10 @@ renderCreatorStandardSummary: (creator, data, categories, services, portfolios) 
                         }
                     } catch (_) {}
                 },
+                _likeInFlight: false,
                 toggleLike: async (creatorId, currentLiked) => {
+                    if (App.creator._likeInFlight) return;
+                    App.creator._likeInFlight = true;
                     try {
                         if (!App.state.user) {
                             App.state.routeAfterLogin = window.location.pathname;
@@ -5740,11 +5766,14 @@ renderCreatorStandardSummary: (creator, data, categories, services, portfolios) 
                             App.ui.toggleModal('auth-modal', true);
                             return;
                         }
-                        await App.api.post('TOGGLE_CREATOR_LIKE', { creatorId, liked: currentLiked });
-                        App.ui.toast(currentLiked ? 'Like kamu sudah dilepas.' : 'Mantap! Creator ini masuk daftar yang kamu suka. ❤️', 'success');
+                        const result = await App.api.post('TOGGLE_CREATOR_LIKE', { creatorId, liked: currentLiked });
+                        const nowLiked = result?.liked ?? !currentLiked;
+                        App.ui.toast(nowLiked ? 'Mantap! Creator ini masuk daftar yang kamu suka. ❤️' : 'Like kamu sudah dilepas.', 'success');
                         await App.creator.render(App.state.creatorUsername, App.state.creatorAmbalanSlug);
                     } catch (e) {
                         App.ui.toast(e?.message || 'Like belum berhasil diproses.', 'error');
+                    } finally {
+                        App.creator._likeInFlight = false;
                     }
                 }
             },
