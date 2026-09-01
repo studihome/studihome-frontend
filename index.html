@@ -1350,10 +1350,11 @@ const App = {
                 }
                 const initialPath = window.location.pathname.toLowerCase().replace(/\/$/, '') || '/';
                 if (!window.location.hash && initialPath !== '/') {
-                    const knownPaths = ['/', '/foyer', '/products', '/kamar', '/dashboard', '/admin', '/studio-ai', '/dapur', '/ruang-kerja', '/creator-studio', '/blog', '/balkon'];
+                    const knownPaths = ['/', '/foyer', '/products', '/kamar', '/dashboard', '/admin', '/studio-ai', '/dapur', '/ruang-kerja', '/creator-studio', '/blog', '/balkon', '/reset-password'];
                     const isCategoryPath = /^(\/ai-|\/kursus-ai|\/jasa-ai|\/ai-untuk-)/i.test(initialPath);
                     const isCreatorPath = /^\/[a-z0-9][a-z0-9-]{2,39}(?:\/portfolio\/[a-z0-9][a-z0-9-]{0,120})?$/i.test(initialPath) && !knownPaths.includes(initialPath) && !isCategoryPath;
-                    if (initialPath === '/studio-ai') { App.router.routePath('/studio-ai'); }
+                    if (initialPath === '/reset-password') { App.router.routePath('/reset-password'); }
+                    else if (initialPath === '/studio-ai') { App.router.routePath('/studio-ai'); }
                     else if (initialPath === '/balkon' || initialPath.startsWith('/balkon/')) { App.router.routePath(initialPath); }
                     else if (initialPath.startsWith('/blog/')) { App.router.routePath('/blog/' + initialPath.split('/blog/')[1]); }
                     else if (initialPath === '/ruang-kerja' || initialPath === '/creator-studio') { window.history.replaceState({}, '', '/dapur'); App.router.routePath('/dapur'); }
@@ -2005,6 +2006,7 @@ App.router.bindCanonicalLinkGuard();
                     if (parts[0] === 'admin') { App.state.routeType = 'admin'; return; }
                     if (parts[0] === 'blog') { App.state.routeType = 'blog'; App.state.blogSlug = parts[1] || ''; return; }
                     if (parts[0] === 'balkon') { App.state.routeType = 'balkon'; App.state.balkonSlug = parts[1] || ''; return; }
+                    if (parts[0] === 'reset-password') { App.state.routeType = 'reset-password'; return; }
                     if (/^(ai-|kursus-ai|jasa-ai|ai-untuk-)/i.test(parts[0])) { App.state.routeType = 'studio-ai'; App.state.studioAICategory = parts[0].toLowerCase(); return; }
                     if (parts.length === 1) { App.state.routeType = 'creator'; App.state.creatorUsername = parts[0].toLowerCase(); App.state.creatorAmbalanSlug = ''; return; }
                     if (parts.length >= 3 && parts[1] === 'portfolio') { App.state.routeType = 'creator'; App.state.creatorUsername = parts[0].toLowerCase(); App.state.creatorAmbalanSlug = parts.slice(2).join('-').toLowerCase(); return; }
@@ -2098,6 +2100,10 @@ App.router.bindCanonicalLinkGuard();
                             } else if (App.blog) {
                                 App.blog.renderPage();
                             }
+                            return true;
+                        case 'reset-password':
+                            App.ui.renderNavigation();
+                            App.auth.renderResetPasswordPage();
                             return true;
                         case 'balkon':
                             App.ui.renderNavigation();
@@ -2198,6 +2204,15 @@ App.router.bindCanonicalLinkGuard();
                     const rawHash = window.location.hash.replace(/^#/, '').toLowerCase();
                     if (rawHash === 'dapur' || rawHash === 'ruang-kerja' || rawHash.startsWith('dapur-')) {
                         window.location.assign('/dapur');
+                        return;
+                    }
+                    // Supabase recovery token from reset password email
+                    if (currentPath === '/reset-password' && (rawHash.includes('access_token') || rawHash.includes('type=recovery'))) {
+                        window.history.replaceState({}, '', '/reset-password');
+                        App.state.routePath = '/reset-password';
+                        App.state.routeType = 'reset-password';
+                        App.ui.renderNavigation();
+                        App.auth.renderResetPasswordPage();
                         return;
                     }
                     const legacyRoutes = {
@@ -2372,6 +2387,11 @@ App.router.bindCanonicalLinkGuard();
                             const { error } = await supabaseClient.auth.resetPasswordForEmail(payload.email, {
                                 redirectTo: window.location.origin + '/reset-password'
                             });
+                            if (error) throw error;
+                            data = { success: true };
+                        } else if (action === 'AUTH_UPDATE_PASSWORD') {
+                            if (!payload.password || payload.password.length < 6) throw new Error('Password minimal 6 karakter.');
+                            const { error } = await supabaseClient.auth.updateUser({ password: payload.password });
                             if (error) throw error;
                             data = { success: true };
                         } else if (action === 'SUBMIT_CREATOR_REVIEW') {
@@ -3067,6 +3087,88 @@ App.router.bindCanonicalLinkGuard();
                         document.getElementById('forgot-submit-btn')?.classList.add('hidden');
                     } catch (err) {
                         App.ui.toast(err.message || 'Gagal mengirim link reset. Coba lagi, ya.', 'error');
+                    }
+                },
+
+                renderResetPasswordPage: () => {
+                    const main = document.getElementById('main-content');
+                    if (!main) return;
+                    main.innerHTML = `
+                    <div class="min-h-[80vh] flex items-center justify-center px-4 py-12">
+                        <div class="w-full max-w-md">
+                            <div class="bg-white rounded-2xl shadow-xl border border-gray-100 overflow-hidden">
+                                <div class="bg-gradient-to-br from-[#151c75] to-[#3f48bf] p-6 text-center">
+                                    <div class="text-3xl text-yellow-400 mb-2 font-black">✦</div>
+                                    <h1 class="text-xl font-black text-white">Studihome</h1>
+                                    <p class="text-blue-200 text-xs mt-1">Platform Pembelajaran Digital &amp; Agentic AI</p>
+                                </div>
+                                <div class="p-6 sm:p-8">
+                                    <div class="inline-block bg-amber-50 text-amber-800 border border-amber-200 rounded-full px-3 py-1 text-[10px] font-extrabold tracking-wide mb-4">RESET KATA SANDI</div>
+                                    <h2 class="text-lg font-extrabold text-[#151c75] mb-2">Atur Kata Sandi Baru 🔒</h2>
+                                    <p class="text-gray-500 text-xs mb-6">Masukkan kata sandi baru Anda di bawah ini. Pastikan minimal 6 karakter.</p>
+                                    <form id="reset-password-form" class="space-y-4">
+                                        <div>
+                                            <label class="block text-xs font-bold text-gray-600 mb-1.5">Kata Sandi Baru</label>
+                                            <input type="password" id="new-password" autocomplete="new-password" required minlength="6" placeholder="Minimal 6 karakter" class="w-full card-3d-inset px-3.5 py-2.5 rounded-xl text-sm outline-none focus:ring-2 focus:ring-[#151c75]">
+                                        </div>
+                                        <div>
+                                            <label class="block text-xs font-bold text-gray-600 mb-1.5">Konfirmasi Kata Sandi</label>
+                                            <input type="password" id="confirm-password" autocomplete="new-password" required minlength="6" placeholder="Ulangi kata sandi" class="w-full card-3d-inset px-3.5 py-2.5 rounded-xl text-sm outline-none focus:ring-2 focus:ring-[#151c75]">
+                                        </div>
+                                        <button type="submit" id="reset-password-btn" class="w-full bg-gradient-to-r from-amber-400 to-amber-500 text-gray-900 font-extrabold text-sm py-3 rounded-xl shadow-lg shadow-amber-200/50 hover:shadow-amber-300/60 transition-all">
+                                            ✓ &nbsp; Simpan Kata Sandi Baru
+                                        </button>
+                                        <p id="reset-success" class="hidden text-center text-green-600 text-xs font-bold">✅ Kata sandi berhasil diperbarui! Mengalihkan ke halaman masuk...</p>
+                                        <p id="reset-error" class="hidden text-center text-red-500 text-xs font-bold"></p>
+                                    </form>
+                                    <div class="text-center mt-5 pt-4 border-t border-gray-100">
+                                        <button onclick="App.router.navigate('home')" class="text-xs font-bold text-[#151c75] hover:underline">← Kembali ke Studihome</button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>`;
+                    // Bind form submit
+                    document.getElementById('reset-password-form')?.addEventListener('submit', App.auth.handleUpdatePassword);
+                    // Clean the URL
+                    if (window.location.hash) {
+                        window.history.replaceState({}, '', '/reset-password');
+                    }
+                },
+
+                handleUpdatePassword: async (e) => {
+                    e.preventDefault();
+                    const newPw = document.getElementById('new-password')?.value || '';
+                    const confirmPw = document.getElementById('confirm-password')?.value || '';
+                    const errEl = document.getElementById('reset-error');
+                    const okEl = document.getElementById('reset-success');
+                    const btn = document.getElementById('reset-password-btn');
+
+                    if (errEl) { errEl.classList.add('hidden'); errEl.textContent = ''; }
+                    if (okEl) okEl.classList.add('hidden');
+
+                    if (newPw.length < 6) {
+                        if (errEl) { errEl.textContent = 'Password minimal 6 karakter.'; errEl.classList.remove('hidden'); }
+                        return;
+                    }
+                    if (newPw !== confirmPw) {
+                        if (errEl) { errEl.textContent = 'Konfirmasi password tidak cocok.'; errEl.classList.remove('hidden'); }
+                        return;
+                    }
+
+                    if (btn) { btn.disabled = true; btn.textContent = 'Menyimpan...'; }
+                    try {
+                        await App.api.post('AUTH_UPDATE_PASSWORD', { password: newPw });
+                        if (okEl) okEl.classList.remove('hidden');
+                        if (btn) btn.textContent = '✅ Berhasil!';
+                        App.ui.toast('Kata sandi berhasil diperbarui! 🎉', 'success');
+                        setTimeout(() => {
+                            App.router.navigate('home');
+                            App.ui.toggleModal('auth-modal', true);
+                        }, 2000);
+                    } catch (err) {
+                        if (errEl) { errEl.textContent = err.message || 'Gagal memperbarui password. Coba lagi.'; errEl.classList.remove('hidden'); }
+                        if (btn) { btn.disabled = false; btn.textContent = '✓  Simpan Kata Sandi Baru'; }
                     }
                 },
 
