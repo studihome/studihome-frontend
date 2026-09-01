@@ -1,157 +1,96 @@
 # STUDIHOME — RELEASE CHECKLIST
 
-**Last updated: 26 Agustus 2026**  
-**Current status: AUDIT OPEN**
+Updated: 1 September 2026  
+Status: **AUDIT OPEN — DO NOT CLAIM SIAP RILIS**
 
-## A. Source / Config
-- [x] `main` SHA identified and consistent across all 3 docs (Handoff, Constitution, State).
-- [x] Production SHA verified via Vercel dashboard matches local HEAD. (**Verified: `f9c6d51`**, 26 Aug 2026)
-- [ ] `vercel.json` parses and contains only canonical Dapur rewrites.
-- [ ] No invalid inline regex in Vercel rewrite sources.
-- [ ] No legacy Dapur injector/gate is referenced by canonical shell.
-- [ ] `dapur.html` loads canonical runtime only.
-- [ ] No global `MutationObserver` in canonical Dapur runtime.
-- [ ] No second-stage Dapur decorator.
-- [ ] No Tailwind CDN.
-- [ ] `/tailwind-compiled.css` exists and is loaded.
-- [ ] **CSS version consistent** across source and all docs (`?v=20260825r3`).
-- [ ] **No dead file references** (e.g., `/dapur-button.js` in vercel.json when file absent).
+Allowed values: PASS / FAIL / BLOCKED / NOT VERIFIED.
 
-## A2. Security Headers
-- [ ] `X-Frame-Options: SAMEORIGIN` present.
-- [ ] `Strict-Transport-Security: max-age=63072000; includeSubDomains; preload` present.
-- [ ] `X-Content-Type-Options: nosniff` present.
-- [x] CSP meta tag present in `index.html` (with appropriate directives).
-- [x] `Referrer-Policy: strict-origin-when-cross-origin` present.
+## A. Source dan Deployment
 
-## A3. Database Migrations
-- [ ] Migration 10 (`validate_creator_publish` + `search_path=""` + REVOKE EXECUTE) run and verified. (File: **HARDENED ✅**, not yet run)
-- [ ] Migration 11 (`contact_email DROP NOT NULL`) run and verified. (File: **HARDENED ✅**, not yet run)
-- [ ] Migration 12 (`hero_promo_modules JSONB`) run and verified. (File: **HARDENED ✅**, not yet run)
-- [ ] All SECURITY DEFINER functions have `search_path=""` (post-migration check).
-- [ ] No anon/PUBLIC EXECUTE grants on authorization-only functions.
+- PASS — GitHub main identified: `6bfb0bd3dbf390dea479731d1d0189d27ce5e058`.
+- PASS — Vercel status check succeeded for main commit.
+- NOT VERIFIED — Production-alias deployment SHA equals current main.
+- PASS — `vercel.json` is valid JSON and SPA fallback is last.
+- PASS — `/dapur` and `/dapur/:username` precede SPA fallback.
+- PASS — sitemap and Markdown rewrites precede SPA fallback.
+- PASS — no Tailwind CDN; compiled CSS loaded as `r6`.
+- NOT VERIFIED — reproducible CSS build and Preflight contract.
 
-## A4. Internal Gate Consistency
-- [ ] RC15 gate status matches RC16 gate status (no contradictions in `index.html`).
-- [ ] RC15 `db.is-admin-public-execute` is PASS.
-- [ ] RC15 `db.post-patch-verify` is PASS.
-- [ ] RC16 `release.fingerprint` matches or is documented as drift.
-- [ ] RC19 `security.final` reports `SECURITY_CLOSED`.
-- [ ] RC19 `release.status` reports `FROZEN`.
+## B. Database dan Security
 
-## B. Homepage Visual Regression Gate
-- [ ] Hero matches locked baseline: blue gradient `#151c75 → #3f48bf`.
-- [ ] Hero typography/spacing/CTA unchanged from agreed baseline.
-- [ ] No white-card cascade regression over hero.
-- [ ] Desktop screenshot checked.
-- [ ] Mobile screenshot checked.
+- PASS — Supabase is current authority and migrations are queryable.
+- PASS — target state of historical M10–M12 exists live.
+- PASS — migrations 34–36 applied and recorded.
+- PASS — audited SECURITY DEFINER functions have explicit search path.
+- NOT VERIFIED — every SECURITY DEFINER caller, authorization check, output contract, and EXECUTE grant.
+- PASS — authorization-only helpers deny anon in live privilege check.
+- FAIL — leaked-password protection disabled according to Security Advisor.
+- NOT VERIFIED — storage owner upload/update/delete E2E.
+- NOT VERIFIED — public RPC abuse/rate-limit matrix.
+- PASS — `ai_links` retired from current database migration history and feature integration.
 
-## C. Auth Accessibility Gate
-- [ ] `#login-email` → `autocomplete="username"`.
-- [ ] `#login-password` → `autocomplete="current-password"`.
-- [ ] `#reg-name` → `autocomplete="name"`.
-- [ ] `#reg-email` → `autocomplete="email"`.
-- [ ] `#reg-phone` → `autocomplete="tel"`.
-- [ ] `#reg-password` → `autocomplete="new-password"`.
-- [ ] No browser autocomplete warnings on member/admin login modal.
-- [ ] **Browser-verified** (Constitution Gate B — previously OPEN, must re-verify).
+## C. Routing dan Runtime
 
-## D. Public Flow
-- [ ] `/` loads.
-- [ ] `/dapur` loads as the same Dapur shell used for members.
-- [ ] Public shows `Masuk / Daftar` only as its active auth action.
-- [ ] `Masuk / Daftar` opens the canonical popup.
-- [ ] Public Dapur does not show auth verification error before session resolution.
-- [ ] Flash Sale loads exactly one active Premium product with the largest current discount.
-- [ ] Flash Sale checkout uses existing Lobi checkout/order flow.
-- [ ] Public Creator API reads return 200.
-- [ ] No 401/403/404/500 caused by public Creator read requests.
+- PASS — `/dapur` renders canonical Dapur shell in production browser.
+- BLOCKED — `/balkon` browser E2E while Under Construction gate is active.
+- BLOCKED — `/studio-ai` browser E2E while Under Construction gate is active.
+- NOT VERIFIED — public Creator and portfolio deep links across back/forward navigation.
+- NOT VERIFIED — no legacy Dapur asset/runtime requests.
+- NOT VERIFIED — complete console/network error matrix.
 
-## E. Member / Premium Flow
-### Non-Premium
-- [ ] `/dapur` renders.
-- [ ] Workspace remains denied.
-- [ ] Direct `/dapur/{username}` cannot bypass entitlement.
+## D. Auth dan Ownership
 
-### Premium without Creator
-- [ ] CTA is `Mulai Membuat Dapur`.
-- [ ] Backend provisions draft exactly once.
-- [ ] Redirect to `/dapur/{username}` succeeds.
-- [ ] Refresh does not create duplicate Creator.
+- NOT VERIFIED — login/register browser flow.
+- NOT VERIFIED — auth autocomplete warnings absent.
+- NOT VERIFIED — Premium without Creator provisions exactly one draft.
+- NOT VERIFIED — Premium owner can manage own Dapur.
+- NOT VERIFIED — non-owner cannot edit another Creator.
+- NOT VERIFIED — logout denies workspace.
+- NOT VERIFIED — admin authority cannot be reached by public/member.
 
-### Premium with Creator
-- [ ] CTA is `Kelola Dapur Kamu` / current canonical copy.
-- [ ] Opens the owned workspace.
-- [ ] Workspace is usable on mobile and desktop.
+## E. Functional Regression
 
-## F. Creator Workspace E2E
-- [ ] Foyer save works.
-- [ ] Menu save works.
-- [ ] Hidangan save works.
-- [ ] Ambalan save works.
-- [ ] Username change with valid value works.
-- [ ] Duplicate username is rejected.
-- [ ] No `permission denied for function validate_creator_username`.
-- [ ] Public URL follows updated username.
-- [ ] `Salin` copies canonical `/{username}` URL.
-- [ ] `Bagikan` uses supported share behavior.
-- [ ] Owner cannot edit another Creator.
-- [ ] Logout blocks workspace access.
+- NOT VERIFIED — Foyer/Menu/Hidangan/Ambalan save flows.
+- NOT VERIFIED — username update and duplicate rejection.
+- NOT VERIFIED — organic Creator/portfolio Like and unlike rollback behavior.
+- NOT VERIFIED — admin Like adjustments remain consistent with public totals.
+- NOT VERIFIED — checkout/payment/order confirmation flow.
+- NOT VERIFIED — social-proof runtime returns only confirmed, public-safe fields.
 
-## G. Admin
-- [ ] `/admin` loads.
-- [ ] Admin auth modal works.
-- [ ] Admin autocomplete warnings are absent.
-- [ ] Admin Creator controls still work.
-- [ ] No public user can reach admin authority.
+## F. UI/UX dan Accessibility
 
-## H. Runtime / Network
-- [ ] Vercel Production deployment is `READY`.
-- [ ] Deployment SHA equals final functional source SHA.
-- [ ] `/dapur` HTTP 200.
-- [ ] `/dapur/{username}` HTTP 200.
-- [ ] No Dapur runtime errors in Vercel logs.
-- [ ] No unexpected legacy Dapur asset requests.
-- [ ] No `Uncaught TypeError`, `permission denied`, `Failed to fetch`, 401, 403, 404, 500 on tested flows.
+- NOT VERIFIED — homepage locked visual baseline desktop.
+- NOT VERIFIED — mobile 375px layout and horizontal overflow.
+- NOT VERIFIED — keyboard focus and modal behavior.
+- NOT VERIFIED — reduced-motion behavior.
+- NOT VERIFIED — text/input sizing and touch targets.
+- NOT VERIFIED — Balkon/Creator/Dapur image rendering on mobile.
 
-## I. Performance / Accessibility
-- [ ] No unnecessary polling.
-- [ ] Long timer violations are profiled before modification.
-- [ ] Inputs are readable and ≥16px on mobile where applicable.
-- [ ] Keyboard focus works.
-- [ ] ESC/backdrop closes auth modal where expected.
-- [ ] `prefers-reduced-motion` respected.
-- [ ] No horizontal overflow on ~375px viewport.
+## G. SEO dan GEO
 
-## J. Documentation Alignment
-- [ ] MASTER_HANDOFF_PROMPT status matches actual state.
-- [ ] PROJECT_CONSTITUTION Art XV baseline matches actual production.
-- [ ] PROJECT_STATE_LATEST reflects current file inventory.
-- [ ] All 3 docs cite the same Production SHA.
-- [ ] No stale claims (e.g., "✅ verified" for items that require browser verification).
+- PASS — sitemap endpoint source has timeout, cache, and static fallback.
+- PASS — IndexNow source requires auth, ownership, canonical URL, and rate limit.
+- NOT VERIFIED — production HTTP response for `sitemap.xml`, `llms.txt`, `openapi.yaml` in this browser environment.
+- NOT VERIFIED — canonical/metadata/JSON-LD for every dynamic route.
+- NOT VERIFIED — Markdown RAG routes for Creator, portfolio, article, and pSEO.
+- NOT VERIFIED — pSEO content factual integrity and absence of fabricated statistics.
 
-## K. Release Decision
+## H. Performance
 
-### PASS criteria
-All critical sections A–J pass. Section I may contain non-blocking warnings only if documented and outside the current release scope.
+- PASS — Creator RLS initplans optimized for profiles, social, services, portfolios, and categories.
+- NOT VERIFIED — remaining initplans for `site_settings`, `testimonials`, `modules`.
+- NOT VERIFIED — five remaining foreign-key index recommendations.
+- NOT VERIFIED — duplicate-index cleanup after query/caller proof.
+- NOT VERIFIED — browser performance and long-task profile.
 
-### DO NOT RELEASE when
-- Production SHA is not verified and consistent across all docs.
-- Homepage hero differs from locked visual contract (browser-verified).
-- Auth accessibility warning remains on tested production modal (browser-verified).
-- Creator authorization/ownership is not proven (browser E2E).
-- Public Creator read requests return unauthorized errors.
-- Any canonical Dapur legacy runtime is still active.
-- RC15/RC16 internal contradiction exists.
-- Migrations 10–12 not run.
-- Security headers incomplete.
-- Documentation contains unverifiable claims.
+## I. Release Decision
 
-### Status values
-- `AUDIT OPEN` — audit findings not yet resolved
-- `FIX IN PROGRESS` — fixes being applied
-- `READY FOR E2E` — code ready, awaiting browser verification
-- `READY FOR MIGRATION` — code ready, migrations pending
-- `SIAP RILIS` — all gates passed, browser-verified
+Release claim remains BLOCKED until all P0 items are PASS:
+1. SECURITY DEFINER caller/grant audit.
+2. Authenticated owner/admin/Dapur E2E.
+3. Checkout/payment regression verification.
+4. Production-alias SHA reconciliation.
+5. Critical browser console/network checks.
 
-`SIAP RILIS` is allowed **only** after actual browser verification, not source inspection alone.
+Current weighted readiness: **72%**. Remaining: **28%**.
+
