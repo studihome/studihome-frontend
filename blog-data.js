@@ -461,8 +461,8 @@
         .blog-article-canvas,.blog-article-promo{width:100%;box-sizing:border-box}
         .blog-article-inner{padding:clamp(1.25rem,3vw,2rem) clamp(.75rem,4vw,3rem) clamp(1.5rem,4vw,2.5rem)}
         .blog-article-back{margin-bottom:clamp(1.25rem,2.5vw,1.75rem)}
-        .blog-article-category{margin:0 0 clamp(1.25rem,2.5vw,1.75rem)}
-        .blog-article-actions{margin:clamp(4.375rem,8.5vw,5.75rem) 0 clamp(.75rem,2vw,1.25rem);padding-top:clamp(1.5rem,3vw,2rem)}
+        .blog-article-category{margin:clamp(.5rem,1vw,.75rem) 0 clamp(1.25rem,2.5vw,1.75rem)}
+        .blog-article-actions{margin:clamp(2.5rem,5vw,3.5rem) 0 clamp(.75rem,2vw,1.25rem);padding-top:clamp(1.5rem,3vw,2rem)}
         @media (max-width:639px){.blog-article-canvas,.blog-article-promo{width:min(100vw,calc(100% + 16px));margin-left:50%;margin-right:0;transform:translateX(-50%)}.blog-article-inner{padding-inline:clamp(.875rem,4vw,1.25rem)}}
       </style>
       <div class="blog-article-page">
@@ -472,7 +472,7 @@
         </button>
 
         <!-- White Canvas Article Container -->
-        <article class="blog-article-canvas w-full bg-white rounded-3xl md:shadow-md md:border border-slate-100 overflow-hidden mb-8">
+        <article class="blog-article-canvas w-full bg-white rounded-3xl md:shadow-md md:border border-slate-100 overflow-hidden mb-10">
           <div class="blog-article-inner">
             <!-- Category (semantic) -->
             <nav aria-label="Kategori Artikel" class="blog-article-category">
