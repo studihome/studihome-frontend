@@ -6,8 +6,8 @@ Tanggal pembaruan: 1 September 2026
 Status: **AUDIT OPEN — 72% release-verified, 28% remaining**  
 Repository: `studihome/studihome-frontend`  
 Branch: `main`  
-Current main SHA: `6bfb0bd3dbf390dea479731d1d0189d27ce5e058`  
-Vercel check: **SUCCESS** untuk SHA tersebut; production-alias SHA masih harus dikonfirmasi dari dashboard sebelum klaim rilis.
+Functional baseline SHA: `6bfb0bd3dbf390dea479731d1d0189d27ce5e058`  
+Commits setelah baseline tersebut pada 1 September 2026 hanya memperbarui dokumen handoff/state/checklist. Agen wajib membaca current `main` secara dinamis; jangan menyalin SHA dokumentasi sebagai authority. Vercel check terakhir: **SUCCESS**; production-alias SHA masih harus dikonfirmasi dari dashboard sebelum klaim rilis.
 
 ## 1. ROLE DAN GOAL
 
@@ -85,8 +85,8 @@ Interpretasi: implementasi fitur diperkirakan sekitar 84%, tetapi readiness yang
 
 ## 6. CONFIRMED CURRENT BASELINE
 
-- Main SHA: `6bfb0bd3dbf390dea479731d1d0189d27ce5e058`.
-- Vercel status check pada commit: SUCCESS.
+- Functional source baseline SHA: `6bfb0bd3dbf390dea479731d1d0189d27ce5e058`; current main harus diverifikasi saat agen mulai.
+- Vercel status check terakhir: SUCCESS.
 - `/dapur` merender `Dapur Creator Studihome` pada browser production.
 - `/balkon` dan `/studio-ai` saat ini diarahkan ke halaman upgrade oleh Under Construction gate; verification keduanya **BLOCKED**, bukan FAIL.
 - `vercel.json` memiliki urutan rewrite: sitemap → markdown → Dapur → SPA fallback.
