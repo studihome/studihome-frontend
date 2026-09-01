@@ -1,6 +1,8 @@
 'use strict';
 
 const BASE_URL = 'https://studihome.id';
+const SUPABASE_READ_TIMEOUT_MS = 3500;
+const CDN_CACHE_CONTROL = 'public, s-maxage=3600, stale-while-revalidate=86400';
 const STATIC_PAGES = [
   ['/', 'daily', '1.0'],
   ['/foyer', 'daily', '0.9'],
@@ -43,11 +45,45 @@ function buildUrl(path, lastmod, changefreq, priority, image) {
   return xml + '  </url>\n';
 }
 
+function setSitemapHeaders(res) {
+  res.setHeader('Content-Type', 'application/xml; charset=utf-8');
+  res.setHeader('Cache-Control', 'public, max-age=0, must-revalidate');
+  res.setHeader('Vercel-CDN-Cache-Control', CDN_CACHE_CONTROL);
+  res.setHeader('X-Content-Type-Options', 'nosniff');
+}
+
+async function readList(base, headers, path) {
+  const controller = new AbortController();
+  const timeoutId = setTimeout(() => controller.abort(), SUPABASE_READ_TIMEOUT_MS);
+
+  try {
+    const response = await fetch(`${base}/rest/v1/${path}`, {
+      headers,
+      signal: controller.signal
+    });
+    if (!response.ok) {
+      console.warn('[sitemap] Supabase read failed', response.status, path);
+      return [];
+    }
+    const body = await response.json();
+    return Array.isArray(body) ? body : [];
+  } catch (error) {
+    const reason = error?.name === 'AbortError' ? 'timed out' : (error?.message || error);
+    console.warn('[sitemap] Supabase request failed', path, reason);
+    return [];
+  } finally {
+    clearTimeout(timeoutId);
+  }
+}
+
 module.exports = async (req, res) => {
   if (req.method !== 'GET' && req.method !== 'HEAD') {
     res.setHeader('Allow', 'GET, HEAD');
     return res.status(405).end();
   }
+
+  setSitemapHeaders(res);
+  if (req.method === 'HEAD') return res.status(200).end();
 
   const supabaseUrl = process.env.SUPABASE_URL || process.env.VITE_SUPABASE_URL;
   const supabaseAnonKey = process.env.SUPABASE_ANON_KEY || process.env.VITE_SUPABASE_ANON_KEY;
@@ -61,26 +97,11 @@ module.exports = async (req, res) => {
     Authorization: `Bearer ${supabaseAnonKey}`,
     Accept: 'application/json'
   };
-  const readList = async path => {
-    try {
-      const response = await fetch(`${base}/rest/v1/${path}`, { headers });
-      if (!response.ok) {
-        console.warn('[sitemap] Supabase read failed', response.status, path);
-        return [];
-      }
-      const body = await response.json();
-      return Array.isArray(body) ? body : [];
-    } catch (error) {
-      console.warn('[sitemap] Supabase request failed', path, error?.message || error);
-      return [];
-    }
-  };
-
   const today = dateOnly();
   const [creators, categories, portfolios] = await Promise.all([
-    readList('creator_profiles?is_published=eq.true&select=id,username,display_name,avatar_url,updated_at&order=updated_at.desc&limit=5000'),
-    readList('ai_categories?is_active=eq.true&select=slug&order=name.asc&limit=200'),
-    readList('creator_portfolios?is_active=eq.true&select=creator_id,title,media_url,media_type,created_at&order=created_at.desc&limit=5000')
+    readList(base, headers, 'creator_profiles?is_published=eq.true&select=id,username,display_name,avatar_url,updated_at&order=updated_at.desc&limit=5000'),
+    readList(base, headers, 'ai_categories?is_active=eq.true&select=slug&order=name.asc&limit=200'),
+    readList(base, headers, 'creator_portfolios?is_active=eq.true&select=creator_id,title,media_url,media_type,created_at&order=created_at.desc&limit=5000')
   ]);
 
   let entries = STATIC_PAGES.map(([path, freq, priority]) => buildUrl(path, today, freq, priority)).join('');
@@ -98,8 +119,7 @@ module.exports = async (req, res) => {
     entries += buildUrl(
       `/${encodeURIComponent(username)}`,
       dateOnly(creator.updated_at),
-      'weekly',
-      '0.8',
+      'weekly', '0.8',
       creator.avatar_url ? { url: creator.avatar_url, title: creator.display_name || username } : null
     );
   });
@@ -116,8 +136,7 @@ module.exports = async (req, res) => {
     entries += buildUrl(
       `/${encodeURIComponent(username)}/portfolio/${encodeURIComponent(slug)}`,
       dateOnly(portfolio.created_at),
-      'monthly',
-      '0.6',
+      'monthly', '0.6',
       portfolio.media_type === 'image' && portfolio.media_url
         ? { url: portfolio.media_url, title: portfolio.title || '' }
         : null
@@ -130,7 +149,6 @@ module.exports = async (req, res) => {
     + entries
     + '</urlset>\n';
 
-  res.setHeader('Content-Type', 'application/xml; charset=utf-8');
-  res.setHeader('Cache-Control', 'public, s-maxage=3600, stale-while-revalidate=86400');
   return res.status(200).send(xml);
 };
+
