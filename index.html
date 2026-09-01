@@ -1917,6 +1917,14 @@ App.router.bindCanonicalLinkGuard();
                         window.location.assign('/dapur');
                         return;
                     }
+                    if (tab === 'dashboard' && App.state._recoverySessionReady) {
+                        window.history.replaceState({}, '', '/reset-password');
+                        App.state.routePath = '/reset-password';
+                        App.state.routeType = 'reset-password';
+                        App.ui.renderNavigation();
+                        App.auth.renderResetPasswordPage();
+                        return;
+                    }
                     const routes = {
                         home: '/',
                         products: '/foyer',
@@ -2031,18 +2039,17 @@ App.router.bindCanonicalLinkGuard();
                         window.location.assign('/dapur');
                         return;
                     }
+                    if ((parts[0] === 'dashboard' || parts[0] === 'kamar') && App.state._recoverySessionReady) {
+                        App.state.routeType = 'reset-password';
+                        window.history.replaceState({}, '', '/reset-password');
+                        return;
+                    }
                     if (parts[0] === 'dashboard' || parts[0] === 'kamar') { App.state.routeType = 'dashboard'; return; }
                     if (parts[0] === 'admin') { App.state.routeType = 'admin'; return; }
                     if (parts[0] === 'blog') { App.state.routeType = 'blog'; App.state.blogSlug = parts[1] || ''; return; }
                     if (parts[0] === 'balkon') { App.state.routeType = 'balkon'; App.state.balkonSlug = parts[1] || ''; return; }
                     if (parts[0] === 'reset-password') {
                         App.state.routeType = 'reset-password';
-                        return;
-                    }
-                    // Block dashboard access during password recovery
-                    if ((parts[0] === 'dashboard' || parts[0] === 'kamar') && App.state._recoverySessionReady) {
-                        App.state.routeType = 'reset-password';
-                        window.history.replaceState({}, '', '/reset-password');
                         return;
                     }
                     if (/^(ai-|kursus-ai|jasa-ai|ai-untuk-)/i.test(parts[0])) { App.state.routeType = 'studio-ai'; App.state.studioAICategory = parts[0].toLowerCase(); return; }
@@ -3213,6 +3220,21 @@ App.router.bindCanonicalLinkGuard();
                         if (okEl) okEl.classList.remove('hidden');
                         if (btn) btn.textContent = '✅ Berhasil!';
                         App.ui.toast('Kata sandi berhasil diperbarui! 🎉', 'success');
+                        App.state._recoverySessionReady = false;
+                        try {
+                            const profile = await withTimeout(
+                                App.api._profile(),
+                                8000,
+                                'Profil pengguna tidak dapat dimuat.'
+                            );
+                            App.state.user = profile && String(profile.status).toLowerCase() === 'active'
+                                ? profile
+                                : null;
+                        } catch (profileError) {
+                            console.warn('[ResetPassword] Profile refresh failed:', profileError?.message || profileError);
+                            App.state.user = null;
+                        }
+                        App.ui.renderTopAuth();
                         setTimeout(() => {
                             App.router.navigate('home');
                             App.ui.toggleModal('auth-modal', true);
