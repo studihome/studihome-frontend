@@ -5447,7 +5447,7 @@ App.router.bindCanonicalLinkGuard();
                                    <div class="w-full lg:w-auto">
                                         <div class="w-full lg:w-auto">
                                         <div class="grid grid-cols-3 gap-2 mb-3">
-                                            <div onclick="App.creator.toggleLike('${c.id}', ${data.liked ? 'true' : 'false'})" class="creator-trust-chip rounded-2xl px-3 py-2.5 text-center cursor-pointer hover:bg-white/10 transition-colors"><div class="text-lg font-black">${data.liked ? '❤️' : '♡'} ${data.likes || 0}</div><div class="text-[9px] text-blue-100">Disukai</div></div>
+                                            <div id="creator-like-btn-${c.id}" onclick="App.creator.toggleLike('${c.id}', ${data.liked ? 'true' : 'false'}, this)" class="creator-trust-chip rounded-2xl px-3 py-2.5 text-center cursor-pointer hover:bg-white/10 transition-colors"><div class="text-lg font-black">${data.liked ? '❤️' : '♡'} ${data.likes || 0}</div><div class="text-[9px] text-blue-100">Disukai</div></div>
                                             <div onclick="App.creator.copyProfileLink('${App.utils.escapeHtml(c.username)}')" class="creator-trust-chip rounded-2xl px-3 py-2.5 text-center cursor-pointer hover:bg-white/10 transition-colors"><div class="text-lg font-black"><i class="fa-solid fa-link"></i></div><div class="text-[9px] text-blue-100">Salin Tautan</div></div>
                                             <div onclick="App.creator.shareProfile('${App.utils.escapeHtml(c.username)}')" class="creator-trust-chip rounded-2xl px-3 py-2.5 text-center cursor-pointer hover:bg-white/10 transition-colors"><div class="text-lg font-black"><i class="fa-solid fa-share-nodes"></i></div><div class="text-[9px] text-blue-100">Bagikan</div></div>
                                         </div>
@@ -5760,7 +5760,7 @@ renderCreatorStandardSummary: (creator, data, categories, services, portfolios) 
                     } catch (_) {}
                 },
                 _likeInFlight: false,
-                toggleLike: async (creatorId, currentLiked) => {
+                toggleLike: async (creatorId, currentLiked, btnElement) => {
                     if (App.creator._likeInFlight) return;
                     App.creator._likeInFlight = true;
                     try {
@@ -5770,10 +5770,15 @@ renderCreatorStandardSummary: (creator, data, categories, services, portfolios) 
                             App.ui.toggleModal('auth-modal', true);
                             return;
                         }
-                        const result = await App.api.post('TOGGLE_CREATOR_LIKE', { creatorId, liked: currentLiked });
-                        const nowLiked = result?.liked ?? !currentLiked;
-                        App.ui.toast(nowLiked ? 'Mantap! Creator ini masuk daftar yang kamu suka. ❤️' : 'Like kamu sudah dilepas.', 'success');
-                        await App.creator.render(App.state.creatorUsername, App.state.creatorAmbalanSlug);
+                        const isLikedNow = !currentLiked;
+                        await App.api.post('TOGGLE_CREATOR_LIKE', { creatorId, liked: currentLiked });
+                        if (btnElement) {
+                            btnElement.setAttribute('onclick', `App.creator.toggleLike('${creatorId}', ${isLikedNow}, this)`);
+                            const data = App.state.creatorProfile || {};
+                            const newCount = Math.max(0, Number(data.likes || 0) + (isLikedNow ? 1 : -1));
+                            btnElement.innerHTML = `<div class="text-lg font-black">${isLikedNow ? '❤️' : '♡'} ${newCount}</div><div class="text-[9px] text-blue-100">Disukai</div>`;
+                        }
+                        App.ui.toast(isLikedNow ? 'Mantap! Creator ini masuk daftar yang kamu suka. ❤️' : 'Like kamu sudah dilepas.', 'success');
                     } catch (e) {
                         App.ui.toast(e?.message || 'Like belum berhasil diproses.', 'error');
                         try { await App.creator.render(App.state.creatorUsername, App.state.creatorAmbalanSlug); } catch (_) {}
