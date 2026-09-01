@@ -1282,6 +1282,17 @@ const App = {
                 App.studioAI._loadSmartContext();
                 App.ui.updateApiStatus('connecting');
                 try {
+                    // Intercept Supabase recovery token BEFORE client creation
+                    // to prevent auto-login and ensure proper handling
+                    const _resetPwPath = window.location.pathname === '/reset-password';
+                    const _resetPwHash = window.location.hash || '';
+                    const _hasRecovery = _resetPwPath && _resetPwHash.includes('access_token') && _resetPwHash.includes('type=recovery');
+                    let _recoveryTokens = null;
+                    if (_hasRecovery) {
+                        const p = new URLSearchParams(_resetPwHash.replace(/^#/, ''));
+                        _recoveryTokens = { access_token: p.get('access_token'), refresh_token: p.get('refresh_token') };
+                        window.history.replaceState({}, '', '/reset-password');
+                    }
                     initSupabase();
                     App.api._requireConfig();
                     await App.auth.handleEmailVerificationFromUrl();
@@ -1291,9 +1302,24 @@ const App = {
                         8000,
                         'Koneksi sesi Supabase terlalu lama.'
                     );
-                    const session = sessionResult?.data?.session || null;
+                    let session = sessionResult?.data?.session || null;
 
-                    if (session?.user) {
+                    // If recovery tokens were extracted, manually set the session
+                    if (_recoveryTokens && _recoveryTokens.access_token && _recoveryTokens.refresh_token) {
+                        const { data: recoverySession, error: recoveryErr } = await supabaseClient.auth.setSession({
+                            access_token: _recoveryTokens.access_token,
+                            refresh_token: _recoveryTokens.refresh_token
+                        });
+                        if (!recoveryErr && recoverySession?.session) {
+                            session = recoverySession.session;
+                            App.state._recoverySessionReady = true;
+                        } else {
+                            console.error('[ResetPassword] Recovery session error:', recoveryErr);
+                            App.ui.toast('Link reset tidak valid atau sudah kedaluwarsa. Minta link baru.', 'error');
+                        }
+                    }
+
+                    if (session?.user && !_hasRecovery) {
                         try {
                             App.state.user = await withTimeout(
                                 App.api._profile(),
@@ -1313,6 +1339,8 @@ const App = {
                     await App.home.load();
                     supabaseClient.auth.onAuthStateChange((_event, sessionNow) => {
                         void (async () => {
+                            // Skip profile load during password recovery to prevent auto-login
+                            if (App.state.routeType === 'reset-password' || App.state._recoverySessionReady) return;
                             if (!sessionNow?.user) {
                                 await cleanupRealtime();
                                 App.state.user = null;
@@ -2006,7 +2034,10 @@ App.router.bindCanonicalLinkGuard();
                     if (parts[0] === 'admin') { App.state.routeType = 'admin'; return; }
                     if (parts[0] === 'blog') { App.state.routeType = 'blog'; App.state.blogSlug = parts[1] || ''; return; }
                     if (parts[0] === 'balkon') { App.state.routeType = 'balkon'; App.state.balkonSlug = parts[1] || ''; return; }
-                    if (parts[0] === 'reset-password') { App.state.routeType = 'reset-password'; return; }
+                    if (parts[0] === 'reset-password') {
+                        App.state.routeType = 'reset-password';
+                        return;
+                    }
                     if (/^(ai-|kursus-ai|jasa-ai|ai-untuk-)/i.test(parts[0])) { App.state.routeType = 'studio-ai'; App.state.studioAICategory = parts[0].toLowerCase(); return; }
                     if (parts.length === 1) { App.state.routeType = 'creator'; App.state.creatorUsername = parts[0].toLowerCase(); App.state.creatorAmbalanSlug = ''; return; }
                     if (parts.length >= 3 && parts[1] === 'portfolio') { App.state.routeType = 'creator'; App.state.creatorUsername = parts[0].toLowerCase(); App.state.creatorAmbalanSlug = parts.slice(2).join('-').toLowerCase(); return; }
@@ -2206,15 +2237,7 @@ App.router.bindCanonicalLinkGuard();
                         window.location.assign('/dapur');
                         return;
                     }
-                    // Supabase recovery token from reset password email
-                    if (currentPath === '/reset-password' && (rawHash.includes('access_token') || rawHash.includes('type=recovery'))) {
-                        window.history.replaceState({}, '', '/reset-password');
-                        App.state.routePath = '/reset-password';
-                        App.state.routeType = 'reset-password';
-                        App.ui.renderNavigation();
-                        App.auth.renderResetPasswordPage();
-                        return;
-                    }
+
                     const legacyRoutes = {
                         home: '/',
                         products: '/foyer',
@@ -2391,6 +2414,10 @@ App.router.bindCanonicalLinkGuard();
                             data = { success: true };
                         } else if (action === 'AUTH_UPDATE_PASSWORD') {
                             if (!payload.password || payload.password.length < 6) throw new Error('Password minimal 6 karakter.');
+                            // Ensure recovery session is fully established before updating
+                            const { data: sessData, error: sessErr } = await supabaseClient.auth.getSession();
+                            if (sessErr) throw new Error('Sesi tidak valid. Minta link reset baru.');
+                            if (!sessData?.session) throw new Error('Sesi belum aktif. Silakan buka link reset dari email lagi.');
                             const { error } = await supabaseClient.auth.updateUser({ password: payload.password });
                             if (error) throw error;
                             data = { success: true };
@@ -3098,9 +3125,8 @@ App.router.bindCanonicalLinkGuard();
                         <div class="w-full max-w-md">
                             <div class="bg-white rounded-2xl shadow-xl border border-gray-100 overflow-hidden">
                                 <div class="bg-gradient-to-br from-[#151c75] to-[#3f48bf] p-6 text-center">
-                                    <div class="text-3xl text-yellow-400 mb-2 font-black">✦</div>
-                                    <h1 class="text-xl font-black text-white">Studihome</h1>
-                                    <p class="text-blue-200 text-xs mt-1">Platform Pembelajaran Digital &amp; Agentic AI</p>
+                                    <div class="text-4xl font-black" style="color:#facc15">✦</div>
+                                    <h1 class="text-xl font-black text-white mt-2">Studihome</h1>
                                 </div>
                                 <div class="p-6 sm:p-8">
                                     <div class="inline-block bg-amber-50 text-amber-800 border border-amber-200 rounded-full px-3 py-1 text-[10px] font-extrabold tracking-wide mb-4">RESET KATA SANDI</div>
