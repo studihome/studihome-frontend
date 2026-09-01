@@ -7,8 +7,8 @@ Allowed values: PASS / FAIL / BLOCKED / NOT VERIFIED.
 
 ## A. Source dan Deployment
 
-- PASS — GitHub main identified: `6bfb0bd3dbf390dea479731d1d0189d27ce5e058`.
-- PASS — Vercel status check succeeded for main commit.
+- PASS — Functional source baseline identified: `6bfb0bd3dbf390dea479731d1d0189d27ce5e058`; subsequent snapshot commits are documentation-only.
+- PASS — Vercel status check succeeded for the latest checked commit.
 - NOT VERIFIED — Production-alias deployment SHA equals current main.
 - PASS — `vercel.json` is valid JSON and SPA fallback is last.
 - PASS — `/dapur` and `/dapur/:username` precede SPA fallback.
