@@ -7,8 +7,9 @@ Status: **AUDIT OPEN — 72% release-verified**
 
 - Repository: `studihome/studihome-frontend`
 - Branch: `main`
-- Main SHA: `6bfb0bd3dbf390dea479731d1d0189d27ce5e058`
-- Vercel check: SUCCESS pada commit tersebut
+- Functional source baseline SHA: `6bfb0bd3dbf390dea479731d1d0189d27ce5e058`
+- Commits berikutnya pada snapshot ini adalah documentation-only; current main wajib dibaca dinamis
+- Vercel check terakhir: SUCCESS
 - Production-alias SHA: NOT VERIFIED pada snapshot ini
 - Frontend: static HTML/CSS/Vanilla JS
 - Database/Auth: Supabase
