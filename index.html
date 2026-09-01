@@ -1107,7 +1107,7 @@
                 auth: {
                     persistSession: true,
                     autoRefreshToken: true,
-                    detectSessionInUrl: true
+                    detectSessionInUrl: false
                 }
             });
             window.supabaseClient = supabaseClient;
@@ -1319,7 +1319,8 @@ const App = {
                         }
                     }
 
-                    if (session?.user && !_hasRecovery) {
+                    // Skip auto-login profile load during password recovery
+                    if (session?.user && !_hasRecovery && !App.state._recoverySessionReady) {
                         try {
                             App.state.user = await withTimeout(
                                 App.api._profile(),
@@ -2038,6 +2039,12 @@ App.router.bindCanonicalLinkGuard();
                         App.state.routeType = 'reset-password';
                         return;
                     }
+                    // Block dashboard access during password recovery
+                    if ((parts[0] === 'dashboard' || parts[0] === 'kamar') && App.state._recoverySessionReady) {
+                        App.state.routeType = 'reset-password';
+                        window.history.replaceState({}, '', '/reset-password');
+                        return;
+                    }
                     if (/^(ai-|kursus-ai|jasa-ai|ai-untuk-)/i.test(parts[0])) { App.state.routeType = 'studio-ai'; App.state.studioAICategory = parts[0].toLowerCase(); return; }
                     if (parts.length === 1) { App.state.routeType = 'creator'; App.state.creatorUsername = parts[0].toLowerCase(); App.state.creatorAmbalanSlug = ''; return; }
                     if (parts.length >= 3 && parts[1] === 'portfolio') { App.state.routeType = 'creator'; App.state.creatorUsername = parts[0].toLowerCase(); App.state.creatorAmbalanSlug = parts.slice(2).join('-').toLowerCase(); return; }
@@ -2088,6 +2095,15 @@ App.router.bindCanonicalLinkGuard();
 
                     if (/^\/dapur(?:\/|$)/.test(path) || path === '/ruang-kerja' || path === '/creator-studio') {
                         window.location.assign(path.startsWith('/dapur') ? path : '/dapur');
+                        return true;
+                    }
+                    // Block dashboard/kamar access during password recovery
+                    if ((path === '/dashboard' || path === '/kamar') && App.state._recoverySessionReady) {
+                        window.history.replaceState({}, '', '/reset-password');
+                        App.state.routePath = '/reset-password';
+                        App.state.routeType = 'reset-password';
+                        App.ui.renderNavigation();
+                        App.auth.renderResetPasswordPage();
                         return true;
                     }
 
@@ -2235,6 +2251,15 @@ App.router.bindCanonicalLinkGuard();
                     const rawHash = window.location.hash.replace(/^#/, '').toLowerCase();
                     if (rawHash === 'dapur' || rawHash === 'ruang-kerja' || rawHash.startsWith('dapur-')) {
                         window.location.assign('/dapur');
+                        return;
+                    }
+                    // Block dashboard/kamar hash access during password recovery
+                    if ((rawHash === 'dashboard' || currentPath === '/kamar') && App.state._recoverySessionReady) {
+                        window.history.replaceState({}, '', '/reset-password');
+                        App.state.routePath = '/reset-password';
+                        App.state.routeType = 'reset-password';
+                        App.ui.renderNavigation();
+                        App.auth.renderResetPasswordPage();
                         return;
                     }
 
