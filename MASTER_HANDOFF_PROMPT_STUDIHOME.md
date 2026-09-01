@@ -1,315 +1,168 @@
+/masterprompt
+
 # MASTER HANDOFF PROMPT — STUDIHOME
 
-Tanggal pembaruan: 26 Agustus 2026  
-Status: **AUDIT OPEN — Production SHA Verified, Migrations Ready**
+Tanggal pembaruan: 1 September 2026  
+Status: **AUDIT OPEN — 72% release-verified, 28% remaining**  
+Repository: `studihome/studihome-frontend`  
+Branch: `main`  
+Current main SHA: `6bfb0bd3dbf390dea479731d1d0189d27ce5e058`  
+Vercel check: **SUCCESS** untuk SHA tersebut; production-alias SHA masih harus dikonfirmasi dari dashboard sebelum klaim rilis.
 
-## 1. MISSION
-Lanjutkan Studihome sebagai senior product engineer + UX engineer + security-minded architect + release engineer.
+## 1. ROLE DAN GOAL
 
-Prioritas wajib:
-1. Security & data integrity
-2. Functional correctness
-3. Routing/runtime stability
-4. Accessibility
-5. Performance
-6. Maintainability
-7. Visual fidelity
-8. Animation
+Bertindak sebagai Staff/Principal Full-Stack Engineer, Security Engineer, Release Engineer, dan UI/UX reviewer. Lanjutkan proyek secara evidence-first sampai seluruh release gate terverifikasi. Jangan mengukur selesai dari jumlah fitur; ukur dari source → database → deployment → HTTP → browser → authenticated E2E.
 
-Aturan mutlak: **jangan reset proyek, jangan redesign tanpa instruksi eksplisit, jangan menambah runtime layer jika canonical source sudah cukup, dan jangan menyebut selesai tanpa bukti source → build → deployment → runtime/browser.**
+Prioritas mutlak:
+1. Security dan data integrity.
+2. Functional correctness.
+3. Routing/runtime stability.
+4. Compatibility dan accessibility.
+5. Performance.
+6. SEO/GEO factual integrity.
+7. Visual fidelity.
 
-## 2. SOURCE OF TRUTH
-- Repository: `studihome/studihome-frontend`
-- Branch: `main`
-- Production SHA: **`f9c6d51`** ✅ VERIFIED via Vercel dashboard (26 Aug 2026)
-- Hosting: Vercel
-- Frontend: static HTML/CSS/Vanilla JS
-- Auth/data authority: Supabase Auth + RLS/policies/functions
-- Payment/order authority: existing Studihome checkout/order logic
+## 2. AUTHORITY DAN URUTAN MEMBACA
 
-Legacy file tidak dianggap aktif hanya karena masih ada. Selalu cari reference + boot order + runtime owner sebelum delete.
+1. GitHub `main` aktual.
+2. Supabase schema/policies/functions/grants aktual.
+3. Vercel deployment aktual.
+4. `PROJECT_CONSTITUTION.md` untuk prinsip dan kontrak yang dikunci.
+5. Dokumen ini dan `PROJECT_STATE_LATEST.md` untuk snapshot terkini.
+6. `RELEASE_CHECKLIST_STUDIHOME.md` untuk status gate.
 
-## 3. LOCKED HOMEPAGE VISUAL CONTRACT
-Homepage `/` tidak boleh didesain ulang.
+Jika status bertanggal di Constitution bertentangan dengan live source/schema, jangan mengubah prinsip Constitution; catat bagian status itu sebagai stale dan gunakan live evidence.
 
-Hero baseline yang harus dipertahankan:
-- gradient `#151c75 → #3f48bf`;
-- text putih;
-- amber/yellow untuk emphasis/CTA;
-- markup, layout, spacing, typography, hierarchy, CTA dan komposisi mengikuti baseline yang telah disepakati;
-- historical baseline: `7406c1fdb8e614e0e3907f2c082bf94811a4beef`.
+## 3. FIRST-RUN PROTOCOL UNTUK AGEN BARU
 
-**STATUS:** ⚠ **OPEN** — Constitution Gate A. Hero visual parity requires browser verification. Previous claim of "verified" not supported by source audit.
+Sebelum menulis kode:
+1. Verifikasi SHA `main` dan status deployment Vercel.
+2. Baca seluruh Constitution, Handoff, State, dan Release Checklist.
+3. Cari runtime owner serta semua caller sebelum mengubah file/object.
+4. Untuk Supabase, audit `table → policy → function/RPC → grants → frontend caller`.
+5. Tampilkan impact area, exact files/objects, dan regression risk.
+6. Gunakan patch minimum, additive-first, reversible bila mungkin.
+7. Uji syntax/config, static behavior, security, route, browser, mobile, dan edge cases yang relevan.
+8. Jangan menyatakan PASS bila bukti belum ada.
 
-## 4. PRODUCTION CSS CONTRACT
-`cdn.tailwindcss.com` dilarang di production.
+## 4. ARSITEKTUR YANG DIKUNCI
 
-`index.html` sekarang menggunakan:
-`/tailwind-compiled.css?v=20260825r3`
+- Frontend canonical: static HTML/CSS/Vanilla JS.
+- Auth/data authority: Supabase Auth + RLS/functions.
+- Hosting: Vercel.
+- `/` = homepage.
+- `/balkon` dan `/balkon/{slug}` = hub/detail artikel.
+- `/studio-ai` = discovery Creator.
+- `/{username}` dan `/{username}/portfolio/{slug}` = public Creator/Ambalan.
+- `/dapur` dan `/dapur/{username}` = canonical Dapur editor via `dapur.html`.
+- `/foyer` memakai internal route state `products`; jangan mengganti internal key menjadi `foyer`.
+- Canonical Dapur owner: `dapur.html`, `dapur-entry.js`, `dapur-editor.js`, `supabase-config.js`, `vercel.json`.
 
-**⚠ IMPORTANT:** Compiled CSS uses Tailwind v3.4.17 **with Preflight enabled**. Constitution Art IV states "tanpa Preflight". This is an open contract violation that needs resolution (either regenerate CSS without Preflight, or update Constitution to accept current state).
+Jangan:
+- reset project, force-push, merge sembarangan, atau redesign architecture;
+- mengubah checkout/payment tanpa audit khusus;
+- mengubah RLS untuk memperbaiki UI;
+- menyentuh Under Construction tanpa instruksi eksplisit;
+- membuat customer, purchase, testimonial, rating, atau social proof fabricated;
+- mengekspos service-role key atau private order/customer data;
+- menghidupkan legacy Dapur runtime/renderer/decorator;
+- mengganti seluruh `document.body` pada SPA transition.
 
-**STATUS:** ⚠ **CONTRACT VIOLATION** — Preflight present despite Constitution prohibition.
+## 5. PROGRESS SCORE
 
-## 5. AUTH ACCESSIBILITY CONTRACT
-Tanpa mengubah desain atau auth logic:
-- `login-email` → `autocomplete="username"`
-- `login-password` → `autocomplete="current-password"`
-- `reg-name` → `autocomplete="name"`
-- `reg-email` → `autocomplete="email"`
-- `reg-phone` → `autocomplete="tel"`
-- `reg-password` → `autocomplete="new-password"`
+Skor ini adalah estimasi engineering berbobot, bukan angka otomatis:
 
-**STATUS:** ⚠ **CONFLICT** — Constitution Gate B says OPEN ("login-email browser warning"). Previous Handoff claimed VERIFIED. Autocomplete attributes are in JS runtime, not verifiable from static source alone.
+| Area | Bobot | Terverifikasi |
+|---|---:|---:|
+| Source, deployment, routing foundation | 15 | 14 |
+| Supabase security dan data integrity | 25 | 19 |
+| Functional product surfaces | 20 | 18 |
+| SEO/GEO infrastructure | 15 | 12 |
+| Browser, accessibility, authenticated E2E, release evidence | 25 | 9 |
+| **Total** | **100** | **72** |
 
-## 6. CANONICAL ROUTES
-- `/` → homepage
-- `/{username}` → public Creator profile
-- `/dapur` → Dapur root
-- `/dapur/{username}` → Creator workspace
+Interpretasi: implementasi fitur diperkirakan sekitar 84%, tetapi readiness yang benar-benar release-verified baru 72%. Sisa 28% terutama audit security dan browser E2E, bukan pembangunan ulang fitur.
 
-Canonical Vercel rewrites:
-- `/dapur` → `/dapur.html`
-- `/dapur/:username` → `/dapur.html`
-- `/:username/portfolio/:slug*` → `/index.html`
-- `/:username` → `/index.html`
+## 6. CONFIRMED CURRENT BASELINE
 
-Jangan memakai inline regex parameter pada `rewrites.source`; sebelumnya menghasilkan `Invalid vercel.json file provided`.
+- Main SHA: `6bfb0bd3dbf390dea479731d1d0189d27ce5e058`.
+- Vercel status check pada commit: SUCCESS.
+- `/dapur` merender `Dapur Creator Studihome` pada browser production.
+- `/balkon` dan `/studio-ai` saat ini diarahkan ke halaman upgrade oleh Under Construction gate; verification keduanya **BLOCKED**, bukan FAIL.
+- `vercel.json` memiliki urutan rewrite: sitemap → markdown → Dapur → SPA fallback.
+- `index.html` memakai `/tailwind-compiled.css?v=20260825r6`; referensi `r3` di dokumen 26 Agustus adalah stale.
+- Supabase migration history mencakup hardening sampai `optimize_creator_content_rls_initplans`.
+- Target schema M10–M12 sudah ada live: `validate_creator_publish()` safe `search_path`, `creator_profiles.contact_email` nullable, `site_settings.hero_promo_modules` JSONB. Jangan menjalankan ulang migration lama hanya berdasarkan dokumen stale.
+- Seluruh SECURITY DEFINER live yang diaudit memiliki `search_path` eksplisit (`""` atau `pg_catalog`). Grant/caller audit masih terbuka.
+- `ai_links` telah dipensiunkan dari frontend/admin/database melalui migration live.
+- IndexNow telah diberi auth, ownership validation, rate limit, canonical URL validation, dan timeout.
+- Sitemap memiliki upstream timeout dan cache/fallback.
+- RLS initplan Creator Profile, social graph, services, portfolios, dan categories sudah dioptimalkan melalui migrations 34–36.
 
-Jangan menghidupkan kembali route:
-- `/dapur/foyer`
-- `/dapur/menu`
-- `/dapur/hidangan`
-- `/dapur/ambalan`
+## 7. OPEN WORK — PRIORITAS
 
-## 7. DAPUR PUBLIC/MEMBER CONTRACT
-`/dapur` adalah landing/entry Creator yang sama untuk publik dan member.
+### P0 — Release blockers
 
-### Public
-- tampil shell Dapur;
-- informasi singkat syarat Creator;
-- hanya CTA `Masuk / Daftar` aktif → popup auth canonical;
-- tidak menunggu auth untuk merender shell publik;
-- Flash Sale boleh menampilkan tepat **1** produk Premium aktif dengan diskon terbesar;
-- tombol Flash Sale memakai existing Lobi checkout/order logic.
+1. Audit seluruh SECURITY DEFINER yang executable oleh `anon`/`authenticated`: body, search_path, grants, caller, ownership/admin checks, output privacy, dan abuse controls.
+2. Authenticated browser E2E: login/register, Premium entitlement, Dapur provisioning, owner isolation, username change, logout denial, admin authority.
+3. Checkout/payment regression E2E read-only terhadap flow existing; jangan mengubah logic dalam audit.
+4. Konfirmasi Vercel production-alias SHA sama dengan final `main` sebelum release claim.
 
-### Premium member tanpa Creator
-- CTA `Mulai Membuat Dapur`;
-- provisioning Creator dilakukan backend;
-- setelah draft tersedia → `/dapur/{username}`.
+### P1 — Security/correctness
 
-### Premium member dengan Creator
-- CTA `Kelola Dapur Kamu` / copy canonical yang sedang aktif;
-- target `/dapur/{username}`.
+1. Supabase Auth leaked-password protection dilaporkan disabled oleh Security Advisor; aktifkan dari dashboard setelah impact review.
+2. Audit public RPC intentional: token consumption, trust summaries, social proof, AI-search logging, smart-demand logging.
+3. Selesaikan sisa RLS initplan pada `site_settings`, `testimonials`, dan `modules` hanya setelah equivalence tests.
+4. Audit foreign-key indexes tersisa dan duplicate indexes; jangan hapus index hanya karena `unused_index` belum mencatat penggunaan.
+5. Audit pSEO/GEO copy agar tidak memuat klaim statistik atau rekomendasi fabricated.
 
-### Non-Premium
-- workspace tidak boleh dapat dibuka hanya dengan URL;
-- entitlement dan authorization backend/RLS adalah authority.
+### P2 — UI/SEO/accessibility
 
-## 8. CANONICAL DAPUR RUNTIME
-Runtime owner tunggal:
-- `dapur.html` — minimal shell
-- `dapur-entry.js` — satu renderer + route/auth orchestration
-- `dapur-editor.js` — standalone editor, lazy-loaded
-- `vercel.json` — route contract
-- `supabase-config.js` — singleton
+1. Browser verification desktop + mobile 375px untuk hero, Balkon, Studio AI, Creator, Dapur, Foyer, dan modal.
+2. Auth autocomplete, keyboard focus, reduced motion, horizontal overflow, console/network errors.
+3. Putuskan kontrak Tailwind Preflight dan sinkronkan versioned CSS secara eksplisit.
+4. Verifikasi `sitemap.xml`, `llms.txt`, `openapi.yaml`, Markdown routes, canonical, metadata, dan JSON-LD dari jaringan produksi.
 
-Dilarang:
-- global `MutationObserver` pada canonical Dapur runtime;
-- second-stage DOM decorator;
-- legacy access-gate/injector;
-- renderer kedua;
-- section route tambahan.
+### P3 — Operability
 
-Generasi superseded berikut sudah dihapus dan jangan dihidupkan kembali:
-- `dapur-app-v1.js` … `dapur-app-v4.js`
-- `dapur-entry-v6.js`, `dapur-entry-v7.js`
-- `dapur-runtime-v4.js`
-- `dapur-workspace-v2.js`, `dapur-workspace-v3.js`
-- `dapur-cta-v1.js`
-- `dapur-design-v2.js`
-- `dapur-enhancements-v1.js`
-- `dapur-access-gate.js`
-- `dapur-workspace.js`
+1. Review Advisor performance setelah traffic representatif.
+2. Dokumentasikan monitoring, rollback, dan incident response minimum.
+3. Bersihkan file hanya setelah reference proof, runtime owner proof, replacement proof, dan rollback path lulus.
 
-Compatibility/admin surfaces yang masih harus diaudit sebelum delete:
-- `dapur-admin-user-route-v1.js` — **NOT in repo** (verify before removing from docs)
-- `dapur-button.js` — **NOT in repo** (referenced in Constitution + vercel.json headers, but file absent)
-- `admin-dapur-creator-v5.js` — present in repo (16.7KB)
-- `admin-dapur-ui-v2.js` — present in repo (11.9KB)
+## 8. SECURITY DEFINER RAMBU-RAMBU
 
-## 9. DAPUR INFORMATION ARCHITECTURE
-- Foyer = identitas, bio, kontak, publikasi
-- Menu = kategori/fokus keahlian
-- Hidangan = layanan, harga, manfaat, estimasi
-- Ambalan = karya/bukti kerja
+Jangan otomatis mencabut semua EXECUTE. Klasifikasikan tiap function:
+- internal trigger only → tidak boleh callable dari API roles;
+- authenticated user action → wajib self/ownership/entitlement check;
+- admin action → wajib server-side `is_admin()` dan audit input;
+- intentional public read → output allowlist, limit/cap, tidak ada PII;
+- intentional public write/signal → input cap, rate/abuse controls, tidak mengembalikan private data.
 
-Workspace wajib mudah dipakai pengguna awam, responsive, mobile-first, dengan:
-- `Tips cepat cari customer`
-- canonical public URL `https://studihome.id/{username}`
-- `Salin`
-- `Bagikan`
+Untuk setiap temuan tampilkan: exploitable/intentional, evidence, caller, blast radius, minimal fix, dan regression test.
 
-## 10. SECURITY / BACKEND CONTRACT
-- Frontend bukan security boundary.
-- Supabase/RLS/backend adalah authority.
-- Owner Creator hanya boleh mengelola Creator sendiri.
-- Admin mengikuti backend authority.
-- Service-role key tidak boleh ada di frontend.
-- Anonymous public-read hanya pada data Creator yang memang public/published/active.
-- Anonymous write Creator data ditutup.
-- Authorization-only RPC seperti `is_admin`, `has_creator_workspace_access`, `has_premium_creator_access`, `is_creator_eligible`, `can_publish_creator` tidak boleh EXECUTE oleh `anon`.
-- `validate_creator_username(text)` wajib safe `search_path` dan authenticated-only.
+## 9. DEFINITION OF DONE
 
-**STATUS:** ⚠ Previous audit claimed all remediated. RC15 gate still reports `is_admin()` anon active. RC16 overrides with owner-supplied evidence. **Requires fresh live verification.**
+Status hanya boleh PASS / FAIL / BLOCKED / NOT VERIFIED. `SIAP RILIS` dilarang sampai:
+- source SHA = production SHA;
+- build/deployment READY;
+- route utama dan canonical assets verified;
+- console/network bersih pada flow yang diuji;
+- Auth/RLS/owner/admin/checkout/Dapur/Social Proof verified;
+- desktop/mobile/accessibility gates verified;
+- dokumen sesuai live evidence.
 
-### Database Security Status (Previous Audit Claim — Not Re-verified 26 Aug)
-- 31 SECURITY DEFINER functions — claimed all have `search_path=""`
-- `is_admin()` restricted to authenticated users only (claimed)
-- `has_creator_workspace_access()` fixed (claimed)
-- `has_premium_creator_access()` fixed (claimed)
-- RLS policies enforced on: `site_settings`, `products`, `testimonials`, `ai_links`, `modules`, `profiles`
-- Storage bucket `creator-media`: owner-only upload/delete
-- Leaked-password protection: ENABLED
-- `email_verification_tokens`: RLS policy added
+## 10. HANDOFF COMMAND UNTUK AGEN BERIKUTNYA
 
-Perubahan RLS/SQL wajib didahului audit table → policy → function/RPC → grants → callers. Jangan memakai SQL sebagai solusi masalah UI/router.
+Salin prompt berikut:
 
-## 11. PENDING DATABASE MIGRATIONS (HARDENED — 26 Aug 2026)
+> `/masterprompt /mission-control /verify /security /edgecase`  
+> Lanjutkan `studihome/studihome-frontend` dari `main`. Baca penuh `PROJECT_CONSTITUTION.md`, `MASTER_HANDOFF_PROMPT_STUDIHOME.md`, `PROJECT_STATE_LATEST.md`, dan `RELEASE_CHECKLIST_STUDIHOME.md`. Verifikasi main SHA, Vercel production SHA, Supabase schema/migrations/advisors sebelum perubahan. Jangan reset/force-push/merge/redesign/deploy manual tanpa kebutuhan. Jangan menyentuh Under Construction, checkout/payment, atau canonical Dapur architecture kecuali task secara eksplisit mengizinkan. Audit dependency/caller sebelum SQL. Gunakan perubahan minimum, test rollback/equivalence, lalu verify source → database → deployment → HTTP → browser → console. Jangan klaim PASS tanpa bukti. Mulai dari P0 SECURITY DEFINER caller/grant audit.
 
-Three SQL migration files exist in repo, all **hardened** but **NOT yet run to production**:
+## 11. PILIHAN PLATFORM AGEN
 
-1. **Migration 10** — `validate_creator_publish()` trigger fix ✅ HARDENED
-   - `search_path=""` ✅ | REVOKE EXECUTE from PUBLIC/anon ✅ | idempotent DROP TRIGGER ✅ | verification queries ✅ | rollback ✅
-2. **Migration 11** — `contact_email DROP NOT NULL` ✅ HARDENED
-   - Constitution Art XI alignment ✅ | CHECK constraint verification ✅ | NULL audit ✅ | rollback with safety guard ✅
-3. **Migration 12** — `hero_promo_modules JSONB` column ✅ HARDENED
-   - RLS pre-check (pg_tables + pg_policies) ✅ | Constitution Art XI audit chain ✅ | rollback ✅ | data validation ✅
+Di antara Freebuff dan Google AI Studio, **Freebuff Desktop/Cloud lebih cocok untuk melanjutkan repository ini** karena fokusnya agent coding pada repo/GitHub, workspace, terminal, serta perubahan multi-file. Gunakan branch/worktree terisolasi dan jangan memberikan secret production.
 
-Run sequence: M10 → M11 → M12 via Supabase SQL Editor. Backup database before running.
+Google AI Studio lebih cocok untuk prototipe Gemini/full-stack baru, eksperimen prompt, dan fitur AI-native. Walau dapat mengimpor GitHub dan mengelola multi-file, jangan menjadikannya authority untuk migration/RLS atau membiarkannya meregenerasi arsitektur Studihome.
 
-## 12. NEW RUNTIME FILES (26 Aug 2026)
+Pilihan tool tidak menggantikan protocol audit di dokumen ini.
 
-Files present in repo not documented in previous handoff:
-
-| File | Purpose |
-|------|---------|
-| `dapur-production-hardening-v2.js` | Dapur runtime hardening |
-| `dapur-editor-hardening-v1.js` | Editor hardening |
-| `dapur-interaction-recovery-v1.js` | Interaction recovery |
-| `dapur-profile-edit-fix-v1.js` | Profile edit fix |
-| `dapur-profile-enhancements.js` | Profile enhancements |
-| `studio-ai-creator-card.js` | Creator card component |
-| `studio-ai-enhancements.js` | Studio AI enhancements |
-| `studio-ai-production-enhancements.js` | Studio AI production |
-| `studio-ai-search.js` | Studio AI search |
-| `admin-gudang-v2.js` | Admin gudang v2 |
-| `under-construction.js` | Under construction renderer |
-| `under-construction-gudang.js` | Under construction admin panel |
-| `maintenance-gate.js` | Maintenance mode gate |
-| `supabase-sdk-loader-v1.js` | Supabase SDK fallback loader |
-| `creator-public.js` | Public creator profile |
-| `DATABASE_MIGRATION_10.sql` | Pending migration |
-| `DATABASE_MIGRATION_11.sql` | Pending migration |
-| `DATABASE_MIGRATION_12.sql` | Pending migration |
-
-## 13. CURRENT PRODUCTION STATE
-Production SHA: **`f9c6d51`** ✅ VERIFIED via Vercel dashboard (26 Aug 2026, Status: Ready, Environment: Production).
-
-Local HEAD matches production SHA. Routing, runtime, and security status documented in PROJECT_STATE_LATEST.md.
-
-## 14. VERIFIED CLOSED ITEMS
-- Vercel invalid regex rewrite issue fixed.
-- Canonical Dapur runtime consolidated.
-- Dapur global MutationObserver removed from canonical runtime.
-- Dapur second-stage decorator removed.
-- Dapur legacy access-gate/injector removed.
-- `dapur.html` reduced to minimal shell.
-- Legacy `intent=creator` is not a special Dapur runtime.
-- Public Creator read path was corrected.
-- Anonymous Creator writes closed.
-- Authorization-only function execution hardened.
-- Username validator search_path hardened.
-- Tailwind CDN removed from `index.html`; compiled CSS in place.
-- RC19 malformed `<script>` tag fixed.
-- Duplicate `<style>` block removed.
-- Editor version string synced.
-- RC19 diagnostic variable names aligned.
-
-## 15. OPEN ITEMS — DO NOT CLAIM AS DONE
-
-### P0 — Must resolve before release
-1. ~~**Verify true production SHA**~~ ✅ DONE (26 Aug — verified `f9c6d51` via Vercel dashboard)
-2. ~~**Resolve RC15/RC16 contradiction**~~ ✅ DONE (26 Aug — RC15 updated to PASS)
-3. **Run Migrations 10–12** to production — files **READY TO RUN** (all 3 hardened 26 Aug)
-4. ~~**Fix Migration 10**~~ ✅ DONE (26 Aug — fully hardened)
-5. ~~**Harden Migration 11**~~ ✅ DONE (26 Aug)
-6. ~~**Harden Migration 12**~~ ✅ DONE (26 Aug)
-7. ~~**Add missing security headers**~~ ✅ DONE (26 Aug — HSTS + X-Content-Type-Options added to vercel.json)
-
-### P1 — Contract violations / conflicts
-5. **Preflight in compiled CSS** — Constitution says "tanpa Preflight"
-6. **Auth autocomplete conflict** — Constitution Gate B OPEN vs Handoff CLOSED
-7. **Homepage hero parity** — Constitution Gate A OPEN vs Handoff CLOSED
-8. **Dead reference** — `dapur-button.js` in vercel.json (file absent)
-9. **CSS version drift** — all docs must reference `?v=20260825r3`
-
-### P2 — Documentation
-10. Document 13+ new runtime files
-11. Update all 3 state docs to same SHA and status
-
-### P3 — E2E (requires real browser)
-12. Full authenticated browser E2E
-
-## 16. RELEASE GATE
-Do not say `SIAP RILIS` until all are true:
-- final main SHA identified and consistent across all docs;
-- Production READY on same final SHA;
-- homepage hero equals locked baseline (browser-verified);
-- `/dapur` HTTP 200;
-- `/dapur/{username}` HTTP 200;
-- public Creator API requests 200;
-- no functional console errors;
-- auth accessibility warning closed (browser-verified);
-- owner/authz browser E2E proven;
-- legacy Dapur resource requests remain zero;
-- payment/order logic remains unchanged and PASS;
-- ~~RC15/RC16 contradiction resolved~~ ✅;
-- Migrations 10–12 complete (files ready, awaiting production run);
-- ~~security headers complete~~ ✅.
-
-**STATUS:** ⚠ **CONDITIONAL** — Production SHA verified ✅ + Migrations ready to run + browser E2E pending.
-
-## 17. CHANGE PROTOCOL
-For every change:
-1. identify owner;
-2. search references;
-3. inspect boot order;
-4. patch canonical source only;
-5. keep blast radius minimal;
-6. syntax/config validation;
-7. deploy;
-8. verify commit SHA = deployment SHA;
-9. verify affected HTTP routes;
-10. check runtime logs;
-11. inspect browser console for affected page;
-12. only then declare status.
-
-## 18. DO NOT REGRESS
-Do not:
-- redesign homepage hero;
-- reintroduce Tailwind CDN;
-- alter public Creator URL `/{username}`;
-- change meaning of `/dapur` or `/dapur/{username}`;
-- create a second Dapur renderer/decorator;
-- use global observer as a UI patch;
-- put service-role key in frontend;
-- duplicate checkout/order logic;
-- change RLS for presentation-only bugs;
-- resurrect deleted legacy runtime.
-
-## 19. CHATGPT LIMIT NOTICE
-`Anda telah mencapai panjang maksimum untuk percakapan ini...` adalah notifikasi UI ChatGPT, bukan error Studihome. Jangan mengubah aplikasi untuk pesan tersebut.
-
-## 20. NEXT-CHAT STARTER
-> Baca `MASTER_HANDOFF_PROMPT_STUDIHOME.md`, `PROJECT_CONSTITUTION.md`, `PROJECT_STATE_LATEST.md`, dan `RELEASE_CHECKLIST_STUDIHOME.md`. Jangan reset proyek. Verifikasi current `main` SHA dan Vercel Production SHA terlebih dahulu. **Jangan klaim READY atau SIAP RILIS sampai semua P0 items di atas terselesaikan.** Gunakan perubahan sekecil mungkin, audit references/boot order, lalu verify source → build → deployment → runtime → browser.
