@@ -6,8 +6,8 @@ Status: **AUDIT OPEN - RELEASE EVIDENCE INCOMPLETE**
 ## Baseline
 
 - Repository: `studihome/studihome-frontend`, branch `main`.
-- Last documented main: [`384045b`](https://github.com/studihome/studihome-frontend/commit/384045b970b90a2c13a0b11b25703b5fd87b691f), but each agent must query current `main`.
-- Vercel status for `384045b`: SUCCESS. Production-alias SHA: NOT VERIFIED.
+- Last documented main: [`06ba899`](https://github.com/studihome/studihome-frontend/commit/06ba899) (1 Sep 2026, includes Creator Like fix + CSP update).
+- Vercel status for `06ba899`: auto-deployed. Production-alias SHA: NOT VERIFIED (needs Vercel dashboard confirmation).
 - Frontend: static HTML/CSS/Vanilla JS. Database/Auth: Supabase. Hosting: Vercel.
 - Canonical Dapur: `dapur.html`, `dapur-entry.js`, `dapur-editor.js`, `supabase-config.js`.
 - `/balkon` and `/studio-ai` browser verification remains BLOCKED while Under Construction controls those routes.
@@ -23,7 +23,7 @@ Status: **AUDIT OPEN - RELEASE EVIDENCE INCOMPLETE**
 | M41 products policy cleanup | PASS | Duplicate admin policy removed; canonical admin and public-active read policies remain. |
 | M42 external Creator rating gate | PASS | New external ratings start hidden; explicit admin moderation required to publish. |
 | Frontend external rating review | PASS | Admin UI creates drafts and shows internal/external ratings together for moderation. |
-| GitHub/Vercel latest documented frontend commit | PASS | `384045b`, Vercel status success. |
+| GitHub/Vercel latest documented frontend commit | PASS | `06ba899`, auto-deployed. |
 
 ## Social proof and privacy position
 

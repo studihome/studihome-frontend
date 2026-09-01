@@ -236,7 +236,7 @@ Jangan menyebut `selesai`, `live`, atau `production ready` jika:
 Latest known Production deployment:
 **VERIFIED ✅** — Production SHA confirmed via Vercel dashboard.
 
-Production SHA: **`f9c6d51`** (verified 26 Aug 2026, Vercel status: Ready, Environment: Production)
+Production SHA: **`06ba899`** (last verified 1 Sep 2026, includes Creator Like fix + CSP update)
 
 State:
 `AUDIT OPEN` (migrations pending, browser E2E pending)

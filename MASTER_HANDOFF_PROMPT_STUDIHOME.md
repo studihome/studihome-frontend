@@ -6,7 +6,7 @@ Updated: 1 September 2026
 Status: **AUDIT OPEN - DO NOT CLAIM RELEASE READY**  
 Repository: `studihome/studihome-frontend`  
 Branch: `main`  
-Last documented main: [`384045b`](https://github.com/studihome/studihome-frontend/commit/384045b970b90a2c13a0b11b25703b5fd87b691f)  
+Last documented main: [`06ba899`](https://github.com/studihome/studihome-frontend/commit/06ba899) (1 Sep 2026, includes Creator Like fix + CSP update)  
 Authority remains current GitHub `main`, live Supabase, and current Vercel production - never this SHA alone.
 
 ## 1. Role and goal
@@ -71,7 +71,7 @@ Other confirmed facts:
 - IndexNow has auth, ownership, URL validation, rate limit, and timeout controls.
 - Sitemap has bounded upstream handling and cache/fallback.
 - Creator profile/social/services/portfolio/category RLS initplans are optimized.
-- Vercel status for commit `384045b` was SUCCESS. Production-alias SHA is still not independently verified.
+- Vercel status for commit `06ba899`: auto-deployed. Production-alias SHA still needs independent verification via Vercel dashboard.
 - There is one legacy public external Creator rating. Do not modify it without reviewing source evidence and authorization.
 
 ## 6. Open priorities

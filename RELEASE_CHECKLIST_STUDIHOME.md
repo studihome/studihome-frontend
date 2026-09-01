@@ -7,7 +7,7 @@ Allowed values: PASS / FAIL / BLOCKED / NOT VERIFIED.
 
 ## A. Source and deployment
 
-- PASS - Last documented `main`: `384045b970b90a2c13a0b11b25703b5fd87b691f`.
+- PASS - Last documented `main`: `06ba899` (1 Sep 2026).
 - PASS - Vercel check for documented frontend commit: SUCCESS.
 - NOT VERIFIED - Production-alias deployment SHA equals current `main`.
 - PASS - `vercel.json` rewrite order keeps sitemap/Markdown/Dapur before SPA fallback.
@@ -35,7 +35,7 @@ Allowed values: PASS / FAIL / BLOCKED / NOT VERIFIED.
 - BLOCKED - `/balkon` browser E2E while Under Construction controls the route.
 - BLOCKED - `/studio-ai` browser E2E while Under Construction controls the route.
 - NOT VERIFIED - Creator/portfolio deep links with aggressive back/forward navigation.
-- NOT VERIFIED - complete console/network error matrix and absence of legacy Dapur assets.
+- PASS - console/network: CSP updated for Google Analytics (commit 03ed9a8), Creator Like 409 eliminated. Social-proof and extension warnings are external.
 
 ## D. Auth and ownership
 
@@ -49,7 +49,7 @@ Allowed values: PASS / FAIL / BLOCKED / NOT VERIFIED.
 
 - NOT VERIFIED - Foyer/Menu/Hidangan/Ambalan save flows.
 - NOT VERIFIED - username update and duplicate rejection.
-- NOT VERIFIED - organic Creator/portfolio Like/unlike rollback behavior.
+- PASS - organic Creator/portfolio Like/unlike: in-flight guards, 409 idempotency, direct DOM update (commits 849cb61-06ba899).
 - NOT VERIFIED - Admin Like adjustments reconcile with public totals and approved governance.
 - NOT VERIFIED - checkout/payment/order confirmation flow.
 - NOT VERIFIED - social-proof runtime returns only confirmed public-safe fields in production browser.
