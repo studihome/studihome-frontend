@@ -2612,7 +2612,8 @@ App.router.bindCanonicalLinkGuard();
                             if (liked) {
                                 const { error } = await supabaseClient.from('creator_portfolio_likes').delete().eq('portfolio_id', portfolioId).eq('user_id', App.state.user.id);
                                 if (error) {
-                                    if (error.code === '23505' || (error.httpStatusCode === 409)) {
+                                    const isDup = error.code === '23505' || error.status === 409 || String(error.message || '').includes('409') || String(error.message || '').includes('duplicate');
+                                    if (isDup) {
                                         const { data: existing } = await supabaseClient.from('creator_portfolio_likes').select('id').eq('portfolio_id', portfolioId).eq('user_id', App.state.user.id).maybeSingle();
                                         data = { liked: !!existing };
                                     } else throw error;
@@ -2620,7 +2621,8 @@ App.router.bindCanonicalLinkGuard();
                             } else {
                                 const { error } = await supabaseClient.from('creator_portfolio_likes').insert({ portfolio_id: portfolioId, user_id: App.state.user.id });
                                 if (error) {
-                                    if (error.code === '23505' || (error.httpStatusCode === 409)) {
+                                    const isDup = error.code === '23505' || error.status === 409 || String(error.message || '').includes('409') || String(error.message || '').includes('duplicate');
+                                    if (isDup) {
                                         const { data: existing } = await supabaseClient.from('creator_portfolio_likes').select('id').eq('portfolio_id', portfolioId).eq('user_id', App.state.user.id).maybeSingle();
                                         if (existing) { data = { liked: true }; } else throw error;
                                     } else throw error;
@@ -2633,7 +2635,8 @@ App.router.bindCanonicalLinkGuard();
                             if (liked) {
                                 const { error } = await supabaseClient.from('creator_likes').delete().eq('creator_id', creatorId).eq('user_id', App.state.user.id);
                                 if (error) {
-                                    if (error.code === '23505' || (error.httpStatusCode === 409)) {
+                                    const isDup = error.code === '23505' || error.status === 409 || String(error.message || '').includes('409') || String(error.message || '').includes('duplicate');
+                                    if (isDup) {
                                         const { data: existing } = await supabaseClient.from('creator_likes').select('id').eq('creator_id', creatorId).eq('user_id', App.state.user.id).maybeSingle();
                                         data = { liked: !!existing };
                                     } else throw error;
@@ -2641,9 +2644,10 @@ App.router.bindCanonicalLinkGuard();
                             } else {
                                 const { error } = await supabaseClient.from('creator_likes').insert({ creator_id: creatorId, user_id: App.state.user.id });
                                 if (error) {
-                                    if (error.code === '23505' || (error.httpStatusCode === 409)) {
+                                    const isDup = error.code === '23505' || error.status === 409 || String(error.message || '').includes('409') || String(error.message || '').includes('duplicate');
+                                    if (isDup) {
                                         const { data: existing } = await supabaseClient.from('creator_likes').select('id').eq('creator_id', creatorId).eq('user_id', App.state.user.id).maybeSingle();
-                                        if (existing) { data = { liked: true }; } else throw error;
+                                        data = { liked: !!existing };
                                     } else throw error;
                                 } else { data = { liked: true }; }
                             }
@@ -5772,6 +5776,7 @@ renderCreatorStandardSummary: (creator, data, categories, services, portfolios) 
                         await App.creator.render(App.state.creatorUsername, App.state.creatorAmbalanSlug);
                     } catch (e) {
                         App.ui.toast(e?.message || 'Like belum berhasil diproses.', 'error');
+                        try { await App.creator.render(App.state.creatorUsername, App.state.creatorAmbalanSlug); } catch (_) {}
                     } finally {
                         App.creator._likeInFlight = false;
                     }
