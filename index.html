@@ -2614,7 +2614,7 @@ App.router.bindCanonicalLinkGuard();
                                 if (error) {
                                     if (error.code === '23505' || (error.httpStatusCode === 409)) {
                                         const { data: existing } = await supabaseClient.from('creator_portfolio_likes').select('id').eq('portfolio_id', portfolioId).eq('user_id', App.state.user.id).maybeSingle();
-                                        if (existing) { data = { liked: true }; } else throw error;
+                                        data = { liked: !!existing };
                                     } else throw error;
                                 } else { data = { liked: false }; }
                             } else {
@@ -2635,7 +2635,7 @@ App.router.bindCanonicalLinkGuard();
                                 if (error) {
                                     if (error.code === '23505' || (error.httpStatusCode === 409)) {
                                         const { data: existing } = await supabaseClient.from('creator_likes').select('id').eq('creator_id', creatorId).eq('user_id', App.state.user.id).maybeSingle();
-                                        if (existing) { data = { liked: true }; } else throw error;
+                                        data = { liked: !!existing };
                                     } else throw error;
                                 } else { data = { liked: false }; }
                             } else {
