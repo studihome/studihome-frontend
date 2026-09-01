@@ -1284,11 +1284,25 @@ const App = {
                 try {
                     // Intercept Supabase recovery token BEFORE client creation
                     // to prevent auto-login and ensure proper handling
+                    const _recoveryGuardKey = 'studihome:password-recovery-pending';
+                    const _setRecoveryGuard = (pending) => {
+                        try {
+                            if (pending) sessionStorage.setItem(_recoveryGuardKey, '1');
+                            else sessionStorage.removeItem(_recoveryGuardKey);
+                        } catch (_) { /* sessionStorage unavailable: retain in-memory guard only */ }
+                    };
+                    const _hasRecoveryGuard = () => {
+                        try { return sessionStorage.getItem(_recoveryGuardKey) === '1'; }
+                        catch (_) { return false; }
+                    };
                     const _resetPwPath = window.location.pathname === '/reset-password';
                     const _resetPwHash = window.location.hash || '';
                     const _hasRecovery = _resetPwPath && _resetPwHash.includes('access_token') && _resetPwHash.includes('type=recovery');
+                    App.state._recoverySessionReady = _hasRecoveryGuard();
                     let _recoveryTokens = null;
                     if (_hasRecovery) {
+                        _setRecoveryGuard(true);
+                        App.state._recoverySessionReady = true;
                         const p = new URLSearchParams(_resetPwHash.replace(/^#/, ''));
                         _recoveryTokens = { access_token: p.get('access_token'), refresh_token: p.get('refresh_token') };
                         window.history.replaceState({}, '', '/reset-password');
@@ -1314,9 +1328,15 @@ const App = {
                             session = recoverySession.session;
                             App.state._recoverySessionReady = true;
                         } else {
+                            _setRecoveryGuard(false);
+                            App.state._recoverySessionReady = false;
                             console.error('[ResetPassword] Recovery session error:', recoveryErr);
                             App.ui.toast('Link reset tidak valid atau sudah kedaluwarsa. Minta link baru.', 'error');
                         }
+                    }
+                    if (App.state._recoverySessionReady && !session?.user) {
+                        _setRecoveryGuard(false);
+                        App.state._recoverySessionReady = false;
                     }
 
                     // Skip auto-login profile load during password recovery
@@ -1343,6 +1363,10 @@ const App = {
                             // Skip profile load during password recovery to prevent auto-login
                             if (App.state.routeType === 'reset-password' || App.state._recoverySessionReady) return;
                             if (!sessionNow?.user) {
+                                if (_event === 'SIGNED_OUT') {
+                                    _setRecoveryGuard(false);
+                                    App.state._recoverySessionReady = false;
+                                }
                                 await cleanupRealtime();
                                 App.state.user = null;
                                 App.state.memberData = null;
@@ -3221,6 +3245,7 @@ App.router.bindCanonicalLinkGuard();
                         if (btn) btn.textContent = '✅ Berhasil!';
                         App.ui.toast('Kata sandi berhasil diperbarui! 🎉', 'success');
                         App.state._recoverySessionReady = false;
+                        try { sessionStorage.removeItem('studihome:password-recovery-pending'); } catch (_) {}
                         try {
                             const profile = await withTimeout(
                                 App.api._profile(),
