@@ -37,7 +37,8 @@ window.STUDIHOME_SUPABASE_ANON_KEY =
           auth: {
             persistSession: true,
             autoRefreshToken: true,
-            detectSessionInUrl: true
+            // Recovery URLs are consumed explicitly by App.init before a session is established.
+            detectSessionInUrl: false
           }
         }
       );
