@@ -3482,7 +3482,14 @@ App.router.bindCanonicalLinkGuard();
                     const hero = data.hero || App.state.demo.hero;
                     const featuredProducts = (data.products || []).filter(p => p.isFeatured).slice(0, 3);
 
-                    const heroPromoMods = JSON.parse(localStorage.getItem('studihome_hero_promo_modules') || '[]');
+                    // Hero promo modules: try localStorage first, then publicData (works for anonymous)
+                    let heroPromoMods = JSON.parse(localStorage.getItem('studihome_hero_promo_modules') || '[]');
+                    if (heroPromoMods.length === 0) {
+                        try {
+                            const pubMods = App.state.publicData?.master?.underConstruction?.heroPromoModules;
+                            if (Array.isArray(pubMods) && pubMods.length > 0) heroPromoMods = pubMods;
+                        } catch(_) {}
+                    }
                     let primaryLabel = hero.ctaPrimaryLabel || hero.ctaPrimary || 'Jelajahi Produk';
                     let primaryUrl = hero.ctaPrimaryUrl || '#products';
                     if (heroPromoMods.length > 0) {
@@ -6640,7 +6647,16 @@ renderCreatorStandardSummary: (creator, data, categories, services, portfolios) 
                     try {
                         let data, modules;
                         if (productId === 'hero-promo') {
-                            const dbMods = await App.admin._loadHeroPromoModsFromDB();
+                            // Try DB first, then publicData (already loaded for homepage), then localStorage
+                            let dbMods = null;
+                            try { dbMods = await App.admin._loadHeroPromoModsFromDB(); } catch(_) {}
+                            if (dbMods === null || dbMods.length === 0) {
+                                // Fallback: read from already-loaded public data (works for anonymous users)
+                                try {
+                                    const pubMods = App.state.publicData?.master?.underConstruction?.heroPromoModules;
+                                    if (Array.isArray(pubMods) && pubMods.length > 0) dbMods = pubMods;
+                                } catch(_) {}
+                            }
                             modules = (dbMods !== null && dbMods.length > 0) ? dbMods : JSON.parse(localStorage.getItem('studihome_hero_promo_modules') || '[]');
                             if (dbMods !== null && dbMods.length > 0) localStorage.setItem('studihome_hero_promo_modules', JSON.stringify(dbMods));
                             data = { productTitle: 'PENAWARAN TERBATAS!!', modules };
