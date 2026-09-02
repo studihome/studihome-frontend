@@ -3486,6 +3486,7 @@ App.router.bindCanonicalLinkGuard();
                     let heroPromoMods = JSON.parse(localStorage.getItem('studihome_hero_promo_modules') || '[]');
                     if (heroPromoMods.length === 0) {
                         try {
+                            // Check under_construction.heroPromoModules (primary storage)
                             const pubMods = App.state.publicData?.master?.underConstruction?.heroPromoModules;
                             if (Array.isArray(pubMods) && pubMods.length > 0) heroPromoMods = pubMods;
                         } catch(_) {}
@@ -6647,7 +6648,7 @@ renderCreatorStandardSummary: (creator, data, categories, services, portfolios) 
                     try {
                         let data, modules;
                         if (productId === 'hero-promo') {
-                            // Try DB first, then publicData (already loaded for homepage), then localStorage
+                            // Load hero promo modules with multiple fallbacks for public access
                             let dbMods = null;
                             try { dbMods = await App.admin._loadHeroPromoModsFromDB(); } catch(_) {}
                             if (dbMods === null || dbMods.length === 0) {
@@ -6655,6 +6656,20 @@ renderCreatorStandardSummary: (creator, data, categories, services, portfolios) 
                                 try {
                                     const pubMods = App.state.publicData?.master?.underConstruction?.heroPromoModules;
                                     if (Array.isArray(pubMods) && pubMods.length > 0) dbMods = pubMods;
+                                } catch(_) {}
+                            }
+                            if (dbMods === null || dbMods.length === 0) {
+                                // Last resort: direct query with select('*') to get all columns
+                                try {
+                                    const { data: rawSettings } = await supabaseClient.from('site_settings').select('*').eq('id', 1).maybeSingle();
+                                    if (rawSettings) {
+                                        const colMods = rawSettings.hero_promo_modules;
+                                        if (Array.isArray(colMods) && colMods.length > 0) dbMods = colMods;
+                                        else if (rawSettings.under_construction?.heroPromoModules) {
+                                            const ucMods = rawSettings.under_construction.heroPromoModules;
+                                            if (Array.isArray(ucMods) && ucMods.length > 0) dbMods = ucMods;
+                                        }
+                                    }
                                 } catch(_) {}
                             }
                             modules = (dbMods !== null && dbMods.length > 0) ? dbMods : JSON.parse(localStorage.getItem('studihome_hero_promo_modules') || '[]');
@@ -8129,6 +8144,11 @@ renderStudioAiControl: async () => {
                             const mods = ucData.under_construction.heroPromoModules;
                             return (mods && Array.isArray(mods)) ? mods : [];
                         }
+                        /* Fallback: check already-loaded publicData (works for anon users) */
+                        try {
+                            const pubMods = App.state.publicData?.master?.underConstruction?.heroPromoModules;
+                            if (Array.isArray(pubMods) && pubMods.length > 0) return pubMods;
+                        } catch(_) {}
                         return null;
                     } catch (_) { return null; }
                 },
