@@ -92,7 +92,7 @@
     <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
 
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2" crossorigin="anonymous"></script>
-    <script src="/supabase-config.js?v=boot4"></script>
+    <script src="/supabase-config.js?v=boot5"></script>
     <!-- Tailwind CSS: compiled production utility layer -->
     <link rel="stylesheet" href="/tailwind-compiled.css?v=20260825r6">
     <!-- FontAwesome Icons -->
@@ -1278,29 +1278,77 @@ const App = {
                     }
                 }
             },
+            network: {
+                _bound: false,
+                _isOffline: false,
+                _retry: null,
+                isConnectivityError: (error) => {
+                    const message = String(error?.message || error || '');
+                    return navigator.onLine === false || /failed to fetch|network(?:error| request)?|load failed|internet|offline/i.test(message);
+                },
+                reportUnavailable: (error, retry) => {
+                    App.network._retry = typeof retry === 'function' ? retry : App.network._retry;
+                    App.network._isOffline = true;
+                    App.ui.updateApiStatus('error');
+                    App.ui.toast('Koneksi internet terputus. Halaman tetap terbuka dan akan tersambung kembali saat jaringan tersedia.', 'error');
+                    console.warn('[Studihome network]', error?.message || error);
+                },
+                bind: () => {
+                    if (App.network._bound) return;
+                    App.network._bound = true;
+                    window.addEventListener('offline', () => {
+                        App.network._isOffline = true;
+                        App.ui.updateApiStatus('error');
+                        App.ui.toast('Koneksi internet terputus. Periksa jaringanmu, ya.', 'error');
+                    });
+                    window.addEventListener('online', () => {
+                        const retry = App.network._retry;
+                        App.network._retry = null;
+                        App.network._isOffline = false;
+                        App.ui.updateApiStatus('connecting');
+                        App.ui.toast('Koneksi kembali tersedia. Menyambungkan ulang…', 'info');
+                        if (retry) {
+                            window.setTimeout(() => {
+                                Promise.resolve(retry()).catch(error => App.network.reportUnavailable(error, retry));
+                            }, 0);
+                        } else {
+                            App.ui.updateApiStatus('online');
+                        }
+                    });
+                }
+            },
             init: async () => {
+                App.network.bind();
                 App.studioAI._loadSmartContext();
                 App.ui.updateApiStatus('connecting');
                 try {
                     // Intercept Supabase auth tokens from URL hash BEFORE client creation
                     // Handles both email confirmation (type=signup → auto-login) and
                     // password reset (type=recovery → stay on reset page, no auto-login)
+                    const _recoveryGuardKey = 'studihome:password-recovery-pending';
+                    const _setRecoveryGuard = (pending) => {
+                        try {
+                            if (pending) sessionStorage.setItem(_recoveryGuardKey, '1');
+                            else sessionStorage.removeItem(_recoveryGuardKey);
+                        } catch (_) { /* sessionStorage unavailable: retain in-memory guard only */ }
+                    };
+                    const _hasRecoveryGuard = () => {
+                        try { return sessionStorage.getItem(_recoveryGuardKey) === '1'; }
+                        catch (_) { return false; }
+                    };
                     const _urlHash = window.location.hash || '';
                     const _hashHasToken = _urlHash.includes('access_token');
                     const _isRecovery = _hashHasToken && _urlHash.includes('type=recovery');
                     const _isSignup = _hashHasToken && _urlHash.includes('type=signup');
+                    App.state._recoverySessionReady = _hasRecoveryGuard();
                     let _authTokens = null;
                     let _authFlowType = null;
                     if (_isRecovery || _isSignup) {
                         const hp = new URLSearchParams(_urlHash.replace(/^#/, ''));
                         _authTokens = { access_token: hp.get('access_token'), refresh_token: hp.get('refresh_token') };
                         _authFlowType = _isRecovery ? 'recovery' : 'signup';
-                        // Clean URL immediately to prevent re-processing
+                        if (_isRecovery) { _setRecoveryGuard(true); App.state._recoverySessionReady = true; }
                         window.history.replaceState({}, '', window.location.pathname);
-                    }
-                    // Restore persisted recovery state (survives full page reload)
-                    if (_authFlowType !== 'recovery' && sessionStorage.getItem('studihome_recovery') === '1') {
-                        App.state._recoverySessionReady = true;
                     }
                     initSupabase();
                     App.api._requireConfig();
@@ -1324,16 +1372,22 @@ const App = {
                             if (_authFlowType === 'recovery') {
                                 // Recovery: set flag, persist in sessionStorage, skip profile
                                 App.state._recoverySessionReady = true;
-                                try { sessionStorage.setItem('studihome_recovery', '1'); } catch(_) {}
+                                try { _setRecoveryGuard(true); } catch(_) {}
                             }
                             // signup: session is set, profile will be loaded below (normal flow)
                         } else {
                             if (_authFlowType === 'recovery') {
+                                _setRecoveryGuard(false);
+                                App.state._recoverySessionReady = false;
                                 console.error('[ResetPassword] Recovery session error:', authErr);
                                 App.ui.toast('Link reset tidak valid atau sudah kedaluwarsa. Minta link baru.', 'error');
                             }
                             // signup errors are non-fatal, user can sign in manually
                         }
+                    }
+                    if (App.state._recoverySessionReady && !session?.user) {
+                        _setRecoveryGuard(false);
+                        App.state._recoverySessionReady = false;
                     }
 
                     // Skip auto-login profile load during password recovery
@@ -1359,8 +1413,12 @@ const App = {
                     supabaseClient.auth.onAuthStateChange((_event, sessionNow) => {
                         void (async () => {
                             // Skip profile load during password recovery to prevent auto-login
-                            if (App.state.routeType === 'reset-password' || App.state._recoverySessionReady || sessionStorage.getItem('studihome_recovery') === '1') return;
+                            if (App.state.routeType === 'reset-password' || App.state._recoverySessionReady || _hasRecoveryGuard()) return;
                             if (!sessionNow?.user) {
+                                if (_event === 'SIGNED_OUT') {
+                                    _setRecoveryGuard(false);
+                                    App.state._recoverySessionReady = false;
+                                }
                                 await cleanupRealtime();
                                 App.state.user = null;
                                 App.state.memberData = null;
@@ -1935,6 +1993,14 @@ App.router.bindCanonicalLinkGuard();
                         window.location.assign('/dapur');
                         return;
                     }
+                    if (tab === 'dashboard' && App.state._recoverySessionReady) {
+                        window.history.replaceState({}, '', '/reset-password');
+                        App.state.routePath = '/reset-password';
+                        App.state.routeType = 'reset-password';
+                        App.ui.renderNavigation();
+                        App.auth.renderResetPasswordPage();
+                        return;
+                    }
                     const routes = {
                         home: '/',
                         products: '/foyer',
@@ -2050,7 +2116,7 @@ App.router.bindCanonicalLinkGuard();
                         return;
                     }
                     // Block ALL authenticated routes during password recovery (must be first)
-                    if ((App.state._recoverySessionReady || sessionStorage.getItem('studihome_recovery') === '1') && (parts[0] === 'dashboard' || parts[0] === 'kamar' || parts[0] === 'admin')) {
+                    if ((App.state._recoverySessionReady || _hasRecoveryGuard()) && (parts[0] === 'dashboard' || parts[0] === 'kamar' || parts[0] === 'admin')) {
                         App.state.routeType = 'reset-password';
                         window.history.replaceState({}, '', '/reset-password');
                         return;
@@ -2116,7 +2182,7 @@ App.router.bindCanonicalLinkGuard();
                         return true;
                     }
                     // Block authenticated routes during password recovery (includes sessionStorage fallback)
-                    if ((path === '/dashboard' || path === '/kamar' || path === '/admin') && (App.state._recoverySessionReady || sessionStorage.getItem('studihome_recovery') === '1')) {
+                    if ((path === '/dashboard' || path === '/kamar' || path === '/admin') && (App.state._recoverySessionReady || _hasRecoveryGuard())) {
                         App.state._recoverySessionReady = true;
                         window.history.replaceState({}, '', '/reset-password');
                         App.state.routePath = '/reset-password';
@@ -2273,7 +2339,7 @@ App.router.bindCanonicalLinkGuard();
                         return;
                     }
                     // Block dashboard/kamar hash access during password recovery
-                    if ((rawHash === 'dashboard' || rawHash === 'kamar' || currentPath === '/kamar') && (App.state._recoverySessionReady || sessionStorage.getItem('studihome_recovery') === '1')) {
+                    if ((rawHash === 'dashboard' || rawHash === 'kamar' || currentPath === '/kamar') && (App.state._recoverySessionReady || _hasRecoveryGuard())) {
                         window.history.replaceState({}, '', '/reset-password');
                         App.state.routePath = '/reset-password';
                         App.state.routeType = 'reset-password';
@@ -2465,7 +2531,7 @@ App.router.bindCanonicalLinkGuard();
                             const { error } = await supabaseClient.auth.updateUser({ password: payload.password });
                             if (error) throw error;
                             // Clear recovery state — password changed, user should log in with new password
-                            try { sessionStorage.removeItem('studihome_recovery'); } catch(_) {}
+                            try { _setRecoveryGuard(false); } catch(_) {}
                             App.state._recoverySessionReady = false;
                             data = { success: true };
                         } else if (action === 'SUBMIT_CREATOR_REVIEW') {
@@ -3236,9 +3302,10 @@ App.router.bindCanonicalLinkGuard();
                         if (btn) btn.textContent = '✅ Berhasil!';
                         App.ui.toast('Kata sandi berhasil diperbarui! 🎉', 'success');
                         // Sign out so user logs in with new password
+                        App.state._recoverySessionReady = false;
+                        try { sessionStorage.removeItem('studihome:password-recovery-pending'); } catch(_) {}
                         await supabaseClient.auth.signOut().catch(() => {});
                         App.state.user = null;
-                        try { sessionStorage.removeItem('studihome_recovery'); } catch(_) {}
                         setTimeout(() => {
                             App.router.navigate('home');
                             App.ui.toggleModal('auth-modal', true);
@@ -3266,8 +3333,16 @@ App.router.bindCanonicalLinkGuard();
                         App.state.publicData = await App.api.post('GET_PUBLIC');
                         App.home.startTestimonialCycle();
                         App.ui.updateApiStatus('online');
+                        return App.state.publicData;
                     } catch (e) {
                         App.state.publicData = null;
+                        if (App.network.isConnectivityError(e)) {
+                            App.network.reportUnavailable(e, async () => {
+                                await App.home.load();
+                                App.router.handlePath() || App.router.handleHash();
+                            });
+                            return null;
+                        }
                         App.ui.updateApiStatus('error');
                         App.ui.showBackendError(e);
                         throw e;
@@ -5593,6 +5668,7 @@ App.router.bindCanonicalLinkGuard();
                 closeBrief: () => { const modal=document.getElementById('creator-brief-modal'); if(modal) modal.remove(); },
                 render: async (username, portfolioSlug = '', options = {}) => {
                     const main = document.getElementById('main-content');
+                    const previousMarkup = main?.innerHTML || '';
                     const renderVersion = ++App.creator._renderVersion;
                     const cachedProfile = App.creator._getCachedProfile(username);
                     if (!cachedProfile && !options.preserveContent) {
@@ -5830,6 +5906,12 @@ App.router.bindCanonicalLinkGuard();
                         window.scrollTo({ top: 0, behavior: 'auto' });
                     } catch (e) {
                         if (renderVersion !== App.creator._renderVersion) return;
+                        if (App.network.isConnectivityError(e)) {
+                            main.removeAttribute('aria-busy');
+                            if (previousMarkup) App.router._commitMain(main, previousMarkup);
+                            App.network.reportUnavailable(e, () => App.creator.render(username, portfolioSlug, { preserveContent: true }));
+                            return;
+                        }
                         document.title = 'Studihome - Halaman Belum Tersedia';
                         const errorMarkup = `
                             <div class="card-3d p-6 sm:p-10 rounded-3xl text-center max-w-lg mx-auto my-12 bg-white border border-blue-100 shadow-xl">
