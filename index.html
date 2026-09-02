@@ -1278,7 +1278,47 @@ const App = {
                     }
                 }
             },
+            network: {
+                _bound: false,
+                _isOffline: false,
+                _retry: null,
+                isConnectivityError: (error) => {
+                    const message = String(error?.message || error || '');
+                    return navigator.onLine === false || /failed to fetch|network(?:error| request)?|load failed|internet|offline/i.test(message);
+                },
+                reportUnavailable: (error, retry) => {
+                    App.network._retry = typeof retry === 'function' ? retry : App.network._retry;
+                    App.network._isOffline = true;
+                    App.ui.updateApiStatus('error');
+                    App.ui.toast('Koneksi internet terputus. Halaman tetap terbuka dan akan tersambung kembali saat jaringan tersedia.', 'error');
+                    console.warn('[Studihome network]', error?.message || error);
+                },
+                bind: () => {
+                    if (App.network._bound) return;
+                    App.network._bound = true;
+                    window.addEventListener('offline', () => {
+                        App.network._isOffline = true;
+                        App.ui.updateApiStatus('error');
+                        App.ui.toast('Koneksi internet terputus. Periksa jaringanmu, ya.', 'error');
+                    });
+                    window.addEventListener('online', () => {
+                        const retry = App.network._retry;
+                        App.network._retry = null;
+                        App.network._isOffline = false;
+                        App.ui.updateApiStatus('connecting');
+                        App.ui.toast('Koneksi kembali tersedia. Menyambungkan ulang…', 'info');
+                        if (retry) {
+                            window.setTimeout(() => {
+                                Promise.resolve(retry()).catch(error => App.network.reportUnavailable(error, retry));
+                            }, 0);
+                        } else {
+                            App.ui.updateApiStatus('online');
+                        }
+                    });
+                }
+            },
             init: async () => {
+                App.network.bind();
                 App.studioAI._loadSmartContext();
                 App.ui.updateApiStatus('connecting');
                 try {
@@ -3287,8 +3327,16 @@ App.router.bindCanonicalLinkGuard();
                         App.state.publicData = await App.api.post('GET_PUBLIC');
                         App.home.startTestimonialCycle();
                         App.ui.updateApiStatus('online');
+                        return App.state.publicData;
                     } catch (e) {
                         App.state.publicData = null;
+                        if (App.network.isConnectivityError(e)) {
+                            App.network.reportUnavailable(e, async () => {
+                                await App.home.load();
+                                App.router.handlePath() || App.router.handleHash();
+                            });
+                            return null;
+                        }
                         App.ui.updateApiStatus('error');
                         App.ui.showBackendError(e);
                         throw e;
@@ -5614,6 +5662,7 @@ App.router.bindCanonicalLinkGuard();
                 closeBrief: () => { const modal=document.getElementById('creator-brief-modal'); if(modal) modal.remove(); },
                 render: async (username, portfolioSlug = '', options = {}) => {
                     const main = document.getElementById('main-content');
+                    const previousMarkup = main?.innerHTML || '';
                     const renderVersion = ++App.creator._renderVersion;
                     const cachedProfile = App.creator._getCachedProfile(username);
                     if (!cachedProfile && !options.preserveContent) {
@@ -5851,6 +5900,12 @@ App.router.bindCanonicalLinkGuard();
                         window.scrollTo({ top: 0, behavior: 'auto' });
                     } catch (e) {
                         if (renderVersion !== App.creator._renderVersion) return;
+                        if (App.network.isConnectivityError(e)) {
+                            main.removeAttribute('aria-busy');
+                            if (previousMarkup) App.router._commitMain(main, previousMarkup);
+                            App.network.reportUnavailable(e, () => App.creator.render(username, portfolioSlug, { preserveContent: true }));
+                            return;
+                        }
                         document.title = 'Studihome - Halaman Belum Tersedia';
                         const errorMarkup = `
                             <div class="card-3d p-6 sm:p-10 rounded-3xl text-center max-w-lg mx-auto my-12 bg-white border border-blue-100 shadow-xl">
