@@ -1413,7 +1413,7 @@ const App = {
                     supabaseClient.auth.onAuthStateChange((_event, sessionNow) => {
                         void (async () => {
                             // Skip profile load during password recovery to prevent auto-login
-                            if (App.state.routeType === 'reset-password' || App.state._recoverySessionReady || _hasRecoveryGuard()) return;
+                            if (App.state.routeType === 'reset-password' || App.state._recoverySessionReady || (typeof _hasRecoveryGuard === 'function' ? _hasRecoveryGuard() : sessionStorage.getItem('studihome:password-recovery-pending') === '1')) return;
                             if (!sessionNow?.user) {
                                 if (_event === 'SIGNED_OUT') {
                                     _setRecoveryGuard(false);
@@ -2116,7 +2116,7 @@ App.router.bindCanonicalLinkGuard();
                         return;
                     }
                     // Block ALL authenticated routes during password recovery (must be first)
-                    if ((App.state._recoverySessionReady || _hasRecoveryGuard()) && (parts[0] === 'dashboard' || parts[0] === 'kamar' || parts[0] === 'admin')) {
+                    if ((App.state._recoverySessionReady || (typeof _hasRecoveryGuard === 'function' ? _hasRecoveryGuard() : sessionStorage.getItem('studihome:password-recovery-pending') === '1')) && (parts[0] === 'dashboard' || parts[0] === 'kamar' || parts[0] === 'admin')) {
                         App.state.routeType = 'reset-password';
                         window.history.replaceState({}, '', '/reset-password');
                         return;
@@ -2182,7 +2182,7 @@ App.router.bindCanonicalLinkGuard();
                         return true;
                     }
                     // Block authenticated routes during password recovery (includes sessionStorage fallback)
-                    if ((path === '/dashboard' || path === '/kamar' || path === '/admin') && (App.state._recoverySessionReady || _hasRecoveryGuard())) {
+                    if ((path === '/dashboard' || path === '/kamar' || path === '/admin') && (App.state._recoverySessionReady || (typeof _hasRecoveryGuard === 'function' ? _hasRecoveryGuard() : sessionStorage.getItem('studihome:password-recovery-pending') === '1'))) {
                         App.state._recoverySessionReady = true;
                         window.history.replaceState({}, '', '/reset-password');
                         App.state.routePath = '/reset-password';
@@ -2339,7 +2339,7 @@ App.router.bindCanonicalLinkGuard();
                         return;
                     }
                     // Block dashboard/kamar hash access during password recovery
-                    if ((rawHash === 'dashboard' || rawHash === 'kamar' || currentPath === '/kamar') && (App.state._recoverySessionReady || _hasRecoveryGuard())) {
+                    if ((rawHash === 'dashboard' || rawHash === 'kamar' || currentPath === '/kamar') && (App.state._recoverySessionReady || (typeof _hasRecoveryGuard === 'function' ? _hasRecoveryGuard() : sessionStorage.getItem('studihome:password-recovery-pending') === '1'))) {
                         window.history.replaceState({}, '', '/reset-password');
                         App.state.routePath = '/reset-password';
                         App.state.routeType = 'reset-password';
@@ -2531,7 +2531,7 @@ App.router.bindCanonicalLinkGuard();
                             const { error } = await supabaseClient.auth.updateUser({ password: payload.password });
                             if (error) throw error;
                             // Clear recovery state — password changed, user should log in with new password
-                            try { _setRecoveryGuard(false); } catch(_) {}
+                            try { sessionStorage.removeItem('studihome:password-recovery-pending'); } catch(_) {}
                             App.state._recoverySessionReady = false;
                             data = { success: true };
                         } else if (action === 'SUBMIT_CREATOR_REVIEW') {
