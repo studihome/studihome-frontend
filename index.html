@@ -3100,6 +3100,14 @@ App.router.bindCanonicalLinkGuard();
                         } else if (action === 'ADMIN_TOGGLE_USER_STATUS') {
                             const {data:u,error:gErr}=await supabaseClient.from('profiles').select('status,role').eq('id',payload.userId).single();if(gErr)throw gErr;if(u.role==='admin')throw new Error('Admin tidak dapat diblokir dari panel ini.');
                             const next=String(u.status).toLowerCase()==='active'?'blocked':'active'; const {error}=await supabaseClient.from('profiles').update({status:next,updated_at:new Date().toISOString()}).eq('id',payload.userId);if(error)throw error;data={success:true};
+                        } else if (action === 'ADMIN_UPDATE_USER_ROLE') {
+                            if (!App.state.user || String(App.state.user.role || '').toLowerCase() !== 'admin') throw new Error('Akses Admin diperlukan.');
+                            const role = String(payload.role || '').trim().toLowerCase();
+                            if (!['member','user','admin'].includes(role)) throw new Error('Role tidak dikenal: ' + role);
+                            if (payload.userId === App.state.user.id) throw new Error('Tidak bisa mengubah role akun sendiri.');
+                            const { data: target, error: gErr } = await supabaseClient.from('profiles').select('role').eq('id', payload.userId).single(); if (gErr) throw gErr;
+                            if (String(target?.role || '').toLowerCase() === 'admin') throw new Error('Role Admin dilindungi dan tidak dapat diubah dari panel ini.');
+                            const { error } = await supabaseClient.from('profiles').update({ role, updated_at: new Date().toISOString() }).eq('id', payload.userId); if (error) throw error; data = { success: true, role };
                         } else { throw new Error('Aksi tidak dikenali: '+action); }
                         App.ui.updateApiStatus('online'); return data;
                     } catch(e) { App.ui.updateApiStatus('error'); App.ui.toast('Backend: '+(e.message||'Terjadi kesalahan.'),'error'); throw e; }
@@ -7977,8 +7985,8 @@ renderStudioAiControl: async () => {
                                                     const isVerifiedEmail = u.email_verified === true;
                                                     const waPhone = String(u.phone || '').replace(/\D/g, '').replace(/^0/, '62');
                                                     const waMessage = encodeURIComponent(isVerifiedEmail
-                                                        ? 'Halo, kami dari Studihome. Email kamu sudah terverifikasi. Silakan masuk ke akun kamu di studihome.id untuk mengakses seluruh fasilitas dan modul belajarmu. Ada juga penawaran terbatas spesial yang sayang untuk dilewatkan, ya.'
-                                                        : 'Halo, kami dari Studihome. Jangan lupa aktifkan email kamu lewat tautan verifikasi yang sudah kami kirim agar akunmu aktif, ya. Setelah aktif, masuk ke studihome.id untuk mengakses fasilitas dan dapatkan penawaran terbatas spesial dari kami.');
+                                                        ? 'Halo, kami dari Studihome. Email kamu sudah terverifikasi. Silakan masuk ke akun kamu di https://studihome.id untuk mengakses seluruh fasilitas dan modul belajarmu. Ada juga penawaran terbatas spesial yang sayang untuk dilewatkan, ya.'
+                                                        : 'Halo, kami dari Studihome. Jangan lupa aktifkan email kamu lewat tautan verifikasi yang sudah kami kirim agar akunmu aktif, ya. Setelah aktif, masuk ke https://studihome.id untuk mengakses fasilitas dan dapatkan penawaran terbatas spesial dari kami.');
                                                     const waUrl = waPhone.length >= 9 ? `https://wa.me/${waPhone}?text=${waMessage}` : '';
                                                     return `
                                                         <tr class="border-b border-slate-100">
@@ -7988,11 +7996,7 @@ renderStudioAiControl: async () => {
                                                                 <a href="${waUrl}" target="_blank" rel="noopener noreferrer" class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-[10px] font-bold text-emerald-700 bg-emerald-50 border border-emerald-200 hover:bg-emerald-100 shadow-2xs">
                                                                     <i class="fa-brands fa-whatsapp"></i> ${App.utils.escapeHtml(u.phone)}
                                                                 </a>` : `<span class="text-[10px] text-slate-400">${App.utils.escapeHtml(u.phone || '-')}</span>`}</td>
-                                                            <td class="py-3 px-2">
-                                                                <span class="px-2 py-0.5 rounded text-[10px] font-extrabold uppercase ${isAdmin ? 'bg-purple-100 text-purple-800' : 'bg-blue-100 text-blue-800'}">
-                                                                    ${u.role}
-                                                                </span>
-                                                            </td>
+                                                            <td class="py-3 px-2">${isAdmin ? `<span class="px-2 py-0.5 rounded text-[10px] font-extrabold uppercase bg-purple-100 text-purple-800">${App.utils.escapeHtml(u.role)}</span>` : `<select data-role="${App.utils.escapeHtml(u.role || '')}" onchange="App.admin.changeUserRole('${u.id || u.email}', this)" class="card-3d-inset px-2.5 py-1.5 rounded-lg text-[10px] font-extrabold text-[#151c75] outline-none">${['member','user','admin'].includes(u.role) ? '' : `<option value="${App.utils.escapeHtml(u.role || '')}" selected>${App.utils.escapeHtml(u.role || '')}</option>`}<option value="member" ${u.role === 'member' ? 'selected' : ''}>member</option><option value="user" ${u.role === 'user' ? 'selected' : ''}>user</option><option value="admin" ${u.role === 'admin' ? 'selected' : ''}>admin</option></select>`}</td>
                                                             <td class="py-3 px-2">
                                                                 <span class="px-2 py-0.5 rounded text-[10px] font-bold ${!isBlocked ? 'bg-emerald-100 text-emerald-800' : 'bg-red-100 text-red-800'}">
                                                                     ${!isBlocked ? 'Aktif' : 'Diblokir'}
@@ -8723,6 +8727,22 @@ renderStudioAiControl: async () => {
                     await App.api.post('ADMIN_TOGGLE_USER_STATUS', { userId });
                     App.ui.toast('Status pengguna berhasil diperbarui.', 'info');
                     App.admin.renderSubTab();
+                },
+
+                changeUserRole: async (userId, selectEl) => {
+                    if (!selectEl) return;
+                    const prevRole = String(selectEl.dataset.role || '').toLowerCase();
+                    const nextRole = String(selectEl.value || '').trim().toLowerCase();
+                    if (!nextRole || nextRole === prevRole) { selectEl.value = selectEl.dataset.role; return; }
+                    const confirmed = window.confirm(`Ubah peran pengguna ini dari "${prevRole}" menjadi "${nextRole}"?\n\nPerubahan langsung aktif dan tersimpan di database.`);
+                    if (!confirmed) { selectEl.value = selectEl.dataset.role; return; }
+                    try {
+                        await App.api.post('ADMIN_UPDATE_USER_ROLE', { userId, role: nextRole });
+                        App.ui.toast(`Peran pengguna berhasil diubah menjadi ${nextRole}.`, 'success');
+                        App.admin.renderSubTab();
+                    } catch (e) {
+                        selectEl.value = selectEl.dataset.role;
+                    }
                 }
             },
 
