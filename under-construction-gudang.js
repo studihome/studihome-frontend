@@ -13,7 +13,6 @@
   let observer = null;
   let reconcileTimer = 0;
   let opening = false;
-  let lastContainer = null;
 
   const sleep = ms => new Promise(resolve => setTimeout(resolve, ms));
   const connected = el => !!el && el.isConnected === true;
@@ -100,39 +99,18 @@
     button.type = 'button';
     button.setAttribute('aria-label', 'Buka Under Construction');
     button.setAttribute('title', 'MT');
-    button.innerHTML = `
-      <span style="display:inline-flex;align-items:center;justify-content:center;width:32px;height:32px;border-radius:12px;background:#fffbeb;color:#b45309;flex:0 0 auto;">
-        <i class="fa-solid fa-person-digging" aria-hidden="true"></i>
-      </span>
-      <span style="min-width:0;display:flex;flex-direction:column;align-items:flex-start;gap:1px;line-height:1.2;">
-        <span style="font-size:11px;font-weight:900;white-space:nowrap;">MT</span>
-      </span>`;
-    button.style.cssText = [
-      'display:flex',
-      'align-items:center',
-      'gap:10px',
-      'width:100%',
-      'min-height:52px',
-      'padding:8px 12px',
-      'border:1px solid #fde68a',
-      'border-radius:14px',
-      'background:#fff',
-      'color:#475569',
-      'cursor:pointer',
-      'text-align:left',
-      'box-shadow:0 6px 18px rgba(21,28,117,.06)',
-      'font:inherit'
-    ].join(';');
-    button.addEventListener('mouseenter', () => {
-      button.style.background = '#fffbeb';
-      button.style.borderColor = '#fcd34d';
-    });
-    button.addEventListener('mouseleave', () => {
-      button.style.background = '#fff';
-      button.style.borderColor = '#fde68a';
-    });
+    // Gaya pill sama dengan deretan menu tab admin (… Dapur Creator, Gudang),
+    // dengan ikon aksen amber khas fitur maintenance.
+    button.className = 'px-3.5 py-2 rounded-xl transition-all text-slate-700 hover:text-[#151c75]';
+    button.innerHTML = '<i class="fa-solid fa-person-digging mr-1 text-amber-600" aria-hidden="true"></i>MT';
     button.addEventListener('click', () => { void openPanel(); });
     return button;
+  }
+
+  function resetLauncherToSidebar(launcher) {
+    launcher.removeAttribute('style');
+    launcher.style.position = 'static';
+    launcher.dataset.mountMode = 'sidebar';
   }
 
   function findGudangItem() {
@@ -146,41 +124,54 @@
 
   function placeLauncher() {
     let launcher = document.getElementById(LAUNCHER_ID);
-    const container = findContainer();
-
     if (!launcher) launcher = buttonMarkup();
 
-    if (container && connected(container)) {
-      const gudangItem = findGudangItem();
-      if (gudangItem && connected(gudangItem) && gudangItem.parentElement === container) {
-        if (connected(launcher)) launcher.remove();
-        gudangItem.insertAdjacentElement('afterend', launcher);
-      } else if (launcher.parentElement !== container) {
-        if (connected(launcher)) launcher.remove();
-        container.appendChild(launcher);
-      }
-      launcher.style.position = 'static';
-      launcher.style.zIndex = '';
-      launcher.dataset.mountMode = 'sidebar';
-      lastContainer = container;
+    // Prioritas: tempel tepat setelah menu tab "Gudang" (urutan: … Dapur Creator → Gudang → MT),
+    // sehingga menu maintenance berada di samping kanan Gudang, satu baris dengan menu Dapur.
+    const gudangItem = findGudangItem();
+    if (gudangItem && connected(gudangItem) && connected(gudangItem.parentElement)) {
+      if (connected(launcher)) launcher.remove();
+      gudangItem.insertAdjacentElement('afterend', launcher);
+      resetLauncherToSidebar(launcher);
       return true;
     }
 
+    // Fallback 1: wadah navigasi yang dikenali lewat heuristik (isi di akhir wadah).
+    const container = findContainer();
+    if (container && connected(container)) {
+      if (connected(launcher)) launcher.remove();
+      container.appendChild(launcher);
+      resetLauncherToSidebar(launcher);
+      return true;
+    }
+
+    // Fallback 2: tombol melayang di pojok kanan bawah.
     if (!connected(launcher)) document.body.appendChild(launcher);
     if (launcher.parentElement !== document.body) {
       launcher.remove();
       document.body.appendChild(launcher);
     }
 
-    launcher.style.position = 'fixed';
-    launcher.style.right = '18px';
-    launcher.style.bottom = '18px';
-    launcher.style.width = 'min(240px, calc(100vw - 36px))';
-    launcher.style.zIndex = '2147483000';
-    launcher.style.padding = '10px 12px';
-    launcher.style.borderRadius = '16px';
+    launcher.style.cssText = [
+      'display:flex',
+      'align-items:center',
+      'gap:10px',
+      'position:fixed',
+      'right:18px',
+      'bottom:18px',
+      'width:min(240px, calc(100vw - 36px))',
+      'padding:10px 12px',
+      'border:1px solid #fde68a',
+      'border-radius:16px',
+      'background:#fff',
+      'color:#475569',
+      'cursor:pointer',
+      'text-align:left',
+      'box-shadow:0 6px 18px rgba(21,28,117,.12)',
+      'z-index:2147483000',
+      'font:inherit'
+    ].join(';');
     launcher.dataset.mountMode = 'floating-fallback';
-    lastContainer = null;
     return true;
   }
 
@@ -297,11 +288,20 @@
   }
 
   function reconcile() {
-    const container = findContainer();
     const launcher = document.getElementById(LAUNCHER_ID);
-    const launcherAlive = connected(launcher);
+    const gudangItem = findGudangItem();
 
-    if (!launcherAlive || lastContainer !== container || launcher?.dataset.mountMode === 'floating-fallback' && container) {
+    if (!connected(launcher)) {
+      placeLauncher();
+      cleanupTrailingFooterText();
+      return;
+    }
+
+    if (gudangItem && connected(gudangItem)) {
+      // Mode sidebar: launcher harus selalu menempel tepat setelah menu "Gudang".
+      if (launcher.previousElementSibling !== gudangItem) placeLauncher();
+    } else if (launcher.dataset.mountMode === 'floating-fallback' && findContainer()) {
+      // Wadah navigasi sudah tersedia → keluar dari mode melayang.
       placeLauncher();
     }
 
@@ -322,8 +322,9 @@
 
     observer = new MutationObserver(() => {
       const launcher = document.getElementById(LAUNCHER_ID);
-      const container = findContainer();
-      if (!connected(launcher) || launcher.parentElement !== container && container || lastContainer !== container) {
+      const gudangItem = findGudangItem();
+      const anchored = !!gudangItem && connected(gudangItem) && connected(launcher) && launcher.previousElementSibling === gudangItem;
+      if (!anchored && (gudangItem || !connected(launcher))) {
         scheduleReconcile();
       }
     });
