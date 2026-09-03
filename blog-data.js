@@ -490,11 +490,12 @@
       <style>
         .blog-article-page{width:min(100%,48rem);margin:0 auto;padding:0 0 clamp(2.5rem,5vw,3rem);box-sizing:border-box}
         .blog-article-canvas,.blog-article-promo{width:100%;box-sizing:border-box}
+        .blog-article-promo{margin-top:clamp(1.5rem,4vw,2.5rem)}
         .blog-article-inner{padding:clamp(1.25rem,3vw,2rem) clamp(.75rem,4vw,3rem) clamp(1.5rem,4vw,2.5rem)}
         .blog-article-back{margin-bottom:clamp(1.25rem,2.5vw,1.75rem)}
         .blog-article-category{margin:clamp(.5rem,1vw,.75rem) 0 clamp(1.25rem,2.5vw,1.75rem)}
         .blog-article-actions{margin:clamp(2.5rem,5vw,3.5rem) 0 clamp(.75rem,2vw,1.25rem);padding-top:clamp(1.5rem,3vw,2rem)}
-        .balkon-pnav{display:flex;gap:.6rem;margin-bottom:clamp(1.25rem,3vw,2rem);box-sizing:border-box}
+        .balkon-pnav{display:flex;gap:.6rem;margin:clamp(1.25rem,3vw,2rem) 0 0;box-sizing:border-box}
         .balkon-pnav-btn{flex:1 1 0;min-width:0;display:flex;align-items:center;gap:.5rem;padding:.72rem 1rem;border:1px solid #e6ebf5;border-radius:.9rem;background:#f8fafc;color:#475569;text-decoration:none;transition:border-color .18s ease,background .18s ease,color .18s ease;box-sizing:border-box}
         .balkon-pnav-btn:hover{border-color:#c7d6f7;background:#eef4ff;color:#151c75}
         .balkon-pnav-btn i{flex:0 0 auto;font-size:.75rem;line-height:1;color:#94a3b8;transition:color .18s ease}
@@ -511,7 +512,7 @@
         </button>
 
         <!-- White Canvas Article Container -->
-        <article class="blog-article-canvas w-full bg-white rounded-3xl md:shadow-md md:border border-slate-100 overflow-hidden mb-10">
+        <article class="blog-article-canvas w-full bg-white rounded-3xl md:shadow-md md:border border-slate-100 overflow-hidden">
           <div class="blog-article-inner">
             <!-- Category (semantic) -->
             <nav aria-label="Kategori Artikel" class="blog-article-category">
