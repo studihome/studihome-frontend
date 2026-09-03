@@ -7632,8 +7632,14 @@ renderStudioAiControl: async () => {
                                     <h3 class="font-bold text-sm text-[#151c75]">Master Data Terpadu</h3>
 
                                     <!-- HERO SECTION MANAGEMENT WITH 4 CTA INPUT FIELDS -->
-                                    <div class="card-3d-inset p-4 sm:p-5 rounded-2xl space-y-3">
-                                        <h4 class="font-bold text-xs text-[#151c75] uppercase tracking-wider"><i class="fa-solid fa-heading mr-1 text-amber-500"></i> Kelola Tampilan Hero Teras</h4>
+<details class="rounded-2xl overflow-hidden border border-blue-100 bg-white card-3d">
+    <summary class="group flex cursor-pointer list-none items-center justify-between gap-3 select-none px-4 py-3.5 sm:px-5" role="button">
+        <div class="min-w-0">
+            <h4 class="font-bold text-xs text-[#151c75] uppercase tracking-wider"><i class="fa-solid fa-heading mr-1 text-amber-500"></i> Kelola Tampilan Hero Teras</h4>
+        </div>
+        <span class="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-blue-50 text-[#151c75] transition-transform duration-200 group-open:rotate-180" aria-hidden="true"><i class="fa-solid fa-chevron-down text-[10px]"></i></span>
+    </summary>
+    <div class="space-y-3 border-t border-blue-100/60 px-4 pb-5 pt-4 sm:px-5">
                                         <div class="space-y-2.5">
                                             <div>
                                                 <label class="block text-[10px] font-bold text-slate-600 mb-1">Text Badge Top Hero</label>
@@ -7698,14 +7704,19 @@ renderStudioAiControl: async () => {
                                                 <button onclick="App.admin.saveHeroSettings()" class="btn-brand-gradient px-4 py-2 rounded-xl text-xs font-bold mt-3">Simpan Tampilan Hero</button>
                                             </div>
                                         </div>
-                                    </div>
+    </div>
+</details>
 
                                     <!-- BLOG ARTICLES -->
-                                    <div class="card-3d-inset p-4 sm:p-5 rounded-2xl space-y-3">
-                                        <div class="flex items-center justify-between">
-                                            <h4 class="font-bold text-xs text-[#151c75] uppercase tracking-wider"><i class="fa-solid fa-newspaper mr-1 text-amber-500"></i> Kelola Artikel Blog</h4>
-                                            <button onclick="App.admin.openBlogArticleForm()" class="btn-brand-gradient px-3 py-1.5 rounded-xl text-xs font-bold">+ Tambah Artikel</button>
-                                        </div>
+<details class="rounded-2xl overflow-hidden border border-blue-100 bg-white card-3d">
+    <summary class="group flex cursor-pointer list-none items-center justify-between gap-3 select-none px-4 py-3.5 sm:px-5" role="button">
+        <div class="min-w-0">
+            <h4 class="font-bold text-xs text-[#151c75] uppercase tracking-wider"><i class="fa-solid fa-newspaper mr-1 text-amber-500"></i> Kelola Artikel Blog</h4>
+        </div>
+        <span class="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-blue-50 text-[#151c75] transition-transform duration-200 group-open:rotate-180" aria-hidden="true"><i class="fa-solid fa-chevron-down text-[10px]"></i></span>
+    </summary>
+    <div class="space-y-3 border-t border-blue-100/60 px-4 pb-5 pt-4 sm:px-5">
+        <div class="flex items-center justify-end"><button onclick="App.admin.openBlogArticleForm()" class="btn-brand-gradient px-3 py-1.5 rounded-xl text-xs font-bold">+ Tambah Artikel</button></div>
                                         <div id="blog-article-form-box" class="hidden card-3d p-3.5 rounded-xl space-y-2.5 bg-white">
                                             <input type="hidden" id="blog-article-id" value="">
                                             <div class="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
@@ -7782,14 +7793,19 @@ renderStudioAiControl: async () => {
                                                 </div>
                                             `).join('')}
                                         </div>
-                                    </div>
+    </div>
+</details>
 
                                     <!-- TESTIMONIALS -->
-                                    <div class="card-3d-inset p-4 sm:p-5 rounded-2xl space-y-3">
-                                        <div class="flex items-center justify-between">
-                                            <h4 class="font-bold text-xs text-[#151c75] uppercase tracking-wider"><i class="fa-solid fa-comments mr-1 text-amber-500"></i> Kelola Testimoni Pengguna</h4>
-                                            <button onclick="App.admin.showTestimonialForm()" class="btn-brand-gradient px-3 py-1.5 rounded-xl text-xs font-bold">+ Tambah Testimoni</button>
-                                        </div>
+<details class="rounded-2xl overflow-hidden border border-blue-100 bg-white card-3d">
+    <summary class="group flex cursor-pointer list-none items-center justify-between gap-3 select-none px-4 py-3.5 sm:px-5" role="button">
+        <div class="min-w-0">
+            <h4 class="font-bold text-xs text-[#151c75] uppercase tracking-wider"><i class="fa-solid fa-comments mr-1 text-amber-500"></i> Kelola Testimoni Pengguna</h4>
+        </div>
+        <span class="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-blue-50 text-[#151c75] transition-transform duration-200 group-open:rotate-180" aria-hidden="true"><i class="fa-solid fa-chevron-down text-[10px]"></i></span>
+    </summary>
+    <div class="space-y-3 border-t border-blue-100/60 px-4 pb-5 pt-4 sm:px-5">
+        <div class="flex items-center justify-end"><button onclick="App.admin.showTestimonialForm()" class="btn-brand-gradient px-3 py-1.5 rounded-xl text-xs font-bold">+ Tambah Testimoni</button></div>
 
                                         <div id="testimonial-form-box" class="hidden card-3d p-3.5 rounded-xl space-y-2.5 bg-white"></div>
 
@@ -7807,16 +7823,21 @@ renderStudioAiControl: async () => {
                                                 </div>
                                             `).join('')}
                                         </div>
-                                    </div>
+    </div>
+</details>
 
                                     <!-- HARGA QRIS SLOTS -->
-                                    <div class="card-3d-inset p-4 sm:p-5 rounded-2xl space-y-3">
-                                        <div>
-                                            <h4 class="font-bold text-xs text-[#151c75] uppercase tracking-wider"><i class="fa-solid fa-qrcode mr-1 text-amber-500"></i> Harga QRIS & Nominal Custom</h4>
-                                            <p class="text-[10px] text-slate-500 mt-1">Setiap slot adalah 1 gambar QRIS untuk 1 nominal harga. Upload gambar QRIS asli dan isi harga yang persis sama dengan harga produk.</p>
-                                        </div>
+<details class="rounded-2xl overflow-hidden border border-blue-100 bg-white card-3d">
+    <summary class="group flex cursor-pointer list-none items-center justify-between gap-3 select-none px-4 py-3.5 sm:px-5" role="button">
+        <div class="min-w-0">
+            <h4 class="font-bold text-xs text-[#151c75] uppercase tracking-wider"><i class="fa-solid fa-qrcode mr-1 text-amber-500"></i> Harga QRIS & Nominal Custom</h4>
+            <p class="text-[10px] text-slate-500 mt-1">Setiap slot adalah 1 gambar QRIS untuk 1 nominal harga. Upload gambar QRIS asli dan isi harga yang persis sama dengan harga produk.</p>
+        </div>
+        <span class="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-blue-50 text-[#151c75] transition-transform duration-200 group-open:rotate-180" aria-hidden="true"><i class="fa-solid fa-chevron-down text-[10px]"></i></span>
+    </summary>
+    <div class="space-y-3 border-t border-blue-100/60 px-4 pb-5 pt-4 sm:px-5">
                                         <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                                            ${Array.from({length: 6}, (_, idx) => {
+                                            ${Array.from({length: 10}, (_, idx) => {
                                                 const slot = idx + 1;
                                                 const q = (master.qrisSlots || []).find(x => Number(x.slot) === slot) || { slot, name: '', price: '', qrisUrl: '' };
                                                 return `
@@ -7844,7 +7865,8 @@ renderStudioAiControl: async () => {
                                             }).join('')}
                                         </div>
                                         <button onclick="App.admin.saveMasterQRIS()" class="btn-brand-gradient px-5 py-2.5 rounded-xl text-xs font-bold"><i class="fa-solid fa-cloud-arrow-up mr-1 text-[#FACC15]"></i> Simpan Konfigurasi QRIS</button>
-                                    </div>
+    </div>
+</details>
                                 </div>
                             `;
                         } else if (tab === 'creators') {
@@ -8603,7 +8625,7 @@ renderStudioAiControl: async () => {
                     const existing = Array.isArray(App.state.publicData?.master?.qrisSlots) ? App.state.publicData.master.qrisSlots : [];
                     const maxBytes = 2 * 1024 * 1024;
                     try {
-                        for (let i = 1; i <= 6; i++) {
+                        for (let i = 1; i <= 10; i++) {
                             const name = document.getElementById(`qris-name-${i}`)?.value.trim() || '';
                             const price = Number(document.getElementById(`qris-price-${i}`)?.value || 0);
                             const urlInput = document.getElementById(`qris-url-${i}`);
