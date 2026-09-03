@@ -390,6 +390,36 @@
     });
     window.scrollTo({ top: 0, behavior: 'auto' });
   }
+
+  // Previous / next article navigation rendered directly below the article canvas.
+  // Follows the same newest-first ordering used by the Balkon listing page and the
+  // delegated /balkon/:slug SPA links. Minimal controls: one soft-rounded button per
+  // side that carries only the neighboring article's title (direction is communicated
+  // by a small arrow on the outer edge + an accessible aria-label).
+  function renderArticleNav(article) {
+    const posts = getPublished();
+    if (!article || !posts || posts.length < 2) return '';
+    const index = posts.findIndex(p => p && p.slug === article.slug);
+    if (index === -1) return '';
+
+    const previous = index > 0 ? posts[index - 1] : null;
+    const next = index < posts.length - 1 ? posts[index + 1] : null;
+    if (!previous && !next) return '';
+
+    function sideButton(post, isNext) {
+      if (!post) return '';
+      const title = esc(post.title || '');
+      const slug = encodeURIComponent(post.slug || '');
+      const label = isNext ? 'Postingan Berikutnya' : 'Postingan Sebelumnya';
+      const arrow = isNext ? '<i class="fa-solid fa-arrow-right" aria-hidden="true"></i>' : '<i class="fa-solid fa-arrow-left" aria-hidden="true"></i>';
+      return `<a class="balkon-pnav-btn ${isNext ? 'is-next' : 'is-prev'}" href="/balkon/${slug}" data-balkon-link data-balkon-slug="${esc(post.slug || '')}" aria-label="${label}: ${title}" title="${title}">
+        ${isNext ? `<span class="balkon-pnav-title">${title}</span>${arrow}` : `${arrow}<span class="balkon-pnav-title">${title}</span>`}
+      </a>`;
+    }
+
+    return `<nav class="balkon-pnav" aria-label="Navigasi artikel Balkon">${sideButton(previous, false)}${sideButton(next, true)}</nav>`;
+  }
+
   function renderArticleDetail(article, products) {
     const dateStr = new Date(article.createdAt).toLocaleDateString('id-ID', {
       day: 'numeric', month: 'long', year: 'numeric'
@@ -454,6 +484,7 @@
     // ISO date for <time datetime>
     const isoDate = article.createdAt ? article.createdAt.slice(0, 10) : '';
     const readMin = Math.ceil((article.content || '').replace(/<[^>]*>/g, '').split(/\s+/).length / 200);
+    const articleNav = renderArticleNav(article);
 
     return `${renderBlogImageGuardStyles()}
       <style>
@@ -463,6 +494,14 @@
         .blog-article-back{margin-bottom:clamp(1.25rem,2.5vw,1.75rem)}
         .blog-article-category{margin:clamp(.5rem,1vw,.75rem) 0 clamp(1.25rem,2.5vw,1.75rem)}
         .blog-article-actions{margin:clamp(2.5rem,5vw,3.5rem) 0 clamp(.75rem,2vw,1.25rem);padding-top:clamp(1.5rem,3vw,2rem)}
+        .balkon-pnav{display:flex;gap:.6rem;margin-bottom:clamp(1.25rem,3vw,2rem);box-sizing:border-box}
+        .balkon-pnav-btn{flex:1 1 0;min-width:0;display:flex;align-items:center;gap:.5rem;padding:.72rem 1rem;border:1px solid #e6ebf5;border-radius:.9rem;background:#f8fafc;color:#475569;text-decoration:none;transition:border-color .18s ease,background .18s ease,color .18s ease;box-sizing:border-box}
+        .balkon-pnav-btn:hover{border-color:#c7d6f7;background:#eef4ff;color:#151c75}
+        .balkon-pnav-btn i{flex:0 0 auto;font-size:.75rem;line-height:1;color:#94a3b8;transition:color .18s ease}
+        .balkon-pnav-btn:hover i{color:#151c75}
+        .balkon-pnav-btn .balkon-pnav-title{flex:1 1 auto;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:13px;font-weight:700;line-height:1.35;transition:color .18s ease}
+        .balkon-pnav-btn.is-next .balkon-pnav-title{text-align:right}
+        @media (max-width:520px){.balkon-pnav{flex-direction:column}.balkon-pnav-btn.is-next .balkon-pnav-title{text-align:left}}
         @media (max-width:639px){.blog-article-canvas,.blog-article-promo{width:min(100vw,calc(100% + 16px));margin-left:50%;margin-right:0;transform:translateX(-50%)}.blog-article-inner{padding-inline:clamp(.875rem,4vw,1.25rem)}}
       </style>
       <div class="blog-article-page">
@@ -511,6 +550,9 @@
             </div>
           </div>
         </article>
+
+        <!-- Previous / next article navigation (below the canvas) -->
+        ${articleNav}
 
         <!-- Contextual Promo Banner (OUTSIDE white canvas) -->
         ${promoHTML}
