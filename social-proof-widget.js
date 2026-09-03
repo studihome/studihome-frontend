@@ -2,9 +2,13 @@
   'use strict';
 
   // ============================================================
-  // STUDIHOME Social Proof Widget v12
+  // STUDIHOME Social Proof Widget v13
   // ============================================================
-  // Queries get_public_social_proof_recent RPC.\n  // Server returns only verified paid orders with privacy-masked names.\n  // No seed or fabricated-data fallback is permitted.\n  //\n  // Timing: 4s initial delay, 5s display, 12-25s random interval
+  // Queries get_public_social_proof_recent RPC.
+  // Server returns only verified paid orders; member names shown in full.
+  // No seed or fabricated-data fallback is permitted.
+  //
+  // Timing: 4s initial delay, 5s display, 12-25s random interval
   // Boot: polls for supabaseClient every 200ms (bulletproof)
   // ============================================================
 
@@ -70,8 +74,8 @@
       '<span class="mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-[#151c75] to-[#3f48bf] text-[10px] font-black text-white">' + esc(ini) + '</span>' +
       '<div class="min-w-0 flex-1">' +
         '<p class="truncate text-xs font-bold text-[#151c75]">' + esc(item.name) + '</p>' +
-        '<p class="mt-0.5 truncate text-[10px] text-slate-500">baru saja membeli <span class="font-semibold text-amber-600">' + esc(item.product_title) + '</span></p>' +
-        '<p class="mt-0.5 text-[9px] font-medium text-blue-400">Studihome</p>' +
+        '<p class="mt-0.5 truncate text-[10px] text-slate-500">baru saja membeli &amp; dapat diskon</p>' +
+        '<p class="mt-0.5 truncate text-[10px] font-semibold text-amber-600">' + esc(item.product_title) + '</p>' +
       '</div>' +
       '<button type="button" aria-label="Tutup" class="sp-close shrink-0 mt-0.5 flex h-5 w-5 items-center justify-center rounded-full text-slate-300 hover:bg-slate-100 hover:text-slate-500 transition-colors">&times;</button>' +
     '</div>';
