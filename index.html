@@ -3483,7 +3483,7 @@ App.router.bindCanonicalLinkGuard();
                     const featuredProducts = (data.products || []).filter(p => p.isFeatured).slice(0, 3);
 
                     // Hero promo modules: try localStorage first, then publicData (works for anonymous)
-                    let heroPromoMods = JSON.parse(localStorage.getItem('studihome_hero_promo_modules') || '[]');
+                    let heroPromoMods = App.admin._getHeroPromoMods();
                     if (heroPromoMods.length === 0) {
                         try {
                             // Check publicData heroPromoModules (works for all users)
@@ -3673,12 +3673,12 @@ App.router.bindCanonicalLinkGuard();
                             _syncHeroPromoCtaButton(dbMods);
                         } else {
                             /* DB empty or column missing: use localStorage */
-                            var localMods = JSON.parse(localStorage.getItem('studihome_hero_promo_modules') || '[]');
+                            var localMods = App.admin._getHeroPromoMods();
                             _syncHeroPromoCtaButton(localMods);
                         }
                     }).catch(function() {
                         /* DB failed: use localStorage */
-                        var localMods = JSON.parse(localStorage.getItem('studihome_hero_promo_modules') || '[]');
+                        var localMods = App.admin._getHeroPromoMods();
                         _syncHeroPromoCtaButton(localMods);
                     });
                 }
@@ -6675,7 +6675,7 @@ renderCreatorStandardSummary: (creator, data, categories, services, portfolios) 
                                     }
                                 } catch(_) {}
                             }
-                            modules = (dbMods !== null && dbMods.length > 0) ? dbMods : JSON.parse(localStorage.getItem('studihome_hero_promo_modules') || '[]');
+                            modules = (dbMods !== null && dbMods.length > 0) ? dbMods : App.admin._getHeroPromoMods();
                             if (dbMods !== null && dbMods.length > 0) localStorage.setItem('studihome_hero_promo_modules', JSON.stringify(dbMods));
                             data = { productTitle: 'PENAWARAN TERBATAS!!', modules };
                         } else {
@@ -7624,7 +7624,7 @@ renderStudioAiControl: async () => {
                             const heroCD = heroUC.heroCountdown || {};
                             const testimonials = adminData.testimonials || App.state.demo.testimonials;
                             const heroPromoModsDB3 = await App.admin._loadHeroPromoModsFromDB();
-                            const heroPromoMods = (heroPromoModsDB3 !== null && heroPromoModsDB3.length > 0) ? heroPromoModsDB3 : JSON.parse(localStorage.getItem('studihome_hero_promo_modules') || '[]');
+                            const heroPromoMods = (heroPromoModsDB3 !== null && heroPromoModsDB3.length > 0) ? heroPromoModsDB3 : App.admin._getHeroPromoMods();
                             if (heroPromoModsDB3 !== null) localStorage.setItem('studihome_hero_promo_modules', JSON.stringify(heroPromoMods));
 
                             area.innerHTML = `
@@ -8127,7 +8127,12 @@ renderStudioAiControl: async () => {
                     App.admin.render();
                 },
 
-                _getHeroPromoMods: () => JSON.parse(localStorage.getItem('studihome_hero_promo_modules') || '[]'),
+                _getHeroPromoMods: () => {
+                    try {
+                        const v = JSON.parse(localStorage.getItem('studihome_hero_promo_modules') || '[]');
+                        return Array.isArray(v) ? v : [];
+                    } catch (_) { return []; }
+                },
                 _heroPromoColumnExists: null,
                 _loadHeroPromoModsFromDB: async () => {
                     try {
@@ -8365,7 +8370,7 @@ renderStudioAiControl: async () => {
 
                 saveHeroSettings: async () => {
                     const heroPromoModsSH = await App.admin._loadHeroPromoModsFromDB();
-                    const heroPromoMods = (heroPromoModsSH !== null && heroPromoModsSH.length > 0) ? heroPromoModsSH : JSON.parse(localStorage.getItem('studihome_hero_promo_modules') || '[]');
+                    const heroPromoMods = (heroPromoModsSH !== null && heroPromoModsSH.length > 0) ? heroPromoModsSH : App.admin._getHeroPromoMods();
                     const isHeroPromoActive = heroPromoMods.length > 0;
                     const hero = {
                         badge: document.getElementById('hero-badge').value,
