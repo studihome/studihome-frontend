@@ -2149,7 +2149,31 @@ App.router.bindCanonicalLinkGuard();
                     };
 
                     let path = window.location.pathname.toLowerCase().replace(/\/{2,}/g, '/').replace(/\/$/, '') || '/';
-                    const rawHash = window.location.hash.replace(/^#/, '').toLowerCase();
+                    let rawHash = window.location.hash.replace(/^#/, '').toLowerCase();
+
+                    // Legacy auth aliases (/login, /register, /masuk, /daftar) -> homepage + auth popup.
+                    const authAlias = path === '/login' || path === '/masuk' ? 'login' : (path === '/register' || path === '/daftar' ? 'register' : '');
+                    if (authAlias) {
+                        if (window.history.replaceState) window.history.replaceState({}, '', '/' + (window.location.search || ''));
+                        path = '/';
+                        rawHash = '';
+                        setTimeout(() => {
+                            if (window.__studihomeAuthAliasHandled) return;
+                            window.__studihomeAuthAliasHandled = true;
+                            (async () => {
+                                try {
+                                    let signedIn = false;
+                                    try {
+                                        const sess = await supabaseClient.auth.getSession();
+                                        signedIn = !!(sess && sess.data && sess.data.session && sess.data.session.user);
+                                    } catch (_) {}
+                                    if (signedIn || (App.state && App.state.user)) return;
+                                    if (App.auth && typeof App.auth.toggleAuthMode === 'function') App.auth.toggleAuthMode(authAlias);
+                                    if (App.ui && typeof App.ui.toggleModal === 'function') App.ui.toggleModal('auth-modal', true);
+                                } catch (_) {}
+                            })();
+                        }, 60);
+                    }
 
                     // Canonicalize direct legacy paths before rendering so legacy URLs never
                     // remain visible as the active URL after navigation/back/refresh.
