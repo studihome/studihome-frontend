@@ -592,7 +592,7 @@
   }
 
   function shareArticle(title, slug) {
-    const url = 'https://studihome.id/blog/' + slug;
+    const url = 'https://studihome.id/balkon/' + slug;
     if (navigator.share) {
       navigator.share({ title: title, url: url }).catch(() => {});
     } else {
@@ -700,13 +700,83 @@
       const products = data.products || [];
       main.innerHTML = `<div class="max-w-6xl mx-auto px-2 sm:px-4 md:px-6 py-8 sm:py-12">${renderArticleDetail(article, products)}</div>`;
       window.scrollTo({ top: 0, behavior: 'smooth' });
-      // Update SEO
+      // Update SEO (canonical /balkon path even in the legacy renderer)
       App.ui.updateSeo({
-        title: article.title + ' | Studihome',
+        title: article.title + ' | Balkon Studihome',
         description: article.excerpt || article.title,
-        path: '/blog/' + article.slug,
+        path: '/balkon/' + article.slug,
         ogType: 'article'
       });
     }
   };
+
+  // ------------------------------------------------------------------
+  // Legacy /blog -> canonical /balkon redirect (SEO/GEO).
+  // Server-side 301s (vercel.json) already cover full page loads and
+  // crawlers. This guards SPA navigation: any in-app call that still
+  // targets a retired /blog path is normalized to its /balkon twin
+  // (/blog/<slug> keeps the slug), and the browser URL is rewritten so
+  // the legacy path never stays visible. The original router methods are
+  // wrapped, never replaced, so existing behavior is preserved.
+  // ------------------------------------------------------------------
+  function toBalkonPath(path) {
+    const value = String(path || '');
+    if (value === '/blog' || value === '/blog/') return '/balkon';
+    if (value.indexOf('/blog/') === 0) {
+      const rest = value.slice('/blog/'.length).replace(/^\/+|\/+$/g, '');
+      return rest ? '/balkon/' + rest : '/balkon';
+    }
+    return null;
+  }
+
+  function installLegacyBlogCanonicalRedirect() {
+    const router = (typeof App !== 'undefined' && App && App.router) || null;
+    if (!router || router._blogCanonicalRedirectInstalled) return;
+    router._blogCanonicalRedirectInstalled = true;
+
+    const originalNavigate = typeof router.navigate === 'function' ? router.navigate.bind(router) : null;
+    const originalRoutePath = typeof router.routePath === 'function' ? router.routePath.bind(router) : null;
+
+    if (originalRoutePath) {
+      router.routePath = function (path) {
+        const canonical = toBalkonPath(path);
+        if (!canonical) return originalRoutePath(path);
+        const target = canonical + (window.location.search || '');
+        if (window.location.pathname + window.location.search !== target) {
+          try { window.history.replaceState({}, '', target); } catch (e) { /* never break on redirect bookkeeping */ }
+        }
+        return originalRoutePath(canonical);
+      };
+    }
+
+    if (originalNavigate) {
+      router.navigate = function (tab, options) {
+        if (tab === 'blog') return originalNavigate('balkon', options);
+        return originalNavigate(tab, options);
+      };
+    }
+
+    // Edge case: if the page somehow loaded while already sitting on a
+    // /blog URL (e.g. sandbox/preview without the Vercel 301), move it to
+    // the canonical URL and let the router re-render the Balkon view.
+    const flushLegacyUrl = function () {
+      const canonical = toBalkonPath(window.location.pathname);
+      if (!canonical) return;
+      try {
+        const target = canonical + (window.location.search || '');
+        if (window.location.pathname + window.location.search !== target) {
+          window.history.replaceState({}, '', target);
+        }
+        if (typeof App.router.handlePath === 'function') App.router.handlePath();
+      } catch (e) { /* ignore; page is still usable */ }
+    };
+
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', flushLegacyUrl, { once: true });
+    } else {
+      flushLegacyUrl();
+    }
+  }
+
+  installLegacyBlogCanonicalRedirect();
 })();

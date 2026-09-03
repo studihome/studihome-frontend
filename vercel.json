@@ -1,4 +1,16 @@
 {
+  "redirects": [
+    {
+      "source": "/blog",
+      "destination": "/balkon",
+      "statusCode": 301
+    },
+    {
+      "source": "/blog/:path*",
+      "destination": "/balkon/:path*",
+      "statusCode": 301
+    }
+  ],
   "rewrites": [
     {
       "source": "/sitemap.xml",

@@ -1,5 +1,6 @@
 'use strict';
 
+const { SEED_ARTICLES = [] } = require('../blog-data.js');
 const BASE_URL = 'https://studihome.id';
 const SUPABASE_READ_TIMEOUT_MS = 3500;
 const CDN_CACHE_CONTROL = 'public, s-maxage=3600, stale-while-revalidate=86400';
@@ -105,6 +106,22 @@ module.exports = async (req, res) => {
   ]);
 
   let entries = STATIC_PAGES.map(([path, freq, priority]) => buildUrl(path, today, freq, priority)).join('');
+
+  // Published Balkon articles (same source as the /balkon/:slug.md Markdown
+  // endpoint) so crawlers and AI engines discover every article URL directly.
+  SEED_ARTICLES.filter(article => article && article.status === 'published' && String(article.slug || '').trim())
+    .forEach(article => {
+      const slug = String(article.slug).trim().toLowerCase();
+      entries += buildUrl(
+        `/balkon/${encodeURIComponent(slug)}`,
+        dateOnly(article.updatedAt || article.createdAt),
+        'monthly', '0.8',
+        /^https?:\/\//i.test(article.image || '')
+          ? { url: article.image, title: article.title || '' }
+          : null
+      );
+    });
+
   PSEO_SERVICES.forEach(service => {
     PSEO_INDUSTRIES.forEach(industry => {
       entries += buildUrl(`/solusi/${service}-untuk-${industry}.md`, today, 'weekly', '0.8');
