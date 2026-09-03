@@ -214,6 +214,37 @@
     });
   }
 
+  // ---- Pagination daftar Creator: 10 per halaman ----
+  const PAGE_SIZE = 10;
+
+  // Urutkan Creator: yang paling baru berubah (updated_at) tampil paling atas.
+  function sortedCreators(rows) {
+    return [...rows].sort((a, b) => {
+      const diff = new Date(b.updated_at || 0) - new Date(a.updated_at || 0);
+      if (diff !== 0) return diff;
+      return String(a.display_name || a.username || '').localeCompare(String(b.display_name || b.username || ''));
+    });
+  }
+
+  function creatorRowMarkup(c) {
+    return `<details class="dc-v5-row card-3d rounded-2xl bg-white overflow-hidden" data-id="${esc(c.id)}" data-search="${esc(`${c.display_name || ''} ${c.username || ''} ${c.bio || ''} ${c.location || ''}`).toLowerCase()}"><summary class="list-none cursor-pointer p-3.5 sm:p-4 flex items-center justify-between gap-3"><div class="flex items-center gap-3 min-w-0"><div class="w-10 h-10 rounded-xl bg-blue-50 text-[#151c75] flex items-center justify-center shrink-0"><i class="fa-solid fa-user"></i></div><div class="min-w-0"><div class="text-xs font-black text-[#151c75] truncate">${esc(c.display_name || c.username || '-')}</div><div class="text-[9px] text-slate-500 truncate">@${esc(c.username || '-')} · ${c.managed_by_studihome ? 'Managed' : 'Community'}</div></div></div><div class="flex items-center gap-2 shrink-0"><span class="text-[10px] font-black text-[#151c75]">♥ ${c.likeCount}</span><span class="px-2 py-1 rounded-lg ${c.is_verified ? 'bg-emerald-50 text-emerald-700' : 'bg-slate-100 text-slate-500'} text-[9px] font-bold">${c.is_verified ? 'Verified' : 'Belum'}</span><i class="fa-solid fa-chevron-down text-[10px] text-slate-400"></i></div></summary><div data-detail class="px-0 pb-0"></div></details>`;
+  }
+
+  // Jendela nomor halaman: 1 … (sekitar halaman aktif) … terakhir.
+  function pagerPages(current, totalPages) {
+    if (totalPages <= 1) return [1];
+    const pages = [];
+    const push = p => { if (!pages.includes(p)) pages.push(p); };
+    const from = Math.max(2, current - 1);
+    const to = Math.min(totalPages - 1, current + 1);
+    push(1);
+    if (from > 2) pages.push('gap-start');
+    for (let p = from; p <= to; p++) push(p);
+    if (to < totalPages - 1) pages.push('gap-end');
+    if (totalPages > 1) push(totalPages);
+    return pages;
+  }
+
   async function render() {
     if (!isAdmin()) return;
     const area = document.getElementById('admin-content-area');
@@ -221,6 +252,7 @@
     area.innerHTML = '<div id="admin-dapur-creator-v5" class="space-y-4"><div class="py-12 text-center text-xs text-slate-500"><i class="fa-solid fa-spinner fa-spin mr-2"></i>Menyiapkan Dapur Creator…</div></div>';
     try {
       const rows = await loadData();
+      const ordered = sortedCreators(rows);
       const queue = rows
         .filter(c => c.review_status === 'PENDING' || c.review_status === 'DRAFT')
         .sort((a, b) => new Date(b.updated_at || 0) - new Date(a.updated_at || 0))
@@ -230,9 +262,64 @@
         <div class="card-3d rounded-3xl p-4 sm:p-5 bg-gradient-to-br from-white to-blue-50/70 border-blue-100"><div class="flex flex-col xl:flex-row xl:items-center justify-between gap-4"><div><div class="text-[9px] font-black uppercase tracking-[.12em] text-amber-600">DAPUR CREATOR · ADMIN</div><h2 class="text-lg sm:text-xl font-black text-[#151c75] mt-1">Semua Creator, satu tempat</h2><p class="text-[10px] sm:text-xs text-slate-500 mt-1">Kelola status, like, profil, jasa, kategori dan portfolio dari satu workspace.</p></div><div class="grid grid-cols-2 sm:grid-cols-4 gap-2 xl:min-w-[420px]">${[['Total',rows.length],['Managed',rows.filter(x=>x.managed_by_studihome).length],['Community',rows.filter(x=>!x.managed_by_studihome).length],['Published',rows.filter(x=>x.is_published).length]].map(([l,v])=>`<div class="rounded-xl bg-white border border-blue-100 px-3 py-2.5"><div class="text-[9px] text-slate-500">${l}</div><div class="text-lg font-black text-[#151c75]">${v}</div></div>`).join('')}</div></div></div>
         <div class="card-3d-inset rounded-2xl p-3 flex items-center gap-2"><i class="fa-solid fa-magnifying-glass text-[#151c75] text-xs"></i><input id="admin-dc-v5-search" type="search" placeholder="Cari nama, username, bio, atau lokasi Creator…" class="w-full bg-transparent text-xs outline-none"></div>
         <section class="card-3d rounded-2xl bg-white p-3.5 sm:p-4 border border-blue-100"><div class="mb-3"><div class="text-[9px] font-black uppercase tracking-[.1em] text-blue-600">REVIEW CREATOR</div><h3 class="mt-0.5 text-sm font-black text-[#151c75]">Antrian Creator</h3></div>${queue.length ? `<div class="space-y-2 max-h-[380px] overflow-auto pr-1">${queue.map(c => `<div class="flex items-center justify-between gap-3 rounded-xl border border-slate-100 bg-slate-50/60 px-3 py-2.5"><div class="min-w-0"><div class="text-[10px] font-extrabold text-slate-700 truncate">${esc(c.display_name || c.username)}</div><div class="text-[9px] text-slate-400">@${esc(c.username || '-')} · ${esc(c.review_status)} · ${c.is_verified ? 'Verified' : 'Belum Verified'}</div></div><div class="flex items-center gap-2 shrink-0"><button type="button" data-queue-verify="${c.id}" class="px-2.5 py-1.5 rounded-lg bg-emerald-50 text-emerald-700 text-[9px] font-bold">Verifikasi</button><button type="button" data-queue-publish="${c.id}" class="px-2.5 py-1.5 rounded-lg bg-[#151c75] text-white text-[9px] font-bold">Publish</button></div></div>`).join('')}</div>` : '<div class="text-[10px] text-slate-400">Tidak ada antrian Creator.</div>'}</section>
-        <div id="admin-dc-v5-list" class="space-y-2">${rows.map(c => `<details class="dc-v5-row card-3d rounded-2xl bg-white overflow-hidden" data-id="${esc(c.id)}" data-search="${esc(`${c.display_name || ''} ${c.username || ''} ${c.bio || ''} ${c.location || ''}`).toLowerCase()}"><summary class="list-none cursor-pointer p-3.5 sm:p-4 flex items-center justify-between gap-3"><div class="flex items-center gap-3 min-w-0"><div class="w-10 h-10 rounded-xl bg-blue-50 text-[#151c75] flex items-center justify-center shrink-0"><i class="fa-solid fa-user"></i></div><div class="min-w-0"><div class="text-xs font-black text-[#151c75] truncate">${esc(c.display_name || c.username || '-')}</div><div class="text-[9px] text-slate-500 truncate">@${esc(c.username || '-')} · ${c.managed_by_studihome ? 'Managed' : 'Community'}</div></div></div><div class="flex items-center gap-2 shrink-0"><span class="text-[10px] font-black text-[#151c75]">♥ ${c.likeCount}</span><span class="px-2 py-1 rounded-lg ${c.is_verified ? 'bg-emerald-50 text-emerald-700' : 'bg-slate-100 text-slate-500'} text-[9px] font-bold">${c.is_verified ? 'Verified' : 'Belum'}</span><i class="fa-solid fa-chevron-down text-[10px] text-slate-400"></i></div></summary><div data-detail class="px-0 pb-0"></div></details>`).join('') || '<div class="rounded-2xl bg-white border border-slate-100 p-8 text-center text-xs text-slate-500">Belum ada Creator.</div>'}</div>`;
-      root.querySelectorAll('.dc-v5-row').forEach(row => row.addEventListener('toggle', () => { if (row.open) { const c = rows.find(x => x.id === row.dataset.id); const detail = row.querySelector('[data-detail]'); if (c && detail && !detail.dataset.loaded) { detail.dataset.loaded = '1'; renderDetail(detail, c); } } }));
-      root.querySelector('#admin-dc-v5-search')?.addEventListener('input', e => { const q = String(e.target.value || '').trim().toLowerCase(); root.querySelectorAll('.dc-v5-row').forEach(row => { row.hidden = q && !String(row.dataset.search || '').includes(q); }); });
+        <div id="admin-dc-v5-list" class="space-y-2"></div>
+        <div id="admin-dc-v5-pagination" class="flex flex-wrap items-center justify-center gap-2 pt-1"></div>`;
+      // ---- Daftar Creator: 10 per halaman, status perubahan terbaru di atas ----
+      const listEl = root.querySelector('#admin-dc-v5-list');
+      const pagerEl = root.querySelector('#admin-dc-v5-pagination');
+      let listQuery = '';
+      let listPage = 1;
+
+      const pageButton = (label, goto, active, disabled) => `<button type="button" data-goto="${goto}"${active ? ' aria-current="page"' : ''}${disabled ? ' disabled' : ''} class="px-2.5 py-1.5 rounded-xl text-[10px] font-extrabold transition-all ${active ? 'btn-brand-gradient' : disabled ? 'bg-transparent text-slate-400 opacity-50 cursor-not-allowed' : 'bg-white border border-blue-100 text-[#151c75] hover:bg-blue-50 hover:border-blue-300'}">${label}</button>`;
+
+      const renderPager = (filteredTotal, page, totalPages) => {
+        if (filteredTotal === 0) return '';
+        const from = (page - 1) * PAGE_SIZE + 1;
+        const to = Math.min(page * PAGE_SIZE, filteredTotal);
+        const info = `<div class="w-full text-center text-[9px] font-black text-slate-500">Menampilkan ${from}–${to} dari ${filteredTotal} Creator</div>`;
+        if (totalPages <= 1) return info;
+        const prev = pageButton('<i class="fa-solid fa-chevron-left mr-1 text-[8px]"></i>Sebelum', 'prev', false, page <= 1);
+        const next = pageButton('Berikut<i class="fa-solid fa-chevron-right ml-1 text-[8px]"></i>', 'next', false, page >= totalPages);
+        const nums = pagerPages(page, totalPages).map(p => p === 'gap-start' || p === 'gap-end'
+          ? '<span class="px-1 text-[10px] font-black text-slate-400 select-none" aria-hidden="true">…</span>'
+          : pageButton(String(p), `page-${p}`, p === page, false)).join('');
+        return `${info}<div class="flex flex-wrap items-center justify-center gap-1.5">${prev}${nums}${next}</div>`;
+      };
+
+      const applyList = () => {
+        if (!listEl || !pagerEl) return;
+        const q = listQuery.toLowerCase();
+        const filtered = q
+          ? ordered.filter(c => String(`${c.display_name || ''} ${c.username || ''} ${c.bio || ''} ${c.location || ''}`).toLowerCase().includes(q))
+          : ordered;
+        const totalPages = Math.max(1, Math.ceil(filtered.length / PAGE_SIZE));
+        if (listPage > totalPages) listPage = totalPages;
+        const slice = filtered.slice((listPage - 1) * PAGE_SIZE, listPage * PAGE_SIZE);
+        listEl.innerHTML = slice.map(creatorRowMarkup).join('') || (ordered.length === 0
+          ? '<div class="rounded-2xl bg-white border border-slate-100 p-8 text-center text-xs text-slate-500">Belum ada Creator.</div>'
+          : `<div class="rounded-2xl bg-white border border-slate-100 p-8 text-center text-xs text-slate-500">Tidak ada Creator yang cocok dengan pencarian “${esc(listQuery)}”.</div>`);
+        listEl.querySelectorAll('.dc-v5-row').forEach(row => row.addEventListener('toggle', () => { if (row.open) { const c = rows.find(x => x.id === row.dataset.id); const detail = row.querySelector('[data-detail]'); if (c && detail && !detail.dataset.loaded) { detail.dataset.loaded = '1'; renderDetail(detail, c); } } }));
+        pagerEl.innerHTML = renderPager(filtered.length, listPage, totalPages);
+      };
+
+      pagerEl?.addEventListener('click', e => {
+        const target = e.target instanceof Element ? e.target : null;
+        const btn = target?.closest('[data-goto]');
+        if (!btn || btn.disabled) return;
+        const goto = String(btn.dataset.goto || '');
+        if (goto === 'prev') listPage = Math.max(1, listPage - 1);
+        else if (goto === 'next') listPage += 1; // batas akhir dikoreksi di applyList()
+        else listPage = parseInt(goto.replace('page-', ''), 10) || 1;
+        applyList();
+      });
+
+      root.querySelector('#admin-dc-v5-search')?.addEventListener('input', e => {
+        listQuery = String(e.target.value || '').trim();
+        listPage = 1;
+        applyList();
+      });
+
+      applyList();
       root.querySelectorAll('[data-queue-verify]').forEach(btn => btn.addEventListener('click', async () => { try { await reviewCreator(btn.dataset.queueVerify, { is_verified: true, review_status: 'APPROVED' }); toast('Creator diverifikasi.', 'success'); await render(); } catch (e) { toast(e?.message || 'Verifikasi gagal.', 'error'); } }));
       root.querySelectorAll('[data-queue-publish]').forEach(btn => btn.addEventListener('click', async () => { try { await reviewCreator(btn.dataset.queuePublish, { is_published: true, is_verified: true, review_status: 'APPROVED' }); toast('Creator dipublikasikan.', 'success'); await render(); } catch (e) { toast(e?.message || 'Publish gagal.', 'error'); } }));
     } catch (e) {
