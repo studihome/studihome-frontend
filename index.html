@@ -3040,7 +3040,7 @@ App.router.bindCanonicalLinkGuard();
                                 supabaseClient.from('modules').select('*').order('created_at',{ascending:true}),
                                 supabaseClient.from('testimonials').select('*').order('created_at',{ascending:false}),
                                 supabaseClient.from('orders').select('id,user_id,product_id,unit_price,total_amount,status,payment_status,payment_confirmed_at,created_at,products(title),profiles!orders_user_id_fkey(name,email,phone)').order('created_at',{ascending:false}),
-                                supabaseClient.from('profiles').select('id,name,email,phone,role,status,created_at').order('created_at',{ascending:false})
+                                supabaseClient.from('profiles').select('id,name,email,phone,role,status,created_at,email_verified').order('created_at',{ascending:false})
                             ]);
                             for (const r of [sRes,pRes,mRes,tRes,oRes,uRes]) if (r.error) throw r.error;
                             const s=sRes.data||{};
@@ -7974,11 +7974,20 @@ renderStudioAiControl: async () => {
                                                 }).map(u => {
                                                     const isAdmin = u.role === 'admin';
                                                     const isBlocked = String(u.status || '').toLowerCase() === 'blocked';
+                                                    const isVerifiedEmail = u.email_verified === true;
+                                                    const waPhone = String(u.phone || '').replace(/\D/g, '').replace(/^0/, '62');
+                                                    const waMessage = encodeURIComponent(isVerifiedEmail
+                                                        ? 'Halo, kami dari Studihome. Email kamu sudah terverifikasi. Silakan masuk ke akun kamu di studihome.id untuk mengakses seluruh fasilitas dan modul belajarmu. Ada juga penawaran terbatas spesial yang sayang untuk dilewatkan, ya.'
+                                                        : 'Halo, kami dari Studihome. Jangan lupa aktifkan email kamu lewat tautan verifikasi yang sudah kami kirim agar akunmu aktif, ya. Setelah aktif, masuk ke studihome.id untuk mengakses fasilitas dan dapatkan penawaran terbatas spesial dari kami.');
+                                                    const waUrl = waPhone.length >= 9 ? `https://wa.me/${waPhone}?text=${waMessage}` : '';
                                                     return `
                                                         <tr class="border-b border-slate-100">
                                                             <td class="py-3 px-2 font-bold text-[#151c75]">${App.utils.escapeHtml(u.name)}</td>
-                                                            <td class="py-3 px-2">${App.utils.escapeHtml(u.email)}</td>
-                                                            <td class="py-3 px-2">${App.utils.escapeHtml(u.phone || '-')}</td>
+                                                            <td class="py-3 px-2"><span class="inline-flex items-center gap-1.5"><span>${App.utils.escapeHtml(u.email)}</span>${isVerifiedEmail ? '<span title="Email terverifikasi" class="shrink-0 text-emerald-600"><i class="fa-solid fa-circle-check" aria-hidden="true"></i></span>' : ''}</span></td>
+                                                            <td class="py-3 px-2">${waUrl ? `
+                                                                <a href="${waUrl}" target="_blank" rel="noopener noreferrer" class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-[10px] font-bold text-emerald-700 bg-emerald-50 border border-emerald-200 hover:bg-emerald-100 shadow-2xs">
+                                                                    <i class="fa-brands fa-whatsapp"></i> ${App.utils.escapeHtml(u.phone)}
+                                                                </a>` : `<span class="text-[10px] text-slate-400">${App.utils.escapeHtml(u.phone || '-')}</span>`}</td>
                                                             <td class="py-3 px-2">
                                                                 <span class="px-2 py-0.5 rounded text-[10px] font-extrabold uppercase ${isAdmin ? 'bg-purple-100 text-purple-800' : 'bg-blue-100 text-blue-800'}">
                                                                     ${u.role}
