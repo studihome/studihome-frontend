@@ -111,12 +111,6 @@
     if (error) throw error;
   }
 
-  async function patchProfile(id, status) {
-    const client = await requireAdmin();
-    const { error } = await client.from('profiles').update({ status }).eq('id', id);
-    if (error) throw error;
-  }
-
   function studioView(data) {
     return `
       <div class="space-y-5">
@@ -167,10 +161,6 @@
           </section>
         </div>
 
-        <section class="rounded-3xl border border-slate-200 bg-white p-4 sm:p-5 shadow-sm">
-          <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-3"><div><div class="text-[9px] font-black uppercase tracking-[.1em] text-slate-500">AKSES PENGGUNA</div><h3 class="text-sm font-black text-[#151c75]">Kontrol Status Akun</h3></div><span class="text-[9px] text-slate-400">${fmt(data.profiles.length)} akun terbaca</span></div>
-          <div class="grid md:grid-cols-2 gap-2 max-h-[360px] overflow-auto pr-1">${data.profiles.slice(0,40).map(p=>`<div class="flex items-center justify-between gap-3 rounded-xl border border-slate-100 bg-slate-50/60 px-3 py-2.5"><div class="min-w-0"><div class="text-[10px] font-extrabold text-slate-700 truncate">${esc(p.name || p.email || 'Pengguna')}</div><div class="text-[9px] text-slate-400">${esc(p.email || '-')} · ${esc(p.role)} · ${esc(p.status)}</div></div><button data-toggle-user="${p.id}" data-next-status="${p.status === 'blocked' ? 'active' : 'blocked'}" class="shrink-0 px-2.5 py-1.5 rounded-lg ${p.status === 'blocked' ? 'bg-emerald-50 text-emerald-700' : 'bg-red-50 text-red-700'} text-[9px] font-bold">${p.status === 'blocked' ? 'Aktifkan' : 'Blokir'}</button></div>`).join('')}</div>
-        </section>
 
         <div class="rounded-2xl border border-slate-200 bg-slate-50/80 p-4 text-[10px] text-slate-600 leading-relaxed"><b class="text-[#151c75]">Logic Governance:</b> menjaga kesehatan Creator, transaksi, entitlement, dan status pengguna dalam satu layar. Governance tidak mengambil alih fungsi Dapur Creator; ia mengawasi status dan melakukan tindakan kontrol yang terukur.</div>
       </div>`;
@@ -199,7 +189,6 @@
   function bindGovernance(area) {
     area.querySelectorAll('[data-verify-creator]').forEach(b => b.onclick = async () => { try { await patchCreator(b.dataset.verifyCreator, { is_verified: true, review_status: 'APPROVED' }); await renderGovernance(area); toast('Creator diverifikasi.', 'success'); } catch (e) { toast(e.message || 'Verifikasi gagal.', 'error'); } });
     area.querySelectorAll('[data-publish-creator]').forEach(b => b.onclick = async () => { try { await patchCreator(b.dataset.publishCreator, { is_published: true, is_verified: true, review_status: 'APPROVED' }); await renderGovernance(area); toast('Creator dipublikasikan.', 'success'); } catch (e) { toast(e.message || 'Publish gagal.', 'error'); } });
-    area.querySelectorAll('[data-toggle-user]').forEach(b => b.onclick = async () => { try { await patchProfile(b.dataset.toggleUser, b.dataset.nextStatus); await renderGovernance(area); toast('Status akun diperbarui.', 'success'); } catch (e) { toast(e.message || 'Status akun gagal diubah.', 'error'); } });
     area.querySelector('[data-open-orders]')?.addEventListener('click', () => { if (!openAdminTab('orders')) toast('Modul Transaksi belum tersedia pada Admin.', 'error'); });
     area.querySelectorAll('[data-g-action="refresh"]').forEach(b => b.onclick = () => renderGovernance(area));
   }
@@ -212,9 +201,6 @@
           <div class="relative z-10 flex flex-col lg:flex-row lg:items-center lg:justify-between gap-5">
             <div class="max-w-3xl"><div class="text-[9px] font-black uppercase tracking-[.14em] text-amber-600">GUDANG · ADMIN CONTROL CENTER</div><h2 class="mt-1 text-lg sm:text-xl font-black text-[#151c75]">Studio AI + Governance, satu pintu</h2><p class="mt-1.5 text-[10px] sm:text-xs text-slate-600 leading-relaxed">Pilih ruang kerja sesuai tujuan. Studio AI mengelola master AI; Governance menjaga kesehatan ekosistem dan tindakan kontrol.</p></div>
             <div class="flex flex-col items-stretch lg:items-end gap-3">
-              <a href="/sitemap.xml" target="_blank" rel="noopener" class="ml-auto flex items-center gap-2 bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-xl text-xs font-bold transition-all shadow-md">
-                <i class="fa-solid fa-satellite-dish"></i> Live Sitemap XML
-              </a>
               <div class="grid grid-cols-2 gap-2"><button data-g-open="studio-ai" class="rounded-2xl border border-blue-100 bg-white px-4 py-3 text-left hover:border-blue-200"><div class="text-[9px] text-slate-400">MASTER DATA</div><div class="text-xs font-black text-[#151c75] mt-0.5">Studio AI</div><div class="text-[9px] text-slate-500 mt-1">Kategori & platform</div></button><button data-g-open="governance" class="rounded-2xl border border-amber-100 bg-white px-4 py-3 text-left hover:border-amber-200"><div class="text-[9px] text-slate-400">CONTROL CENTER</div><div class="text-xs font-black text-[#151c75] mt-0.5">Governance</div><div class="text-[9px] text-slate-500 mt-1">Review & kontrol</div></button></div>
             </div>
           </div>
