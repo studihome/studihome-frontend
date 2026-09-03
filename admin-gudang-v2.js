@@ -21,11 +21,6 @@
     return client;
   }
 
-  const openAdminTab = (key) => {
-    try { if (typeof window.App?.admin?.switchTab === 'function') { window.App.admin.switchTab(key); return true; } } catch (_) {}
-    return false;
-  };
-
   const fmt = (n) => Number(n || 0).toLocaleString('id-ID');
   const rupiah = (n) => 'Rp ' + fmt(n);
 
@@ -69,7 +64,7 @@
       client.from('ai_categories').select('id,name,slug,description,icon,is_active,updated_at').order('name', { ascending: true }),
       client.from('creator_profiles').select('id').eq('is_published', true),
       client.from('creator_services').select('id').eq('is_active', true),
-      client.from('creator_profiles').select('id,display_name,username,is_published,is_verified,review_status,managed_by_studihome,updated_at').in('review_status', ['PENDING','DRAFT']).order('updated_at', { ascending: false }).limit(12),
+      client.from('creator_profiles').select('id,review_status').in('review_status', ['PENDING','DRAFT']).order('updated_at', { ascending: false }).limit(500),
       client.from('orders').select('id,user_id,product_id,total_amount,status,payment_status,created_at').in('status', ['PAYMENT_REVIEW','PENDING_PAYMENT']).order('created_at', { ascending: false }).limit(12),
       client.from('entitlements').select('id,user_id,product_id,status,granted_at').order('granted_at', { ascending: false }).limit(500),
       client.from('profiles').select('id,name,email,role,status,created_at').order('created_at', { ascending: false }).limit(100),
@@ -129,19 +124,6 @@
     if (error) throw error;
     toast(id ? 'Kategori AI diperbarui.' : 'Kategori AI ditambahkan.', 'success');
     resetCategoryForm(form);
-  }
-
-  async function patchCreator(id, patch) {
-    const client = await requireAdmin();
-    const { data: userData } = await client.auth.getUser();
-    const reviewer = userData?.user?.id || null;
-    const payload = { ...patch };
-    if (patch.review_status) {
-      payload.reviewed_by = reviewer;
-      payload.reviewed_at = new Date().toISOString();
-    }
-    const { error } = await client.from('creator_profiles').update(payload).eq('id', id);
-    if (error) throw error;
   }
 
   const localMonthKey = (iso) => {
@@ -240,13 +222,7 @@
           <div class="space-y-2 max-h-[420px] overflow-auto pr-1">${data.categories.map(c => `<div class="flex items-center justify-between gap-3 rounded-xl border border-slate-100 bg-slate-50/60 px-3 py-2.5"><div class="min-w-0"><div class="text-[10px] font-extrabold text-slate-700 truncate">${esc(c.name)}</div><div class="text-[9px] text-slate-400 truncate">${esc(c.slug)} · ${c.is_active ? 'Aktif' : 'Nonaktif'}</div></div><div class="flex items-center gap-2 shrink-0"><button data-toggle-cat="${c.id}" data-next="${c.is_active ? 'false' : 'true'}" class="px-2.5 py-1.5 rounded-lg ${c.is_active ? 'bg-emerald-50 text-emerald-700' : 'bg-slate-200 text-slate-600'} text-[9px] font-bold">${c.is_active ? 'Aktif' : 'Aktifkan'}</button><button type="button" data-edit-category="${esc(c.id)}" data-category-id="${esc(c.id)}" data-category-name="${encodeURIComponent(String(c.name || ''))}" data-category-slug="${encodeURIComponent(String(c.slug || ''))}" data-category-description="${encodeURIComponent(String(c.description || ''))}" class="w-7 h-7 rounded-lg bg-blue-50 text-[#151c75] hover:bg-blue-100 flex items-center justify-center transition-all" title="Edit Kategori" aria-label="Edit kategori ${esc(c.name)}"><i class="fa-solid fa-pen text-[10px]" aria-hidden="true"></i></button></div></div>`).join('') || '<div class="text-[10px] text-slate-400">Belum ada kategori.</div>'}</div>
         </section>
 
-        <div class="grid xl:grid-cols-2 gap-4">
-          <section class="rounded-3xl border border-blue-100 bg-white p-4 sm:p-5 shadow-sm">
-            <div class="mb-3"><div class="text-[9px] font-black uppercase tracking-[.1em] text-blue-600">REVIEW CREATOR</div><h3 class="text-sm font-black text-[#151c75]">Antrian Creator</h3></div>
-            <div class="space-y-2 max-h-[420px] overflow-auto pr-1">${data.pendingCreators.map(c => `<div class="rounded-xl border border-slate-100 bg-slate-50/60 p-3"><div class="flex items-start justify-between gap-3"><div class="min-w-0"><div class="text-[10px] font-extrabold text-slate-700 truncate">${esc(c.display_name || c.username)}</div><div class="text-[9px] text-slate-400">@${esc(c.username)} · ${esc(c.review_status)} · ${c.is_verified ? 'Verified' : 'Belum Verified'}</div></div><div class="flex gap-1.5 shrink-0"><button data-verify-creator="${c.id}" class="px-2.5 py-1.5 rounded-lg bg-emerald-50 text-emerald-700 text-[9px] font-bold">Verifikasi</button><button data-publish-creator="${c.id}" class="px-2.5 py-1.5 rounded-lg bg-[#151c75] text-white text-[9px] font-bold">Publish</button></div></div></div>`).join('') || '<div class="text-[10px] text-slate-400">Tidak ada antrian Creator.</div>'}</div>
-          </section>
-
-          <section class="rounded-3xl border border-amber-100 bg-white p-4 sm:p-5 shadow-sm">
+        <section class="rounded-3xl border border-amber-100 bg-white p-4 sm:p-5 shadow-sm">
             <div class="flex items-start justify-between gap-3 mb-3 flex-wrap">
               <div>
                 <div class="text-[9px] font-black uppercase tracking-[.1em] text-amber-600">REKAP TRANSAKSI</div>
@@ -268,12 +244,10 @@
 
             <div id="g-recap-scope" class="mt-3">${recapScopeHtml(paidRecap(paid, initialScope))}</div>
 
-            ${reviewingOrders ? `<div class="mt-3 rounded-xl border border-amber-100 bg-amber-50/70 px-3 py-2.5 text-[10px] text-amber-800"><b>${fmt(reviewingOrders)}</b> transaksi menunggu review Admin.</div>` : ''}
-            <button data-open-orders class="mt-3 w-full rounded-xl bg-amber-50 border border-amber-100 text-amber-800 text-[10px] font-extrabold py-2.5">Buka Transaksi</button>
-          </section>
-        </div>
+            ${reviewingOrders ? `<div class="mt-3 rounded-xl border border-amber-100 bg-amber-50/70 px-3 py-2.5 text-[10px] text-amber-800"><b>${fmt(reviewingOrders)}</b> transaksi menunggu review Admin — kelola lewat menu Transaksi.</div>` : ''}
+        </section>
 
-        <div class="rounded-2xl border border-slate-200 bg-slate-50/80 p-4 text-[10px] text-slate-600 leading-relaxed"><b class="text-[#151c75]">Logic Gudang:</b> satu dashboard untuk master data Studio AI (kategori), antrian review Creator, dan rekap penjualan transaksi berstatus PAID/CONFIRMED. Governance tidak mengambil alih fungsi Dapur Creator; ia mengawasi status dan melakukan tindakan kontrol yang terukur.</div>
+        <div class="rounded-2xl border border-slate-200 bg-slate-50/80 p-4 text-[10px] text-slate-600 leading-relaxed"><b class="text-[#151c75]">Logic Gudang:</b> satu dashboard untuk master data Studio AI (kategori) dan rekap penjualan transaksi berstatus PAID/CONFIRMED. Review Creator dikelola di menu Dapur Creator; di sini hanya tampil indikator antrian yang menunggu tindakan.</div>
       </div>`;
   }
 
@@ -293,9 +267,6 @@
     const categoryForm = area.querySelector('[data-g-form="category"]');
     area.querySelectorAll('[data-edit-category]').forEach(button => button.onclick = () => editCategory(categoryForm, button));
     categoryForm?.addEventListener('submit', async e => { e.preventDefault(); try { await saveCategory(e.currentTarget); await renderGudang(area); } catch (err) { toast(err.message || 'Kategori gagal disimpan.', 'error'); } });
-    area.querySelectorAll('[data-verify-creator]').forEach(b => b.onclick = async () => { try { await patchCreator(b.dataset.verifyCreator, { is_verified: true, review_status: 'APPROVED' }); await renderGudang(area); toast('Creator diverifikasi.', 'success'); } catch (e) { toast(e.message || 'Verifikasi gagal.', 'error'); } });
-    area.querySelectorAll('[data-publish-creator]').forEach(b => b.onclick = async () => { try { await patchCreator(b.dataset.publishCreator, { is_published: true, is_verified: true, review_status: 'APPROVED' }); await renderGudang(area); toast('Creator dipublikasikan.', 'success'); } catch (e) { toast(e.message || 'Publish gagal.', 'error'); } });
-    area.querySelector('[data-open-orders]')?.addEventListener('click', () => { if (!openAdminTab('orders')) toast('Modul Transaksi belum tersedia pada Admin.', 'error'); });
 
     const monthSel = area.querySelector('#g-recap-month');
     const scopeWrap = area.querySelector('#g-recap-scope');

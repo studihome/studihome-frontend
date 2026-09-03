@@ -108,6 +108,19 @@
     if (error) throw error;
   }
 
+  // Review-queue action: marks who reviewed and when (same audit contract as the old Gudang governance panel).
+  async function reviewCreator(id, patch) {
+    const db = await requireAdminClient();
+    const { data: userData } = await db.auth.getUser();
+    const payload = { ...patch };
+    if (patch.review_status) {
+      payload.reviewed_by = userData?.user?.id || null;
+      payload.reviewed_at = new Date().toISOString();
+    }
+    const { error } = await db.from('creator_profiles').update(payload).eq('id', id);
+    if (error) throw error;
+  }
+
   async function adjustCreatorLike(creatorId, type) {
     try {
       const inputEl = document.getElementById(`like-input-${creatorId}`);
@@ -208,13 +221,20 @@
     area.innerHTML = '<div id="admin-dapur-creator-v5" class="space-y-4"><div class="py-12 text-center text-xs text-slate-500"><i class="fa-solid fa-spinner fa-spin mr-2"></i>Menyiapkan Dapur Creator…</div></div>';
     try {
       const rows = await loadData();
+      const queue = rows
+        .filter(c => c.review_status === 'PENDING' || c.review_status === 'DRAFT')
+        .sort((a, b) => new Date(b.updated_at || 0) - new Date(a.updated_at || 0))
+        .slice(0, 12);
       const root = document.getElementById('admin-dapur-creator-v5');
       root.innerHTML = `
         <div class="card-3d rounded-3xl p-4 sm:p-5 bg-gradient-to-br from-white to-blue-50/70 border-blue-100"><div class="flex flex-col xl:flex-row xl:items-center justify-between gap-4"><div><div class="text-[9px] font-black uppercase tracking-[.12em] text-amber-600">DAPUR CREATOR · ADMIN</div><h2 class="text-lg sm:text-xl font-black text-[#151c75] mt-1">Semua Creator, satu tempat</h2><p class="text-[10px] sm:text-xs text-slate-500 mt-1">Kelola status, like, profil, jasa, kategori dan portfolio dari satu workspace.</p></div><div class="grid grid-cols-2 sm:grid-cols-4 gap-2 xl:min-w-[420px]">${[['Total',rows.length],['Managed',rows.filter(x=>x.managed_by_studihome).length],['Community',rows.filter(x=>!x.managed_by_studihome).length],['Published',rows.filter(x=>x.is_published).length]].map(([l,v])=>`<div class="rounded-xl bg-white border border-blue-100 px-3 py-2.5"><div class="text-[9px] text-slate-500">${l}</div><div class="text-lg font-black text-[#151c75]">${v}</div></div>`).join('')}</div></div></div>
         <div class="card-3d-inset rounded-2xl p-3 flex items-center gap-2"><i class="fa-solid fa-magnifying-glass text-[#151c75] text-xs"></i><input id="admin-dc-v5-search" type="search" placeholder="Cari nama, username, bio, atau lokasi Creator…" class="w-full bg-transparent text-xs outline-none"></div>
+        <section class="card-3d rounded-2xl bg-white p-3.5 sm:p-4 border border-blue-100"><div class="mb-3"><div class="text-[9px] font-black uppercase tracking-[.1em] text-blue-600">REVIEW CREATOR</div><h3 class="mt-0.5 text-sm font-black text-[#151c75]">Antrian Creator</h3></div>${queue.length ? `<div class="space-y-2 max-h-[380px] overflow-auto pr-1">${queue.map(c => `<div class="flex items-center justify-between gap-3 rounded-xl border border-slate-100 bg-slate-50/60 px-3 py-2.5"><div class="min-w-0"><div class="text-[10px] font-extrabold text-slate-700 truncate">${esc(c.display_name || c.username)}</div><div class="text-[9px] text-slate-400">@${esc(c.username || '-')} · ${esc(c.review_status)} · ${c.is_verified ? 'Verified' : 'Belum Verified'}</div></div><div class="flex items-center gap-2 shrink-0"><button type="button" data-queue-verify="${c.id}" class="px-2.5 py-1.5 rounded-lg bg-emerald-50 text-emerald-700 text-[9px] font-bold">Verifikasi</button><button type="button" data-queue-publish="${c.id}" class="px-2.5 py-1.5 rounded-lg bg-[#151c75] text-white text-[9px] font-bold">Publish</button></div></div>`).join('')}</div>` : '<div class="text-[10px] text-slate-400">Tidak ada antrian Creator.</div>'}</section>
         <div id="admin-dc-v5-list" class="space-y-2">${rows.map(c => `<details class="dc-v5-row card-3d rounded-2xl bg-white overflow-hidden" data-id="${esc(c.id)}" data-search="${esc(`${c.display_name || ''} ${c.username || ''} ${c.bio || ''} ${c.location || ''}`).toLowerCase()}"><summary class="list-none cursor-pointer p-3.5 sm:p-4 flex items-center justify-between gap-3"><div class="flex items-center gap-3 min-w-0"><div class="w-10 h-10 rounded-xl bg-blue-50 text-[#151c75] flex items-center justify-center shrink-0"><i class="fa-solid fa-user"></i></div><div class="min-w-0"><div class="text-xs font-black text-[#151c75] truncate">${esc(c.display_name || c.username || '-')}</div><div class="text-[9px] text-slate-500 truncate">@${esc(c.username || '-')} · ${c.managed_by_studihome ? 'Managed' : 'Community'}</div></div></div><div class="flex items-center gap-2 shrink-0"><span class="text-[10px] font-black text-[#151c75]">♥ ${c.likeCount}</span><span class="px-2 py-1 rounded-lg ${c.is_verified ? 'bg-emerald-50 text-emerald-700' : 'bg-slate-100 text-slate-500'} text-[9px] font-bold">${c.is_verified ? 'Verified' : 'Belum'}</span><i class="fa-solid fa-chevron-down text-[10px] text-slate-400"></i></div></summary><div data-detail class="px-0 pb-0"></div></details>`).join('') || '<div class="rounded-2xl bg-white border border-slate-100 p-8 text-center text-xs text-slate-500">Belum ada Creator.</div>'}</div>`;
       root.querySelectorAll('.dc-v5-row').forEach(row => row.addEventListener('toggle', () => { if (row.open) { const c = rows.find(x => x.id === row.dataset.id); const detail = row.querySelector('[data-detail]'); if (c && detail && !detail.dataset.loaded) { detail.dataset.loaded = '1'; renderDetail(detail, c); } } }));
       root.querySelector('#admin-dc-v5-search')?.addEventListener('input', e => { const q = String(e.target.value || '').trim().toLowerCase(); root.querySelectorAll('.dc-v5-row').forEach(row => { row.hidden = q && !String(row.dataset.search || '').includes(q); }); });
+      root.querySelectorAll('[data-queue-verify]').forEach(btn => btn.addEventListener('click', async () => { try { await reviewCreator(btn.dataset.queueVerify, { is_verified: true, review_status: 'APPROVED' }); toast('Creator diverifikasi.', 'success'); await render(); } catch (e) { toast(e?.message || 'Verifikasi gagal.', 'error'); } }));
+      root.querySelectorAll('[data-queue-publish]').forEach(btn => btn.addEventListener('click', async () => { try { await reviewCreator(btn.dataset.queuePublish, { is_published: true, is_verified: true, review_status: 'APPROVED' }); toast('Creator dipublikasikan.', 'success'); await render(); } catch (e) { toast(e?.message || 'Publish gagal.', 'error'); } }));
     } catch (e) {
       const root = document.getElementById('admin-dapur-creator-v5');
       if (root) root.innerHTML = `<div class="rounded-2xl bg-red-50 border border-red-100 p-5 text-xs text-red-700"><div class="font-black">Dapur Creator belum dapat dimuat.</div><div class="mt-1">${esc(e?.message || 'Terjadi kesalahan koneksi data.')}</div><button type="button" id="admin-dc-v5-retry" class="mt-3 px-3 py-2 rounded-xl bg-white border border-red-200 text-[10px] font-extrabold">Coba lagi</button></div>`;
