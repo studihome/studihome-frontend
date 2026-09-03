@@ -2461,7 +2461,7 @@ App.router.bindCanonicalLinkGuard();
                         },
                         products: (productsRes.data || []).map(App.api._mapProduct),
                         testimonials: testimonialsRes.data || [],
-                        master: { qrisSlots: Array.isArray(s.qris_slots) ? s.qris_slots : [], underConstruction: s.under_construction || {} }
+                        master: { qrisSlots: Array.isArray(s.qris_slots) ? s.qris_slots : [], underConstruction: s.under_construction || {}, heroPromoModules: (Array.isArray(s.hero_promo_modules) && s.hero_promo_modules.length > 0) ? s.hero_promo_modules : ((s.under_construction && Array.isArray(s.under_construction.heroPromoModules)) ? s.under_construction.heroPromoModules : []) }
                     };
                 },
                 _mapProduct: (p) => ({
@@ -3486,8 +3486,9 @@ App.router.bindCanonicalLinkGuard();
                     let heroPromoMods = JSON.parse(localStorage.getItem('studihome_hero_promo_modules') || '[]');
                     if (heroPromoMods.length === 0) {
                         try {
-                            // Check under_construction.heroPromoModules (primary storage)
-                            const pubMods = App.state.publicData?.master?.underConstruction?.heroPromoModules;
+                            // Check publicData heroPromoModules (works for all users)
+                            const pubMods = App.state.publicData?.master?.heroPromoModules
+                                || App.state.publicData?.master?.underConstruction?.heroPromoModules;
                             if (Array.isArray(pubMods) && pubMods.length > 0) heroPromoMods = pubMods;
                         } catch(_) {}
                     }
@@ -6648,18 +6649,20 @@ renderCreatorStandardSummary: (creator, data, categories, services, portfolios) 
                     try {
                         let data, modules;
                         if (productId === 'hero-promo') {
-                            // Load hero promo modules with multiple fallbacks for public access
+                            // Load hero promo modules — prioritize publicData (works for ALL users including anonymous)
                             let dbMods = null;
-                            try { dbMods = await App.admin._loadHeroPromoModsFromDB(); } catch(_) {}
-                            if (dbMods === null || dbMods.length === 0) {
-                                // Fallback: read from already-loaded public data (works for anonymous users)
-                                try {
-                                    const pubMods = App.state.publicData?.master?.underConstruction?.heroPromoModules;
-                                    if (Array.isArray(pubMods) && pubMods.length > 0) dbMods = pubMods;
-                                } catch(_) {}
+                            // 1st: publicData (already loaded via _public(), works for anonymous)
+                            try {
+                                const pubMods = App.state.publicData?.master?.heroPromoModules
+                                    || App.state.publicData?.master?.underConstruction?.heroPromoModules;
+                                if (Array.isArray(pubMods) && pubMods.length > 0) dbMods = pubMods;
+                            } catch(_) {}
+                            // 2nd: DB query (works for authenticated users, may fail for anon due to RLS)
+                            if (!dbMods || dbMods.length === 0) {
+                                try { dbMods = await App.admin._loadHeroPromoModsFromDB(); } catch(_) {}
                             }
-                            if (dbMods === null || dbMods.length === 0) {
-                                // Last resort: direct query with select('*') to get all columns
+                            // 3rd: direct select('*') last resort
+                            if (!dbMods || dbMods.length === 0) {
                                 try {
                                     const { data: rawSettings } = await supabaseClient.from('site_settings').select('*').eq('id', 1).maybeSingle();
                                     if (rawSettings) {
@@ -8146,7 +8149,8 @@ renderStudioAiControl: async () => {
                         }
                         /* Fallback: check already-loaded publicData (works for anon users) */
                         try {
-                            const pubMods = App.state.publicData?.master?.underConstruction?.heroPromoModules;
+                            const pubMods = App.state.publicData?.master?.heroPromoModules
+                                || App.state.publicData?.master?.underConstruction?.heroPromoModules;
                             if (Array.isArray(pubMods) && pubMods.length > 0) return pubMods;
                         } catch(_) {}
                         return null;
