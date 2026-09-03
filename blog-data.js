@@ -239,7 +239,7 @@
     return `<style id="blog-mobile-image-guard">
       .balkon-card-media{width:100%;aspect-ratio:16 / 9;height:auto;overflow:hidden}
       .balkon-card-image{width:100%;height:100%;display:block;object-fit:cover;object-position:center}
-      .blog-article-hero-image{width:100%;aspect-ratio:19 / 5;height:auto;display:block;object-fit:cover;object-position:center}
+      .blog-article-hero-image{width:100%;aspect-ratio:16 / 9;height:auto;display:block;object-fit:cover;object-position:center}
       .blog-article-content img{max-width:100%!important;height:auto!important;display:block!important;margin:1.5rem auto!important;border-radius:.75rem!important}
     </style>`;
   }
@@ -457,7 +457,7 @@
 
     return `${renderBlogImageGuardStyles()}
       <style>
-        .blog-article-page{width:min(100%,80rem);margin:0 auto;padding:0 0 clamp(2.5rem,5vw,3rem);box-sizing:border-box}
+        .blog-article-page{width:min(100%,48rem);margin:0 auto;padding:0 0 clamp(2.5rem,5vw,3rem);box-sizing:border-box}
         .blog-article-canvas,.blog-article-promo{width:100%;box-sizing:border-box}
         .blog-article-inner{padding:clamp(1.25rem,3vw,2rem) clamp(.75rem,4vw,3rem) clamp(1.5rem,4vw,2.5rem)}
         .blog-article-back{margin-bottom:clamp(1.25rem,2.5vw,1.75rem)}
@@ -539,14 +539,11 @@
     return normalizedHtml.replace(/<pre><code(?:\s+class="prompt-block")?>([\s\S]*?)<\/code><\/pre>/gi, function(match, code) {
       const decoded = code.replace(/&amp;/g,'&').replace(/&lt;/g,'<').replace(/&gt;/g,'>').replace(/&quot;/g,'"').replace(/&#39;/g,"'");
       const id = 'pb-' + Math.random().toString(36).slice(2, 8);
-      return '<figure class="my-6 relative rounded-2xl overflow-hidden border border-slate-700/50" style="background:linear-gradient(145deg,#0f172a,#1e293b)">' +
-        '<figcaption class="flex items-center justify-between px-5 py-3 border-b border-white/5">' +
-          '<span class="inline-flex items-center gap-1.5 text-[11px] font-bold text-emerald-400 uppercase tracking-wider"><i class="fa-solid fa-terminal text-[10px]"></i>Prompt AI</span>' +
-          '<button onclick="App.blog.copyPrompt(this, \' '+id+'\')" class="absolute top-3 right-3 z-10 inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium text-white backdrop-blur-sm transition-all duration-200" style="background:rgba(255,255,255,.1);backdrop-filter:blur(8px);border:1px solid rgba(255,255,255,.12)" data-id="'+id+'">' +
-            '<i class="fa-regular fa-copy text-[11px]"></i> <span class="btn-label">Salin Prompt</span>' +
-          '</button>' +
-        '</figcaption>' +
-        '<pre id="'+id+'" class="p-5 overflow-x-auto text-[13px] md:text-sm leading-relaxed text-blue-100" style="margin:0;background:transparent;font-family:\'JetBrains Mono\',\'Fira Code\',\'Cascadia Code\',monospace;tab-size:2"><code>' + decoded + '</code></pre>' +
+      return '<figure class="my-6 relative rounded-2xl overflow-hidden border border-blue-200/80 shadow-sm" style="background:linear-gradient(160deg,#eff6ff,#dbeafe)">' +
+        '<button onclick="App.blog.copyPrompt(this, \''+id+'\')" class="absolute top-2.5 right-2.5 z-10 inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold text-blue-700 transition-all duration-200 hover:bg-blue-600 hover:text-white" style="background:rgba(255,255,255,.92);border:1px solid #bfdbfe;backdrop-filter:blur(6px);box-shadow:0 2px 8px rgba(59,130,246,.14)" data-id="'+id+'">' +
+          '<i class="fa-regular fa-copy text-[11px]"></i> <span class="btn-label">Salin</span>' +
+        '</button>' +
+        '<pre id="'+id+'" class="p-5 overflow-x-auto text-[13px] md:text-sm leading-relaxed text-blue-950" style="margin:0;background:transparent;font-family:\'JetBrains Mono\',\'Fira Code\',\'Cascadia Code\',monospace;tab-size:2"><code>' + decoded + '</code></pre>' +
       '</figure>';
     });
   }
