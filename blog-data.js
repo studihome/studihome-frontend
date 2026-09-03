@@ -238,7 +238,7 @@
   function renderBlogImageGuardStyles() {
     return `<style id="blog-mobile-image-guard">
       .balkon-card-media{width:100%;aspect-ratio:16 / 9;height:auto;overflow:hidden}
-      .balkon-card-image{width:100%;height:100%;display:block;object-fit:contain;object-position:center;background:#f1f5f9}
+      .balkon-card-image{width:100%;height:100%;display:block;object-fit:cover;object-position:center}
       .blog-article-hero-image{width:100%;aspect-ratio:19 / 5;height:auto;display:block;object-fit:cover;object-position:center}
       .blog-article-content img{max-width:100%!important;height:auto!important;display:block!important;margin:1.5rem auto!important;border-radius:.75rem!important}
     </style>`;
@@ -312,7 +312,7 @@
       <a href="/balkon/${encodeURIComponent(article.slug)}" data-balkon-link data-balkon-slug="${esc(article.slug)}" class="block w-full cursor-pointer transition-transform hover:-translate-y-1 group">
         <div class="card-3d w-full rounded-2xl overflow-hidden flex flex-col bg-white p-3.5 sm:p-4 border border-slate-200/80 transition-all duration-200 hover:shadow-md">
           <div class="balkon-card-media relative w-full rounded-xl overflow-hidden mb-2.5 card-3d-inset">
-            <img src="${esc(imageSrc)}" alt="${esc(article.title)}" class="balkon-card-image block w-full h-full object-contain object-center transition-transform duration-700 ease-in-out group-hover:scale-105" loading="${loading}" fetchpriority="${fetchPriority}" referrerpolicy="no-referrer">
+            <img src="${esc(imageSrc)}" alt="${esc(article.title)}" class="balkon-card-image block w-full h-full object-cover object-center transition-transform duration-700 ease-in-out group-hover:scale-105" loading="${loading}" fetchpriority="${fetchPriority}" referrerpolicy="no-referrer">
           </div>
           <h2 class="font-extrabold text-sm sm:text-base leading-snug text-[#151c75] transition-colors group-hover:text-[#3f48bf]">${esc(article.title)}</h2>
           <p class="mt-1.5 text-xs leading-relaxed text-slate-600 line-clamp-2">${esc(article.excerpt || '')}</p>
