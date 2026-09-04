@@ -1890,7 +1890,7 @@ App.router.bindCanonicalLinkGuard();
                     ];
 
                     if (user) {
-                        if (user.role === 'admin') {
+                        if (user.role === 'admin' || user.role === 'staff') {
                             items.push({ key: 'admin', label: 'Admin', icon: 'fa-user-shield' });
                         } else {
                             items.push({ key: 'dashboard', label: 'Kamar', icon: 'fa-user-shield' });
@@ -3040,6 +3040,7 @@ App.router.bindCanonicalLinkGuard();
                             if (error) throw error;
                             data = { rows: result || [] };
                         } else if (action === 'GET_ADMIN_DATA') {
+                            if (!App.auth.isStaffOrAdmin()) throw new Error('Akses Admin diperlukan.');
                             const [sRes,pRes,mRes,tRes,oRes,uRes] = await Promise.all([
                                 supabaseClient.from('site_settings').select('*').eq('id',1).single(),
                                 supabaseClient.from('products').select('*').order('created_at',{ascending:false}),
