@@ -1126,7 +1126,7 @@
             if (!supabaseClient || !window.App?.state?.user) return;
             await cleanupRealtime();
             const userId = window.App.state.user.id;
-            const isAdmin = String(window.App.state.user.role || '').toLowerCase() === 'admin';
+            const isAdmin = ['admin','staff'].includes(String(window.App.state.user.role || '').toLowerCase());
             const channel = supabaseClient.channel(`studihome-live-${userId}`);
             const refresh = () => {
                 clearTimeout(window.App.state.realtimeRefreshTimer);
@@ -2455,7 +2455,7 @@ App.router.bindCanonicalLinkGuard();
                     if (!user) return null;
                     const { data, error } = await supabaseClient.from('profiles').select('id,name,phone,role,status,created_at,updated_at,email,email_verified').eq('id', user.id).maybeSingle();
                     if (error) throw error;
-                    if (!data) return { id: user.id, name: user.email || 'User', phone: '', role: 'user', status: 'active', created_at: user.created_at, updated_at: user.created_at, email: user.email || '', email_verified: false, registeredAt: user.created_at };
+                    if (!data) return { id: user.id, name: user.email || 'User', phone: '', role: 'member', status: 'active', created_at: user.created_at, updated_at: user.created_at, email: user.email || '', email_verified: false, registeredAt: user.created_at };
                     return { ...data, email: data.email || user.email || '', registeredAt: data.created_at };
                 },
                 _public: async () => {
@@ -2500,6 +2500,12 @@ App.router.bindCanonicalLinkGuard();
                     App.ui.updateApiStatus('connecting');
                     try {
                         let data = null;
+                        const _actorRole = String(App.state?.user?.role || '').toLowerCase();
+                        const _staffAdminActions = ['ADMIN_SAVE_HERO','ADMIN_SAVE_TESTIMONIAL','ADMIN_DELETE_TESTIMONIAL','ADMIN_SAVE_MASTER','ADMIN_SET_CREATOR_VERIFIED','ADMIN_REVIEW_CREATOR','ADMIN_VERIFY_ORDER','ADMIN_REJECT_ORDER','ADMIN_ADD_CREATOR_LIKE_ADJUSTMENT','ADMIN_ADD_PORTFOLIO_LIKE_ADJUSTMENT','ADMIN_ADD_CREATOR_EXTERNAL_RATING','ADMIN_MODERATE_CREATOR_EXTERNAL_RATING','ADMIN_MODERATE_CREATOR_LIKES','ADMIN_MODERATE_CREATOR_PORTFOLIO','ADMIN_MODERATE_CREATOR_RATING'];
+                        const _adminOnlyActions = ['ADMIN_SAVE_PRODUCT','ADMIN_TOGGLE_FEATURED_PRODUCT','ADMIN_DELETE_PRODUCT','ADMIN_SAVE_MODULE','ADMIN_DELETE_MODULE','ADMIN_TOGGLE_USER_STATUS','ADMIN_UPDATE_USER_ROLE'];
+                        if (_staffAdminActions.includes(action) || _adminOnlyActions.includes(action)) {
+                            if (_actorRole !== 'admin' && !(_actorRole === 'staff' && _staffAdminActions.includes(action))) throw new Error('Akses Admin diperlukan.');
+                        }
                         if (action === 'GET_PUBLIC') {
                             data = await App.api._public();
                         } else if (action === 'AUTH_LOGIN') {
@@ -2565,7 +2571,7 @@ App.router.bindCanonicalLinkGuard();
                             if (error) throw error;
                             data = result || { success: true };
                         } else if (action === 'GET_CREATOR_MODERATION_QUEUE') {
-                            if (!App.state.user || String(App.state.user.role).toLowerCase() !== 'admin') throw new Error('Akses Admin diperlukan.');
+                            if (!App.auth.isStaffOrAdmin()) throw new Error('Akses Admin diperlukan.');
                             const { data: creators, error } = await supabaseClient
                                 .from('creator_profiles')
                                 .select('id,username,display_name,bio,avatar_url,location,is_published,is_verified,review_status,review_note,review_requested_at,reviewed_at')
@@ -2575,7 +2581,7 @@ App.router.bindCanonicalLinkGuard();
                             if (error) throw error;
                             data = { creators: creators || [] };
                         } else if (action === 'GET_CREATOR_TRUST_ADMIN') {
-                            if (!App.state.user || String(App.state.user.role).toLowerCase() !== 'admin') throw new Error('Akses Admin diperlukan.');
+                            if (!App.auth.isStaffOrAdmin()) throw new Error('Akses Admin diperlukan.');
                             const { data: creators, error } = await supabaseClient
                                 .from('creator_profiles')
                                 .select('id,username,display_name,is_published,is_verified,review_status,updated_at')
@@ -2598,12 +2604,12 @@ App.router.bindCanonicalLinkGuard();
                             [...(ratingsRes.data || []), ...(extRatingsRes.data || [])].forEach(x => { if (x.is_visible !== false) { ratings[x.creator_id] ||= []; ratings[x.creator_id].push(Number(x.rating)); } });
                             data = { creators: (creators || []).map(c => ({ ...c, likesOrganic: likes[c.id] || 0, likesAdjustment: likeAdjustments[c.id] || 0, likes: (likes[c.id] || 0) + (likeAdjustments[c.id] || 0), services: services[c.id] || 0, portfolios: portfolios[c.id] || 0, ratingCount: (ratings[c.id] || []).length, ratingAvg: (ratings[c.id] || []).length ? ((ratings[c.id].reduce((a,b)=>a+b,0) / ratings[c.id].length).toFixed(1)) : null })) };
                         } else if (action === 'ADMIN_SET_CREATOR_VERIFIED') {
-                            if (!App.state.user || String(App.state.user.role).toLowerCase() !== 'admin') throw new Error('Akses Admin diperlukan.');
+                            if (!App.auth.isStaffOrAdmin()) throw new Error('Akses Admin diperlukan.');
                             const { data: result, error } = await supabaseClient.rpc('admin_set_creator_verified', { p_creator_id: payload.creatorId, p_verified: !!payload.verified });
                             if (error) throw error;
                             data = result || {success:true};
-                        } else if (action === 'ADMIN_ADD_CREATOR_LIKE_ADJUSTMENT') { if (!App.state.user || String(App.state.user.role).toLowerCase() !== 'admin') throw new Error('Akses Admin diperlukan.'); const {data: result,error}=await supabaseClient.rpc('admin_add_creator_like_adjustment',{p_creator_id:payload.creatorId,p_delta_count:Number(payload.delta),p_reason:String(payload.reason||'')}); if(error)throw error; data=result||{success:true}; } else if (action === 'ADMIN_ADD_PORTFOLIO_LIKE_ADJUSTMENT') {
-                            if (!App.state.user || String(App.state.user.role).toLowerCase() !== 'admin') throw new Error('Akses Admin diperlukan.');
+                        } else if (action === 'ADMIN_ADD_CREATOR_LIKE_ADJUSTMENT') { if (!App.auth.isStaffOrAdmin()) throw new Error('Akses Admin diperlukan.'); const {data: result,error}=await supabaseClient.rpc('admin_add_creator_like_adjustment',{p_creator_id:payload.creatorId,p_delta_count:Number(payload.delta),p_reason:String(payload.reason||'')}); if(error)throw error; data=result||{success:true}; } else if (action === 'ADMIN_ADD_PORTFOLIO_LIKE_ADJUSTMENT') {
+                            if (!App.auth.isStaffOrAdmin()) throw new Error('Akses Admin diperlukan.');
                             const { data: result, error } = await supabaseClient.rpc('admin_add_portfolio_like_adjustment', {
                                 p_portfolio_id: payload.portfolioId,
                                 p_delta_count: Number(payload.delta),
@@ -2611,28 +2617,28 @@ App.router.bindCanonicalLinkGuard();
                             });
                             if (error) throw error;
                             data = result || { success: true };
-                        } else if (action === 'ADMIN_ADD_CREATOR_EXTERNAL_RATING') { if (!App.state.user || String(App.state.user.role).toLowerCase() !== 'admin') throw new Error('Akses Admin diperlukan.'); const {data: result,error}=await supabaseClient.rpc('admin_add_creator_external_rating',{p_creator_id:payload.creatorId,p_reviewer_name:String(payload.reviewerName||''),p_rating:Number(payload.rating),p_review:String(payload.review||''),p_source_label:String(payload.sourceLabel||'')}); if(error)throw error; data=result||{success:true};
-                        } else if (action === 'ADMIN_MODERATE_CREATOR_EXTERNAL_RATING') { if (!App.state.user || String(App.state.user.role).toLowerCase() !== 'admin') throw new Error('Akses Admin diperlukan.'); const {data: result,error}=await supabaseClient.rpc('admin_set_creator_external_rating_visibility',{p_rating_id:payload.ratingId,p_visible:Boolean(payload.visible)}); if(error)throw error; data=result||{success:true};
+                        } else if (action === 'ADMIN_ADD_CREATOR_EXTERNAL_RATING') { if (!App.auth.isStaffOrAdmin()) throw new Error('Akses Admin diperlukan.'); const {data: result,error}=await supabaseClient.rpc('admin_add_creator_external_rating',{p_creator_id:payload.creatorId,p_reviewer_name:String(payload.reviewerName||''),p_rating:Number(payload.rating),p_review:String(payload.review||''),p_source_label:String(payload.sourceLabel||'')}); if(error)throw error; data=result||{success:true};
+                        } else if (action === 'ADMIN_MODERATE_CREATOR_EXTERNAL_RATING') { if (!App.auth.isStaffOrAdmin()) throw new Error('Akses Admin diperlukan.'); const {data: result,error}=await supabaseClient.rpc('admin_set_creator_external_rating_visibility',{p_rating_id:payload.ratingId,p_visible:Boolean(payload.visible)}); if(error)throw error; data=result||{success:true};
                         } else if (action === 'ADMIN_MODERATE_CREATOR_LIKES') {
-                            if (!App.state.user || String(App.state.user.role).toLowerCase() !== 'admin') throw new Error('Akses Admin diperlukan.');
+                            if (!App.auth.isStaffOrAdmin()) throw new Error('Akses Admin diperlukan.');
                             const { error } = await supabaseClient.rpc('admin_delete_creator_like', { p_like_id: payload.likeId });
                             if (error) throw error;
                             data = {success:true};
                         } else if (action === 'ADMIN_MODERATE_CREATOR_PORTFOLIO') {
-                            if (!App.state.user || String(App.state.user.role).toLowerCase() !== 'admin') throw new Error('Akses Admin diperlukan.');
+                            if (!App.auth.isStaffOrAdmin()) throw new Error('Akses Admin diperlukan.');
                             const { data: result, error } = await supabaseClient.rpc('admin_set_creator_portfolio_active', { p_portfolio_id: payload.portfolioId, p_active: !!payload.active });
                             if (error) throw error;
                             data = result || {success:true};
                         } else if (action === 'GET_CREATOR_RATINGS_ADMIN') {
-                            if (!App.state.user || String(App.state.user.role).toLowerCase() !== 'admin') throw new Error('Akses Admin diperlukan.');
+                            if (!App.auth.isStaffOrAdmin()) throw new Error('Akses Admin diperlukan.');
                             const { data: ratings, error } = await supabaseClient.from('creator_ratings').select('id,creator_id,user_id,rating,review,is_visible,created_at,creator_profiles(username,display_name)').order('created_at',{ascending:false}).limit(300);
                             if (error) throw error; data = {ratings: ratings || []};
                         } else if (action === 'ADMIN_MODERATE_CREATOR_RATING') {
-                            if (!App.state.user || String(App.state.user.role).toLowerCase() !== 'admin') throw new Error('Akses Admin diperlukan.');
+                            if (!App.auth.isStaffOrAdmin()) throw new Error('Akses Admin diperlukan.');
                             const { data: result, error } = await supabaseClient.rpc('admin_set_creator_rating_visibility', { p_rating_id: payload.ratingId, p_visible: !!payload.visible });
                             if (error) throw error; data = result || {success:true};
                         } else if (action === 'ADMIN_REVIEW_CREATOR') {
-                            if (!App.state.user || String(App.state.user.role).toLowerCase() !== 'admin') throw new Error('Akses Admin diperlukan.');
+                            if (!App.auth.isStaffOrAdmin()) throw new Error('Akses Admin diperlukan.');
                             const decision = String(payload.decision || '').toUpperCase();
                             if (!['APPROVED','REJECTED'].includes(decision)) throw new Error('Keputusan review tidak valid.');
                             const { data: result, error } = await supabaseClient.rpc('admin_review_creator', {
@@ -3103,7 +3109,7 @@ App.router.bindCanonicalLinkGuard();
                         } else if (action === 'ADMIN_UPDATE_USER_ROLE') {
                             if (!App.state.user || String(App.state.user.role || '').toLowerCase() !== 'admin') throw new Error('Akses Admin diperlukan.');
                             const role = String(payload.role || '').trim().toLowerCase();
-                            if (!['member','user','admin'].includes(role)) throw new Error('Role tidak dikenal: ' + role);
+                            if (!['member','staff','admin'].includes(role)) throw new Error('Role tidak dikenal: ' + role);
                             if (payload.userId === App.state.user.id) throw new Error('Tidak bisa mengubah role akun sendiri.');
                             const { data: target, error: gErr } = await supabaseClient.from('profiles').select('role').eq('id', payload.userId).single(); if (gErr) throw gErr;
                             if (String(target?.role || '').toLowerCase() === 'admin') throw new Error('Role Admin dilindungi dan tidak dapat diubah dari panel ini.');
@@ -3115,6 +3121,10 @@ App.router.bindCanonicalLinkGuard();
             },
 
             auth: {
+                isStaffOrAdmin: () => {
+                    const r = String(window.App?.state?.user?.role || '').toLowerCase();
+                    return r === 'admin' || r === 'staff';
+                },
                 handleEmailVerificationFromUrl: async () => {
                     const params = new URLSearchParams(window.location.search);
                     const token = params.get('verify_email');
@@ -3210,7 +3220,7 @@ App.router.bindCanonicalLinkGuard();
                             App.state.pendingCheckoutProductId = null;
                             App.shop.startCheckout(pId);
                         } else {
-                            if (userData.role === 'admin') App.router.navigate('admin');
+                            if (userData.role === 'admin' || userData.role === 'staff') App.router.navigate('admin');
                             else App.router.navigate('dashboard');
                         }
                     } catch (err) {
@@ -7107,18 +7117,31 @@ ${(() => { const rs=String(p.review_status||'DRAFT').toUpperCase(); const map={D
                 },
                 render: async () => {
                     const main = document.getElementById('main-content');
-                    if (!App.state.user || App.state.user.role !== 'admin') {
+                    if (!App.state.user || !['admin','staff'].includes(String(App.state.user.role || '').toLowerCase())) {
                         main.innerHTML = `
                             <div class="card-3d p-6 sm:p-8 rounded-3xl text-center max-w-md mx-auto my-8 sm:my-12 bg-white">
                                 <i class="fa-solid fa-shield-cat text-4xl text-red-500 mb-3"></i>
                                 <h2 class="text-base sm:text-lg font-bold text-slate-800 mb-2">Akses Ditolak</h2>
-                                <p class="text-xs text-slate-500">Halaman ini khusus untuk Administrator Studihome.</p>
+                                <p class="text-xs text-slate-500">Halaman ini khusus untuk Administrator &amp; Staff Studihome.</p>
                             </div>
                         `;
                         return;
                     }
 
-                    const activeTab = App.state.adminTab || 'orders';
+                    const adminStaffTabs = ['orders', 'master', 'dapur-creator'];
+                    const canAdminTab = (t) => { const r = String(App.state.user?.role || '').toLowerCase(); return r === 'admin' ? true : (r === 'staff' ? adminStaffTabs.includes(t) : false); };
+                    let activeTab = App.state.adminTab || 'orders';
+                    if (!canAdminTab(activeTab)) activeTab = 'orders';
+                    App.state.adminTab = activeTab;
+                    const adminNavTabs = [
+                        { id: 'orders', icon: 'fa-receipt', label: 'Transaksi' },
+                        { id: 'products', icon: 'fa-boxes-stacked', label: 'Produk' },
+                        { id: 'modules', icon: 'fa-book-open', label: 'Modul' },
+                        { id: 'master', icon: 'fa-sliders', label: 'Master Data' },
+                        { id: 'users', icon: 'fa-users', label: 'Pengguna' },
+                        { id: 'dapur-creator', icon: 'fa-kitchen-set', label: 'Dapur Creator' },
+                        { id: 'gudang', icon: 'fa-warehouse', label: 'Gudang' }
+                    ].filter(t => canAdminTab(t.id));
 
                     main.innerHTML = `
                         <div class="mb-6 flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
@@ -7129,28 +7152,9 @@ ${(() => { const rs=String(p.review_status||'DRAFT').toUpperCase(); const map={D
                         </div>
 
                         <div class="flex flex-wrap items-center gap-1.5 mb-6 card-3d-inset p-1.5 rounded-2xl text-xs font-bold">
-                            <button onclick="App.admin.switchTab('orders')" class="px-3.5 py-2 rounded-xl transition-all ${activeTab === 'orders' ? 'btn-brand-gradient shadow-xs' : 'text-slate-700 hover:text-[#151c75]'}">
-                                <i class="fa-solid fa-receipt mr-1"></i> Transaksi
-                            </button>
-                            <button onclick="App.admin.switchTab('products')" class="px-3.5 py-2 rounded-xl transition-all ${activeTab === 'products' ? 'btn-brand-gradient shadow-xs' : 'text-slate-700 hover:text-[#151c75]'}">
-                                <i class="fa-solid fa-boxes-stacked mr-1"></i> Produk
-                            </button>
-                            <button onclick="App.admin.switchTab('modules')" class="px-3.5 py-2 rounded-xl transition-all ${activeTab === 'modules' ? 'btn-brand-gradient shadow-xs' : 'text-slate-700 hover:text-[#151c75]'}">
-                                <i class="fa-solid fa-book-open mr-1"></i> Modul
-                            </button>
-                            <button onclick="App.admin.switchTab('master')" class="px-3.5 py-2 rounded-xl transition-all ${activeTab === 'master' ? 'btn-brand-gradient shadow-xs' : 'text-slate-700 hover:text-[#151c75]'}">
-                                <i class="fa-solid fa-sliders mr-1"></i> Master Data
-                            </button>
-                            <button onclick="App.admin.switchTab('users')" class="px-3.5 py-2 rounded-xl transition-all ${activeTab === 'users' ? 'btn-brand-gradient shadow-xs' : 'text-slate-700 hover:text-[#151c75]'}">
-                                <i class="fa-solid fa-users mr-1"></i> Pengguna
-                            </button>
-                            <button onclick="App.admin.switchTab('dapur-creator')" class="px-3.5 py-2 rounded-xl transition-all ${activeTab === 'dapur-creator' ? 'btn-brand-gradient shadow-xs' : 'text-slate-700 hover:text-[#151c75]'}">
-                                <i class="fa-solid fa-kitchen-set mr-1"></i> Dapur Creator
-                            </button>
-                            <button onclick="App.admin.switchTab('gudang')" class="px-3.5 py-2 rounded-xl transition-all ${activeTab === 'gudang' ? 'btn-brand-gradient shadow-xs' : 'text-slate-700 hover:text-[#151c75]'}">
-                                <i class="fa-solid fa-warehouse mr-1"></i> Gudang
-                            </button>
-
+                            ${adminNavTabs.map(t => `<button onclick="App.admin.switchTab('${t.id}')" class="px-3.5 py-2 rounded-xl transition-all ${activeTab === t.id ? 'btn-brand-gradient shadow-xs' : 'text-slate-700 hover:text-[#151c75]'}">
+                                <i class="fa-solid ${t.icon} mr-1"></i> ${t.label}
+                            </button>`).join('')}
                         </div>
 
                         <div id="admin-content-area" class="card-3d p-4 sm:p-6 rounded-3xl bg-white">
@@ -7511,6 +7515,9 @@ renderStudioAiControl: async () => {
                 },
 
                 switchTab: (tab) => {
+                    const r = String(App.state.user?.role || '').toLowerCase();
+                    const allowed = r === 'admin' ? true : (r === 'staff' ? ['orders','master','dapur-creator'].includes(tab) : false);
+                    if (!allowed) { App.ui.toast('Menu ini tidak tersedia untuk role kamu.', 'error'); return; }
                     App.state.adminTab = tab;
                     App.admin.render();
                 },
@@ -7996,7 +8003,7 @@ renderStudioAiControl: async () => {
                                                                 <a href="${waUrl}" target="_blank" rel="noopener noreferrer" class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-[10px] font-bold text-emerald-700 bg-emerald-50 border border-emerald-200 hover:bg-emerald-100 shadow-2xs">
                                                                     <i class="fa-brands fa-whatsapp"></i> ${App.utils.escapeHtml(u.phone)}
                                                                 </a>` : `<span class="text-[10px] text-slate-400">${App.utils.escapeHtml(u.phone || '-')}</span>`}</td>
-                                                            <td class="py-3 px-2">${isAdmin ? `<span class="px-2 py-0.5 rounded text-[10px] font-extrabold uppercase bg-purple-100 text-purple-800">${App.utils.escapeHtml(u.role)}</span>` : `<select data-role="${App.utils.escapeHtml(u.role || '')}" onchange="App.admin.changeUserRole('${u.id || u.email}', this)" class="card-3d-inset px-2.5 py-1.5 rounded-lg text-[10px] font-extrabold text-[#151c75] outline-none">${['member','user','admin'].includes(u.role) ? '' : `<option value="${App.utils.escapeHtml(u.role || '')}" selected>${App.utils.escapeHtml(u.role || '')}</option>`}<option value="member" ${u.role === 'member' ? 'selected' : ''}>member</option><option value="user" ${u.role === 'user' ? 'selected' : ''}>user</option><option value="admin" ${u.role === 'admin' ? 'selected' : ''}>admin</option></select>`}</td>
+                                                            <td class="py-3 px-2">${isAdmin ? `<span class="px-2 py-0.5 rounded text-[10px] font-extrabold uppercase bg-purple-100 text-purple-800">${App.utils.escapeHtml(u.role)}</span>` : `<select data-role="${App.utils.escapeHtml(u.role || '')}" onchange="App.admin.changeUserRole('${u.id || u.email}', this)" class="card-3d-inset px-2.5 py-1.5 rounded-lg text-[10px] font-extrabold text-[#151c75] outline-none">${['member','staff','admin'].includes(u.role) ? '' : `<option value="${App.utils.escapeHtml(u.role || '')}" selected>${App.utils.escapeHtml(u.role || '')}</option>`}<option value="member" ${u.role === 'member' ? 'selected' : ''}>member</option><option value="staff" ${u.role === 'staff' ? 'selected' : ''}>staff</option><option value="admin" ${u.role === 'admin' ? 'selected' : ''}>admin</option></select>`}</td>
                                                             <td class="py-3 px-2">
                                                                 <span class="px-2 py-0.5 rounded text-[10px] font-bold ${!isBlocked ? 'bg-emerald-100 text-emerald-800' : 'bg-red-100 text-red-800'}">
                                                                     ${!isBlocked ? 'Aktif' : 'Diblokir'}
@@ -8742,6 +8749,7 @@ renderStudioAiControl: async () => {
                         App.admin.renderSubTab();
                     } catch (e) {
                         selectEl.value = selectEl.dataset.role;
+                        App.ui.toast('Gagal mengubah peran: ' + (e?.message || 'Terjadi kesalahan.'), 'error');
                     }
                 }
             },
