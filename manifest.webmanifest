@@ -31,6 +31,22 @@
       "purpose": "maskable"
     }
   ],
+  "screenshots": [
+    {
+      "src": "/icons/screenshot-wide.png",
+      "sizes": "1920x1080",
+      "type": "image/png",
+      "form_factor": "wide",
+      "label": "Tampilan desktop Studihome dengan panel produk dan fitur Agentic AI"
+    },
+    {
+      "src": "/icons/screenshot-narrow.png",
+      "sizes": "1080x1920",
+      "type": "image/png",
+      "form_factor": "narrow",
+      "label": "Tampilan mobile Studihome: modul belajar, prompt AI, dan studio creator"
+    }
+  ],
   "shortcuts": [
     {
       "name": "Kamar Saya",
