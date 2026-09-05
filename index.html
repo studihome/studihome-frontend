@@ -29,6 +29,64 @@
         });
       })();
     </script>
+
+    <!-- PWA: branded custom install banner -->
+    <style>
+      .studihome-install-prompt{position:fixed;bottom:0;left:0;right:0;z-index:9999;padding:0 env(safe-area-inset-bottom,0) 0 0;font-family:'Inter',sans-serif;pointer-events:none}
+      .studihome-install-prompt.show{pointer-events:auto}
+      .sip-inner{transform:translateY(100%);transition:transform .4s cubic-bezier(.22,.9,.3,1);background:linear-gradient(135deg,#151c75,#3f48bf);color:#fff;padding:1rem 1.25rem 1.25rem;border-radius:1.25rem 1.25rem 0 0;box-shadow:0 -12px 40px rgba(21,28,117,.35)}
+      .studihome-install-prompt.show .sip-inner{transform:translateY(0)}
+      .sip-btn-install{flex:1;padding:.6rem;border:none;border-radius:.75rem;background:#EAB308;color:#0F172A;font-weight:800;font-size:12px;cursor:pointer;transition:box-shadow .2s}
+      .sip-btn-install:hover{box-shadow:0 4px 14px rgba(234,179,8,.35)}
+      .sip-btn-dismiss{padding:.6rem .8rem;border:1px solid rgba(255,255,255,.25);border-radius:.75rem;background:transparent;color:#fff;font-weight:700;font-size:11px;cursor:pointer}
+      @media(prefers-reduced-motion:reduce){.sip-inner{transition:none!important}}
+    </style>
+    <script>
+      (function () {
+        var deferred, el;
+        var isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
+        var dismissed = function () { try { return sessionStorage.getItem('studihome-install-dismissed'); } catch (_) { return 1; } };
+        function show () {
+          if (dismissed()) return;
+          if (!el) el = build();
+          el.classList.add('show');
+        }
+        function hide () { if (el) el.classList.remove('show'); }
+        function build () {
+          el = document.createElement('div');
+          el.className = 'studihome-install-prompt';
+          var ios = isIOS && !window.navigator.standalone;
+          el.innerHTML = '<div class="sip-inner">'
+            + '<div style="display:flex;align-items:center;gap:.75rem;margin-bottom:.75rem">'
+            + '<div style="width:44px;height:44px;border-radius:12px;background:rgba(255,255,255,.12);display:flex;align-items:center;justify-content:center;font-size:1.3rem;flex-shrink:0">\u2726</div>'
+            + '<div><div style="font-weight:800;font-size:14px">Install Studihome</div>'
+            + '<div style="font-size:11px;opacity:.8;margin-top:2px">' + (ios ? 'Tap ikon <b>Share</b> \u2191 lalu Add to Home Screen' : 'Akses cepat dari home screen \u2022 Bisa dipakai offline') + '</div></div></div>'
+            + '<div style="display:flex;gap:.5rem">'
+            + (ios
+              ? '<button class="sip-dismiss" style="flex:1;padding:.6rem;border:1px solid rgba(255,255,255,.25);border-radius:.75rem;background:transparent;color:#fff;font-weight:700;font-size:11px;cursor:pointer">Mengerti</button>'
+              : '<button class="sip-install sip-btn-install">Instal</button><button class="sip-dismiss sip-btn-dismiss">Nanti</button>'
+            ) + '</div></div>';
+          document.body.appendChild(el);
+          el.querySelector('.sip-dismiss').onclick = function () {
+            try { sessionStorage.setItem('studihome-install-dismissed', '1'); } catch (_) {}
+            hide();
+          };
+          var ib = el.querySelector('.sip-install');
+          if (ib) ib.onclick = function () {
+            if (!deferred) return;
+            deferred.prompt();
+            deferred.userChoice.then(function (r) {
+              if (r.outcome === 'accepted') { try { sessionStorage.setItem('studihome-install-dismissed', '1'); } catch (_) {} }
+              hide(); deferred = null;
+            });
+          };
+          return el;
+        }
+        window.addEventListener('beforeinstallprompt', function (e) { e.preventDefault(); deferred = e; show(); });
+        window.addEventListener('appinstalled', function () { try { sessionStorage.setItem('studihome-install-dismissed', '1'); } catch (_) {} hide(); deferred = null; });
+        if (isIOS && !window.navigator.standalone) setTimeout(show, 3500);
+      })();
+    </script>
     <link rel="canonical" href="https://studihome.id/">
 
     <!-- LOCKED VISUAL CONTRACT — Favicon AA/RC3: ✦ + hero gradient; do not override -->
