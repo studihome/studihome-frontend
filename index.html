@@ -1123,25 +1123,26 @@
             return Promise.race([promise, timeout]).finally(() => clearTimeout(timer));
         }
         async function setupRealtime() {
-            if (!supabaseClient || !window.App?.state?.user) return;
+            // NB: pakai App global const - window.App adalah objek tiruan dari script eksternal (window.App = window.App || {})
+            if (!supabaseClient || !App?.state?.user) return;
             await cleanupRealtime();
-            const userId = window.App.state.user.id;
-            const isAdmin = ['admin','staff'].includes(String(window.App.state.user.role || '').toLowerCase());
+            const userId = App.state.user.id;
+            const isAdmin = ['admin','staff'].includes(String(App.state.user.role || '').toLowerCase());
             const channel = supabaseClient.channel(`studihome-live-${userId}`);
             const refresh = () => {
-                clearTimeout(window.App.state.realtimeRefreshTimer);
-                window.App.state.realtimeRefreshTimer = setTimeout(async () => {
+                clearTimeout(App.state.realtimeRefreshTimer);
+                App.state.realtimeRefreshTimer = setTimeout(async () => {
                     try {
                         if (isAdmin) {
-                            if (window.App.state.activeTab === 'admin') {
-                                await window.App.admin.renderSubTab();
+                            if (App.state.activeTab === 'admin') {
+                                await App.admin.renderSubTab();
                             }
                         } else {
-                            window.App.state.memberData = await window.App.api.post('GET_MEMBER_DASHBOARD');
-                            if (window.App.state.activeTab === 'dashboard') {
-                                await window.App.dashboard.render();
-                            } else if (window.App.state.activeTab === 'products') {
-                                window.App.products.render();
+                            App.state.memberData = await App.api.post('GET_MEMBER_DASHBOARD');
+                            if (App.state.activeTab === 'dashboard') {
+                                await App.dashboard.render();
+                            } else if (App.state.activeTab === 'products') {
+                                App.products.render();
                             }
                         }
                     } catch (_) {}
@@ -1158,17 +1159,17 @@
             // Realtime is supplemental. Do not downgrade the main server indicator
             // when the realtime channel is unavailable; the indicator reflects core API health.
             channel.subscribe();
-            window.App.state.realtimeChannel = channel;
+            App.state.realtimeChannel = channel;
         }
         async function cleanupRealtime() {
-            if (!window.App?.state) return;
-            clearTimeout(window.App.state.realtimeRefreshTimer);
-            window.App.state.realtimeRefreshTimer = null;
-            if (window.App.state.realtimeChannel && supabaseClient) {
+            if (!App?.state) return;
+            clearTimeout(App.state.realtimeRefreshTimer);
+            App.state.realtimeRefreshTimer = null;
+            if (App.state.realtimeChannel && supabaseClient) {
                 try {
-                    await supabaseClient.removeChannel(window.App.state.realtimeChannel);
+                    await supabaseClient.removeChannel(App.state.realtimeChannel);
                 } catch (_) {}
-                window.App.state.realtimeChannel = null;
+                App.state.realtimeChannel = null;
             }
         }
         const IND_NOTICE_OVERRIDES = [
@@ -3123,7 +3124,8 @@ App.router.bindCanonicalLinkGuard();
 
             auth: {
                 isStaffOrAdmin: () => {
-                    const r = String(window.App?.state?.user?.role || '').toLowerCase();
+                    // NB: gunakan App asli - window.App diisi objek tiruan oleh script eksternal, sehingga guard lama selalu melempar Akses Admin diperlukan
+                    const r = String(App?.state?.user?.role || '').toLowerCase();
                     return r === 'admin' || r === 'staff';
                 },
                 handleEmailVerificationFromUrl: async () => {
