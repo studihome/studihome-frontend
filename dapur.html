@@ -7,6 +7,7 @@
   <meta name="description" content="Dapur Creator Studihome membantu Creator menampilkan identitas, layanan, karya, dan kontak dalam satu alamat publik.">
   <meta name="robots" content="noindex,follow">
   <meta name="theme-color" content="#151c75">
+  <link rel="manifest" href="/manifest.webmanifest">
   <link rel="canonical" href="https://studihome.id/dapur">
   <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext x='50' y='60' text-anchor='middle' font-family='Arial,sans-serif' font-size='70' font-weight='700' fill='%23151c75'%3E%E2%9C%A6%3C/text%3E%3C/svg%3E">
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -20,5 +21,15 @@
   <main id="app" aria-live="polite"></main>
   <script src="/dapur-entry.js?v=20260825svg" defer></script>
   <script src="/dapur-production-hardening-v2.js?v=20260822prod1" defer></script>
+  <script>
+    (function () {
+      // PWA optional & additive: registration failures are ignored.
+      if (!('serviceWorker' in navigator)) return;
+      if (location.protocol !== 'https:' && location.hostname !== 'localhost' && location.hostname !== '127.0.0.1') return;
+      window.addEventListener('load', function () {
+        navigator.serviceWorker.register('/sw.js', { scope: '/' }).catch(function () { /* PWA opsional; gagal diam-diam */ });
+      });
+    })();
+  </script>
 </body>
 </html>
