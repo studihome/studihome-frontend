@@ -3,8 +3,7 @@
 if(window.__STUDIHOME_SUPABASE_SDK_LOADER__)return;
 window.__STUDIHOME_SUPABASE_SDK_LOADER__=true;
 const sources=[
- 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2',
- 'https://unpkg.com/@supabase/supabase-js@2/dist/umd/supabase.js'
+ 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.115.0'
 ];
 let i=0;
 function load(){
