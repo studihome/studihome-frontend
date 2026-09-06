@@ -40,6 +40,13 @@ CURRENT KNOWN CONTEXT — 6 SEP 2026
 
 Do not claim the merged portfolio fix is live until Vercel successfully deploys current main, /api/version equals the current main SHA, and production smoke passes.
 
+VERCEL RECOVERY REVALIDATION — 7 SEP 2026
+- operator reports Vercel capacity is available again;
+- ignore the old build-rate-limit result only after a fresh PR deployment/check succeeds;
+- a documentation commit is used to retrigger Preview verification;
+- merge only after fresh Vercel SUCCESS + current release-gate PASS;
+- production remains NOT VERIFIED until main SHA reconciliation + smoke PASS.
+
 CONSOLE TRIAGE BASELINE — 7 SEP 2026
 - `/studio-ai` message-channel errors (`Receiving end does not exist`, `listener indicated an asynchronous response... channel closed`) have no matching `chrome.runtime`/`browser.runtime`/`sendMessage`/`onMessage` implementation in the repository; classify as external/browser-extension provenance unless a Studihome-owned stack frame is proven;
 - YouTube `compute-pressure` warnings are third-party iframe diagnostics; do not relax Studihome Permissions-Policy to silence them;
