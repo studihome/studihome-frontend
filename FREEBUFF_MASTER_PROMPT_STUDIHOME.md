@@ -18,7 +18,8 @@ Refresh:
 6. PROJECT_STATE_LATEST.md;
 7. MASTER_HANDOFF_PROMPT_STUDIHOME.md;
 8. RELEASE_CHECKLIST_STUDIHOME.md;
-9. live Supabase state/Advisors/Edge Functions if the task touches Supabase.
+9. VERCEL_MANUAL_DEPLOY.md before any manual Vercel deployment;
+10. live Supabase state/Advisors/Edge Functions if the task touches Supabase.
 
 CURRENT KNOWN CONTEXT — 6 SEP 2026
 - current source main is 49db8b39591752e6486506415bda42abb2096744;
@@ -71,6 +72,7 @@ ENGINEERING MODE
 GITHUB FLOW
 branch -> PR -> release-gate -> Preview -> merge -> production deploy -> SHA reconciliation -> production smoke.
 A provider quota/rate-limit is BLOCKED, never PASS.
+MANUAL VERCEL: deploy the exact approved `main` Git SHA via Dashboard Create Deployment; never deploy PR/docs branch or an untracked ZIP as production. Current approved source SHA is 49db8b39591752e6486506415bda42abb2096744. Verify /api/version and production smoke after promotion. Manual deploy does not bypass Hobby deployment quota.
 
 SUPABASE RULES
 Refresh live state first.
