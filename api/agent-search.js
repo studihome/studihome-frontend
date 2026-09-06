@@ -4,6 +4,8 @@ const BASE_URL = 'https://studihome.id';
 const MAX_QUERY_LENGTH = 120;
 const MAX_SOURCE_ROWS = 200;
 const MAX_RESULTS = 5;
+const SUPABASE_READ_TIMEOUT_MS = 3500;
+const INTENT_LOG_TIMEOUT_MS = 1200;
 const CACHE_CONTROL = 'public, s-maxage=300, stale-while-revalidate=600';
 
 const normalizeText = value => String(value || '')
@@ -42,6 +44,18 @@ const formatPrice = (minimum, maximum) => {
 const creatorFromRelation = relation => (
   Array.isArray(relation) ? relation[0] : relation
 );
+
+const withAbortTimeout = async (timeoutMs, task) => {
+  const controller = new AbortController();
+  const timeoutId = setTimeout(() => controller.abort(), timeoutMs);
+
+  try {
+    return await task(controller.signal);
+  } finally {
+    clearTimeout(timeoutId);
+  }
+};
+
 
 const scoreService = (service, creator, normalizedQuery, tokens) => {
   if (!normalizedQuery) return 1;
@@ -97,20 +111,29 @@ module.exports = async (req, res) => {
 
   let loggingTask = Promise.resolve();
   if (query.length > 2) {
-    loggingTask = fetch(`${supabaseUrl}/rest/v1/rpc/record_ai_search`, {
-      method: 'POST',
-      headers: {
-        apikey: supabaseAnonKey,
-        Authorization: `Bearer ${supabaseAnonKey}`,
-        'Content-Type': 'application/json',
-        Prefer: 'return=minimal'
-      },
-      body: JSON.stringify({ p_query_text: query })
-    })
+    loggingTask = withAbortTimeout(
+      INTENT_LOG_TIMEOUT_MS,
+      signal => fetch(`${supabaseUrl}/rest/v1/rpc/record_ai_search`, {
+        method: 'POST',
+        headers: {
+          apikey: supabaseAnonKey,
+          Authorization: `Bearer ${supabaseAnonKey}`,
+          'Content-Type': 'application/json',
+          Prefer: 'return=minimal'
+        },
+        body: JSON.stringify({ p_query_text: query }),
+        signal
+      })
+    )
       .then(response => {
         if (!response.ok) console.warn('[agent-search] Intent logging failed', response.status);
       })
-      .catch(error => console.warn('[agent-search] Intent logging failed', error?.message || error));
+      .catch(error => {
+        const reason = error?.name === 'AbortError'
+          ? 'timeout'
+          : (error?.message || error);
+        console.warn('[agent-search] Intent logging failed', reason);
+      });
 
   }
 
@@ -130,16 +153,23 @@ module.exports = async (req, res) => {
       order: 'created_at.desc',
       limit: String(MAX_SOURCE_ROWS)
     });
-    const [, response] = await Promise.all([
+    const [, upstream] = await Promise.all([
       loggingTask,
-      fetch(`${supabaseUrl}/rest/v1/creator_services?${params}`, { headers })
+      withAbortTimeout(SUPABASE_READ_TIMEOUT_MS, async signal => {
+        const response = await fetch(
+          `${supabaseUrl}/rest/v1/creator_services?${params}`,
+          { headers, signal }
+        );
+        const payload = response.ok ? await response.json() : null;
+        return { response, payload };
+      })
     ]);
-    if (!response.ok) {
-      console.error('[agent-search] Supabase read failed', response.status);
+    if (!upstream.response.ok) {
+      console.error('[agent-search] Supabase read failed', upstream.response.status);
       return sendJson(res, 502, { error: 'Upstream data source unavailable' }, isHead);
     }
 
-    const payload = await response.json();
+    const payload = upstream.payload;
     const services = Array.isArray(payload) ? payload : [];
     const ranked = services
       .map((service, index) => {
@@ -176,6 +206,10 @@ module.exports = async (req, res) => {
       ...(results.length ? {} : { message: 'Tidak ditemukan layanan yang cocok.' })
     }, isHead);
   } catch (error) {
+    if (error?.name === 'AbortError') {
+      console.warn('[agent-search] Supabase read timed out');
+      return sendJson(res, 504, { error: 'Upstream data source timed out' }, isHead);
+    }
     console.error('[agent-search] Unexpected error', error?.message || error);
     return sendJson(res, 500, { error: 'Internal Server Error' }, isHead);
   }
