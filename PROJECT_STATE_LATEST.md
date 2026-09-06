@@ -307,7 +307,8 @@ Portfolio route correction — SOURCE MERGED / PRODUCTION BLOCKED:
 - PR #73 merged to `main` as `49db8b39591752e6486506415bda42abb2096744` after release-gate PASS and Vercel Preview SUCCESS.
 - main push release-gate run 602: PASS 25/25.
 - production Vercel deployment for the merge SHA returned `build-rate-limit`; classify as BLOCKED external.
-- production smoke run `34047113620` has not established PASS because the production alias has not converged to the merge SHA.
+- production smoke run `34047113620`: **FAIL** — all 36/36 alias checks still returned `bc3f31f445e21ac3b8582bd40ea70c10a7db167f`, not merge SHA `49db8b39591752e6486506415bda42abb2096744`.
+- exact smoke error: `Production alias did not converge to 49db8b39591752e6486506415bda42abb2096744`.
 - do not claim the collision fix live until `/api/version` equals current main and production smoke passes.
 
 ## P1 remaining
