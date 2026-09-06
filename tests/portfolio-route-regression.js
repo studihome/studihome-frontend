@@ -73,6 +73,23 @@ for (const item of longDuplicates) {
   assert.match(value, /^[a-z0-9][a-z0-9-]{0,119}$/);
 }
 
+const sharedPrefix = [
+  {
+    id: 'aaaaaaaa-1111-4111-8111-111111111111',
+    title: 'Judul Sama'
+  },
+  {
+    id: 'aaaaaaaa-2222-4222-8222-222222222222',
+    title: 'Judul Sama'
+  }
+];
+const sharedPrefixSlugs = sharedPrefix.map(
+  item => routeSlug(item, sharedPrefix)
+);
+assert.equal(new Set(sharedPrefixSlugs).size, 2);
+assert.match(sharedPrefixSlugs[0], /-aaaaaaaa1111$/);
+assert.match(sharedPrefixSlugs[1], /-aaaaaaaa2222$/);
+
 assert.equal(
   routeSlug(
     { id: 'ABCDEF12-0000-4000-8000-000000000000', title: '' },
