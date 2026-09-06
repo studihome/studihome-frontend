@@ -485,5 +485,8 @@ jobs:
 
           print('Public API upstream timeout guardrails: PASS')
 
+      - name: Public API resilience regression
+        run: node tests/api-resilience-regression.js
+
       - name: Diff hygiene
         run: git diff --check
