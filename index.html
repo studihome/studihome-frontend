@@ -11011,37 +11011,59 @@ window.StudihomeProductionPilotSimulation = {
 <!-- PROGRAMMATIC SEO & GEO -->
 
 
-/* ── Push Notification Triggers (admin) ───────────────────── */
-window.App = window.App || {};
-window.App.notify = window.App.notify || {};
-window.App.notify.newProduct = async function(productTitle, productUrl) {
-  if (!window.StudihomePWA?.sendNotification) return;
-  return window.StudihomePWA.sendNotification(
-    '\u2728 Produk Baru di Studihome!',
-    productTitle + ' sudah tersedia. Yuk lihat sekarang!',
-    productUrl || '/foyer'
-  );
-};
-window.App.notify.priceChange = async function(productTitle, newPrice, oldPrice, productUrl) {
-  if (!window.StudihomePWA?.sendNotification) return;
-  var priceText = newPrice === 0 ? 'GRATIS' : ('Rp ' + Number(newPrice).toLocaleString('id-ID'));
-  return window.StudihomePWA.sendNotification(
-    '\uD83D\uDEA8 Harga Berubah!',
-    productTitle + ' sekarang ' + priceText + '. Jangan sampai kehabisan!',
-    productUrl || '/foyer'
-  );
-};
-window.App.notify.promo = async function(promoTitle, promoBody, promoUrl) {
-  if (!window.StudihomePWA?.sendNotification) return;
-  return window.StudihomePWA.sendNotification(
-    '\uD83C\uDF1F Promo Spesial!',
-    promoBody || promoTitle,
-    promoUrl || '/foyer'
-  );
-};
-window.App.notify.custom = async function(title, body, url) {
-  if (!window.StudihomePWA?.sendNotification) return;
-  return window.StudihomePWA.sendNotification(title, body, url);
-};
+<!-- Push Notification Triggers (admin) — runs inside the script element below -->
+<script>
+(function () {
+  'use strict';
+  window.App = window.App || {};
+  window.App.notify = window.App.notify || {};
+
+  // Single funnel for every trigger. Returns a stable result so admin callers
+  // can surface feedback: { error } when the PWA push layer is not ready yet,
+  // otherwise the result of StudihomePWA.sendNotification (which itself
+  // resolves to { error } instead of throwing).
+  function send(title, body, url) {
+    var pusher = window.StudihomePWA;
+    if (!pusher || typeof pusher.sendNotification !== 'function') {
+      return Promise.resolve({ error: 'Layanan notifikasi push belum siap.' });
+    }
+    return pusher.sendNotification(title, body, url);
+  }
+
+  window.App.notify.newProduct = async function (productTitle, productUrl) {
+    return send(
+      '\u2728 Produk Baru di Studihome!',
+      String(productTitle || 'Produk baru') + ' sudah tersedia. Yuk lihat sekarang!',
+      productUrl || '/foyer'
+    );
+  };
+
+  window.App.notify.priceChange = async function (productTitle, newPrice, oldPrice, productUrl) {
+    // Normalize first: '0', 0, null, undefined, and NaN all resolve to GRATIS
+    // instead of producing 'Rp 0' or 'Rp NaN' (the previous strict === 0 check).
+    var priceValue = Number(newPrice);
+    var priceText = Number.isFinite(priceValue) && priceValue > 0
+      ? 'Rp ' + priceValue.toLocaleString('id-ID')
+      : 'GRATIS';
+    return send(
+      '\uD83D\uDEA8 Harga Berubah!',
+      String(productTitle || 'Produk') + ' sekarang ' + priceText + '. Jangan sampai kehabisan!',
+      productUrl || '/foyer'
+    );
+  };
+
+  window.App.notify.promo = async function (promoTitle, promoBody, promoUrl) {
+    return send(
+      '\uD83C\uDF1F Promo Spesial!',
+      String(promoBody || promoTitle || 'Promo terbaru Studihome'),
+      promoUrl || '/foyer'
+    );
+  };
+
+  window.App.notify.custom = async function (title, body, url) {
+    return send(title, body, url);
+  };
+})();
+</script>
 </body>
 </html>
