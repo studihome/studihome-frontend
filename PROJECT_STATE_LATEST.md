@@ -83,6 +83,7 @@ Applied production migrations:
 - `20260906141626_consolidate_public_admin_rls_batch3`
 - `20260906141936_convert_safe_admin_rpcs_to_security_invoker`
 - `20260906142048_correct_admin_rpc_security_modes`
+- `20260906142509_convert_more_admin_rpcs_to_security_invoker`
 
 All are tracked under `supabase/migrations/`.
 
@@ -102,7 +103,7 @@ Current findings:
 
 - `rls_enabled_no_policy`: 3 INFO
 - `anon_security_definer_function_executable`: 8 WARN
-- `authenticated_security_definer_function_executable`: 29 WARN
+- `authenticated_security_definer_function_executable`: 27 WARN
 - `auth_leaked_password_protection`: 1 WARN (Free-plan limitation)
 
 The three RLS/no-policy tables are intentional direct-access deny surfaces:
@@ -133,8 +134,10 @@ Converted and regression-tested as `SECURITY INVOKER`:
 - `admin_set_creator_verified(uuid, boolean)`
 - `admin_set_creator_portfolio_active(uuid, boolean)`
 - `admin_set_creator_rating_visibility(uuid, boolean)`
+- `admin_delete_creator_like(uuid)`
+- `admin_review_creator(uuid, text, text)`
 
-Admin-success and non-admin-denial regression test: PASS.
+Admin-success and non-admin-denial regression tests: PASS.
 
 The following were tested for INVOKER but intentionally restored to DEFINER because authenticated lacks direct DML grants on their protected tables:
 
