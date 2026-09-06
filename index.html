@@ -175,10 +175,14 @@
         /* Push Notification Subscription Manager */
         window.StudihomePWA = window.StudihomePWA || {};
         window.StudihomePWA.VAPID_PUBLIC_KEY = 'BPiNGLNKTsED_jhLQErpSwBzDc_j9ywTrxUA018NLQ7Kr-WFia4rhaY7qFhqpkVCRkpOVlrpxSl0oCuI-Zrl7ck';
+        // P0 safety gate: push backend is not production-ready yet. Keep disabled until
+        // database migration + Edge Function + real-device interoperability are verified.
+        window.StudihomePWA.PUSH_ROLLOUT_ENABLED = false;
 
         window.StudihomePWA.subscribePush = async function() {
           try {
-            if (!('serviceWorker' in navigator) || !('PushManager' in window)) return null;
+            if (!window.StudihomePWA.PUSH_ROLLOUT_ENABLED) return null;
+            if (!('serviceWorker' in navigator) || !('PushManager' in window) || !('Notification' in window)) return null;
             const reg = await navigator.serviceWorker.ready;
             const existing = await reg.pushManager.getSubscription();
             if (existing) return existing;
@@ -194,6 +198,7 @@
 
         window.StudihomePWA.syncSubscription = async function() {
           try {
+            if (!window.StudihomePWA.PUSH_ROLLOUT_ENABLED) return;
             const sub = await window.StudihomePWA.subscribePush();
             if (!sub || !window.supabaseClient || !App?.state?.user) return;
             const json = sub.toJSON();
@@ -210,6 +215,7 @@
 
         window.StudihomePWA.sendNotification = async function(title, body, url) {
           try {
+            if (!window.StudihomePWA.PUSH_ROLLOUT_ENABLED) return { error: 'Push notifications are not enabled yet' };
             if (!window.supabaseClient) return { error: 'No Supabase client' };
             const { data, error } = await window.supabaseClient.functions.invoke('send-push-notification', {
               body: { title, body, url: url || '/' }
@@ -3463,7 +3469,6 @@ App.router.bindCanonicalLinkGuard();
                         App.ui.renderTopAuth();
                         App.ui.toggleModal('auth-modal', false);
                         App.ui.toast(`Hai ${userData.name}! 👋 Senang kamu kembali.`, 'success');
-                        if (window.StudihomePWA?.syncSubscription) window.StudihomePWA.syncSubscription();
 
                         if (App.state.pendingCheckoutProductId) {
                             const pId = App.state.pendingCheckoutProductId;
@@ -3527,7 +3532,6 @@ App.router.bindCanonicalLinkGuard();
 
                         if (res.verificationSent) {
                             App.ui.toast('Akunmu sudah siap 🎉 Email verifikasi sudah dikirim. Sekarang masuk untuk lanjut.', 'success');
-                        if (window.StudihomePWA?.syncSubscription) window.StudihomePWA.syncSubscription();
                         } else {
                             App.ui.toast('Akunmu sudah siap 🎉 Sekarang masuk untuk lanjut, ya.', 'success');
                         }
