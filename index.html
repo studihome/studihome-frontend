@@ -170,6 +170,7 @@
         if (isIOS && !window.navigator.standalone) {
           setTimeout(show, 4000);
         }
+        window.StudihomePWA = { show: show };
       })();
     </script>
 <link rel="canonical" href="https://studihome.id/">
@@ -1118,7 +1119,7 @@
                 <span class="text-blue-100">2026 &copy; All Rights Reserved.</span>
             </div>
             <div class="flex items-center gap-4 sm:gap-6">
-                <a href="#privacy" onclick="App.ui.toast('Tenang, data kamu kami kelola dengan aman dan seperlunya.', 'info')" class="text-blue-100 hover:text-white transition-colors">Privasi</a>
+                <a href="#install" onclick="window.StudihomePWA && window.StudihomePWA.show()" class="text-blue-100 hover:text-white transition-colors">Instal</a>
                 <a href="#terms" onclick="App.ui.toast('Syaratnya simpel: gunakan layanan dengan wajar dan sesuai ketentuan Studihome.', 'info')" class="text-blue-100 hover:text-white transition-colors">Ketentuan</a>
                 <a href="https://wa.me/6285111581115" target="_blank" class="hover:brightness-110 font-bold flex items-center gap-1.5 text-slate-900 bg-gradient-to-r from-[#EAB308] to-[#F59E0B] px-3.5 py-1.5 rounded-xl shadow-xs transition-all text-xs">
                     <i class="fa-brands fa-whatsapp text-slate-900 text-sm"></i> Bantuan
