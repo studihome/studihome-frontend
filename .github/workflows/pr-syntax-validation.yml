@@ -533,5 +533,41 @@ jobs:
 
           print('Edge Function dependency pin guardrails: PASS')
 
+      - name: Legacy Edge Function quarantine guardrails
+        shell: python3 {0}
+        run: |
+          from pathlib import Path
+
+          forbidden = ('smooth-action', 'swift-endpoint')
+          runtime_suffixes = ('.html', '.js', '.mjs', '.ts')
+          ignored_roots = {
+              '.git', '.github', 'supabase/functions', 'tests'
+          }
+
+          violations = []
+          for path in Path('.').rglob('*'):
+              if not path.is_file() or path.suffix.lower() not in runtime_suffixes:
+                  continue
+
+              normalized = path.as_posix()
+              if any(
+                  normalized == root or normalized.startswith(root + '/')
+                  for root in ignored_roots
+              ):
+                  continue
+
+              body = path.read_text(encoding='utf-8', errors='replace')
+              for slug in forbidden:
+                  if slug in body:
+                      violations.append(f'{normalized}: {slug}')
+
+          if violations:
+              raise SystemExit(
+                  'Legacy Edge Function runtime reference detected:\n'
+                  + '\n'.join(violations)
+              )
+
+          print('Legacy Edge Function quarantine guardrails: PASS')
+
       - name: Diff hygiene
         run: git diff --check
