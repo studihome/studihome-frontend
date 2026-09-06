@@ -13,6 +13,14 @@
   ],
   "rewrites": [
     {
+      "source": "/privasi",
+      "destination": "/privacy.html"
+    },
+    {
+      "source": "/ketentuan",
+      "destination": "/terms.html"
+    },
+    {
       "source": "/sitemap.xml",
       "destination": "/api/sitemap"
     },
