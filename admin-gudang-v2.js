@@ -277,7 +277,7 @@
 
   function shell() {
     return `
-      <section id="admin-gudang-v2" class="space-y-5 sm:space-y-6">
+      <section id="admin-gudang-v2" data-nosnippet class="space-y-5 sm:space-y-6">
         <div class="relative overflow-hidden rounded-3xl border border-blue-100 bg-gradient-to-br from-white via-white to-blue-50/80 p-5 sm:p-6 shadow-sm">
           <div class="absolute -right-16 -top-16 h-44 w-44 rounded-full bg-blue-200/40 blur-3xl"></div>
           <div class="relative z-10 flex flex-col lg:flex-row lg:items-center lg:justify-between gap-5">
