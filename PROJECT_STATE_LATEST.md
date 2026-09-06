@@ -311,6 +311,18 @@ Portfolio route correction — SOURCE MERGED / PRODUCTION BLOCKED:
 - exact smoke error: `Production alias did not converge to 49db8b39591752e6486506415bda42abb2096744`.
 - do not claim the collision fix live until `/api/version` equals current main and production smoke passes.
 
+## Console diagnostics triage — 7 Sep 2026
+
+User-supplied `/studio-ai` console evidence was audited against current main:
+- no repository implementation of `chrome.runtime`, `browser.runtime`, `sendMessage`, `onMessage`, or a matching page message listener was found;
+- repeated `Receiving end does not exist` / asynchronous message-channel-closed errors are **not proven Studihome defects** and are classified as likely browser-extension/content-script noise;
+- YouTube embed emits `compute-pressure` Permissions Policy warning; current Studihome policy remains unchanged because playback does not require weakening the security boundary;
+- Chromium Windows emits `powerPreference option is currently ignored` diagnostic from the embedded player path;
+- PWA banner warning reflects `beforeinstallprompt.preventDefault()` semantics; no runtime change is justified without evidence that the custom install CTA fails;
+- social-proof widget diagnostics show successful client readiness and 3 loaded items.
+
+No application/runtime/security-header change was made for this console report. Required reproduction rule: test with extensions disabled/incognito and obtain a Studihome-owned stack frame before opening a runtime-fix PR.
+
 ## Legacy Admin Dapur runtime audit — COMPLETED
 
 Current-main evidence:
