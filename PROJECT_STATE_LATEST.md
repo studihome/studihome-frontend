@@ -7,7 +7,7 @@ Status: **SECURITY/RELEASE HARDENING ACTIVE**
 
 - Repository: `studihome/studihome-frontend`
 - Branch: `main`
-- Latest main before this state-sync PR: `86c69ae31238a545573a4dd05c71bfada7fe3c26`
+- Latest verified main before API-timeout PR: `74161640619ecf1f5bfe8049d08c6ac02f521f63`
 - Frontend: static HTML/CSS/Vanilla JS
 - Backend/Auth: Supabase
 - Hosting: Vercel
@@ -245,6 +245,18 @@ Regression tests:
 - category slug -> existing Creator username: denied, PASS
 - unchanged legacy `ai-video` category slug: PASS
 - all mutation tests rolled back.
+
+## Public API resilience — HARDENING IN PROGRESS
+
+Current bounded upstream behavior:
+- `api/sitemap.js`: Supabase read timeout 3500 ms.
+- `api/index-push.js`: bounded request window 10000 ms.
+- `api/agent-search.js`: data read timeout 3500 ms; non-critical intent log timeout 1200 ms.
+- `api/markdown.js`: each Supabase read bounded to 3500 ms.
+- no automatic retry is added to native-fetch Data API calls; failure remains bounded and explicit.
+- Markdown public error payload remains unchanged on upstream timeout.
+- Agent Search timeout uses HTTP 504 with the existing JSON error envelope.
+- release-gate includes timeout regression markers for all four public API handlers.
 
 ## P1 remaining
 
