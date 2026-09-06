@@ -1,6 +1,10 @@
 'use strict';
 
 const { SEED_ARTICLES = [] } = require('../blog-data.js');
+const {
+  routeSlug: portfolioRouteSlug,
+  findByRouteSlug: findPortfolioByRouteSlug
+} = require('../portfolio-route.js');
 
 const MAX_PATH_LENGTH = 240;
 const MAX_USERNAME_LENGTH = 64;
@@ -274,6 +278,13 @@ module.exports = async (req, res) => {
           .filter(creator => creator?.id && creator?.username)
           .map(creator => [creator.id, creator])
       );
+      const portfoliosByCreatorId = new Map();
+      portfolioRows.forEach(portfolio => {
+        if (!portfolio?.creator_id) return;
+        const list = portfoliosByCreatorId.get(portfolio.creator_id) || [];
+        list.push(portfolio);
+        portfoliosByCreatorId.set(portfolio.creator_id, list);
+      });
       const serviceKeywords = service.keywords.map(keyword => keyword.toLowerCase());
       const industryKeywords = industry.keywords.map(keyword => keyword.toLowerCase());
       const recommendations = portfolioRows
@@ -301,7 +312,8 @@ module.exports = async (req, res) => {
       markdown += '\n## Rekomendasi Portofolio Publik\n\n';
       if (recommendations.length) {
         recommendations.forEach(({ portfolio, creator }) => {
-          const portfolioSlug = slugify(portfolio.title);
+          const siblings = portfoliosByCreatorId.get(portfolio.creator_id) || [];
+          const portfolioSlug = portfolioRouteSlug(portfolio, siblings);
           const detailUrl = `https://studihome.id/${encodeURIComponent(creator.username)}/portfolio/${encodeURIComponent(portfolioSlug)}`;
           markdown += `- [${textBlock(portfolio.title)} oleh ${textBlock(creator.display_name || creator.username)}](${detailUrl})\n`;
         });
@@ -335,8 +347,9 @@ module.exports = async (req, res) => {
 
     if (isPortfolioRoute) {
       const portfolioSlug = segments[2];
-      const portfolio = portfolios.find(item => slugify(item.title) === portfolioSlug);
+      const portfolio = findPortfolioByRouteSlug(portfolios, portfolioSlug);
       if (!portfolio) return sendError(404, '# 404 Not Found\n\nPortofolio tidak ditemukan atau belum dipublikasikan.\n');
+      const canonicalPortfolioSlug = portfolioRouteSlug(portfolio, portfolios);
 
       let service = null;
       if (portfolio.service_id) {
@@ -367,7 +380,7 @@ module.exports = async (req, res) => {
         if (Number.isInteger(Number(service.delivery_days)) && Number(service.delivery_days) > 0) markdown += `**Estimasi pengerjaan:** ${Number(service.delivery_days)} hari\n\n`;
       }
       if (portfolio.media_url && /^https?:\/\//i.test(portfolio.media_url)) markdown += `[Lihat media portofolio](${portfolio.media_url})\n\n`;
-      markdown += `---\n\nSumber resmi: [Studihome](https://studihome.id/${encodeURIComponent(creator.username)}/portfolio/${portfolioSlug})\n`;
+      markdown += `---\n\nSumber resmi: [Studihome](https://studihome.id/${encodeURIComponent(creator.username)}/portfolio/${canonicalPortfolioSlug})\n`;
       if (req.method === 'HEAD') return res.status(200).end();
       return res.status(200).send(markdown);
     }
@@ -383,7 +396,7 @@ module.exports = async (req, res) => {
     if (portfolios.length > 0) {
       markdown += '## Portofolio & Layanan\n\n';
       portfolios.forEach(portfolio => {
-        const portfolioSlug = slugify(portfolio.title);
+        const portfolioSlug = portfolioRouteSlug(portfolio, portfolios);
         markdown += `### [${textBlock(portfolio.title || 'Portofolio')}](https://studihome.id/${encodeURIComponent(creator.username)}/portfolio/${portfolioSlug})\n\n`;
         if (portfolio.description) markdown += `${textBlock(portfolio.description)}\n\n`;
       });
