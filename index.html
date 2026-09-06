@@ -30,64 +30,149 @@
       })();
     </script>
 
-    <!-- PWA: branded custom install banner -->
+    <!-- PWA: centered install prompt -->
     <style>
-      .studihome-install-prompt{position:fixed;bottom:0;left:0;right:0;z-index:9999;padding:0 env(safe-area-inset-bottom,0) 0 0;font-family:'Inter',sans-serif;pointer-events:none}
-      .studihome-install-prompt.show{pointer-events:auto}
-      .sip-inner{transform:translateY(100%);transition:transform .4s cubic-bezier(.22,.9,.3,1);background:linear-gradient(135deg,#151c75,#3f48bf);color:#fff;padding:1rem 1.25rem 1.25rem;border-radius:1.25rem 1.25rem 0 0;box-shadow:0 -12px 40px rgba(21,28,117,.35)}
-      .studihome-install-prompt.show .sip-inner{transform:translateY(0)}
-      .sip-btn-install{flex:1;padding:.6rem;border:none;border-radius:.75rem;background:#EAB308;color:#0F172A;font-weight:800;font-size:12px;cursor:pointer;transition:box-shadow .2s}
-      .sip-btn-install:hover{box-shadow:0 4px 14px rgba(234,179,8,.35)}
-      .sip-btn-dismiss{padding:.6rem .8rem;border:1px solid rgba(255,255,255,.25);border-radius:.75rem;background:transparent;color:#fff;font-weight:700;font-size:11px;cursor:pointer}
-      @media(prefers-reduced-motion:reduce){.sip-inner{transition:none!important}}
+      .sh-pwa-overlay{position:fixed;inset:0;z-index:9999;display:none;align-items:center;justify-content:center;padding:1rem;background:rgba(2,6,23,.55);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);font-family:'Inter',system-ui,sans-serif}
+      .sh-pwa-overlay.show{display:flex}
+      .sh-pwa-card{position:relative;width:min(400px,calc(100vw - 2rem));background:#fff;border-radius:1.5rem;box-shadow:0 25px 60px rgba(21,28,117,.25);overflow:hidden;animation:shPwaIn .35s cubic-bezier(.22,.9,.3,1)}
+      .sh-pwa-header{background:linear-gradient(135deg,#151c75,#3f48bf);padding:2rem 1.5rem 1.5rem;text-align:center}
+      .sh-pwa-star{width:64px;height:64px;margin:0 auto 1rem;border-radius:1.25rem;background:rgba(255,255,255,.12);display:flex;align-items:center;justify-content:center;font-size:2rem;color:#FACC15;box-shadow:0 8px 24px rgba(21,28,117,.3)}
+      .sh-pwa-title{color:#fff;font-size:18px;font-weight:900;line-height:1.2}
+      .sh-pwa-sub{color:rgba(255,255,255,.75);font-size:12px;margin-top:.35rem}
+      .sh-pwa-body{padding:1.25rem 1.5rem}
+      .sh-pwa-benefits{display:grid;gap:.6rem;margin-bottom:1.25rem}
+      .sh-pwa-benefit{display:flex;align-items:center;gap:.6rem;font-size:12px;color:#475569;line-height:1.4}
+      .sh-pwa-benefit i{color:#151c75;font-size:14px;width:18px;text-align:center;flex-shrink:0}
+      .sh-pwa-actions{display:flex;gap:.5rem}
+      .sh-pwa-btn-install{flex:1;padding:.75rem;border:none;border-radius:.875rem;background:linear-gradient(135deg,#EAB308,#F59E0B);color:#0F172A;font-weight:900;font-size:13px;cursor:pointer;transition:box-shadow .2s,transform .15s;box-shadow:0 4px 14px rgba(234,179,8,.25)}
+      .sh-pwa-btn-install:hover{box-shadow:0 6px 20px rgba(234,179,8,.4);transform:translateY(-1px)}
+      .sh-pwa-btn-dismiss{padding:.75rem 1rem;border:1px solid #e2e8f0;border-radius:.875rem;background:#f8fafc;color:#64748b;font-weight:700;font-size:12px;cursor:pointer;transition:background .15s}
+      .sh-pwa-btn-dismiss:hover{background:#f1f5f9}
+      .sh-pwa-ios-note{background:#f0f7ff;border:1px solid #bfdbfe;border-radius:.75rem;padding:.75rem;font-size:11px;color:#1e40af;line-height:1.6}
+      .sh-pwa-ios-note b{font-weight:800}
+      @keyframes shPwaIn{from{opacity:0;transform:scale(.92) translateY(12px)}to{opacity:1;transform:scale(1) translateY(0)}}
+      @media(prefers-reduced-motion:reduce){.sh-pwa-card{animation:none}}
     </style>
     <script>
       (function () {
         var deferred, el;
         var isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
-        var dismissed = function () { try { return sessionStorage.getItem('studihome-install-dismissed'); } catch (_) { return 1; } };
-        function show () {
-          if (dismissed()) return;
+        var DISMISS_KEY = 'studihome-pwa-dismissed-v2';
+        var DISMISS_TTL = 7 * 24 * 60 * 60 * 1000; // 7 days
+
+        function isInstalled() {
+          if (window.navigator.standalone) return true; // iOS standalone
+          if (window.matchMedia('(display-mode: standalone)').matches) return true;
+          return false;
+        }
+
+        function isDismissed() {
+          if (isInstalled()) return true;
+          try {
+            var v = localStorage.getItem(DISMISS_KEY);
+            if (!v) return false;
+            return (Date.now() - Number(v)) < DISMISS_TTL;
+          } catch (_) { return false; }
+        }
+
+        function dismiss() {
+          try { localStorage.setItem(DISMISS_KEY, String(Date.now())); } catch (_) {}
+          hide();
+        }
+
+        function show() {
+          if (isDismissed()) return;
           if (!el) el = build();
           el.classList.add('show');
         }
-        function hide () { if (el) el.classList.remove('show'); }
-        function build () {
+
+        function hide() { if (el) el.classList.remove('show'); }
+
+        function build() {
           el = document.createElement('div');
-          el.className = 'studihome-install-prompt';
+          el.className = 'sh-pwa-overlay';
           var ios = isIOS && !window.navigator.standalone;
-          el.innerHTML = '<div class="sip-inner">'
-            + '<div style="display:flex;align-items:center;gap:.75rem;margin-bottom:.75rem">'
-            + '<div style="width:44px;height:44px;border-radius:12px;background:rgba(255,255,255,.12);display:flex;align-items:center;justify-content:center;font-size:1.3rem;flex-shrink:0">\u2726</div>'
-            + '<div><div style="font-weight:800;font-size:14px">Install Studihome</div>'
-            + '<div style="font-size:11px;opacity:.8;margin-top:2px">' + (ios ? 'Tap ikon <b>Share</b> \u2191 lalu Add to Home Screen' : 'Akses cepat dari home screen \u2022 Bisa dipakai offline') + '</div></div></div>'
-            + '<div style="display:flex;gap:.5rem">'
-            + (ios
-              ? '<button class="sip-dismiss" style="flex:1;padding:.6rem;border:1px solid rgba(255,255,255,.25);border-radius:.75rem;background:transparent;color:#fff;font-weight:700;font-size:11px;cursor:pointer">Mengerti</button>'
-              : '<button class="sip-install sip-btn-install">Instal</button><button class="sip-dismiss sip-btn-dismiss">Nanti</button>'
-            ) + '</div></div>';
+
+          var benefits = '<div class="sh-pwa-benefits">'
+            + '<div class="sh-pwa-benefit"><i class="fa-solid fa-bolt"></i>Akses instan dari home screen</div>'
+            + '<div class="sh-pwa-benefit"><i class="fa-solid fa-wifi-slash"></i>Bisa dipakai meski offline</div>'
+            + '<div class="sh-pwa-benefit"><i class="fa-solid fa-shield-halved"></i>Pengalaman lebih cepat & ringan</div>'
+            + '</div>';
+
+          var actions;
+          if (ios) {
+            actions = '<div class="sh-pwa-ios-note">'
+              + 'Tap ikon <b>Share \u2191</b> di Safari, lalu pilih <b>"Add to Home Screen"</b> untuk menginstal Studihome.'
+              + '</div>'
+              + '<div class="sh-pwa-actions" style="margin-top:.75rem">'
+              + '<button class="sh-pwa-dismiss" style="flex:1">Mengerti</button>'
+              + '</div>';
+          } else {
+            actions = '<div class="sh-pwa-actions">'
+              + '<button class="sh-pwa-dismiss">Nanti Saja</button>'
+              + '<button class="sh-pwa-btn-install">Instal Sekarang</button>'
+              + '</div>';
+          }
+
+          el.innerHTML = '<div class="sh-pwa-card">'
+            + '<div class="sh-pwa-header">'
+            + '<div class="sh-pwa-star">\u2726</div>'
+            + '<div class="sh-pwa-title">Instal Studihome</div>'
+            + '<div class="sh-pwa-sub">Akses cepat & pengalaman lebih baik</div>'
+            + '</div>'
+            + '<div class="sh-pwa-body">'
+            + benefits
+            + actions
+            + '</div></div>';
+
           document.body.appendChild(el);
-          el.querySelector('.sip-dismiss').onclick = function () {
-            try { sessionStorage.setItem('studihome-install-dismissed', '1'); } catch (_) {}
-            hide();
-          };
-          var ib = el.querySelector('.sip-install');
+
+          // Close on backdrop click
+          el.addEventListener('click', function (e) {
+            if (e.target === el) dismiss();
+          });
+
+          // Dismiss button
+          el.querySelector('.sh-pwa-dismiss').onclick = dismiss;
+
+          // Install button (Android/Desktop)
+          var ib = el.querySelector('.sh-pwa-btn-install');
           if (ib) ib.onclick = function () {
             if (!deferred) return;
             deferred.prompt();
             deferred.userChoice.then(function (r) {
-              if (r.outcome === 'accepted') { try { sessionStorage.setItem('studihome-install-dismissed', '1'); } catch (_) {} }
-              hide(); deferred = null;
+              if (r.outcome === 'accepted') {
+                try { localStorage.setItem(DISMISS_KEY, String(Date.now())); } catch (_) {}
+              }
+              hide();
+              deferred = null;
             });
           };
+
           return el;
         }
-        window.addEventListener('beforeinstallprompt', function (e) { e.preventDefault(); deferred = e; show(); });
-        window.addEventListener('appinstalled', function () { try { sessionStorage.setItem('studihome-install-dismissed', '1'); } catch (_) {} hide(); deferred = null; });
-        if (isIOS && !window.navigator.standalone) setTimeout(show, 3500);
+
+        // Android/Desktop: listen for beforeinstallprompt
+        window.addEventListener('beforeinstallprompt', function (e) {
+          e.preventDefault();
+          deferred = e;
+          show();
+        });
+
+        // On successful install
+        window.addEventListener('appinstalled', function () {
+          try { localStorage.setItem(DISMISS_KEY, String(Date.now())); } catch (_) {}
+          hide();
+          deferred = null;
+        });
+
+        // iOS: show after short delay (no beforeinstallprompt on iOS)
+        if (isIOS && !window.navigator.standalone) {
+          setTimeout(show, 4000);
+        }
       })();
     </script>
-    <link rel="canonical" href="https://studihome.id/">
+<link rel="canonical" href="https://studihome.id/">
 
     <!-- LOCKED VISUAL CONTRACT — Favicon AA/RC3: ✦ + hero gradient; do not override -->
     <link id="studihome-favicon-locked" rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Cdefs%3E%3ClinearGradient id='g' x1='0%25' y1='0%25' x2='100%25' y2='100%25'%3E%3Cstop offset='0%25' stop-color='%23151c75'/%3E%3Cstop offset='100%25' stop-color='%233f48bf'/%3E%3C/linearGradient%3E%3C/defs%3E%3Ctext x='50' y='51' text-anchor='middle' dominant-baseline='central' font-family='Arial,sans-serif' font-size='112' font-weight='700' fill='url(%23g)'%3E%E2%9C%A6%3C/text%3E%3C/svg%3E">
