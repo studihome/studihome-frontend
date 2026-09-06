@@ -63,6 +63,13 @@ For that SHA:
 
 Therefore do **not** claim the portfolio fix is live merely because it is merged to `main`. Re-run/complete deployment and production smoke only after Vercel can deploy the current main SHA.
 
+Vercel capacity recovery revalidation — 7 Sep 2026:
+- operator reports Vercel is accepting deployments again;
+- GitHub's previous Vercel failure on PR #74 is treated as stale provider evidence until a fresh deployment/check completes;
+- this documentation commit intentionally retriggers PR Preview validation;
+- do not merge until the fresh Vercel check is SUCCESS and the current Release Gate remains PASS;
+- production for main `49db8b...` remains NOT VERIFIED until `/api/version` reports that SHA and production smoke passes.
+
 Legacy/runtime ownership audit on current main:
 
 - Issue #21 audit: **COMPLETED WITH CORRECTION** after direct parsing of the large `index.html`;
