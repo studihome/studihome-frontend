@@ -71,7 +71,20 @@ Legacy Admin Dapur runtime audit on current main:
 - Issue #24 duplicate Supabase-client refactor: **CLOSED / NOT PLANNED** because refactoring an unproven/dead runtime adds risk without production value;
 - no legacy file has been deleted; removal still requires a dedicated cleanup PR, release-gate, Preview/browser acceptance, and rollback path.
 
-## 4. Portfolio canonical URL contract — DO NOT REGRESS
+## 4. Console diagnostics baseline — 7 Sep 2026
+
+Current `/studio-ai` console report was triaged against current main:
+
+- repository search found no `chrome.runtime`, `browser.runtime`, `sendMessage`, `onMessage`, or page `message` listener matching the reported extension-channel errors;
+- `Could not establish connection. Receiving end does not exist.` and `A listener indicated an asynchronous response... channel closed` are therefore classified **EXTERNAL / BROWSER-EXTENSION PROVENANCE LIKELY**, not a proven Studihome runtime defect;
+- YouTube `compute-pressure` Permissions Policy warnings originate inside `youtube.com` embed code. Do **not** weaken Studihome `Permissions-Policy` merely to silence that warning;
+- Chromium `powerPreference option is currently ignored... on Windows` is browser/driver diagnostic noise, not a Studihome application error;
+- `beforeinstallprompt.preventDefault()` warning is expected when a custom PWA install flow suppresses the browser banner. Treat as actionable only if the custom install CTA itself fails to call the saved prompt after a user gesture;
+- social-proof logs `supabaseClient ready immediately` and `loaded 3 items` are normal successful diagnostics.
+
+Before changing app code for similar reports, reproduce with extensions disabled/incognito and identify a Studihome-owned stack frame or failed feature. Do not add catch-all handlers or relax security headers solely to make DevTools quiet.
+
+## 5. Portfolio canonical URL contract — DO NOT REGRESS
 
 Public portfolio route:
 
@@ -97,7 +110,7 @@ Required regression coverage:
 - `tests/index-push-canonical-regression.js`;
 - release-gate static guards against title-only resolver regression and single-hyphen collision-namespace regression.
 
-## 5. Release governance
+## 6. Release governance
 
 GitHub main protection is active:
 
@@ -120,7 +133,7 @@ Auto-deployment protocol:
 
 A Vercel quota/rate-limit is **BLOCKED**, never PASS.
 
-## 6. Current release-gate scope
+## 7. Current release-gate scope
 
 The gate covers at least:
 
@@ -148,7 +161,7 @@ The gate covers at least:
 
 Do not weaken a failing assertion merely to make CI green.
 
-## 7. Supabase safety baseline
+## 8. Supabase safety baseline
 
 Project: `studihome` / ref `hbfmhwwxbgidsnljupca`.
 
@@ -183,7 +196,7 @@ For any Supabase change:
 
 Never expose service-role/secret credentials.
 
-## 8. Edge Functions
+## 9. Edge Functions
 
 Current tracked Supabase JS target: `2.115.0`.
 
@@ -196,7 +209,7 @@ Recorded state:
 
 Do not retire legacy functions without independent caller/invocation evidence.
 
-## 9. Security and runtime boundaries
+## 10. Security and runtime boundaries
 
 Never:
 
@@ -211,7 +224,7 @@ Never:
 - weaken CSP/security/noindex controls to make tests pass;
 - mutate checkout/payment flows without focused audit and regression coverage.
 
-## 10. SEO / GEO rules
+## 11. SEO / GEO rules
 
 - `llms.txt` is not a Google ranking lever.
 - Maintain canonical consistency between runtime HTML/SPA, sitemap, Markdown endpoints, IndexNow, and structured data.
@@ -220,7 +233,7 @@ Never:
 - Sitemap `<loc>` values must be unique.
 - Do not fabricate freshness or statistics.
 
-## 11. Definition of done
+## 12. Definition of done
 
 Allowed status vocabulary:
 
@@ -246,7 +259,7 @@ A production release is verified only after:
 - relevant authenticated/browser checks are completed;
 - documentation matches live evidence.
 
-## 12. Required engineering report
+## 13. Required engineering report
 
 Every substantive change report must include:
 
