@@ -249,7 +249,7 @@
     if (!isAdmin()) return;
     const area = document.getElementById('admin-content-area');
     if (!area) return;
-    area.innerHTML = '<div id="admin-dapur-creator-v5" class="space-y-4"><div class="py-12 text-center text-xs text-slate-500"><i class="fa-solid fa-spinner fa-spin mr-2"></i>Menyiapkan Dapur Creator…</div></div>';
+    area.innerHTML = '<div id="admin-dapur-creator-v5" data-nosnippet class="space-y-4"><div class="py-12 text-center text-xs text-slate-500"><i class="fa-solid fa-spinner fa-spin mr-2"></i>Menyiapkan Dapur Creator…</div></div>';
     try {
       const rows = await loadData();
       const ordered = sortedCreators(rows);
