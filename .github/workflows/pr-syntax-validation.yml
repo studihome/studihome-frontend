@@ -266,5 +266,56 @@ jobs:
 
           print('Security/dependency/PWA guardrails: PASS')
 
+      - name: SEO, trust, and crawl guardrails
+        shell: python3 {0}
+        run: |
+          import json
+          from pathlib import Path
+
+          index = Path('index.html').read_text(encoding='utf-8')
+          robots = Path('robots.txt').read_text(encoding='utf-8')
+          sitemap = Path('api/sitemap.js').read_text(encoding='utf-8')
+          vercel = json.loads(Path('vercel.json').read_text(encoding='utf-8'))
+
+          for required in ['/privasi', '/ketentuan']:
+              if f'href="{required}"' not in index:
+                  raise SystemExit(f'Missing footer trust link: {required}')
+              if required not in sitemap:
+                  raise SystemExit(f'Missing sitemap trust route: {required}')
+
+          rewrite_map = {
+              item.get('source'): item.get('destination')
+              for item in vercel.get('rewrites', [])
+          }
+          expected = {
+              '/privasi': '/privacy.html',
+              '/ketentuan': '/terms.html',
+          }
+          for source, destination in expected.items():
+              if rewrite_map.get(source) != destination:
+                  raise SystemExit(
+                      f'Missing trust-page rewrite: {source}'
+                  )
+
+          private_routes = [
+              '/admin', '/kamar', '/dapur',
+              '/dashboard', '/creator-studio', '/ruang-kerja'
+          ]
+          for route in private_routes:
+              if robots.count(f'Disallow: {route}') < 2:
+                  raise SystemExit(
+                      f'Private crawl boundary not repeated: {route}'
+                  )
+
+          if 'new Date().toISOString().slice(0, 10)' in sitemap:
+              raise SystemExit(
+                  'Sitemap must not invent lastmod using request date.'
+              )
+
+          if 'Tingkatkan efisiensi kerja hingga 10x lipat' in index:
+              raise SystemExit('Unsupported homepage numeric claim restored.')
+
+          print('SEO/trust/crawl guardrails: PASS')
+
       - name: Diff hygiene
         run: git diff --check
