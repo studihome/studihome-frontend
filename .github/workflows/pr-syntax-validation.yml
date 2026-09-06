@@ -1,4 +1,4 @@
-name: Frontend PR Syntax Validation
+name: Studihome Release Gate
 
 on:
   pull_request:
@@ -10,9 +10,16 @@ on:
 permissions:
   contents: read
 
+concurrency:
+  group: studihome-release-gate-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
-  syntax:
+  validate:
+    name: release-gate
     runs-on: ubuntu-latest
+    timeout-minutes: 10
+
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -22,13 +29,18 @@ jobs:
         with:
           node-version: 22
 
-      - name: Check JavaScript modules
+      - name: JavaScript syntax
         run: |
-          node --check studio-ai-creator-card.js
-          node --check dapur-entry.js
-          node --check dapur-editor.js
+          set -euo pipefail
+          for file in             studio-ai-creator-card.js             dapur-entry.js             dapur-editor.js             sw.js             supabase-sdk-loader-v1.js             supabase-config.js             api/agent-search.js             api/index-push.js             api/markdown.js             api/sitemap.js
+          do
+            if [ -f "$file" ]; then
+              echo "Checking $file"
+              node --check "$file"
+            fi
+          done
 
-      - name: Check inline JavaScript in route shells
+      - name: Inline JavaScript syntax
         shell: python3 {0}
         run: |
           import re
@@ -38,23 +50,153 @@ jobs:
 
           for html_name in ('dapur.html', 'index.html'):
               html = Path(html_name).read_text(encoding='utf-8')
-              blocks = re.findall(r'<script(?P<attrs>[^>]*)>(?P<body>.*?)</script>', html, flags=re.I | re.S)
+              blocks = re.findall(
+                  r'<script(?P<attrs>[^>]*)>(?P<body>.*?)</script>',
+                  html,
+                  flags=re.I | re.S,
+              )
               checked = 0
               for i, (attrs, body) in enumerate(blocks):
                   if re.search(r'\bsrc\s*=', attrs, flags=re.I):
                       continue
-                  if re.search(r'type\s*=\s*["\']application/ld\+json["\']', attrs, flags=re.I):
+                  if re.search(
+                      r'type\s*=\s*["\']application/ld\+json["\']',
+                      attrs,
+                      flags=re.I,
+                  ):
                       continue
                   if not body.strip():
                       continue
+
                   path = Path(tempfile.gettempdir()) / f'{html_name}-{i}.js'
                   path.write_text(body, encoding='utf-8')
-                  result = subprocess.run(['node', '--check', str(path)], text=True, capture_output=True)
+                  result = subprocess.run(
+                      ['node', '--check', str(path)],
+                      text=True,
+                      capture_output=True,
+                  )
                   if result.returncode != 0:
                       print(result.stderr)
-                      raise SystemExit(f'Inline JavaScript syntax failure in {html_name} block {i}.')
+                      raise SystemExit(
+                          f'Inline JavaScript syntax failure in '
+                          f'{html_name} block {i}.'
+                      )
                   checked += 1
-              print(f'{html_name}: validated {checked} inline JavaScript blocks.')
+
+              print(
+                  f'{html_name}: validated {checked} inline '
+                  'JavaScript blocks.'
+              )
+
+      - name: Structured configuration validation
+        shell: python3 {0}
+        run: |
+          import json
+          from pathlib import Path
+
+          candidates = [
+              Path('vercel.json'),
+              Path('manifest.webmanifest'),
+              Path('openapi.json'),
+          ]
+
+          for path in candidates:
+              if not path.exists():
+                  continue
+              with path.open(encoding='utf-8') as handle:
+                  json.load(handle)
+              print(f'{path}: valid JSON')
+
+      - name: P0 push rollout guardrails
+        shell: python3 {0}
+        run: |
+          from pathlib import Path
+
+          index = Path('index.html').read_text(encoding='utf-8')
+          migration = Path(
+              'DATABASE_MIGRATION_46_PUSH_SUBSCRIPTIONS.sql'
+          ).read_text(encoding='utf-8')
+
+          required_index = [
+              'window.StudihomePWA.PUSH_ROLLOUT_ENABLED = false;',
+              "if (!window.StudihomePWA.PUSH_ROLLOUT_ENABLED) return null;",
+              "if (!window.StudihomePWA.PUSH_ROLLOUT_ENABLED) return;",
+          ]
+          for marker in required_index:
+              if marker not in index:
+                  raise SystemExit(
+                      f'P0 push gate missing from index.html: {marker}'
+                  )
+
+          forbidden_auto_sync = (
+              'if (window.StudihomePWA?.syncSubscription) '
+              'window.StudihomePWA.syncSubscription();'
+          )
+          if forbidden_auto_sync in index:
+              raise SystemExit(
+                  'Automatic push subscription must not run during '
+                  'login/registration.'
+              )
+
+          forbidden_m46 = [
+              'CREATE POLICY push_subscriptions_service_read',
+              'SECURITY DEFINER\nSET search_path',
+              'SELECT id FROM push_notification_log ORDER BY id DESC',
+          ]
+          for marker in forbidden_m46:
+              if marker in migration:
+                  raise SystemExit(
+                      f'Unsafe M46 pattern reintroduced: {marker}'
+                  )
+
+          required_m46 = [
+              'REVOKE ALL ON TABLE public.push_subscriptions '
+              'FROM PUBLIC, anon, authenticated;',
+              'TO authenticated\nUSING ((SELECT auth.uid()) = user_id);',
+              'DROP FUNCTION IF EXISTS '
+              'public.trigger_push_notification(text, text, text, uuid[]);',
+          ]
+          for marker in required_m46:
+              if marker not in migration:
+                  raise SystemExit(
+                      f'Required M46 hardening missing: {marker}'
+                  )
+
+          print('P0 push rollout and M46 guardrails: PASS')
+
+      - name: Public runtime secret-pattern scan
+        shell: python3 {0}
+        run: |
+          import re
+          from pathlib import Path
+
+          roots = [
+              Path('index.html'),
+              Path('dapur.html'),
+              Path('supabase-config.js'),
+              Path('dapur-entry.js'),
+              Path('dapur-editor.js'),
+              Path('studio-ai-creator-card.js'),
+          ]
+
+          patterns = {
+              'Supabase secret key': re.compile(r'sb_secret_[A-Za-z0-9_-]+'),
+              'service_role JWT claim': re.compile(
+                  r'["\']role["\']\s*:\s*["\']service_role["\']'
+              ),
+          }
+
+          for path in roots:
+              if not path.exists():
+                  continue
+              text = path.read_text(encoding='utf-8', errors='replace')
+              for label, pattern in patterns.items():
+                  if pattern.search(text):
+                      raise SystemExit(
+                          f'{label} pattern found in public runtime: {path}'
+                      )
+
+          print('Public runtime secret-pattern scan: PASS')
 
       - name: Diff hygiene
         run: git diff --check
