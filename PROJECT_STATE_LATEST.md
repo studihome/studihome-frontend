@@ -7,7 +7,7 @@ Status: **SECURITY/RELEASE HARDENING ACTIVE**
 
 - Repository: `studihome/studihome-frontend`
 - Branch: `main`
-- Latest verified main before API-timeout PR: `74161640619ecf1f5bfe8049d08c6ac02f521f63`
+- Latest verified production main: `99ef3ffec71a902e2a74865678ad3bb1273f8d8a`
 - Frontend: static HTML/CSS/Vanilla JS
 - Backend/Auth: Supabase
 - Hosting: Vercel
@@ -256,7 +256,8 @@ Current bounded upstream behavior:
 - no automatic retry is added to native-fetch Data API calls; failure remains bounded and explicit.
 - Markdown public error payload remains unchanged on upstream timeout.
 - Agent Search timeout uses HTTP 504 with the existing JSON error envelope.
-- release-gate includes timeout regression markers for all four public API handlers.
+- release-gate includes timeout guard markers for all four public API handlers.
+- runtime regression harness validates Agent Search success/timeout behavior and Markdown success/timeout/pSEO fallback behavior with mocked abortable upstreams.
 
 ## P1 remaining
 
