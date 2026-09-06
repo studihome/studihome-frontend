@@ -399,5 +399,49 @@ jobs:
 
           print('Public route namespace guardrails: PASS')
 
+      - name: Supabase least-privilege migration guardrails
+        shell: python3 {0}
+        run: |
+          import re
+          from pathlib import Path
+
+          migration_dir = Path('supabase/migrations')
+          if not migration_dir.exists():
+              raise SystemExit('supabase/migrations directory missing')
+
+          dangerous = re.compile(
+              r'grant\s+[^;]*(?:truncate|trigger|references)[^;]*'
+              r'\bto\s+(?:anon|authenticated)\b',
+              flags=re.I | re.S,
+          )
+
+          anon_write = re.compile(
+              r'grant\s+[^;]*(?:insert|update|delete)[^;]*'
+              r'on\s+(?:table\s+)?public\.'
+              r'(?:modules|site_settings|testimonials)\b'
+              r'[^;]*\bto\s+anon\b',
+              flags=re.I | re.S,
+          )
+
+          for path in sorted(migration_dir.glob('*.sql')):
+              body = path.read_text(encoding='utf-8', errors='replace')
+              sql = re.sub(r'--[^\n]*', '', body)
+              if dangerous.search(sql):
+                  raise SystemExit(
+                      f'Dangerous browser-role table privilege in {path}'
+                  )
+              if anon_write.search(sql):
+                  raise SystemExit(
+                      f'Anon write grant on public-read table in {path}'
+                  )
+
+          required = migration_dir / (
+              '20260906150757_harden_browser_table_privileges.sql'
+          )
+          if not required.exists():
+              raise SystemExit('Browser ACL hardening migration missing')
+
+          print('Supabase least-privilege migration guardrails: PASS')
+
       - name: Diff hygiene
         run: git diff --check
