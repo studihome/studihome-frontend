@@ -62,6 +62,15 @@ For that SHA:
 
 Therefore do **not** claim the portfolio fix is live merely because it is merged to `main`. Re-run/complete deployment and production smoke only after Vercel can deploy the current main SHA.
 
+Legacy Admin Dapur runtime audit on current main:
+
+- Issue #21 audit: **COMPLETED**;
+- `admin-dapur-ui-v2.js`: **DELETE-CANDIDATE**, with no current HTML/loader reference found;
+- its only discovered `window.AdminDapurUI` consumers are `dapur-editor-hardening-v1.js` and `dapur-interaction-recovery-v1.js`, and neither consumer has a current loader/reference found;
+- `admin-dapur-creator-v5.js`: **DELETE-CANDIDATE**, with no external consumer found; current references are Constitution/CI inspection plus its own export;
+- Issue #24 duplicate Supabase-client refactor: **CLOSED / NOT PLANNED** because refactoring an unproven/dead runtime adds risk without production value;
+- no legacy file has been deleted; removal still requires a dedicated cleanup PR, release-gate, Preview/browser acceptance, and rollback path.
+
 ## 4. Portfolio canonical URL contract — DO NOT REGRESS
 
 Public portfolio route:
