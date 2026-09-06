@@ -5942,10 +5942,16 @@ App.router.bindCanonicalLinkGuard();
                     const idFallback = (value) => String(value || '').toLowerCase().replace(/[^a-z0-9]/g, '').slice(0, 120);
                     const baseFor = (candidate) => App.creator._slugify(candidate?.title) || idFallback(candidate?.id) || 'portfolio';
                     const base = baseFor(item);
-                    const collisions = list.filter(candidate => baseFor(candidate) === base).length;
-                    if (collisions <= 1) return base;
-                    const suffix = idFallback(item?.id).slice(0, 8);
-                    if (!suffix) return base;
+                    const collidingItems = list.filter(candidate => baseFor(candidate) === base);
+                    if (collidingItems.length <= 1) return base;
+                    const normalizedId = idFallback(item?.id);
+                    if (!normalizedId) return base;
+                    const suffixSteps = [8, 12, 16, 20, 24, 28, 32];
+                    const suffixLength = suffixSteps.find(length => {
+                        const prefix = normalizedId.slice(0, length);
+                        return prefix && collidingItems.filter(candidate => idFallback(candidate?.id).slice(0, length) === prefix).length === 1;
+                    }) || normalizedId.length;
+                    const suffix = normalizedId.slice(0, suffixLength);
                     const baseLimit = Math.max(1, 120 - 1 - suffix.length);
                     return base.slice(0, baseLimit) + '-' + suffix;
                 },
