@@ -362,5 +362,42 @@ jobs:
 
           print('Private crawl/admin snippet guardrails: PASS')
 
+      - name: Public route namespace guardrails
+        shell: python3 {0}
+        run: |
+          from pathlib import Path
+
+          sitemap = Path('api/sitemap.js').read_text(encoding='utf-8')
+          migration = Path(
+              'supabase/migrations/'
+              '20260906150336_guard_public_route_namespace.sql'
+          ).read_text(encoding='utf-8')
+
+          required_sitemap = [
+              'const staticRootPaths = new Set(',
+              'if (staticRootPaths.has(categoryPath))',
+              "category route shadowed by static route; skipped",
+          ]
+          for marker in required_sitemap:
+              if marker not in sitemap:
+                  raise SystemExit(
+                      f'Sitemap namespace dedupe guard missing: {marker}'
+                  )
+
+          required_db = [
+              'studihome-public-route:',
+              'trg_creator_public_route_namespace',
+              'trg_category_public_route_namespace',
+              'is_reserved_public_route_slug',
+              'pg_advisory_xact_lock',
+          ]
+          for marker in required_db:
+              if marker not in migration:
+                  raise SystemExit(
+                      f'Database namespace guard missing: {marker}'
+                  )
+
+          print('Public route namespace guardrails: PASS')
+
       - name: Diff hygiene
         run: git diff --check
