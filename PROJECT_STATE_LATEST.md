@@ -1,64 +1,78 @@
-# STUDIHOME - PROJECT STATE LATEST
+# STUDIHOME — PROJECT STATE LATEST
 
-Snapshot: 1 September 2026  
-Status: **AUDIT OPEN - RELEASE EVIDENCE INCOMPLETE**
+Snapshot: 6 September 2026  
+Status: **AUDIT OPEN — STRICT RELEASE GATES NOT YET PASSED**
 
-## Baseline
+## Current baseline
+- Repository: `studihome/studihome-frontend`
+- Branch: `main`
+- Latest main observed while preparing this state: `4cae3c144ae5583868478bea7ba3fca0cf254d7a`
+- Frontend: static HTML/CSS/Vanilla JS
+- Backend/Auth: Supabase
+- Hosting: Vercel
+- Canonical Dapur: `dapur.html`, `dapur-entry.js`, `dapur-editor.js`, `supabase-config.js`
 
-- Repository: `studihome/studihome-frontend`, branch `main`.
-- Last documented main: [`06ba899`](https://github.com/studihome/studihome-frontend/commit/06ba899) (1 Sep 2026, includes Creator Like fix + CSP update).
-- Vercel status for `06ba899`: auto-deployed. Production-alias SHA: NOT VERIFIED (needs Vercel dashboard confirmation).
-- Frontend: static HTML/CSS/Vanilla JS. Database/Auth: Supabase. Hosting: Vercel.
-- Canonical Dapur: `dapur.html`, `dapur-entry.js`, `dapur-editor.js`, `supabase-config.js`.
-- `/balkon` and `/studio-ai` browser verification remains BLOCKED while Under Construction controls those routes.
+IMPORTANT: Always refresh main before work. This SHA is historical immediately after newer commits land.
 
-## Verified work through M42
+## P0
+1. Main branch governance
+   - protected=false at last audit
+   - active rulesets=none at last audit
+2. Push rollout incomplete
+   - frontend push code exists
+   - live DB lacked push_subscriptions / push_notification_log / trigger_push_notification
+   - live Edge Functions did not include send-push-notification
+3. M46 unsafe as-is
+   - requires schema qualification, ACL hardening, correct RETURNING, validation, rollback
+4. Supabase Security Advisor
+   - leaked-password protection disabled
+   - multiple SECURITY DEFINER executable findings requiring classification
+5. CI/release gates insufficient
+   - existing workflow mainly syntax-level
+   - not enough for auth/RLS/PWA/SEO/checkout/regression assurance
+6. GitHub/Supabase deployment drift
+   - live Edge Function set not fully represented by current repo
 
-| Scope | Status | Live evidence |
-|---|---|---|
-| M37 publish trigger hardening | PASS | Trigger validation is schema-qualified and not API-executable. |
-| M38 portfolio Like integrity | PASS | Adjustment actor audit, bounded delta, non-negative totals. |
-| M39 stale admin policy cleanup | PASS | Legacy modules/testimonials/site-settings admin bypass policies removed. |
-| M40 `site_settings` RLS | PASS | Admin policy is `TO authenticated` with `(select is_admin())`; public read retained. |
-| M41 products policy cleanup | PASS | Duplicate admin policy removed; canonical admin and public-active read policies remain. |
-| M42 external Creator rating gate | PASS | New external ratings start hidden; explicit admin moderation required to publish. |
-| Frontend external rating review | PASS | Admin UI creates drafts and shows internal/external ratings together for moderation. |
-| GitHub/Vercel latest documented frontend commit | PASS | `06ba899`, auto-deployed. |
+## P1
+- restore/verify global HTTP security headers
+- CSP hardening plan
+- service worker version/cache hardening
+- exact-version Supabase SDK strategy
+- runtime duplication cleanup via evidence-first consolidation
+- server/pre-render metadata for high-value public entity routes
+- push permission UX should be explicit/contextual
 
-## Social proof and privacy position
-
-- No fabricated social proof may be inserted or displayed.
-- Public social proof runtime is server-side filtered and must not expose email, phone, `user_id`, amount, or private order information.
-- External Creator ratings are not equivalent to verified purchases. Their source and permission require an Admin review before visibility.
-- Audit found one legacy external rating already public. It is a review backlog, not evidence of validity; do not alter it automatically.
-- Admin Like adjustments are auditable but remain a P1 governance review because they affect public trust metrics.
-
-## Security status
-
-- PASS: RLS is enabled on exposed public tables audited so far.
-- PASS: `v_social_proof_recent` uses `security_invoker=true` and has no public grant.
-- PASS: audited SECURITY DEFINER functions use explicit `search_path`.
-- NOT VERIFIED: complete caller/output/abuse matrix for every executable SECURITY DEFINER function.
-- FAIL: Supabase Security Advisor reports leaked-password protection disabled. Enable in Supabase Auth Dashboard after review.
-- NOT VERIFIED: storage and authenticated owner/admin E2E flows.
-
-## Known performance posture
-
-- PASS: Creator profile/social/services/portfolio/category RLS initplans optimized.
-- PASS: `site_settings` admin initplan optimized in M40.
-- NOT VERIFIED: `testimonials` and `modules` remaining RLS performance findings after equivalence review.
-- NOT VERIFIED: foreign-key index recommendations and duplicate-index cleanup; Advisor `unused_index` is insufficient removal evidence.
-
-## Current priorities
-
-1. P0 - Complete SECURITY DEFINER caller/grant/output classification.
-2. P0 - Authenticated owner/admin/Dapur and checkout/payment E2E, without production writes outside normal test scope.
-3. P0 - Production-alias SHA reconciliation.
-4. P1 - Enable leaked-password protection and review the one legacy public external rating.
-5. P1 - Define governance for Like adjustments as public trust signals.
-6. P2 - mobile 375px/accessibility/console verification and production SEO/GEO checks.
+## Confirmed positive baseline
+- frontend uses publishable Supabase key, not service_role credential
+- dynamic SEO updater handles canonical/meta/OG/Twitter/JSON-LD for many SPA routes
+- robots/sitemap/llms/Markdown/OpenAPI/IndexNow surfaces exist
+- previous M37–M42 security/integrity work remains documented but must be revalidated against live DB when relevant
 
 ## No-regression boundary
+Do not:
+- fabricate social proof
+- expose PII/secrets
+- redesign unrelated UI
+- force-push/reset history
+- blindly merge
+- apply SQL without live audit/rollback
+- use RLS to solve presentation bugs
+- change checkout/payment/Auth/Dapur without scoped tests
 
-Do not touch Under Construction, checkout/payment, canonical Dapur architecture, or unrelated UI while auditing. Do not reset, force-push, merge blindly, fabricate production data, or use RLS to solve UI. See `MASTER_HANDOFF_PROMPT_STUDIHOME.md` and `FREEBUFF_MASTER_PROMPT_STUDIHOME.md` for the continuation protocol.
+## Required next engineering order
+1. Protect main + required checks
+2. Freeze/feature-gate incomplete push behavior
+3. Rewrite M46 safely
+4. Reconcile Edge Function source/live state
+5. Enable leaked-password protection
+6. Complete SECURITY DEFINER matrix
+7. Expand CI/E2E
+8. Restore/verify security headers
+9. Harden SW/cache and push UX
+10. SEO/GEO and performance optimization after security/release correctness
 
+See:
+- `FREEBUFF_SKILL_STUDIHOME.md`
+- `FREEBUFF_INITIAL_COMMAND.md`
+- `MASTER_HANDOFF_PROMPT_STUDIHOME.md`
+- `PROJECT_CONSTITUTION.md`
