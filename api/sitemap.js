@@ -4,6 +4,7 @@ const { SEED_ARTICLES = [] } = require('../blog-data.js');
 const BASE_URL = 'https://studihome.id';
 const SUPABASE_READ_TIMEOUT_MS = 3500;
 const CDN_CACHE_CONTROL = 'public, s-maxage=3600, stale-while-revalidate=86400';
+const CONTENT_RELEASE_DATE = '2026-09-06';
 const STATIC_PAGES = [
   ['/', 'daily', '1.0'],
   ['/foyer', 'daily', '0.9'],
@@ -13,7 +14,9 @@ const STATIC_PAGES = [
   ['/ai-automation', 'weekly', '0.8'],
   ['/ai-content', 'weekly', '0.8'],
   ['/ai-untuk-guru', 'weekly', '0.8'],
-  ['/ai-untuk-umkm', 'weekly', '0.8']
+  ['/ai-untuk-umkm', 'weekly', '0.8'],
+  ['/privasi', 'monthly', '0.5'],
+  ['/ketentuan', 'monthly', '0.5']
 ];
 
 const PSEO_SERVICES = ['otomasi-whatsapp', 'ai-content', 'ai-video', 'ai-chatbot', 'webapp-tanpa-coding'];
@@ -25,7 +28,7 @@ const escapeXml = value => String(value || '')
 
 const dateOnly = value => /^\d{4}-\d{2}-\d{2}/.test(String(value || ''))
   ? String(value).slice(0, 10)
-  : new Date().toISOString().slice(0, 10);
+  : null;
 
 const slugify = value => String(value || '').toLowerCase().trim().normalize('NFKD')
   .replace(/[\u0300-\u036f]/g, '').replace(/[^a-z0-9]+/g, '-')
@@ -34,7 +37,7 @@ const slugify = value => String(value || '').toLowerCase().trim().normalize('NFK
 function buildUrl(path, lastmod, changefreq, priority, image) {
   let xml = '  <url>\n';
   xml += `    <loc>${escapeXml(BASE_URL + path)}</loc>\n`;
-  xml += `    <lastmod>${escapeXml(lastmod)}</lastmod>\n`;
+  if (lastmod) xml += `    <lastmod>${escapeXml(lastmod)}</lastmod>\n`;
   xml += `    <changefreq>${escapeXml(changefreq)}</changefreq>\n`;
   xml += `    <priority>${escapeXml(priority)}</priority>\n`;
   if (image?.url) {
@@ -98,14 +101,13 @@ module.exports = async (req, res) => {
     Authorization: `Bearer ${supabaseAnonKey}`,
     Accept: 'application/json'
   };
-  const today = dateOnly();
   const [creators, categories, portfolios] = await Promise.all([
     readList(base, headers, 'creator_profiles?is_published=eq.true&select=id,username,display_name,avatar_url,updated_at&order=updated_at.desc&limit=5000'),
     readList(base, headers, 'ai_categories?is_active=eq.true&select=slug&order=name.asc&limit=200'),
     readList(base, headers, 'creator_portfolios?is_active=eq.true&select=creator_id,title,media_url,media_type,created_at&order=created_at.desc&limit=5000')
   ]);
 
-  let entries = STATIC_PAGES.map(([path, freq, priority]) => buildUrl(path, today, freq, priority)).join('');
+  let entries = STATIC_PAGES.map(([path, freq, priority]) => buildUrl(path, CONTENT_RELEASE_DATE, freq, priority)).join('');
 
   // Published Balkon articles (same source as the /balkon/:slug.md Markdown
   // endpoint) so crawlers and AI engines discover every article URL directly.
@@ -124,7 +126,7 @@ module.exports = async (req, res) => {
 
   PSEO_SERVICES.forEach(service => {
     PSEO_INDUSTRIES.forEach(industry => {
-      entries += buildUrl(`/solusi/${service}-untuk-${industry}.md`, today, 'weekly', '0.8');
+      entries += buildUrl(`/solusi/${service}-untuk-${industry}.md`, CONTENT_RELEASE_DATE, 'weekly', '0.8');
     });
   });
   const creatorMap = new Map();
@@ -143,7 +145,7 @@ module.exports = async (req, res) => {
 
   categories.forEach(category => {
     const slug = String(category.slug || '').trim().toLowerCase();
-    if (slug) entries += buildUrl(`/${encodeURIComponent(slug)}`, today, 'weekly', '0.8');
+    if (slug) entries += buildUrl(`/${encodeURIComponent(slug)}`, null, 'weekly', '0.8');
   });
 
   portfolios.forEach(portfolio => {
