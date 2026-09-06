@@ -23,7 +23,8 @@ Before changing anything, refresh and reconcile in this order:
 5. `PROJECT_CONSTITUTION.md`;
 6. `PROJECT_STATE_LATEST.md`;
 7. this document and `RELEASE_CHECKLIST_STUDIHOME.md`;
-8. `FREEBUFF_MASTER_PROMPT_STUDIHOME.md` for continuation agents.
+8. `FREEBUFF_MASTER_PROMPT_STUDIHOME.md` for continuation agents;
+9. `VERCEL_MANUAL_DEPLOY.md` before any manual Vercel deployment.
 
 If dated documentation conflicts with live evidence, preserve Constitution principles but update the dated status. Do not substitute an old handoff claim for current verification.
 
@@ -139,6 +140,8 @@ Auto-deployment protocol:
 8. only then production-verified.
 
 A Vercel quota/rate-limit is **BLOCKED**, never PASS.
+
+Manual deployment rule: use the exact approved Git SHA from `main` through Vercel **Create Deployment**. Do not upload an untracked ZIP or deploy a documentation/feature branch as production. Current approved production source target is `49db8b39591752e6486506415bda42abb2096744`. If Vercel creates a staged deployment, confirm the Git SHA first and only then Promote to Production. Production remains NOT VERIFIED until `/api/version` matches and production smoke passes. See `VERCEL_MANUAL_DEPLOY.md`.
 
 ## 7. Current release-gate scope
 
