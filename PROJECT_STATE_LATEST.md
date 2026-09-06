@@ -88,6 +88,7 @@ Applied production migrations:
 - `20260906143850_fix_creator_review_submission_trigger_contract`
 - `20260906143929_harden_creator_review_submission_rowcount`
 - `20260906144934_convert_creator_self_service_rpcs_to_security_invoker`
+- `20260906150336_guard_public_route_namespace`
 
 All are tracked under `supabase/migrations/`.
 
@@ -200,6 +201,25 @@ Regression test:
 `get_public_social_proof_recent()` intentionally returns full member names because Migration 22 records an explicit owner request to unmask them.
 
 Do not silently re-mask this without a product/privacy decision.
+
+## Public route namespace — HARDENED
+
+Verified current state:
+- Creator username ↔ category slug collisions: 0 before guard.
+- Legacy static/category collisions remain for `ai-video`, `ai-automation`, and `ai-content`.
+- Those legacy category slugs are allowed only while unchanged.
+- New Creator usernames cannot claim category/system route slugs.
+- New/changed category slugs cannot claim Creator/system route slugs.
+- Matching route claims are serialized with an advisory transaction lock.
+- Sitemap skips category entries shadowed by an existing static route, so one canonical URL is emitted.
+
+Regression tests:
+- valid Creator username change: PASS
+- Creator username -> existing category slug: denied, PASS
+- Creator username -> reserved system route: denied, PASS
+- category slug -> existing Creator username: denied, PASS
+- unchanged legacy `ai-video` category slug: PASS
+- all mutation tests rolled back.
 
 ## P1 remaining
 
