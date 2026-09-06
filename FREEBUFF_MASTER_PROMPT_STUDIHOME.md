@@ -26,8 +26,9 @@ CURRENT KNOWN CONTEXT — 6 SEP 2026
 - PR head release-gate PASS 25/25 and Vercel Preview SUCCESS;
 - main push release-gate run 602 PASS 25/25;
 - Vercel production deployment for 49db8b... is BLOCKED/FAIL with build-rate-limit;
-- production smoke run 34047113620 has not established PASS because production alias has not converged to the merge SHA;
+- production smoke run 34047113620 is FAIL: all 36/36 alias checks still returned bc3f31f445e21ac3b8582bd40ea70c10a7db167f instead of 49db8b39591752e6486506415bda42abb2096744;
 - last known production alias before merge was bc3f31f445e21ac3b8582bd40ea70c10a7db167f, whose production smoke failed on duplicate sitemap URLs;
+- exact smoke error: `Production alias did not converge to 49db8b39591752e6486506415bda42abb2096744`;
 - therefore 49db8b... is NOT VERIFIED in production;
 - push rollout remains disabled and send-push-notification is not production-ready.
 
