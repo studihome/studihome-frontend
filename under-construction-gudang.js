@@ -145,34 +145,9 @@
       return true;
     }
 
-    // Fallback 2: tombol melayang di pojok kanan bawah.
-    if (!connected(launcher)) document.body.appendChild(launcher);
-    if (launcher.parentElement !== document.body) {
-      launcher.remove();
-      document.body.appendChild(launcher);
-    }
-
-    launcher.style.cssText = [
-      'display:flex',
-      'align-items:center',
-      'gap:10px',
-      'position:fixed',
-      'right:18px',
-      'bottom:18px',
-      'width:min(240px, calc(100vw - 36px))',
-      'padding:10px 12px',
-      'border:1px solid #fde68a',
-      'border-radius:16px',
-      'background:#fff',
-      'color:#475569',
-      'cursor:pointer',
-      'text-align:left',
-      'box-shadow:0 6px 18px rgba(21,28,117,.12)',
-      'z-index:2147483000',
-      'font:inherit'
-    ].join(';');
-    launcher.dataset.mountMode = 'floating-fallback';
-    return true;
+    // Tidak ada floating fallback — tombol hanya boleh ada di panel admin.
+    if (connected(launcher)) launcher.remove();
+    return false;
   }
 
   function cleanupTrailingFooterText() {
@@ -300,9 +275,10 @@
     if (gudangItem && connected(gudangItem)) {
       // Mode sidebar: launcher harus selalu menempel tepat setelah menu "Gudang".
       if (launcher.previousElementSibling !== gudangItem) placeLauncher();
-    } else if (launcher.dataset.mountMode === 'floating-fallback' && findContainer()) {
-      // Wadah navigasi sudah tersedia → keluar dari mode melayang.
-      placeLauncher();
+    } else if (!findGudangItem() && !findContainer()) {
+      // Sidebar admin tidak ditemukan → kemungkinan pengguna sudah pindah rute via SPA.
+      // Hapus tombol agar tidak bocor ke halaman publik.
+      launcher.remove();
     }
 
     cleanupTrailingFooterText();
