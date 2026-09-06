@@ -311,6 +311,22 @@ Portfolio route correction — SOURCE MERGED / PRODUCTION BLOCKED:
 - exact smoke error: `Production alias did not converge to 49db8b39591752e6486506415bda42abb2096744`.
 - do not claim the collision fix live until `/api/version` equals current main and production smoke passes.
 
+## Legacy Admin Dapur runtime audit — COMPLETED
+
+Current-main evidence:
+- `dapur.html` canonical shell does not load `admin-dapur-ui-v2.js` or `admin-dapur-creator-v5.js`.
+- exact repo search found no runtime loader/reference for `admin-dapur-ui-v2.js` outside Constitution.
+- `window.AdminDapurUI` is referenced by `dapur-editor-hardening-v1.js` and `dapur-interaction-recovery-v1.js`, but neither consumer has a current loader/reference found.
+- exact repo search for `admin-dapur-creator-v5.js` found Constitution/CI inspection only; `window.StudihomeAdminDapurCreatorV5` has no external consumer.
+- dynamic `script.src` audit found no loader path for either legacy runtime.
+
+Classification:
+- `admin-dapur-ui-v2.js`: **DELETE-CANDIDATE**.
+- `admin-dapur-creator-v5.js`: **DELETE-CANDIDATE**.
+- Issue #21: **CLOSED / COMPLETED** after evidence-first ownership audit.
+- Issue #24: **CLOSED / NOT PLANNED**; do not refactor duplicate Supabase client logic inside an unproven/dead runtime.
+- no deletion was performed; dedicated cleanup PR + release-gate + Preview/browser acceptance remains mandatory before removal.
+
 ## P1 remaining
 
 - continue per-function SECURITY DEFINER classification/hardening
