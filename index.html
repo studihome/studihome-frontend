@@ -171,6 +171,62 @@
           setTimeout(show, 4000);
         }
         window.StudihomePWA = { show: show };
+
+        /* Push Notification Subscription Manager */
+        window.StudihomePWA = window.StudihomePWA || {};
+        window.StudihomePWA.VAPID_PUBLIC_KEY = 'BPiNGLNKTsED_jhLQErpSwBzDc_j9ywTrxUA018NLQ7Kr-WFia4rhaY7qFhqpkVCRkpOVlrpxSl0oCuI-Zrl7ck';
+
+        window.StudihomePWA.subscribePush = async function() {
+          try {
+            if (!('serviceWorker' in navigator) || !('PushManager' in window)) return null;
+            const reg = await navigator.serviceWorker.ready;
+            const existing = await reg.pushManager.getSubscription();
+            if (existing) return existing;
+            const permission = await Notification.requestPermission();
+            if (permission !== 'granted') return null;
+            const sub = await reg.pushManager.subscribe({
+              userVisibleOnly: true,
+              applicationServerKey: urlBase64ToUint8Array(window.StudihomePWA.VAPID_PUBLIC_KEY)
+            });
+            return sub;
+          } catch (_) { return null; }
+        };
+
+        window.StudihomePWA.syncSubscription = async function() {
+          try {
+            const sub = await window.StudihomePWA.subscribePush();
+            if (!sub || !window.supabaseClient || !App?.state?.user) return;
+            const json = sub.toJSON();
+            await window.supabaseClient.from('push_subscriptions').upsert({
+              user_id: App.state.user.id,
+              endpoint: json.endpoint,
+              p256dh: json.keys.p256dh,
+              auth_key: json.keys.auth,
+              user_agent: navigator.userAgent,
+              is_active: true
+            }, { onConflict: 'endpoint' });
+          } catch (_) { /* best-effort */ }
+        };
+
+        window.StudihomePWA.sendNotification = async function(title, body, url) {
+          try {
+            if (!window.supabaseClient) return { error: 'No Supabase client' };
+            const { data, error } = await window.supabaseClient.functions.invoke('send-push-notification', {
+              body: { title, body, url: url || '/' }
+            });
+            if (error) throw error;
+            return data;
+          } catch (e) { return { error: e.message }; }
+        };
+
+        function urlBase64ToUint8Array(base64String) {
+          var padding = '='.repeat((4 - base64String.length % 4) % 4);
+          var base64 = (base64String + padding).replace(/-/g, '+').replace(/_/g, '/');
+          var rawData = window.atob(base64);
+          var outputArray = new Uint8Array(rawData.length);
+          for (var i = 0; i < rawData.length; i++) outputArray[i] = rawData.charCodeAt(i);
+          return outputArray;
+        }
       })();
     </script>
 <link rel="canonical" href="https://studihome.id/">
@@ -3403,6 +3459,7 @@ App.router.bindCanonicalLinkGuard();
                         App.ui.renderTopAuth();
                         App.ui.toggleModal('auth-modal', false);
                         App.ui.toast(`Hai ${userData.name}! 👋 Senang kamu kembali.`, 'success');
+                        if (window.StudihomePWA?.syncSubscription) window.StudihomePWA.syncSubscription();
 
                         if (App.state.pendingCheckoutProductId) {
                             const pId = App.state.pendingCheckoutProductId;
@@ -3466,6 +3523,7 @@ App.router.bindCanonicalLinkGuard();
 
                         if (res.verificationSent) {
                             App.ui.toast('Akunmu sudah siap 🎉 Email verifikasi sudah dikirim. Sekarang masuk untuk lanjut.', 'success');
+                        if (window.StudihomePWA?.syncSubscription) window.StudihomePWA.syncSubscription();
                         } else {
                             App.ui.toast('Akunmu sudah siap 🎉 Sekarang masuk untuk lanjut, ya.', 'success');
                         }
@@ -10952,5 +11010,38 @@ window.StudihomeProductionPilotSimulation = {
 <script src="/social-proof-admin.js?v=1"></script>
 <!-- PROGRAMMATIC SEO & GEO -->
 
+
+/* ── Push Notification Triggers (admin) ───────────────────── */
+window.App = window.App || {};
+window.App.notify = window.App.notify || {};
+window.App.notify.newProduct = async function(productTitle, productUrl) {
+  if (!window.StudihomePWA?.sendNotification) return;
+  return window.StudihomePWA.sendNotification(
+    '\u2728 Produk Baru di Studihome!',
+    productTitle + ' sudah tersedia. Yuk lihat sekarang!',
+    productUrl || '/foyer'
+  );
+};
+window.App.notify.priceChange = async function(productTitle, newPrice, oldPrice, productUrl) {
+  if (!window.StudihomePWA?.sendNotification) return;
+  var priceText = newPrice === 0 ? 'GRATIS' : ('Rp ' + Number(newPrice).toLocaleString('id-ID'));
+  return window.StudihomePWA.sendNotification(
+    '\uD83D\uDEA8 Harga Berubah!',
+    productTitle + ' sekarang ' + priceText + '. Jangan sampai kehabisan!',
+    productUrl || '/foyer'
+  );
+};
+window.App.notify.promo = async function(promoTitle, promoBody, promoUrl) {
+  if (!window.StudihomePWA?.sendNotification) return;
+  return window.StudihomePWA.sendNotification(
+    '\uD83C\uDF1F Promo Spesial!',
+    promoBody || promoTitle,
+    promoUrl || '/foyer'
+  );
+};
+window.App.notify.custom = async function(title, body, url) {
+  if (!window.StudihomePWA?.sendNotification) return;
+  return window.StudihomePWA.sendNotification(title, body, url);
+};
 </body>
 </html>

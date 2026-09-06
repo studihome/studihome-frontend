@@ -197,3 +197,50 @@ async function trimCache(cache) {
     if (keys.length > RUNTIME_MAX) await cache.delete(keys[0]);
   } catch (_) { /* best-effort */ }
 }
+
+/* ============================================================
+   Push Notifications
+   ============================================================ */
+self.addEventListener('push', (evt) => {
+  if (!evt.data) return;
+  try {
+    const data = evt.data.json();
+    const title = data.title || 'Studihome';
+    const options = {
+      body: data.body || '',
+      icon: '/icons/icon-192.png',
+      badge: '/icons/icon-192.png',
+      image: data.image || undefined,
+      data: { url: data.url || '/' },
+      vibrate: [100, 50, 100],
+      tag: data.tag || 'studihome-push',
+      renotify: true,
+      actions: [
+        { action: 'open', title: 'Lihat Sekarang' },
+        { action: 'dismiss', title: 'Tutup' }
+      ]
+    };
+    evt.waitUntil(self.registration.showNotification(title, options));
+  } catch (_) { /* ignore malformed push */ }
+});
+
+self.addEventListener('notificationclick', (evt) => {
+  evt.notification.close();
+  if (evt.action === 'dismiss') return;
+  const url = (evt.notification.data && evt.notification.data.url) || '/';
+  evt.waitUntil(
+    self.clients.matchAll({ type: 'window', includeUncontrolled: true }).then((clients) => {
+      // Focus existing window if open
+      for (const client of clients) {
+        if (client.url.includes(self.location.origin) && 'focus' in client) {
+          client.navigate(url);
+          return client.focus();
+        }
+      }
+      // Open new window
+      return self.clients.openWindow(url);
+    })
+  );
+});
+
+self.addEventListener('notificationclose', () => { /* no-op */ });
