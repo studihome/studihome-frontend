@@ -143,9 +143,21 @@ module.exports = async (req, res) => {
     );
   });
 
+  const staticRootPaths = new Set(
+    STATIC_PAGES.map(([path]) => String(path || '').trim().toLowerCase())
+  );
+
   categories.forEach(category => {
     const slug = String(category.slug || '').trim().toLowerCase();
-    if (slug) entries += buildUrl(`/${encodeURIComponent(slug)}`, null, 'weekly', '0.8');
+    if (!slug) return;
+
+    const categoryPath = `/${slug}`;
+    if (staticRootPaths.has(categoryPath)) {
+      console.warn('[sitemap] category route shadowed by static route; skipped', categoryPath);
+      return;
+    }
+
+    entries += buildUrl(`/${encodeURIComponent(slug)}`, null, 'weekly', '0.8');
   });
 
   portfolios.forEach(portfolio => {
