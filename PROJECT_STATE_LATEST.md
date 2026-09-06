@@ -7,7 +7,7 @@ Status: **SECURITY/RELEASE HARDENING ACTIVE**
 
 - Repository: `studihome/studihome-frontend`
 - Branch: `main`
-- Latest main before this state-sync PR: `dc6cc2724fdc0ca4d5465d80c136e74565cc5234`
+- Latest main before this state-sync PR: `86c69ae31238a545573a4dd05c71bfada7fe3c26`
 - Frontend: static HTML/CSS/Vanilla JS
 - Backend/Auth: Supabase
 - Hosting: Vercel
@@ -84,6 +84,9 @@ Applied production migrations:
 - `20260906141936_convert_safe_admin_rpcs_to_security_invoker`
 - `20260906142048_correct_admin_rpc_security_modes`
 - `20260906142509_convert_more_admin_rpcs_to_security_invoker`
+- `20260906143452_convert_creator_read_helpers_to_security_invoker`
+- `20260906143850_fix_creator_review_submission_trigger_contract`
+- `20260906143929_harden_creator_review_submission_rowcount`
 
 All are tracked under `supabase/migrations/`.
 
@@ -103,7 +106,7 @@ Current findings:
 
 - `rls_enabled_no_policy`: 3 INFO
 - `anon_security_definer_function_executable`: 8 WARN
-- `authenticated_security_definer_function_executable`: 27 WARN
+- `authenticated_security_definer_function_executable`: 23 WARN
 - `auth_leaked_password_protection`: 1 WARN (Free-plan limitation)
 
 The three RLS/no-policy tables are intentional direct-access deny surfaces:
@@ -136,8 +139,18 @@ Converted and regression-tested as `SECURITY INVOKER`:
 - `admin_set_creator_rating_visibility(uuid, boolean)`
 - `admin_delete_creator_like(uuid)`
 - `admin_review_creator(uuid, text, text)`
+- `has_premium_creator_access()`
+- `is_creator_eligible()`
+- `has_creator_workspace_access()`
+- `can_publish_creator(uuid)`
 
 Admin-success and non-admin-denial regression tests: PASS.
+
+Creator helper INVOKER equivalence tests:
+- admin baseline/output: PASS
+- premium Creator baseline/output: PASS
+- non-premium member baseline/output: PASS
+- downstream Creator RLS visibility after helper conversion: PASS
 
 The following were tested for INVOKER but intentionally restored to DEFINER because authenticated lacks direct DML grants on their protected tables:
 
@@ -146,6 +159,31 @@ The following were tested for INVOKER but intentionally restored to DEFINER beca
 - `admin_add_creator_like_adjustment`
 
 Do NOT grant broader table DML only to reduce Advisor warnings.
+
+
+## Creator review submission bug — RESOLVED
+
+A pre-change baseline test found `submit_creator_for_review()` was already failing with:
+
+`Status review dikelola sistem/Admin.`
+
+Root cause:
+- `submit_creator_for_review()` legitimately updates review-managed fields;
+- `enforce_creator_review_rules()` blocked every non-admin change to those fields;
+- SECURITY DEFINER does not change `auth.uid()` / the business identity, so the trigger still treated the caller as a normal Creator.
+
+Resolution:
+- the RPC now sets a transaction-local `app.creator_review_submit_user` marker bound to `auth.uid()`;
+- the trigger accepts only the narrow owner-bound transition to `PENDING`;
+- direct client updates to review status remain denied;
+- RPC update row count is captured with `GET DIAGNOSTICS ... ROW_COUNT` before any later `PERFORM`.
+
+Regression test:
+- official submit RPC -> PASS
+- transactional state becomes `PENDING` -> PASS
+- direct Creator update of `review_status` -> still denied, PASS
+- all test mutations rolled back.
+
 
 ## Social proof privacy contract
 
@@ -156,7 +194,7 @@ Do not silently re-mask this without a product/privacy decision.
 ## P1 remaining
 
 - continue per-function SECURITY DEFINER classification/hardening
-- review legacy/unmapped Edge Functions using invocation evidence before retirement
+- review legacy/unmapped Edge Functions using invocation evidence before retirement (current connected Supabase tool does not expose invocation logs; do not retire without independent log evidence)
 - continue observability and production smoke automation
 - evaluate strict nonce/hash CSP migration only after inline-runtime extraction
 - route-aware server/pre-render metadata for high-value public routes
