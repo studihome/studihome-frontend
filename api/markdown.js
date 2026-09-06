@@ -5,6 +5,7 @@ const { SEED_ARTICLES = [] } = require('../blog-data.js');
 const MAX_PATH_LENGTH = 240;
 const MAX_USERNAME_LENGTH = 64;
 const MAX_SLUG_LENGTH = 160;
+const SUPABASE_READ_TIMEOUT_MS = 3500;
 const CACHE_CONTROL = 'public, s-maxage=3600, stale-while-revalidate=86400';
 
 
@@ -147,6 +148,18 @@ const slugify = value => String(value || '')
 const isUsername = value => value.length <= MAX_USERNAME_LENGTH && /^[a-z0-9](?:[a-z0-9._-]{0,62}[a-z0-9])?$/.test(value);
 const isSlug = value => value.length <= MAX_SLUG_LENGTH && /^[a-z0-9](?:[a-z0-9-]*[a-z0-9])?$/.test(value);
 
+const withAbortTimeout = async (timeoutMs, task) => {
+  const controller = new AbortController();
+  const timeoutId = setTimeout(() => controller.abort(), timeoutMs);
+
+  try {
+    return await task(controller.signal);
+  } finally {
+    clearTimeout(timeoutId);
+  }
+};
+
+
 module.exports = async (req, res) => {
   res.setHeader('Content-Type', 'text/markdown; charset=utf-8');
   res.setHeader('Cache-Control', CACHE_CONTROL);
@@ -211,17 +224,20 @@ module.exports = async (req, res) => {
   if (!supabaseUrl || !supabaseAnonKey) return sendError(503, '# Error\n\nLayanan profil belum tersedia.\n');
 
   const headers = { apikey: supabaseAnonKey, Authorization: `Bearer ${supabaseAnonKey}`, Accept: 'application/json' };
-  const readJson = async url => {
-    const response = await fetch(url, { headers });
-    if (!response.ok) {
-      console.warn('[markdown] Supabase read failed', response.status);
-      const error = new Error('Supabase read failed');
-      error.status = response.status;
-      throw error;
+  const readJson = async url => withAbortTimeout(
+    SUPABASE_READ_TIMEOUT_MS,
+    async signal => {
+      const response = await fetch(url, { headers, signal });
+      if (!response.ok) {
+        console.warn('[markdown] Supabase read failed', response.status);
+        const error = new Error('Supabase read failed');
+        error.status = response.status;
+        throw error;
+      }
+      const data = await response.json();
+      return Array.isArray(data) ? data : [];
     }
-    const data = await response.json();
-    return Array.isArray(data) ? data : [];
-  };
+  );
 
   try {
     if (isPseoRoute) {
@@ -376,7 +392,10 @@ module.exports = async (req, res) => {
     if (req.method === 'HEAD') return res.status(200).end();
     return res.status(200).send(markdown);
   } catch (error) {
-    console.error('[markdown] Request failed', error?.message || error);
+    const reason = error?.name === 'AbortError'
+      ? 'Supabase read timed out'
+      : (error?.message || error);
+    console.error('[markdown] Request failed', reason);
     return sendError(502, '# Error\n\nGagal mengambil data publik.\n');
   }
 };

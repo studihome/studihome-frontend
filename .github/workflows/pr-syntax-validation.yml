@@ -443,5 +443,47 @@ jobs:
 
           print('Supabase least-privilege migration guardrails: PASS')
 
+      - name: Public API upstream timeout guardrails
+        shell: python3 {0}
+        run: |
+          from pathlib import Path
+
+          agent = Path('api/agent-search.js').read_text(encoding='utf-8')
+          markdown = Path('api/markdown.js').read_text(encoding='utf-8')
+          sitemap = Path('api/sitemap.js').read_text(encoding='utf-8')
+          index_push = Path('api/index-push.js').read_text(encoding='utf-8')
+
+          required_agent = [
+              'SUPABASE_READ_TIMEOUT_MS = 3500',
+              'INTENT_LOG_TIMEOUT_MS = 1200',
+              'withAbortTimeout',
+              '{ headers, signal }',
+              "error?.name === 'AbortError'",
+          ]
+          for marker in required_agent:
+              if marker not in agent:
+                  raise SystemExit(
+                      f'agent-search timeout guard missing: {marker}'
+                  )
+
+          required_markdown = [
+              'SUPABASE_READ_TIMEOUT_MS = 3500',
+              'withAbortTimeout',
+              'fetch(url, { headers, signal })',
+              "error?.name === 'AbortError'",
+          ]
+          for marker in required_markdown:
+              if marker not in markdown:
+                  raise SystemExit(
+                      f'markdown timeout guard missing: {marker}'
+                  )
+
+          if 'SUPABASE_READ_TIMEOUT_MS = 3500' not in sitemap:
+              raise SystemExit('sitemap upstream timeout guard missing')
+          if 'REQUEST_TIMEOUT_MS = 10000' not in index_push:
+              raise SystemExit('index-push request timeout guard missing')
+
+          print('Public API upstream timeout guardrails: PASS')
+
       - name: Diff hygiene
         run: git diff --check
