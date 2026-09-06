@@ -572,6 +572,11 @@ jobs:
       - name: Runtime version endpoint regression
         run: node tests/version-endpoint-regression.js
 
+      - name: Production smoke script self-test
+        run: |
+          python3 -m py_compile scripts/production-smoke.py
+          python3 scripts/production-smoke.py --self-test
+
       - name: Production smoke workflow guardrails
         shell: python3 {0}
         run: |
@@ -580,6 +585,9 @@ jobs:
           version_api = Path('api/version.js').read_text(encoding='utf-8')
           workflow = Path(
               '.github/workflows/production-smoke.yml'
+          ).read_text(encoding='utf-8')
+          smoke = Path(
+              'scripts/production-smoke.py'
           ).read_text(encoding='utf-8')
 
           required_api = [
@@ -595,14 +603,10 @@ jobs:
                   )
 
           required_workflow = [
-              'Wait for production alias SHA',
-              'github.sha',
-              '/api/version',
-              'Sitemap and public API smoke',
-              'Edge Function unauthenticated boundary',
-              'send-email-verification',
-              'provision_managed_creators',
-              'expected 401',
+              'name: Studihome Production Smoke',
+              'uses: actions/checkout@v4',
+              'EXPECTED_SHA: $' + '{{ github.sha }}',
+              'run: python3 scripts/production-smoke.py',
           ]
           for marker in required_workflow:
               if marker not in workflow:
@@ -610,7 +614,23 @@ jobs:
                       f'Production smoke workflow guard missing: {marker}'
                   )
 
-          print('Production smoke workflow guardrails: PASS')
+          required_smoke = [
+              'Wait for production alias SHA',
+              '/api/version',
+              '/sitemap.xml',
+              'x-robots-tag',
+              'content-security-policy',
+              'send-email-verification',
+              'provision_managed_creators',
+              'expected 401',
+              'Studihome production smoke: PASS',
+          ]
+          for marker in required_smoke:
+              if marker not in smoke:
+                  raise SystemExit(
+                      f'Production smoke script guard missing: {marker}'
+                  )
 
+          print('Production smoke workflow guardrails: PASS')
       - name: Diff hygiene
         run: git diff --check
