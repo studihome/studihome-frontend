@@ -7,7 +7,12 @@ Status: **SECURITY/RELEASE HARDENING ACTIVE**
 
 - Repository: `studihome/studihome-frontend`
 - Branch: `main`
-- Latest deployed production main before portfolio-collision PR: `bc3f31f445e21ac3b8582bd40ea70c10a7db167f`
+- Current source `main`: `49db8b39591752e6486506415bda42abb2096744`
+- PR #73: **MERGED**
+- Main push release-gate run 602: **PASS 25/25**
+- Vercel production deployment for current main: **BLOCKED / FAIL — build-rate-limit**
+- Last known production alias SHA before merge: `bc3f31f445e21ac3b8582bd40ea70c10a7db167f`
+- Current main production verification: **NOT VERIFIED**
 - Latest fully production-smoke verified main: **NOT YET ESTABLISHED**
 - Frontend: static HTML/CSS/Vanilla JS
 - Backend/Auth: Supabase
@@ -291,7 +296,7 @@ Latest production evidence for `bc3f31f445e21ac3b8582bd40ea70c10a7db167f`:
 - this is a real canonical/deep-link ambiguity, not only a test artifact.
 - no production data was deleted or rewritten to hide the conflict.
 
-Portfolio route correction in progress:
+Portfolio route correction — SOURCE MERGED / PRODUCTION BLOCKED:
 - unique portfolio titles preserve their historical title-only slug.
 - only colliding title slugs receive a deterministic UUID-derived suffix in the reserved `--` namespace (example: `demo--aaaaaaaa`).
 - normal title slugification collapses punctuation runs to a single `-`, so a natural title slug cannot occupy the reserved `--` collision namespace.
@@ -299,8 +304,11 @@ Portfolio route correction in progress:
 - historical title-only deep links remain readable as backward-compatible fallback.
 - runtime Creator links, Sitemap, Markdown/GEO, and IndexNow use the same canonical contract.
 - release-gate includes behavior regressions for collision routing, reserved-namespace separation, sitemap uniqueness, and IndexNow canonical enforcement.
-- PR #73 remains OPEN / NOT MERGED.
-- current Vercel Preview blocker: `build-rate-limit`; classify as BLOCKED external, never as Preview PASS or a reason to bypass the gate.
+- PR #73 merged to `main` as `49db8b39591752e6486506415bda42abb2096744` after release-gate PASS and Vercel Preview SUCCESS.
+- main push release-gate run 602: PASS 25/25.
+- production Vercel deployment for the merge SHA returned `build-rate-limit`; classify as BLOCKED external.
+- production smoke run `34047113620` has not established PASS because the production alias has not converged to the merge SHA.
+- do not claim the collision fix live until `/api/version` equals current main and production smoke passes.
 
 ## P1 remaining
 
