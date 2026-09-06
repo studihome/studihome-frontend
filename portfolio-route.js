@@ -1,7 +1,7 @@
 'use strict';
 
 const MAX_SLUG_LENGTH = 120;
-const COLLISION_SUFFIX_LENGTH = 8;
+const COLLISION_SUFFIX_STEPS = [8, 12, 16, 20, 24, 28, 32];
 
 const slugify = value => String(value || '')
   .toLowerCase()
@@ -34,9 +34,20 @@ const routeSlug = (item, siblings = []) => {
   const base = baseSlug(item);
   if (collisionCount(item, siblings) <= 1) return base;
 
-  const suffix = normalizeId(item?.id).slice(0, COLLISION_SUFFIX_LENGTH);
-  if (!suffix) return base;
+  const normalizedId = normalizeId(item?.id);
+  if (!normalizedId) return base;
 
+  const collidingItems = (Array.isArray(siblings) ? siblings : [])
+    .filter(candidate => baseSlug(candidate) === base);
+  const suffixLength = COLLISION_SUFFIX_STEPS.find(length => {
+    const candidatePrefix = normalizedId.slice(0, length);
+    if (!candidatePrefix) return false;
+    return collidingItems.filter(
+      candidate => normalizeId(candidate?.id).slice(0, length) === candidatePrefix
+    ).length === 1;
+  }) || normalizedId.length;
+
+  const suffix = normalizedId.slice(0, suffixLength);
   const baseLimit = Math.max(
     1,
     MAX_SLUG_LENGTH - 1 - suffix.length
