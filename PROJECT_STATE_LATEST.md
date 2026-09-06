@@ -89,8 +89,26 @@ Applied production migrations:
 - `20260906143929_harden_creator_review_submission_rowcount`
 - `20260906144934_convert_creator_self_service_rpcs_to_security_invoker`
 - `20260906150336_guard_public_route_namespace`
+- `20260906150757_harden_browser_table_privileges`
 
 All are tracked under `supabase/migrations/`.
+
+## Browser-role table ACLs — HARDENED
+
+Verified production state:
+- `anon` / `authenticated` have no `TRUNCATE`, `TRIGGER`, or `REFERENCES` table privilege in `public`.
+- `anon` access to `modules`, `site_settings`, and `testimonials` is read-only.
+- schema `public`: anon/authenticated have USAGE but not CREATE.
+- authenticated CRUD needed by Creator/Admin flows remains intact.
+- Supabase Data API uses explicit CRUD grants + RLS; browser roles are not given DDL/destructive table privileges.
+
+Regression tests:
+- anon public reads: PASS
+- admin authenticated category update: PASS
+- Creator self-service username RPC: PASS
+- all mutation tests rolled back.
+
+CI now rejects tracked Supabase migrations that re-grant dangerous table privileges to browser-facing roles.
 
 ## RLS regression verification
 
@@ -201,6 +219,13 @@ Regression test:
 `get_public_social_proof_recent()` intentionally returns full member names because Migration 22 records an explicit owner request to unmask them.
 
 Do not silently re-mask this without a product/privacy decision.
+
+## Private crawl hardening — ACTIVE
+
+- private application routes receive `X-Robots-Tag: noindex, nofollow, noarchive`.
+- Dapur shell has matching meta robots.
+- Admin Gudang/Admin Dapur roots use `data-nosnippet`.
+- release-gate includes private crawl/admin snippet regression guards.
 
 ## Public route namespace — HARDENED
 
