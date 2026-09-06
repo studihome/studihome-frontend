@@ -32,7 +32,7 @@ jobs:
       - name: JavaScript syntax
         run: |
           set -euo pipefail
-          for file in             studio-ai-creator-card.js             dapur-entry.js             dapur-editor.js             sw.js             supabase-sdk-loader-v1.js             supabase-config.js             api/agent-search.js             api/index-push.js             api/markdown.js             api/sitemap.js
+          for file in             studio-ai-creator-card.js             dapur-entry.js             dapur-editor.js             sw.js             supabase-sdk-loader-v1.js             supabase-config.js             api/agent-search.js             api/index-push.js             api/markdown.js             api/sitemap.js             api/version.js
           do
             if [ -f "$file" ]; then
               echo "Checking $file"
@@ -568,6 +568,49 @@ jobs:
               )
 
           print('Legacy Edge Function quarantine guardrails: PASS')
+
+      - name: Runtime version endpoint regression
+        run: node tests/version-endpoint-regression.js
+
+      - name: Production smoke workflow guardrails
+        shell: python3 {0}
+        run: |
+          from pathlib import Path
+
+          version_api = Path('api/version.js').read_text(encoding='utf-8')
+          workflow = Path(
+              '.github/workflows/production-smoke.yml'
+          ).read_text(encoding='utf-8')
+
+          required_api = [
+              'VERCEL_GIT_COMMIT_SHA',
+              'VERCEL_ENV',
+              "Cache-Control', 'no-store, max-age=0",
+              'SHA_PATTERN',
+          ]
+          for marker in required_api:
+              if marker not in version_api:
+                  raise SystemExit(
+                      f'Production version endpoint guard missing: {marker}'
+                  )
+
+          required_workflow = [
+              'Wait for production alias SHA',
+              'github.sha',
+              '/api/version',
+              'Sitemap and public API smoke',
+              'Edge Function unauthenticated boundary',
+              'send-email-verification',
+              'provision_managed_creators',
+              'expected 401',
+          ]
+          for marker in required_workflow:
+              if marker not in workflow:
+                  raise SystemExit(
+                      f'Production smoke workflow guard missing: {marker}'
+                  )
+
+          print('Production smoke workflow guardrails: PASS')
 
       - name: Diff hygiene
         run: git diff --check
