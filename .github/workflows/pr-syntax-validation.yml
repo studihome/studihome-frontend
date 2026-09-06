@@ -488,5 +488,50 @@ jobs:
       - name: Public API resilience regression
         run: node tests/api-resilience-regression.js
 
+      - name: Edge Function dependency pin guardrails
+        shell: python3 {0}
+        run: |
+          import re
+          from pathlib import Path
+
+          expected = 'npm:@supabase/supabase-js@2.115.0'
+          function_root = Path('supabase/functions')
+          if not function_root.exists():
+              raise SystemExit('Supabase function source directory missing')
+
+          candidates = [
+              *function_root.rglob('*.ts'),
+              *function_root.rglob('deno.json'),
+              *function_root.rglob('deno.jsonc'),
+          ]
+
+          ranged = re.compile(
+              r'npm:@supabase/supabase-js@2(?=[\"\'\s,}])'
+          )
+          seen = 0
+          for path in candidates:
+              body = path.read_text(encoding='utf-8', errors='replace')
+              if 'supabase-js' not in body:
+                  continue
+              seen += 1
+              if ranged.search(body):
+                  raise SystemExit(
+                      f'Unpinned Supabase Edge dependency in {path}'
+                  )
+              if (
+                  'npm:@supabase/supabase-js@' in body
+                  and expected not in body
+              ):
+                  raise SystemExit(
+                      f'Unexpected Supabase Edge version in {path}'
+                  )
+
+          if seen < 3:
+              raise SystemExit(
+                  f'Expected at least 3 Supabase Edge dependency references, got {seen}'
+              )
+
+          print('Edge Function dependency pin guardrails: PASS')
+
       - name: Diff hygiene
         run: git diff --check
