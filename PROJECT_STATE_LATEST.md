@@ -7,13 +7,13 @@ Status: **SECURITY/RELEASE HARDENING ACTIVE**
 
 - Repository: `studihome/studihome-frontend`
 - Branch: `main`
-- Current source `main`: `49db8b39591752e6486506415bda42abb2096744`
+- Verified production evidence SHA: `1ce0b628fb1733d404c5125ff4ab0176791e58e4`
 - PR #73: **MERGED**
 - Main push release-gate run 602: **PASS 25/25**
-- Vercel production deployment for current main: **BLOCKED / FAIL — build-rate-limit**
+- Vercel production deployment for `1ce0b628...`: **SUCCESS**
 - Last known production alias SHA before merge: `bc3f31f445e21ac3b8582bd40ea70c10a7db167f`
-- Current main production verification: **NOT VERIFIED**
-- Latest fully production-smoke verified main: **NOT YET ESTABLISHED**
+- Production verification for `1ce0b628...`: **PASS / VERIFIED**
+- Latest fully production-smoke verified evidence: `1ce0b628fb1733d404c5125ff4ab0176791e58e4`
 - Frontend: static HTML/CSS/Vanilla JS
 - Backend/Auth: Supabase
 - Hosting: Vercel
@@ -23,12 +23,16 @@ Always refresh `main`, Vercel, and live Supabase before new work.
 
 Manual Vercel recovery playbook: `VERCEL_MANUAL_DEPLOY.md`. Current approved production source target is `main` SHA `49db8b39591752e6486506415bda42abb2096744`; never use PR #74 head as application production source.
 
-Vercel capacity recovery revalidation — 7 Sep 2026:
-- operator reports deployments are available again;
-- prior GitHub Vercel `build-rate-limit` status is stale until superseded by a fresh check;
-- PR #74 is intentionally retriggered with a documentation-only commit;
-- merge remains blocked until the new Vercel check succeeds;
-- production remains NOT VERIFIED until `studihome.id/api/version` equals current approved main SHA and production smoke passes.
+Vercel capacity recovery and production verification — 7 Sep 2026:
+- PR #74 fresh Vercel check: SUCCESS;
+- PR #74 Release Gate #614: PASS;
+- merged main SHA: `1ce0b628fb1733d404c5125ff4ab0176791e58e4`;
+- main Release Gate #615: PASS;
+- production Vercel deployment: SUCCESS;
+- Production Smoke run #9 / `34068317674`: PASS;
+- production alias SHA reconciliation passed;
+- state: **PASS / VERIFIED** for this deployment evidence.
+
 
 ## Release governance — RESOLVED
 
@@ -297,7 +301,7 @@ Current repo target:
 - after promotion, `/api/version` must equal the approved SHA and production smoke must PASS;
 - full operator procedure: `VERCEL_MANUAL_DEPLOY.md`.
 
-## Production deployment verification — FIX IN PROGRESS
+## Production deployment verification — VERIFIED
 
 Current mechanism:
 - `api/version.js` exposes only the current Vercel Git commit SHA and deployment environment; no secret/config values.
