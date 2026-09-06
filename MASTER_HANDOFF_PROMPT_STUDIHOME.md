@@ -46,8 +46,9 @@ Evidence after merge:
 
 - main push `release-gate` run **602**: **PASS 25/25**;
 - Vercel production status for `49db8b39591752e6486506415bda42abb2096744`: **FAIL / BLOCKED** with provider `build-rate-limit`;
-- production smoke run `34047113620`: started for this SHA but has **not established PASS** because production alias has not converged to the merge SHA;
+- production smoke run `34047113620`: **FAIL** — all 36/36 alias checks still returned `bc3f31f445e21ac3b8582bd40ea70c10a7db167f`, not `49db8b39591752e6486506415bda42abb2096744`;
 - production release status for `49db8b...`: **NOT VERIFIED / BLOCKED BY VERCEL DEPLOYMENT**.
+- exact smoke error: `Production alias did not converge to 49db8b39591752e6486506415bda42abb2096744`.
 
 Last known production alias evidence before this merge:
 
