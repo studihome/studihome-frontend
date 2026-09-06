@@ -1,26 +1,32 @@
 /* ============================================================
-   Studihome Service Worker v2
+   Studihome Service Worker v3
    ─────────────────────────────────────────────────────────────
-   Strategy:  network-first for navigations (deploys visible
-              immediately; precached shell as offline fallback)
-              stale-while-revalidate for same-origin static
-              assets with query-string normalization (the HTML
-              references assets with ?v= cache-busters).
-   Cross-origin: NEVER touched (Supabase, CDN, fonts, GA).
-   Security:  only GET, same-origin. Auth tokens never cached.
-   Offline:   CSS + core JS are precached so the shell renders
-              with correct layout even without a network.
+   Strategy:
+     - Navigations: network-first (deploys visible immediately);
+       on network failure fall back to the precached shell for the
+       route family, and finally to a synthetic offline Response —
+       the fetch handler NEVER resolves with `undefined` (that
+       previously produced "Failed to convert value to 'Response'").
+     - Same-origin static assets: stale-while-revalidate with
+       query-string normalization (?v= cache-busters are stripped
+       before cache.match). If a request fails and nothing is
+       cached, a synthetic Response is returned instead of an
+       uncaught rejection.
+   Cross-origin: NEVER touched (Supabase, CDN, fonts, embeds).
+   Security: only GET, same-origin. Auth tokens never cached.
+   Install: per-URL tolerant — one failing asset no longer wipes
+            the whole shell cache.
    ============================================================ */
 'use strict';
 
-const SHELL_CACHE  = 'studihome-shell-v2';
+const SHELL_CACHE  = 'studihome-shell-v3';
 const RUNTIME_CACHE = 'studihome-runtime-v1';
 const RUNTIME_MAX   = 80;
 
-/* App shell — precached at install.
-   The HTML references these with ?v= suffixes; the runtime
-   handler strips query strings before cache.match so one
-   precached entry serves every versioned request. */
+/* App shell — precached at install (tolerantly, one by one).
+   The HTML references these with ?v= suffixes; the runtime handler
+   strips query strings before cache.match so one precached entry
+   serves every versioned request. */
 const APP_SHELL = [
   '/',
   '/index.html',
@@ -30,16 +36,45 @@ const APP_SHELL = [
   '/supabase-config.js'
 ];
 
-/* ── Install ──────────────────────────────────────────────── */
+function offlineResponse(status, body, contentType) {
+  return new Response(body, {
+    status: status,
+    statusText: status === 503 ? 'Service Unavailable' : 'Not Found',
+    headers: { 'Content-Type': contentType || 'text/plain; charset=utf-8' }
+  });
+}
+
+const OFFLINE_HTML =
+  '<!doctype html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">' +
+  '<title>Sedang offline — Studihome</title></head>' +
+  '<body style="margin:0;background:#f3f6ff;color:#151c75;font-family:system-ui,-apple-system,Segoe UI,Roboto,sans-serif;display:flex;align-items:center;justify-content:center;min-height:100vh;text-align:center;padding:24px">' +
+  '<div><div style="font-size:56px;line-height:1">✦</div>' +
+  '<h1 style="font-size:22px;margin:16px 0 8px">Koneksi terputus</h1>' +
+  '<p style="font-size:14px;color:#475569;max-width:340px;margin:0 auto">Periksa koneksi internetmu lalu coba lagi. Data kamu tetap aman.</p>' +
+  '<a href="/" style="display:inline-block;margin-top:18px;padding:10px 20px;border-radius:14px;background:linear-gradient(135deg,#151c75,#3f48bf);color:#fff;text-decoration:none;font-weight:700;font-size:13px">Coba lagi</a>' +
+  '</div></body></html>';
+
+/* ── Install: tolerant per-URL precache ───────────────────── */
 self.addEventListener('install', (evt) => {
   evt.waitUntil(
-    caches.open(SHELL_CACHE)
-      .then((c) => c.addAll(APP_SHELL))
-      .then(() => self.skipWaiting())
+    (async () => {
+      const cache = await caches.open(SHELL_CACHE);
+      await Promise.all(
+        APP_SHELL.map(async (url) => {
+          try {
+            const res = await fetch(url, { cache: 'reload' });
+            if (res && res.ok) await cache.put(url, res);
+          } catch (_) {
+            /* best-effort: a single failing asset must not nuke the shell */
+          }
+        })
+      );
+      await self.skipWaiting();
+    })()
   );
 });
 
-/* ── Activate ─────────────────────────────────────────────── */
+/* ── Activate: purge stale caches, take control ───────────── */
 self.addEventListener('activate', (evt) => {
   evt.waitUntil(
     (async () => {
@@ -66,43 +101,62 @@ self.addEventListener('fetch', (evt) => {
   /* Navigations — network-first, precached shell as offline fallback */
   if (req.mode === 'navigate') {
     evt.respondWith(
-      fetch(req)
-        .then((res) => {
+      (async () => {
+        try {
+          const res = await fetch(req);
           if (res && res.ok) {
             const copy = res.clone();
-            caches.open(SHELL_CACHE).then((c) => c.put(req.url, copy));
+            caches.open(SHELL_CACHE).then((c) => c.put(req.url, copy)).catch(() => {});
           }
           return res;
-        })
-        .catch(async () => {
-          /* /dapur/*  →  /dapur.html;  everything else  →  /index.html */
-          if (url.pathname.startsWith('/dapur')) return caches.match('/dapur.html');
-          return caches.match('/index.html');
-        })
+        } catch (_) {
+          /* Offline: try this URL's own cached entry, then the route family shell */
+          const shellPath = url.pathname.startsWith('/dapur') ? '/dapur.html' : '/index.html';
+          const cached =
+            (await caches.match(req)) ||
+            (await caches.match(url.href)) ||
+            (await caches.match(shellPath)) ||
+            (await caches.match('/'));
+          if (cached) return cached;
+          return offlineResponse(503, OFFLINE_HTML, 'text/html; charset=utf-8');
+        }
+      })()
     );
     return;
   }
 
-  /* Same-origin static assets — stale-while-revalidate.
-     Query strings are stripped before matching so a precached
-     /tailwind-compiled.css serves ?v=20260825r6 requests. */
+  /* Same-origin static assets — stale-while-revalidate with query normalization */
   evt.respondWith(
     (async () => {
-      const cache    = await caches.open(RUNTIME_CACHE);
+      const cache = await caches.open(RUNTIME_CACHE);
       const cleanKey = url.origin + url.pathname;
-      const cached   = await cache.match(cleanKey) || await cache.match(req);
 
-      const network = fetch(req)
-        .then((res) => {
+      const fromNetwork = async () => {
+        try {
+          const res = await fetch(req);
           if (res && res.ok) {
             const copy = res.clone();
-            cache.put(cleanKey, copy).then(() => trimCache(cache));
+            cache.put(cleanKey, copy).then(() => trimCache(cache)).catch(() => {});
           }
           return res;
-        })
-        .catch(() => cached);
+        } catch (_) {
+          const stale = await cache.match(cleanKey);
+          if (stale) return stale;
+          const shellHit = await caches.match(url.pathname);
+          if (shellHit) return shellHit;
+          /* Distinguish the true offline case from a 4xx by checking navigator online
+             is impossible inside the SW, so return a plain synthetic 503 text/plain. */
+          return offlineResponse(503, 'Offline — resource belum tersedia di cache.');
+        }
+      };
 
-      return cached || network;
+      const cached = await cache.match(cleanKey) || await cache.match(req) || await caches.match(url.pathname);
+      if (cached) {
+        /* Return cached immediately, refresh in background */
+        fromNetwork().catch(() => {});
+        return cached;
+      }
+      return fromNetwork();
     })()
   );
 });

@@ -6814,18 +6814,12 @@ renderCreatorStandardSummary: (creator, data, categories, services, portfolios) 
                                     || App.state.publicData?.master?.underConstruction?.heroPromoModules;
                                 if (Array.isArray(pubMods) && pubMods.length > 0) dbMods = pubMods;
                             } catch(_) {}
-                            // 2nd: public RPC (DB migration 45) — works for EVERY role incl. anonymous & members
-                            if (!dbMods || dbMods.length === 0) {
-                                try {
-                                    const { data: rpcMods } = await supabaseClient.rpc('get_public_hero_promo_modules');
-                                    if (Array.isArray(rpcMods) && rpcMods.length > 0) dbMods = rpcMods;
-                                } catch(_) {}
-                            }
-                            // 3rd: direct DB query (site_settings read — works once public_read policy (M45) is applied)
+                            // 2nd: shared DB helper — site_settings column → under_construction →
+                            //      publicData → guarded public RPC (migration 45: works for every role)
                             if (!dbMods || dbMods.length === 0) {
                                 try { dbMods = await App.admin._loadHeroPromoModsFromDB(); } catch(_) {}
                             }
-                            // 4th: direct select('*') last resort
+                            // 3rd: direct select('*') last resort
                             if (!dbMods || dbMods.length === 0) {
                                 try {
                                     const { data: rawSettings } = await supabaseClient.from('site_settings').select('*').eq('id', 1).maybeSingle();
@@ -8322,14 +8316,11 @@ renderStudioAiControl: async () => {
                     } catch (_) { return []; }
                 },
                 _heroPromoColumnExists: null,
+                /* Guards repeated 404 probes when the M45 RPC is not deployed yet (session-scoped) */
+                _heroPromoRpcUnavailable: null,
                 _loadHeroPromoModsFromDB: async () => {
                     try {
                         if (!window.supabaseClient) return null;
-                        /* 0th: public RPC get_public_hero_promo_modules (DB migration 45) works for EVERY role — anon, member, staff, admin */
-                        try {
-                            const { data: rpcMods } = await supabaseClient.rpc('get_public_hero_promo_modules');
-                            if (Array.isArray(rpcMods) && rpcMods.length > 0) return rpcMods;
-                        } catch (_) {}
                         /* Try dedicated column ONLY if confirmed to exist */
                         if (App.admin._heroPromoColumnExists === true) {
                             const { data, error } = await supabaseClient.from('site_settings').select('hero_promo_modules').eq('id', 1).maybeSingle();
@@ -8351,6 +8342,26 @@ renderStudioAiControl: async () => {
                                 || App.state.publicData?.master?.underConstruction?.heroPromoModules;
                             if (Array.isArray(pubMods) && pubMods.length > 0) return pubMods;
                         } catch(_) {}
+                        /* Last resort: hardened public RPC (DB migration 45). Guarded by a session flag —
+                           a missing function (PGRST205 / HTTP 404 — migration not applied yet) disables
+                           further probes instead of spamming the console. */
+                        if (App.admin._heroPromoRpcUnavailable !== true) {
+                            try {
+                                const { data: rpcMods, error: rpcErr } = await supabaseClient.rpc('get_public_hero_promo_modules');
+                                if (rpcErr) {
+                                    if (rpcErr.code === 'PGRST205' || rpcErr.status === 404 || /could not find the function/i.test(String(rpcErr.message || ''))) {
+                                        App.admin._heroPromoRpcUnavailable = true;
+                                    }
+                                } else if (Array.isArray(rpcMods) && rpcMods.length > 0) {
+                                    App.admin._heroPromoRpcUnavailable = false;
+                                    return rpcMods;
+                                }
+                            } catch (e) {
+                                if (e && (e.code === 'PGRST205' || e.status === 404 || /could not find the function/i.test(String(e.message || '')))) {
+                                    App.admin._heroPromoRpcUnavailable = true;
+                                }
+                            }
+                        }
                         return null;
                     } catch (_) { return null; }
                 },
