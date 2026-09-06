@@ -317,5 +317,50 @@ jobs:
 
           print('SEO/trust/crawl guardrails: PASS')
 
+      - name: Private crawl and admin snippet guardrails
+        shell: python3 {0}
+        run: |
+          import json
+          from pathlib import Path
+
+          vercel = json.loads(Path('vercel.json').read_text(encoding='utf-8'))
+          header_map = {
+              item.get('source'): {
+                  h.get('key'): h.get('value')
+                  for h in item.get('headers', [])
+              }
+              for item in vercel.get('headers', [])
+          }
+
+          private_paths = [
+              '/admin', '/kamar', '/dapur', '/dapur.html',
+              '/dashboard', '/creator-studio', '/ruang-kerja'
+          ]
+          expected = 'noindex, nofollow, noarchive'
+          for path in private_paths:
+              if header_map.get(path, {}).get('X-Robots-Tag') != expected:
+                  raise SystemExit(
+                      f'Missing private X-Robots-Tag header: {path}'
+                  )
+              if not path.endswith('.html'):
+                  nested = f'{path}/:path*'
+                  if header_map.get(nested, {}).get('X-Robots-Tag') != expected:
+                      raise SystemExit(
+                          f'Missing nested private X-Robots-Tag header: {nested}'
+                      )
+
+          dapur = Path('dapur.html').read_text(encoding='utf-8').lower()
+          if 'name="robots" content="noindex, nofollow, noarchive"' not in dapur:
+              raise SystemExit('Dapur meta robots noindex guard missing.')
+
+          admin_gudang = Path('admin-gudang-v2.js').read_text(encoding='utf-8')
+          admin_dapur = Path('admin-dapur-creator-v5.js').read_text(encoding='utf-8')
+          if '<section id="admin-gudang-v2" data-nosnippet' not in admin_gudang:
+              raise SystemExit('Admin Gudang data-nosnippet guard missing.')
+          if '<div id="admin-dapur-creator-v5" data-nosnippet' not in admin_dapur:
+              raise SystemExit('Admin Dapur data-nosnippet guard missing.')
+
+          print('Private crawl/admin snippet guardrails: PASS')
+
       - name: Diff hygiene
         run: git diff --check
