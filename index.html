@@ -1248,6 +1248,20 @@
                 App.state.realtimeChannel = null;
             }
         }
+        // BFCache recovery: when a page is restored from the back/forward cache the browser
+        // froze the realtime WebSocket ("Page entered Back-Forward Cache" in the console).
+        // Re-establish the channel so live updates resume cleanly without duplicate sockets.
+        if (typeof window !== 'undefined' && window.addEventListener) {
+            window.addEventListener('pageshow', function (ev) {
+                if (!ev || !ev.persisted) return;
+                cleanupRealtime()
+                    .then(function () {
+                        if (App?.state?.user && supabaseClient) return setupRealtime();
+                        return null;
+                    })
+                    .catch(function () {});
+            });
+        }
         const IND_NOTICE_OVERRIDES = [
     [/^Email not confirmed$/i, 'Emailmu belum terverifikasi. Cek email verifikasi dulu, ya.'],
     [/^Invalid login credentials$/i, 'Email atau password belum cocok. Coba cek lagi, ya.'],
@@ -6800,11 +6814,18 @@ renderCreatorStandardSummary: (creator, data, categories, services, portfolios) 
                                     || App.state.publicData?.master?.underConstruction?.heroPromoModules;
                                 if (Array.isArray(pubMods) && pubMods.length > 0) dbMods = pubMods;
                             } catch(_) {}
-                            // 2nd: DB query (works for authenticated users, may fail for anon due to RLS)
+                            // 2nd: public RPC (DB migration 45) — works for EVERY role incl. anonymous & members
+                            if (!dbMods || dbMods.length === 0) {
+                                try {
+                                    const { data: rpcMods } = await supabaseClient.rpc('get_public_hero_promo_modules');
+                                    if (Array.isArray(rpcMods) && rpcMods.length > 0) dbMods = rpcMods;
+                                } catch(_) {}
+                            }
+                            // 3rd: direct DB query (site_settings read — works once public_read policy (M45) is applied)
                             if (!dbMods || dbMods.length === 0) {
                                 try { dbMods = await App.admin._loadHeroPromoModsFromDB(); } catch(_) {}
                             }
-                            // 3rd: direct select('*') last resort
+                            // 4th: direct select('*') last resort
                             if (!dbMods || dbMods.length === 0) {
                                 try {
                                     const { data: rawSettings } = await supabaseClient.from('site_settings').select('*').eq('id', 1).maybeSingle();
@@ -8304,6 +8325,11 @@ renderStudioAiControl: async () => {
                 _loadHeroPromoModsFromDB: async () => {
                     try {
                         if (!window.supabaseClient) return null;
+                        /* 0th: public RPC get_public_hero_promo_modules (DB migration 45) works for EVERY role — anon, member, staff, admin */
+                        try {
+                            const { data: rpcMods } = await supabaseClient.rpc('get_public_hero_promo_modules');
+                            if (Array.isArray(rpcMods) && rpcMods.length > 0) return rpcMods;
+                        } catch (_) {}
                         /* Try dedicated column ONLY if confirmed to exist */
                         if (App.admin._heroPromoColumnExists === true) {
                             const { data, error } = await supabaseClient.from('site_settings').select('hero_promo_modules').eq('id', 1).maybeSingle();
@@ -8338,7 +8364,10 @@ renderStudioAiControl: async () => {
                         const uc = (ucRow && ucRow.under_construction) || {};
                         uc.heroPromoModules = mods;
                         await supabaseClient.from('site_settings').upsert({ id: 1, under_construction: uc, updated_at: new Date().toISOString() }, { onConflict: 'id' });
-                        /* Skip dedicated column — use under_construction as primary */
+                        /* Dual-write the dedicated hero_promo_modules column too (keeps both public readers consistent). Independent try — one path never blocks the other. */
+                        try {
+                            await supabaseClient.from('site_settings').update({ hero_promo_modules: mods, updated_at: new Date().toISOString() }).eq('id', 1);
+                        } catch (_) {}
                     } catch (_) {}
                 },
                 _syncHeroPromoCta: (mods) => {
