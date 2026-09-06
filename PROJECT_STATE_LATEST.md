@@ -7,7 +7,8 @@ Status: **SECURITY/RELEASE HARDENING ACTIVE**
 
 - Repository: `studihome/studihome-frontend`
 - Branch: `main`
-- Latest verified production main: `2f42dca7b5411f907131232e3fad5667148dd9e0`
+- Latest deployed production main before portfolio-collision PR: `bc3f31f445e21ac3b8582bd40ea70c10a7db167f`
+- Latest fully production-smoke verified main: **NOT YET ESTABLISHED**
 - Frontend: static HTML/CSS/Vanilla JS
 - Backend/Auth: Supabase
 - Hosting: Vercel
@@ -273,16 +274,33 @@ Current repo target:
 
 ## Production deployment verification — FIX IN PROGRESS
 
-Planned/current mechanism:
+Current mechanism:
 - `api/version.js` exposes only the current Vercel Git commit SHA and deployment environment; no secret/config values.
 - response is `no-store` and GET/HEAD only.
 - post-deploy GitHub workflow waits until `studihome.id/api/version` equals the pushed `github.sha` before testing production.
-- production smoke validates global security headers, trust pages, Dapur noindex, sitemap uniqueness/private-route exclusion, Agent Search, pSEO Markdown, and unauthenticated 401 boundaries for the two active Edge Functions.
-- the first merged workflow definition failed before job creation because embedded Python heredocs made the YAML invalid.
-- corrective design moves all network/assertion logic to dependency-free `scripts/production-smoke.py`.
-- release-gate now runs `python3 -m py_compile` and `--self-test` for the smoke runner before merge.
+- smoke logic lives in dependency-free `scripts/production-smoke.py`; release-gate py-compiles and self-tests it before merge.
 - production workflow YAML is intentionally minimal: checkout + one Python command.
-- this workflow runs after pushes to `main`; it complements, not replaces, the pre-merge `release-gate`.
+- production smoke validates global security headers, trust pages, Dapur noindex, sitemap uniqueness/private-route exclusion, Agent Search, pSEO Markdown, and unauthenticated 401 boundaries for the two active Edge Functions.
+
+Latest production evidence for `bc3f31f445e21ac3b8582bd40ea70c10a7db167f`:
+- Vercel deployment: SUCCESS.
+- production alias SHA reconciliation: PASS.
+- public pages/security headers: PASS.
+- production smoke run `34045201632`: FAIL on duplicate sitemap URLs.
+- live-data root cause: three published Creator scopes each contain three active portfolios with the same title-derived route slug.
+- this is a real canonical/deep-link ambiguity, not only a test artifact.
+- no production data was deleted or rewritten to hide the conflict.
+
+Portfolio route correction in progress:
+- unique portfolio titles preserve their historical title-only slug.
+- only colliding title slugs receive a deterministic UUID-derived suffix in the reserved `--` namespace (example: `demo--aaaaaaaa`).
+- normal title slugification collapses punctuation runs to a single `-`, so a natural title slug cannot occupy the reserved `--` collision namespace.
+- UUID suffix length expands when needed so equal short prefixes cannot re-collide.
+- historical title-only deep links remain readable as backward-compatible fallback.
+- runtime Creator links, Sitemap, Markdown/GEO, and IndexNow use the same canonical contract.
+- release-gate includes behavior regressions for collision routing, reserved-namespace separation, sitemap uniqueness, and IndexNow canonical enforcement.
+- PR #73 remains OPEN / NOT MERGED.
+- current Vercel Preview blocker: `build-rate-limit`; classify as BLOCKED external, never as Preview PASS or a reason to bypass the gate.
 
 ## P1 remaining
 

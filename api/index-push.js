@@ -8,15 +8,10 @@ const MAX_BODY_BYTES = 4096;
 const MAX_AUTHORIZATION_BYTES = 4096;
 const REQUEST_TIMEOUT_MS = 10000;
 const PORTFOLIO_PATH_PATTERN = /^\/([a-z0-9][a-z0-9-]{0,62})\/portfolio\/([a-z0-9][a-z0-9-]{0,119})$/;
-
-const slugify = (value) => String(value || '')
-  .toLowerCase()
-  .trim()
-  .normalize('NFKD')
-  .replace(/[\u0300-\u036f]/g, '')
-  .replace(/[^a-z0-9]+/g, '-')
-  .replace(/^-+|-+$/g, '')
-  .slice(0, 120);
+const {
+  routeSlug: portfolioRouteSlug,
+  findByRouteSlug: findPortfolioByRouteSlug
+} = require('../portfolio-route.js');
 
 const parseJsonResponse = async (response) => {
   const text = await response.text();
@@ -114,8 +109,7 @@ module.exports = async (req, res) => {
     return res.status(400).json({ error: 'Only canonical creator portfolio URLs can be submitted.' });
   }
   const [, username, portfolioSlug] = pathMatch;
-  const normalizedUrl = `https://${HOST}${targetUrl.pathname}`;
-  if (Buffer.byteLength(normalizedUrl, 'utf8') > 2048) {
+  if (Buffer.byteLength(`https://${HOST}${targetUrl.pathname}`, 'utf8') > 2048) {
     return res.status(400).json({ error: 'URL is too long.' });
   }
 
@@ -173,10 +167,20 @@ module.exports = async (req, res) => {
       console.warn('[index-push] Portfolio lookup failed', portfolioResponse.status);
       return res.status(502).json({ error: 'Unable to verify portfolio ownership.' });
     }
-    const portfolioExists = Array.isArray(portfolios) &&
-      portfolios.some((portfolio) => slugify(portfolio.title) === portfolioSlug);
-    if (!portfolioExists) {
+    const portfolio = Array.isArray(portfolios)
+      ? findPortfolioByRouteSlug(portfolios, portfolioSlug)
+      : null;
+    if (!portfolio) {
       return res.status(403).json({ error: 'Published portfolio ownership could not be verified.' });
+    }
+
+    const canonicalPortfolioSlug = portfolioRouteSlug(portfolio, portfolios);
+    const normalizedUrl = `https://${HOST}/${username}/portfolio/${canonicalPortfolioSlug}`;
+    if (portfolioSlug !== canonicalPortfolioSlug) {
+      return res.status(409).json({
+        error: 'Use the canonical portfolio URL.',
+        canonicalUrl: normalizedUrl
+      });
     }
 
     const reservationResponse = await fetch(

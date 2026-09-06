@@ -5845,7 +5845,7 @@ App.router.bindCanonicalLinkGuard();
                     const username = App.utils.escapeHtml(creator.username || '');
                     const portfolioTitle = App.utils.escapeHtml(portfolio.title || 'Portfolio');
                     const description = App.utils.escapeHtml(portfolio.description || 'Karya dari Creator Studihome.');
-                    const slug = App.utils.escapeHtml(App.creator._slugify(portfolio.title || 'portfolio'));
+                    const slug = App.utils.escapeHtml(App.creator._routeSlug(portfolio, creator.portfolios || []));
                     return `
                         <article class="creator-portfolio-card card-3d rounded-2xl overflow-hidden bg-white border border-slate-200/80 transition-transform hover:-translate-y-1">
                             <div class="p-4 sm:p-5">
@@ -5937,6 +5937,33 @@ App.router.bindCanonicalLinkGuard();
                     App.creator._fetchProfile(key).catch(() => {});
                 },
                 _slugify: (value) => String(value || '').toLowerCase().trim().normalize('NFKD').replace(/[\u0300-\u036f]/g, '').replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '').slice(0, 120),
+                _routeSlug: (item, siblings = []) => {
+                    const list = Array.isArray(siblings) ? siblings : [];
+                    const idFallback = (value) => String(value || '').toLowerCase().replace(/[^a-z0-9]/g, '').slice(0, 120);
+                    const baseFor = (candidate) => App.creator._slugify(candidate?.title) || idFallback(candidate?.id) || 'portfolio';
+                    const base = baseFor(item);
+                    const collidingItems = list.filter(candidate => baseFor(candidate) === base);
+                    if (collidingItems.length <= 1) return base;
+                    const normalizedId = idFallback(item?.id);
+                    if (!normalizedId) return base;
+                    const collisionSeparator = '--';
+                    const suffixSteps = [8, 12, 16, 20, 24, 28, 32];
+                    const suffixLength = suffixSteps.find(length => {
+                        const prefix = normalizedId.slice(0, length);
+                        return prefix && collidingItems.filter(candidate => idFallback(candidate?.id).slice(0, length) === prefix).length === 1;
+                    }) || normalizedId.length;
+                    const suffix = normalizedId.slice(0, suffixLength);
+                    const baseLimit = Math.max(1, 120 - collisionSeparator.length - suffix.length);
+                    return base.slice(0, baseLimit) + collisionSeparator + suffix;
+                },
+                _findPortfolioByRoute: (items, candidateSlug) => {
+                    const list = Array.isArray(items) ? items : [];
+                    const normalized = String(candidateSlug || '').trim().toLowerCase();
+                    if (!normalized) return null;
+                    const canonical = list.find(item => App.creator._routeSlug(item, list) === normalized);
+                    if (canonical) return canonical;
+                    return list.find(item => App.creator._slugify(item?.title) === normalized || String(item?.id || '').trim().toLowerCase() === normalized) || null;
+                },
                 _waUrl: (rawPhone, displayName, customMessage = '') => {
                     const phone = String(rawPhone || '').replace(/\D/g, '').replace(/^0/, '62');
                     if (!phone || phone.length < 9 || phone.length > 15) return '';
@@ -6018,7 +6045,7 @@ App.router.bindCanonicalLinkGuard();
                         App.state.creatorProfile = data;
                         const c = data.creator;
                         const primaryCategory = data.categories.find(x => x.isPrimary) || data.categories[0];
-                        const creatorPath = portfolioSlug ? `/${String(c.username).toLowerCase()}/portfolio/${String(portfolioSlug).toLowerCase()}` : `/${String(c.username).toLowerCase()}`;
+                        let creatorPath = portfolioSlug ? `/${String(c.username).toLowerCase()}/portfolio/${String(portfolioSlug).toLowerCase()}` : `/${String(c.username).toLowerCase()}`;
                         const creatorTitle = `${c.display_name || c.username} | ${primaryCategory?.name || 'Creator AI'} | Studihome`;
                         const creatorDescription = String(c.bio || `${c.display_name || c.username} menyediakan jasa dan solusi AI di Studio AI Studihome.`).replace(/\s+/g, ' ').slice(0, 160);
                         App.ui.updateSeo({
@@ -6037,7 +6064,13 @@ App.router.bindCanonicalLinkGuard();
                         });
                         const defaultWa = App.creator._waUrl(c.whatsapp, c.display_name || 'Creator');
                         const initials = String(c.display_name || c.username || 'C').trim().charAt(0).toUpperCase();
-                        const targetPortfolio = portfolioSlug ? (data.portfolios || []).find(p => App.creator._slugify(p.title) === String(portfolioSlug).toLowerCase()) : null;
+                        const targetPortfolio = portfolioSlug ? App.creator._findPortfolioByRoute(data.portfolios || [], portfolioSlug) : null;
+                        const targetPortfolioSlug = targetPortfolio ? App.creator._routeSlug(targetPortfolio, data.portfolios || []) : '';
+                        if (targetPortfolio && targetPortfolioSlug && targetPortfolioSlug !== String(portfolioSlug || '').toLowerCase()) {
+                            creatorPath = `/${String(c.username).toLowerCase()}/portfolio/${targetPortfolioSlug}`;
+                            window.history.replaceState({}, '', creatorPath);
+                            App.state.creatorAmbalanSlug = targetPortfolioSlug;
+                        }
                         if (portfolioSlug && !targetPortfolio) {
                             main.removeAttribute('aria-busy');
                             App.router._commitMain(
@@ -6056,7 +6089,7 @@ App.router.bindCanonicalLinkGuard();
                                 path: creatorPath,
                                 image: targetPortfolio.media_url || c.cover_url || c.avatar_url || '',
                                 ogType: 'article',
-                                markdownPath: `/${encodeURIComponent(String(c.username || '').toLowerCase())}/portfolio/${encodeURIComponent(App.creator._slugify(targetPortfolio.title))}.md`,
+                                markdownPath: `/${encodeURIComponent(String(c.username || '').toLowerCase())}/portfolio/${encodeURIComponent(targetPortfolioSlug)}.md`,
                                 jsonLd: App.ui.generatePortfolioSchema(
                                     targetPortfolio,
                                     c,
@@ -6146,7 +6179,7 @@ App.router.bindCanonicalLinkGuard();
 
                                             ${c.whatsapp ? `<a href="${App.creator._waUrl(c.whatsapp, c.display_name, 'Halo ' + (c.display_name || 'Creator') + ', saya sangat tertarik dengan karya Anda yang berjudul: ' + targetPortfolio.title + '. Bisa kita ngobrol lebih lanjut?')}" target="_blank" rel="noopener noreferrer" class="flex-1 sm:flex-none sm:w-fit py-2.5 px-3 sm:px-6 rounded-full bg-yellow-100/70 backdrop-blur-md border border-yellow-200/80 text-yellow-900 text-[11px] sm:text-xs font-extrabold hover:bg-yellow-200/80 hover:border-yellow-300 transition-all shadow-sm flex items-center justify-center gap-1.5 sm:gap-2 whitespace-nowrap overflow-hidden"><i class="fa-brands fa-whatsapp text-sm sm:text-base text-emerald-600 shrink-0"></i> <span class="truncate">Ngobrol</span></a>` : ''}
 
-                                            <button type="button" onclick="App.creator.sharePortfolio('${App.utils.escapeHtml(c.username)}', '${App.creator._slugify(targetPortfolio.title)}', '${App.utils.escapeHtml(targetPortfolio.title)}')" class="shrink-0 sm:flex-none sm:w-fit py-2.5 px-3.5 sm:px-6 rounded-full text-[11px] sm:text-xs font-extrabold bg-blue-50 border border-blue-200 text-[#151c75] hover:bg-blue-100 transition-all shadow-sm flex items-center justify-center gap-1.5 sm:gap-2">
+                                            <button type="button" onclick="App.creator.sharePortfolio('${App.utils.escapeHtml(c.username)}', '${targetPortfolioSlug}', '${App.utils.escapeHtml(targetPortfolio.title)}')" class="shrink-0 sm:flex-none sm:w-fit py-2.5 px-3.5 sm:px-6 rounded-full text-[11px] sm:text-xs font-extrabold bg-blue-50 border border-blue-200 text-[#151c75] hover:bg-blue-100 transition-all shadow-sm flex items-center justify-center gap-1.5 sm:gap-2">
                                                 <i class="fa-solid fa-share-nodes text-sm shrink-0"></i> <span class="hidden sm:inline truncate">Bagikan</span>
                                             </button>
                                         </div>
@@ -6209,7 +6242,7 @@ App.router.bindCanonicalLinkGuard();
                                             thumbHTML = `<div class="w-full h-full bg-slate-100 flex items-center justify-center text-slate-400"><i class="fa-solid fa-link text-3xl"></i></div>`;
                                         }
 
-                                        return `<a href="/${App.utils.escapeHtml(c.username)}/portfolio/${App.creator._slugify(p.title)}" data-creator-link data-creator-username="${App.utils.escapeHtml(c.username)}" data-portfolio-slug="${App.creator._slugify(p.title)}" class="creator-portfolio-card card-3d rounded-2xl overflow-hidden bg-white border border-slate-200/80 cursor-pointer group flex flex-col h-full transition-transform hover:-translate-y-1">
+                                        return `<a href="/${App.utils.escapeHtml(c.username)}/portfolio/${App.creator._routeSlug(p, portfolios)}" data-creator-link data-creator-username="${App.utils.escapeHtml(c.username)}" data-portfolio-slug="${App.creator._routeSlug(p, portfolios)}" class="creator-portfolio-card card-3d rounded-2xl overflow-hidden bg-white border border-slate-200/80 cursor-pointer group flex flex-col h-full transition-transform hover:-translate-y-1">
                                             <div class="relative">
                                                 <div class="portfolio-overlay absolute inset-0 bg-black/10 group-hover:bg-transparent transition-colors z-10"></div>
                                                 <div class="aspect-video overflow-hidden bg-slate-950 flex items-center justify-center relative border-b border-slate-100">
@@ -7237,7 +7270,7 @@ ${(() => { const rs=String(p.review_status||'DRAFT').toUpperCase(); const map={D
                 portfolioForm(id=''){const p=(this.data?.portfolios||[]).find(x=>x.id===id)||{};const services=this.data?.services||[];const vt=p.media_type||'';return `<div class="card-3d-inset p-4 rounded-xl mb-3"><input id="cp-title" value="${App.utils.escapeHtml(p.title||'')}" placeholder="Judul ambalan" class="w-full card-3d-inset px-3 py-2.5 rounded-xl text-xs outline-none"><textarea id="cp-desc" rows="2" placeholder="Deskripsi singkat karya" class="w-full card-3d-inset px-3 py-2.5 rounded-xl text-xs outline-none mt-2">${App.utils.escapeHtml(p.description||'')}</textarea><div class="grid sm:grid-cols-2 gap-2 mt-2"><select id="cp-service" class="w-full card-3d-inset px-3 py-2.5 rounded-xl text-xs outline-none"><option value="">Hidangan terkait (opsional)</option>${services.map(s=>`<option value="${s.id}" ${p.service_id===s.id?'selected':''}>${App.utils.escapeHtml(s.title)}</option>`).join('')}</select><select id="cp-type" class="w-full card-3d-inset px-3 py-2.5 rounded-xl text-xs outline-none"><option value="youtube" ${vt==='youtube'?'selected':''}>YouTube</option><option value="drive" ${vt==='drive'?'selected':''}>Google Drive</option><option value="tiktok" ${vt==='tiktok'?'selected':''}>TikTok</option><option value="instagram" ${vt==='instagram'?'selected':''}>Instagram</option></select></div><input id="cp-url" value="${App.utils.escapeHtml(p.media_url||'')}" placeholder="Tempel tautan YouTube / Drive / TikTok / Instagram" class="w-full card-3d-inset px-3 py-2.5 rounded-xl text-xs outline-none mt-2"><p class="creator-media-note mt-2">Foto/video tidak diunggah langsung. Gunakan tautan publik dari YouTube, Google Drive, TikTok, atau Instagram. Sistem akan memeriksa domain sebelum menyimpan.</p><div class="flex gap-2 mt-2"><button onclick="App.creatorStudio.savePortfolio('${id}')" class="btn-brand-gradient px-3.5 py-2 rounded-xl text-xs font-bold">Simpan Ambalan</button><button onclick="App.creatorStudio.reload()" class="px-3.5 py-2 rounded-xl text-xs font-bold bg-slate-100">Batal</button></div></div>`;},
                 addPortfolioForm(){const box=document.getElementById('creator-portfolio-list');if(box)box.innerHTML=this.portfolioForm()+this.portfolioList();},
                 editPortfolio(id){const box=document.getElementById('creator-portfolio-list');if(box)box.innerHTML=this.portfolioForm(id)+this.portfolioList();},
-                async savePortfolio(id=''){try{const url=String(document.getElementById('cp-url')?.value||'').trim();const v=this.validatePortfolioUrl(url);if(!v.ok)throw new Error('Tautan harus berasal dari YouTube, Google Drive, TikTok, atau Instagram.');const title=String(document.getElementById('cp-title')?.value||'').trim();await App.api.post('CREATOR_SAVE_PORTFOLIO',{id,serviceId:document.getElementById('cp-service').value||null,title,description:document.getElementById('cp-desc').value,mediaType:v.provider,mediaUrl:url,sortOrder:0,isActive:true});if(this.data?.profile?.is_published)void this.triggerIndexNow(this.data.profile.username,App.creator._slugify(title));App.ui.toast('Ambalan berhasil disimpan.','success');await this.reload();}catch(e){App.ui.toast(e.message||'Ambalan belum bisa disimpan.','error');}},
+                async savePortfolio(id=''){try{const url=String(document.getElementById('cp-url')?.value||'').trim();const v=this.validatePortfolioUrl(url);if(!v.ok)throw new Error('Tautan harus berasal dari YouTube, Google Drive, TikTok, atau Instagram.');const title=String(document.getElementById('cp-title')?.value||'').trim();const saved=await App.api.post('CREATOR_SAVE_PORTFOLIO',{id,serviceId:document.getElementById('cp-service').value||null,title,description:document.getElementById('cp-desc').value,mediaType:v.provider,mediaUrl:url,sortOrder:0,isActive:true});const savedPortfolio=saved?.portfolio||null;if(this.data?.profile?.is_published&&savedPortfolio){const siblings=[...(this.data?.portfolios||[]).filter(p=>p.id!==savedPortfolio.id&&p.is_active!==false),savedPortfolio];void this.triggerIndexNow(this.data.profile.username,App.creator._routeSlug(savedPortfolio,siblings));}App.ui.toast('Ambalan berhasil disimpan.','success');await this.reload();}catch(e){App.ui.toast(e.message||'Ambalan belum bisa disimpan.','error');}},
                 async deletePortfolio(id){if(!confirm('Portfolio ini mau dihapus?'))return;try{await App.api.post('CREATOR_DELETE_PORTFOLIO',{id});App.ui.toast('Portfolio dihapus.','info');await this.reload();}catch(e){App.ui.toast(e.message||'Portfolio belum bisa dihapus.','error');}},
                 async copyPublicLink(url){ try{ await navigator.clipboard.writeText(url); App.ui.toast('Link profilmu sudah disalin. Tinggal tempel di bio 😎','success'); } catch(e){ App.ui.toast('Link belum bisa disalin otomatis. Coba salin manual ya.','info'); } },
                 async shareProfile(url){ const text=`Lihat profil saya di Studihome: ${url}`; try{ if(navigator.share){ await navigator.share({title:'Profil Studihome',text,url}); } else { await navigator.clipboard.writeText(url); App.ui.toast('Link profilmu sudah disalin. Tinggal dibagikan ✨','success'); } } catch(e){ if(e?.name!=='AbortError') App.ui.toast('Belum berhasil membagikan. Link-nya tetap siap kamu salin.','info'); } },

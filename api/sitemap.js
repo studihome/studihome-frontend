@@ -1,6 +1,7 @@
 'use strict';
 
 const { SEED_ARTICLES = [] } = require('../blog-data.js');
+const { routeSlug: portfolioRouteSlug } = require('../portfolio-route.js');
 const BASE_URL = 'https://studihome.id';
 const SUPABASE_READ_TIMEOUT_MS = 3500;
 const CDN_CACHE_CONTROL = 'public, s-maxage=3600, stale-while-revalidate=86400';
@@ -29,10 +30,6 @@ const escapeXml = value => String(value || '')
 const dateOnly = value => /^\d{4}-\d{2}-\d{2}/.test(String(value || ''))
   ? String(value).slice(0, 10)
   : null;
-
-const slugify = value => String(value || '').toLowerCase().trim().normalize('NFKD')
-  .replace(/[\u0300-\u036f]/g, '').replace(/[^a-z0-9]+/g, '-')
-  .replace(/^-+|-+$/g, '').slice(0, 120);
 
 function buildUrl(path, lastmod, changefreq, priority, image) {
   let xml = '  <url>\n';
@@ -104,7 +101,7 @@ module.exports = async (req, res) => {
   const [creators, categories, portfolios] = await Promise.all([
     readList(base, headers, 'creator_profiles?is_published=eq.true&select=id,username,display_name,avatar_url,updated_at&order=updated_at.desc&limit=5000'),
     readList(base, headers, 'ai_categories?is_active=eq.true&select=slug&order=name.asc&limit=200'),
-    readList(base, headers, 'creator_portfolios?is_active=eq.true&select=creator_id,title,media_url,media_type,created_at&order=created_at.desc&limit=5000')
+    readList(base, headers, 'creator_portfolios?is_active=eq.true&select=id,creator_id,title,media_url,media_type,created_at&order=created_at.desc&limit=5000')
   ]);
 
   let entries = STATIC_PAGES.map(([path, freq, priority]) => buildUrl(path, CONTENT_RELEASE_DATE, freq, priority)).join('');
@@ -160,9 +157,18 @@ module.exports = async (req, res) => {
     entries += buildUrl(`/${encodeURIComponent(slug)}`, null, 'weekly', '0.8');
   });
 
+  const portfoliosByCreatorId = new Map();
+  portfolios.forEach(portfolio => {
+    if (!portfolio?.creator_id) return;
+    const siblings = portfoliosByCreatorId.get(portfolio.creator_id) || [];
+    siblings.push(portfolio);
+    portfoliosByCreatorId.set(portfolio.creator_id, siblings);
+  });
+
   portfolios.forEach(portfolio => {
     const username = creatorMap.get(portfolio.creator_id);
-    const slug = slugify(portfolio.title);
+    const siblings = portfoliosByCreatorId.get(portfolio.creator_id) || [];
+    const slug = portfolioRouteSlug(portfolio, siblings);
     if (!username || !slug) return;
     entries += buildUrl(
       `/${encodeURIComponent(username)}/portfolio/${encodeURIComponent(slug)}`,
