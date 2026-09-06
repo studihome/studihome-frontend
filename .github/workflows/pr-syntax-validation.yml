@@ -198,5 +198,73 @@ jobs:
 
           print('Public runtime secret-pattern scan: PASS')
 
+      - name: Security, dependency, and PWA guardrails
+        shell: python3 {0}
+        run: |
+          import json
+          from pathlib import Path
+
+          vercel = json.loads(Path('vercel.json').read_text(encoding='utf-8'))
+          rules = {
+              item['source']: {
+                  h['key']: h['value']
+                  for h in item.get('headers', [])
+              }
+              for item in vercel.get('headers', [])
+          }
+          global_headers = rules.get('/(.*)', {})
+          expected_headers = {
+              'Strict-Transport-Security': 'max-age=31536000',
+              'X-Content-Type-Options': 'nosniff',
+              'Referrer-Policy': 'strict-origin-when-cross-origin',
+              'X-Frame-Options': 'DENY',
+              'Content-Security-Policy': "frame-ancestors 'none';",
+          }
+          for key, value in expected_headers.items():
+              if global_headers.get(key) != value:
+                  raise SystemExit(
+                      f'Missing/incorrect global security header: {key}'
+                  )
+
+          exact_sdk = (
+              'https://cdn.jsdelivr.net/npm/'
+              '@supabase/supabase-js@2.115.0'
+          )
+          browser_files = [
+              Path('index.html'),
+              Path('supabase-sdk-loader-v1.js'),
+              Path('admin-dapur-creator-v5.js'),
+          ]
+          for path in browser_files:
+              body = path.read_text(encoding='utf-8')
+              if '@supabase/supabase-js@2' in body and exact_sdk not in body:
+                  raise SystemExit(
+                      f'Unpinned Supabase browser SDK in {path}'
+                  )
+              if 'unpkg.com/@supabase/supabase-js' in body:
+                  raise SystemExit(
+                      f'CSP-incompatible Supabase fallback in {path}'
+                  )
+
+          sw = Path('sw.js').read_text(encoding='utf-8')
+          required_sw = [
+              "studihome-shell-v5",
+              "studihome-runtime-v2",
+              "cache.put(req, copy)",
+              "if (!url.search)",
+          ]
+          for item in required_sw:
+              if item not in sw:
+                  raise SystemExit(
+                      f'Release-aware PWA cache guard missing: {item}'
+                  )
+          if 'cleanKey(url)' in sw:
+              raise SystemExit(
+                  'Service worker must not strip cache-buster queries '
+                  'from static assets.'
+              )
+
+          print('Security/dependency/PWA guardrails: PASS')
+
       - name: Diff hygiene
         run: git diff --check

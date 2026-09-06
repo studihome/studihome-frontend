@@ -1,5 +1,5 @@
 /* ============================================================
-   Studihome Service Worker v4
+   Studihome Service Worker v5
    ─────────────────────────────────────────────────────────────
    Strategy:
      - Navigations: network-first; EVERY successful same-origin
@@ -23,21 +23,22 @@
    ============================================================ */
 'use strict';
 
-const SHELL_CACHE   = 'studihome-shell-v4';
-const RUNTIME_CACHE = 'studihome-runtime-v1';
+const SHELL_CACHE   = 'studihome-shell-v5';
+const RUNTIME_CACHE = 'studihome-runtime-v2';
 const RUNTIME_MAX   = 80;
 
 /* App shell — precached at install (tolerantly, one by one).
-   The HTML references these with ?v= suffixes; the runtime handler
-   strips query strings before cache.match so one precached entry
-   serves every versioned request. */
+   Versioned assets are cached with their FULL URL, including query
+   strings. This prevents an older ?v= asset from silently satisfying
+   a newer HTML release. Keep current route-shell versions listed here. */
 const APP_SHELL = [
   '/',
   '/index.html',
   '/dapur.html',
-  '/tailwind-compiled.css',
-  '/supabase-sdk-loader-v1.js',
-  '/supabase-config.js'
+  '/tailwind-compiled.css?v=20260825r6',
+  '/supabase-sdk-loader-v1.js?v=1',
+  '/supabase-config.js?v=boot5',
+  '/supabase-config.js?v=boot6'
 ];
 
 function offlineResponse(status, body, contentType) {
@@ -58,8 +59,10 @@ const OFFLINE_HTML =
   '<a href="/" style="display:inline-block;margin-top:18px;padding:10px 20px;border-radius:14px;background:linear-gradient(135deg,#151c75,#3f48bf);color:#fff;text-decoration:none;font-weight:700;font-size:13px">Coba lagi</a>' +
   '</div></body></html>';
 
-/* Normalized cache key: origin + pathname (query/cache-buster stripped). */
-function cleanKey(url) {
+/* Navigation cache key intentionally ignores query parameters because
+   public/member route data is fetched client-side and auth tokens are never
+   cached. Static assets do NOT use this normalization. */
+function cleanNavigationKey(url) {
   return url.origin + url.pathname;
 }
 
@@ -102,7 +105,7 @@ self.addEventListener('activate', (evt) => {
 async function navigationHandler(req, url) {
   const shell = await caches.open(SHELL_CACHE);
   const runtime = await caches.open(RUNTIME_CACHE);
-  const key = cleanKey(url);
+  const key = cleanNavigationKey(url);
   const familyShell = url.pathname.startsWith('/dapur') ? '/dapur.html' : '/index.html';
 
   /* Ordered fallback: own normalized entry → exact URL →
@@ -140,34 +143,41 @@ async function navigationHandler(req, url) {
   return stale || res;
 }
 
-/* ── Static asset: stale-while-revalidate (query-normalized) ─ */
+/* ── Static asset: stale-while-revalidate (release-aware) ─── */
 async function assetHandler(req, url) {
   const cache = await caches.open(RUNTIME_CACHE);
-  const key = cleanKey(url);
+
+  const exactCached = async () =>
+    (await cache.match(req)) ||
+    (await caches.match(req)) ||
+    null;
 
   const fromNetwork = async () => {
     try {
       const res = await fetch(req);
       if (res && res.ok) {
         const copy = res.clone();
-        cache.put(key, copy).then(() => trimCache(cache)).catch(() => {});
+        cache.put(req, copy).then(() => trimCache(cache)).catch(() => {});
       }
       return res;
     } catch (_) {
-      const stale = await cache.match(key);
+      const stale = await exactCached();
       if (stale) return stale;
-      const shellHit = await caches.match(url.pathname);
-      if (shellHit) return shellHit;
+
+      /* Only unversioned asset requests may fall back to an unversioned
+         shell entry. A versioned request must never receive another
+         release's asset because that can create mixed-version runtime. */
+      if (!url.search) {
+        const shellHit = await caches.match(url.pathname);
+        if (shellHit) return shellHit;
+      }
       return offlineResponse(503, 'Offline — resource belum tersedia di cache.');
     }
   };
 
-  const cached =
-    (await cache.match(key)) ||
-    (await cache.match(req)) ||
-    (await caches.match(url.pathname));
+  const cached = await exactCached();
   if (cached) {
-    /* Serve instantly, refresh in the background. */
+    /* Serve the exact release immediately, refresh in the background. */
     fromNetwork().catch(() => {});
     return cached;
   }

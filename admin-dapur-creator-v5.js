@@ -26,7 +26,7 @@
         return;
       }
       const script = document.createElement('script');
-      script.src = 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2';
+      script.src = 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.115.0';
       script.async = true;
       script.dataset.studihomeSupabaseSdk = '1';
       script.onload = () => window.supabase?.createClient ? resolve() : reject(new Error('Library Supabase tidak tersedia.'));
