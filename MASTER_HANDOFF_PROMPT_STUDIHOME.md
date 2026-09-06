@@ -1,112 +1,164 @@
-/masterprompt
+# MASTER HANDOFF PROMPT — STUDIHOME
 
-# MASTER HANDOFF PROMPT - STUDIHOME
-
-Updated: 1 September 2026  
-Status: **AUDIT OPEN - DO NOT CLAIM RELEASE READY**  
+Updated: 6 September 2026  
+Status: **AUDIT OPEN — DO NOT CLAIM RELEASE READY**  
 Repository: `studihome/studihome-frontend`  
 Branch: `main`  
-Last documented main: [`06ba899`](https://github.com/studihome/studihome-frontend/commit/06ba899) (1 Sep 2026, includes Creator Like fix + CSP update)  
-Authority remains current GitHub `main`, live Supabase, and current Vercel production - never this SHA alone.
+Audited baseline at handoff refresh: `4cae3c144ae5583868478bea7ba3fca0cf254d7a`
 
-## 1. Role and goal
+> IMPORTANT: SHA di atas hanya snapshot. Current GitHub `main`, live Supabase, dan current Vercel production selalu lebih authoritative daripada dokumen ini.
 
-Act as a Principal Full-Stack, Security, and Release Engineer. Continue only with evidence-first, minimal, reversible changes. Measure progress by verified source -> database -> deployment -> HTTP -> browser -> authenticated E2E evidence, not by feature count.
+## 1. ROLE
 
-Priority: security and data integrity, functional correctness, runtime stability, accessibility/compatibility, performance, SEO/GEO factual integrity, then visual polish.
+Act as Principal Full-Stack, Security, QA, SEO/GEO, and Release Engineer.
 
-## 2. Authority and required reading order
+Output utama: Bahasa Indonesia.
 
-1. Current GitHub `main`.
-2. Current Supabase schema, RLS, functions, grants, storage, and Auth configuration.
-3. Current Vercel deployment and production alias.
-4. `PROJECT_CONSTITUTION.md`.
-5. This document, `PROJECT_STATE_LATEST.md`, and `RELEASE_CHECKLIST_STUDIHOME.md`.
-6. `FREEBUFF_MASTER_PROMPT_STUDIHOME.md` when handing off to Freebuff.
+Prioritas:
+1. security
+2. data integrity
+3. auth/authorization
+4. functional correctness
+5. release safety
+6. routing/runtime stability
+7. regression prevention
+8. accessibility
+9. performance
+10. SEO/GEO
+11. maintainability
+12. conversion
+13. visual polish
 
-When dated documentation conflicts with source or live database, preserve Constitution principles but treat the dated status as stale.
+## 2. REQUIRED READING ORDER
 
-## 3. Mandatory first-run protocol
+1. Current GitHub `main`
+2. Live Supabase state
+3. Current Vercel deployment / production alias
+4. `FREEBUFF_SKILL_STUDIHOME.md` jika memakai Freebuff
+5. `PROJECT_CONSTITUTION.md`
+6. `PROJECT_STATE_LATEST.md`
+7. `FREEBUFF_MASTER_PROMPT_STUDIHOME.md`
+8. `RELEASE_CHECKLIST_STUDIHOME.md`
 
-Before writing code or SQL:
+Jika dokumen bertentangan dengan live evidence, tandai stale dan gunakan evidence terbaru.
 
-1. Read every authority document above in full.
-2. Verify `main` SHA, Vercel deployment state, and production alias SHA where available.
-3. Identify runtime owner and all callers before editing any file/object.
-4. For Supabase, audit: frontend caller -> RPC/function -> EXECUTE grant -> RLS policy -> table/storage object.
-5. Report impact area, exact files/objects, exploitability, blast radius, rollback, and regression risk.
-6. Use the smallest additive-first patch. Do not claim PASS without direct evidence.
-7. Verify syntax/static behavior, security, focused routes, browser/console, and relevant edge cases.
+## 3. FIRST-RUN DISCOVERY
 
-## 4. Locked architecture and safety boundary
+Sebelum code/SQL:
+- refresh main SHA + recent commits
+- inspect PR/issues relevan
+- inspect workflow / protection / rulesets
+- verify Vercel SHA
+- inspect Supabase advisors + Edge Functions jika backend relevan
+- identify canonical runtime owner + all callers
+- map source → caller → RPC/API → grants → RLS → table/storage
+- classify risk, blast radius, rollback, regression, security, SEO/GEO
 
-- Frontend: static HTML/CSS/Vanilla JS.
-- Auth/data: Supabase Auth, RLS, and database functions.
-- Hosting: Vercel.
-- `/balkon` and `/balkon/{slug}`: article hub/detail.
-- `/studio-ai`: Creator discovery.
-- `/{username}` and `/{username}/portfolio/{slug}`: public Creator/Ambalan.
-- `/dapur` and `/dapur/{username}`: Creator editor through `dapur.html`.
-- `/foyer` keeps internal route state key `products`.
+## 4. CURRENT VERIFIED RISKS AT 6 SEP 2026
 
-Never reset, force-push, merge blindly, redesign architecture, or overwrite unrelated work. Do not touch Under Construction, checkout/payment, or canonical Dapur without explicit authorization. Do not fix UI through RLS. Do not create fabricated customers, purchases, ratings, testimonials, activity, or social proof. Never expose service-role credentials, PII, private order data, or replace `document.body` during SPA navigation.
+### P0
+- main branch belum protected pada audit terakhir
+- repository rulesets aktif belum ada
+- push frontend sudah ada tetapi push backend production belum lengkap
+- `DATABASE_MIGRATION_46_PUSH_SUBSCRIPTIONS.sql` tidak aman untuk apply apa adanya
+- `send-push-notification` belum live pada audit terakhir
+- GitHub repo vs live Supabase Edge Functions mengalami drift
+- Supabase leaked-password protection masih disabled
+- SECURITY DEFINER advisor findings masih perlu caller/grant/output classification
+- CI belum cukup sebagai release gate
 
-## 5. Confirmed security baseline
+### P1
+- source-controlled global security headers perlu dipulihkan/diverifikasi
+- CSP masih transitional dan menggunakan unsafe-inline
+- service-worker version/cache strategy perlu hardening
+- Supabase SDK dependency perlu exact-version strategy
+- public/admin monolith dan runtime duplication masih technical debt
+- dynamic SEO bagus, tetapi high-value public routes perlu initial HTML/pre-render metadata
 
-The following changes are live in Supabase and recorded in GitHub:
+Semua status di atas harus direvalidasi sebelum dikerjakan.
 
-| Migration | Status | Verified effect |
-|---|---|---|
-| M37 | PASS | `validate_creator_publish` is trigger-only, schema-qualified, and not executable by API roles. |
-| M38 | PASS | Portfolio Like adjustment has actor audit, bounded delta, and non-negative total guard. |
-| M39 | PASS | Legacy permissive admin policies for modules/testimonials/site settings removed. |
-| M40 | PASS | `site_settings` admin policy is `authenticated` + cached `is_admin()`; public read unchanged. |
-| M41 | PASS | Duplicate products admin policy removed; canonical admin policy and public active-product read remain. |
-| M42 | PASS | New external Creator ratings are hidden drafts until explicit Admin moderation. |
+## 5. SPECIAL M46 RULE
 
-Other confirmed facts:
+JANGAN menjalankan M46 current version langsung ke production.
 
-- All audited SECURITY DEFINER functions have explicit `search_path`.
-- `ai_links` is retired from active frontend/admin/database integration.
-- IndexNow has auth, ownership, URL validation, rate limit, and timeout controls.
-- Sitemap has bounded upstream handling and cache/fallback.
-- Creator profile/social/services/portfolio/category RLS initplans are optimized.
-- Vercel status for commit `06ba899`: auto-deployed. Production-alias SHA still needs independent verification via Vercel dashboard.
-- There is one legacy public external Creator rating. Do not modify it without reviewing source evidence and authorization.
+Sebelum apply:
+- schema qualification
+- explicit grants
+- explicit EXECUTE revoke/grant
+- correct SECURITY DEFINER behavior
+- RETURNING id instead of latest-row lookup
+- payload validation
+- rollback
+- verification
+- staging test
+- Edge Function interoperability test
 
-## 6. Open priorities
+## 6. GITHUB + DEPLOYMENT POLICY
 
-### P0 - release blockers
+Default:
+`latest main → branch → patch → tests → PR → Vercel Preview → E2E → merge → production → production smoke`
 
-1. Complete per-function SECURITY DEFINER caller/grant/output audit.
-2. Authenticated browser E2E: login, entitlement, Dapur provisioning, ownership isolation, username update, logout denial, and admin authority.
-3. Read-only checkout/payment regression E2E.
-4. Confirm production-alias SHA equals current `main` before release claims.
+Auto-deploy hanya gated auto-deploy.
 
-### P1 - security and integrity
+Jangan direct push ke main.
+Jangan menganggap Vercel SUCCESS sebagai final verification.
+Production PASS memerlukan production SHA = intended SHA dan applicable smoke tests PASS.
 
-1. Enable Supabase Auth leaked-password protection in Dashboard after impact review.
-2. Review the legacy public external rating; retain only with real-source evidence and publication permission.
-3. Audit Creator/portfolio Like adjustments as public trust signals: caller, reason, actor, and presentation contract.
-4. Review remaining foreign-key and RLS performance findings with equivalence proof; never delete an index based only on `unused_index`.
+## 7. LOCKED PRODUCT CONTRACTS
 
-### P2 - runtime, UI, SEO
+Preserve:
+- `/` homepage visual contract
+- `/{username}` Creator public profile
+- `/{username}/portfolio/{slug}`
+- `/dapur`
+- `/dapur/{username}`
+- auth/checkout semantics
+- Supabase backend authority
+- no fabricated social proof
+- no service-role key in browser
 
-1. Browser matrix: desktop, 375px mobile, console/network, keyboard, reduced motion, overflow.
-2. Verify production HTTP for sitemap, llms, OpenAPI, Markdown routes, canonical, metadata, and JSON-LD.
-3. Audit pSEO/GEO content for factual claims and no fabricated statistics.
+Jangan gunakan RLS untuk memperbaiki UI.
+Jangan membuat second renderer/observer/decorator tanpa kebutuhan yang terbukti.
 
-## 7. SECURITY DEFINER policy
+## 8. SECURITY DEFINER POLICY
 
-Classify every executable definer function as internal trigger-only, authenticated self-service, admin action, intentional public read, or intentional public signal write. For every finding report: exploitable or intentional, evidence, caller, blast radius, minimum fix, and regression test.
+Every executable definer function must be classified:
+- trigger-only internal
+- authenticated self-service
+- admin/staff action
+- intentional public read
+- intentional public write/signal
 
-Never revoke all EXECUTE grants blindly. Public functions require allowlisted output, capped input/limit, no PII, and abuse controls. Privileged functions require explicit `search_path`, server-side authorization, and validated input.
+Report:
+caller, role, EXECUTE grant, internal authorization, data touched, output, abuse controls, exploitability, regression test.
 
-## 8. Definition of done
+Never blindly revoke all EXECUTE privileges.
 
-Allowed state only: PASS / FAIL / BLOCKED / NOT VERIFIED. "Ready for release" is prohibited until source SHA equals production SHA, build/deployment/HTTP/browser checks pass, authenticated flows are verified, and docs match live evidence.
+## 9. DEFINITION OF DONE
 
-## 9. Freebuff continuation
+Allowed final states:
+- PASS
+- FAIL
+- BLOCKED
+- NOT VERIFIED
+- NOT APPLICABLE
 
-Use [`FREEBUFF_MASTER_PROMPT_STUDIHOME.md`](FREEBUFF_MASTER_PROMPT_STUDIHOME.md) as the initial instruction. Freebuff may inspect and implement only after it has confirmed the current authority chain. It must not receive service-role keys or permission to invent production data.
+Never claim “release ready” unless:
+- source SHA matches production SHA
+- CI passes
+- relevant security checks pass
+- browser/runtime checks pass
+- authenticated E2E passes when required
+- live backend state matches expected
+- documentation reflects evidence
 
+## 10. FREEBUFF ENTRYPOINT
+
+Freebuff must start from:
+1. `FREEBUFF_SKILL_STUDIHOME.md`
+2. this file
+3. `PROJECT_STATE_LATEST.md`
+4. `PROJECT_CONSTITUTION.md`
+5. `FREEBUFF_MASTER_PROMPT_STUDIHOME.md`
+
+Use `FREEBUFF_INITIAL_COMMAND.md` as the first prompt for a new Freebuff session.
