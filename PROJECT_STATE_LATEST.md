@@ -1,64 +1,187 @@
-# STUDIHOME - PROJECT STATE LATEST
+# STUDIHOME — PROJECT STATE LATEST
 
-Snapshot: 1 September 2026  
-Status: **AUDIT OPEN - RELEASE EVIDENCE INCOMPLETE**
+Snapshot: 6 September 2026  
+Status: **SECURITY/RELEASE HARDENING ACTIVE**
 
-## Baseline
+## Current baseline
 
-- Repository: `studihome/studihome-frontend`, branch `main`.
-- Last documented main: [`06ba899`](https://github.com/studihome/studihome-frontend/commit/06ba899) (1 Sep 2026, includes Creator Like fix + CSP update).
-- Vercel status for `06ba899`: auto-deployed. Production-alias SHA: NOT VERIFIED (needs Vercel dashboard confirmation).
-- Frontend: static HTML/CSS/Vanilla JS. Database/Auth: Supabase. Hosting: Vercel.
-- Canonical Dapur: `dapur.html`, `dapur-entry.js`, `dapur-editor.js`, `supabase-config.js`.
-- `/balkon` and `/studio-ai` browser verification remains BLOCKED while Under Construction controls those routes.
+- Repository: `studihome/studihome-frontend`
+- Branch: `main`
+- Latest main before this state-sync PR: `dc6cc2724fdc0ca4d5465d80c136e74565cc5234`
+- Frontend: static HTML/CSS/Vanilla JS
+- Backend/Auth: Supabase
+- Hosting: Vercel
+- Canonical Dapur: `dapur.html`, `dapur-entry.js`, `dapur-editor.js`, `supabase-config.js`
 
-## Verified work through M42
+Always refresh `main`, Vercel, and live Supabase before new work.
 
-| Scope | Status | Live evidence |
-|---|---|---|
-| M37 publish trigger hardening | PASS | Trigger validation is schema-qualified and not API-executable. |
-| M38 portfolio Like integrity | PASS | Adjustment actor audit, bounded delta, non-negative totals. |
-| M39 stale admin policy cleanup | PASS | Legacy modules/testimonials/site-settings admin bypass policies removed. |
-| M40 `site_settings` RLS | PASS | Admin policy is `TO authenticated` with `(select is_admin())`; public read retained. |
-| M41 products policy cleanup | PASS | Duplicate admin policy removed; canonical admin and public-active read policies remain. |
-| M42 external Creator rating gate | PASS | New external ratings start hidden; explicit admin moderation required to publish. |
-| Frontend external rating review | PASS | Admin UI creates drafts and shows internal/external ratings together for moderation. |
-| GitHub/Vercel latest documented frontend commit | PASS | `06ba899`, auto-deployed. |
+## Release governance — RESOLVED
 
-## Social proof and privacy position
+GitHub Ruleset:
 
-- No fabricated social proof may be inserted or displayed.
-- Public social proof runtime is server-side filtered and must not expose email, phone, `user_id`, amount, or private order information.
-- External Creator ratings are not equivalent to verified purchases. Their source and permission require an Admin review before visibility.
-- Audit found one legacy external rating already public. It is a review backlog, not evidence of validity; do not alter it automatically.
-- Admin Like adjustments are auditable but remain a P1 governance review because they affect public trust metrics.
+- Name: `Studihome Main Protection`
+- Enforcement: Active
+- Target: `refs/heads/main`
+- Pull request required: ON
+- Required approvals: 0
+- Required status check: `release-gate`
+- Integration: GitHub Actions
+- Strict/up-to-date status checks: ON
+- Branch deletion blocked
+- Non-fast-forward / force-push blocked
+- No bypass actors
 
-## Security status
+## Current release gate
 
-- PASS: RLS is enabled on exposed public tables audited so far.
-- PASS: `v_social_proof_recent` uses `security_invoker=true` and has no public grant.
-- PASS: audited SECURITY DEFINER functions use explicit `search_path`.
-- NOT VERIFIED: complete caller/output/abuse matrix for every executable SECURITY DEFINER function.
-- FAIL: Supabase Security Advisor reports leaked-password protection disabled. Enable in Supabase Auth Dashboard after review.
-- NOT VERIFIED: storage and authenticated owner/admin E2E flows.
+`Studihome Release Gate / release-gate` validates:
 
-## Known performance posture
+- JavaScript syntax
+- inline JavaScript syntax
+- structured config
+- P0 push rollout guardrails
+- public runtime secret patterns
+- security headers
+- exact Supabase SDK pin
+- PWA cache/version invariants
+- SEO/trust/crawl invariants
+- diff hygiene
 
-- PASS: Creator profile/social/services/portfolio/category RLS initplans optimized.
-- PASS: `site_settings` admin initplan optimized in M40.
-- NOT VERIFIED: `testimonials` and `modules` remaining RLS performance findings after equivalence review.
-- NOT VERIFIED: foreign-key index recommendations and duplicate-index cleanup; Advisor `unused_index` is insufficient removal evidence.
+## P0 / high-risk state
 
-## Current priorities
+### Push notification
 
-1. P0 - Complete SECURITY DEFINER caller/grant/output classification.
-2. P0 - Authenticated owner/admin/Dapur and checkout/payment E2E, without production writes outside normal test scope.
-3. P0 - Production-alias SHA reconciliation.
-4. P1 - Enable leaked-password protection and review the one legacy public external rating.
-5. P1 - Define governance for Like adjustments as public trust signals.
-6. P2 - mobile 375px/accessibility/console verification and production SEO/GEO checks.
+- `PUSH_ROLLOUT_ENABLED = false`
+- automatic permission/subscription after login/register removed
+- M46 source hardened but NOT applied
+- `send-push-notification` remains NOT production-ready
+- do not enable push until standards-compliant sender + real-device interoperability pass
+
+### Supabase Auth leaked-password protection
+
+- Advisor warning remains because project is on Supabase Free
+- HaveIBeenPwned leaked-password protection requires Pro+
+- classification: **ACCEPTED / PLAN-LIMITED RISK**
+- do not fake this with SQL or client-side-only validation
+- product decision currently keeps minimum password length at 6 characters
+
+## Supabase performance state
+
+Latest Advisor after optimizer work:
+
+- duplicate indexes: **0**
+- unindexed foreign keys: **0**
+- multiple permissive policies: **0**
+- unused indexes: observational only; do not drop solely from this lint
+
+Applied production migrations:
+
+- `20260906120944_remove_redundant_email_token_policy`
+- `20260906121149_remove_duplicate_core_fk_indexes`
+- `20260906121433_index_remaining_foreign_keys`
+- `20260906141254_consolidate_rls_policies_batch1`
+- `20260906141506_consolidate_creator_rls_policies_batch2`
+- `20260906141626_consolidate_public_admin_rls_batch3`
+- `20260906141936_convert_safe_admin_rpcs_to_security_invoker`
+- `20260906142048_correct_admin_rpc_security_modes`
+
+All are tracked under `supabase/migrations/`.
+
+## RLS regression verification
+
+Completed and PASS:
+
+- admin/member visibility after batch 1
+- admin/Creator-owner visibility after batch 2
+- anon/member/admin visibility after batch 3
+
+No data mutation persisted from regression tests; tests used transaction rollback.
+
+## Security Advisor state
+
+Current findings:
+
+- `rls_enabled_no_policy`: 3 INFO
+- `anon_security_definer_function_executable`: 8 WARN
+- `authenticated_security_definer_function_executable`: 29 WARN
+- `auth_leaked_password_protection`: 1 WARN (Free-plan limitation)
+
+The three RLS/no-policy tables are intentional direct-access deny surfaces:
+
+- `ai_search_logs`
+- `indexnow_submissions`
+- `smart_demand_signals`
+
+Verified table ACL:
+- anon: no direct table grant
+- authenticated: no direct table grant
+- service_role: SELECT only
+
+Do not add dummy RLS policies merely to silence INFO.
+
+## SECURITY DEFINER hardening
+
+Verified:
+
+- no current SECURITY DEFINER function is executable by PostgreSQL `PUBLIC`
+- admin RPCs are not executable by `anon`
+- admin RPC bodies reviewed so far perform `is_admin()` checks
+- public signal functions have explicit bounds/rate controls
+- public read functions are intentional privileged/sanitized read contracts
+
+Converted and regression-tested as `SECURITY INVOKER`:
+
+- `admin_set_creator_verified(uuid, boolean)`
+- `admin_set_creator_portfolio_active(uuid, boolean)`
+- `admin_set_creator_rating_visibility(uuid, boolean)`
+
+Admin-success and non-admin-denial regression test: PASS.
+
+The following were tested for INVOKER but intentionally restored to DEFINER because authenticated lacks direct DML grants on their protected tables:
+
+- `admin_set_creator_external_rating_visibility`
+- `admin_add_creator_external_rating`
+- `admin_add_creator_like_adjustment`
+
+Do NOT grant broader table DML only to reduce Advisor warnings.
+
+## Social proof privacy contract
+
+`get_public_social_proof_recent()` intentionally returns full member names because Migration 22 records an explicit owner request to unmask them.
+
+Do not silently re-mask this without a product/privacy decision.
+
+## P1 remaining
+
+- continue per-function SECURITY DEFINER classification/hardening
+- review legacy/unmapped Edge Functions using invocation evidence before retirement
+- continue observability and production smoke automation
+- evaluate strict nonce/hash CSP migration only after inline-runtime extraction
+- route-aware server/pre-render metadata for high-value public routes
+- continue runtime monolith reduction with canonical-owner discipline
 
 ## No-regression boundary
 
-Do not touch Under Construction, checkout/payment, canonical Dapur architecture, or unrelated UI while auditing. Do not reset, force-push, merge blindly, fabricate production data, or use RLS to solve UI. See `MASTER_HANDOFF_PROMPT_STUDIHOME.md` and `FREEBUFF_MASTER_PROMPT_STUDIHOME.md` for the continuation protocol.
+Do not:
 
+- fabricate social proof
+- expose service-role/secret credentials
+- redesign unrelated UI
+- force-push/reset history
+- bypass `release-gate`
+- apply SQL without live audit + verification
+- use RLS as UI workaround
+- broaden table grants solely to remove Advisor warnings
+- re-enable push before backend/device verification
+
+## Release language
+
+Use:
+- PASS
+- FAIL
+- BLOCKED
+- NOT VERIFIED
+- NOT APPLICABLE
+
+Preferred statement:
+
+“Tidak ditemukan known regression pada test scope yang telah dijalankan untuk SHA <sha>.”
