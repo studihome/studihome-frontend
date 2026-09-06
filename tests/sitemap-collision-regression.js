@@ -128,9 +128,9 @@ const run = async () => {
   );
 
   assert.deepEqual(portfolioLocs, [
-    'https://studihome.id/aksara/portfolio/ai-video-growth-showcase-layanan-aaaaaaaa',
-    'https://studihome.id/aksara/portfolio/ai-video-growth-showcase-layanan-bbbbbbbb',
-    'https://studihome.id/aksara/portfolio/ai-video-growth-showcase-layanan-cccccccc'
+    'https://studihome.id/aksara/portfolio/ai-video-growth-showcase-layanan--aaaaaaaa',
+    'https://studihome.id/aksara/portfolio/ai-video-growth-showcase-layanan--bbbbbbbb',
+    'https://studihome.id/aksara/portfolio/ai-video-growth-showcase-layanan--cccccccc'
   ]);
 
   console.log('Sitemap portfolio collision regression: PASS');

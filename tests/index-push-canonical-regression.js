@@ -97,14 +97,14 @@ const run = async () => {
     error: 'Use the canonical portfolio URL.',
     canonicalUrl:
       'https://studihome.id/aksara/portfolio/' +
-      'ai-video-growth-showcase-layanan-aaaaaaaa'
+      'ai-video-growth-showcase-layanan--aaaaaaaa'
   });
 
   let reservationBody = null;
   let indexNowBody = null;
   const canonical = await invoke(
     'https://studihome.id/aksara/portfolio/' +
-      'ai-video-growth-showcase-layanan-bbbbbbbb',
+      'ai-video-growth-showcase-layanan--bbbbbbbb',
     async (url, options = {}) => {
       const value = String(url);
       if (value.endsWith('/auth/v1/user')) {
@@ -136,7 +136,7 @@ const run = async () => {
   assert.equal(
     canonical.body?.url,
     'https://studihome.id/aksara/portfolio/' +
-      'ai-video-growth-showcase-layanan-bbbbbbbb'
+      'ai-video-growth-showcase-layanan--bbbbbbbb'
   );
   assert.equal(
     reservationBody?.p_target_url,

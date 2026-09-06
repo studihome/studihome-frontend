@@ -5946,14 +5946,15 @@ App.router.bindCanonicalLinkGuard();
                     if (collidingItems.length <= 1) return base;
                     const normalizedId = idFallback(item?.id);
                     if (!normalizedId) return base;
+                    const collisionSeparator = '--';
                     const suffixSteps = [8, 12, 16, 20, 24, 28, 32];
                     const suffixLength = suffixSteps.find(length => {
                         const prefix = normalizedId.slice(0, length);
                         return prefix && collidingItems.filter(candidate => idFallback(candidate?.id).slice(0, length) === prefix).length === 1;
                     }) || normalizedId.length;
                     const suffix = normalizedId.slice(0, suffixLength);
-                    const baseLimit = Math.max(1, 120 - 1 - suffix.length);
-                    return base.slice(0, baseLimit) + '-' + suffix;
+                    const baseLimit = Math.max(1, 120 - collisionSeparator.length - suffix.length);
+                    return base.slice(0, baseLimit) + collisionSeparator + suffix;
                 },
                 _findPortfolioByRoute: (items, candidateSlug) => {
                     const list = Array.isArray(items) ? items : [];

@@ -509,6 +509,7 @@ jobs:
           index = Path('index.html').read_text(encoding='utf-8')
 
           required_route = [
+              "COLLISION_SEPARATOR = '--'",
               'COLLISION_SUFFIX_STEPS',
               'routeSlug',
               'findByRouteSlug',
@@ -556,6 +557,7 @@ jobs:
 
           required_browser = [
               '_routeSlug:',
+              "const collisionSeparator = '--';",
               '_findPortfolioByRoute:',
               'targetPortfolioSlug',
               'window.history.replaceState',
@@ -572,6 +574,16 @@ jobs:
               'triggerIndexNow(this.data.profile.username,App.creator._slugify(title))',
               'const slug = slugify(portfolio.title);',
           ]
+          forbidden_separator_patterns = [
+              "return \`${base.slice(0, baseLimit)}-${suffix}\`;",
+              "return base.slice(0, baseLimit) + '-' + suffix;",
+          ]
+          for value in forbidden_separator_patterns:
+              if value in route or value in index:
+                  raise SystemExit(
+                      f'Unsafe single-hyphen collision namespace restored: {value}'
+                  )
+
           combined = '\n'.join((index, sitemap, markdown, index_push))
           for value in forbidden:
               if value in combined:

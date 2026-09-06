@@ -293,11 +293,14 @@ Latest production evidence for `bc3f31f445e21ac3b8582bd40ea70c10a7db167f`:
 
 Portfolio route correction in progress:
 - unique portfolio titles preserve their historical title-only slug.
-- only colliding title slugs receive a deterministic UUID-derived suffix.
+- only colliding title slugs receive a deterministic UUID-derived suffix in the reserved `--` namespace (example: `demo--aaaaaaaa`).
+- normal title slugification collapses punctuation runs to a single `-`, so a natural title slug cannot occupy the reserved `--` collision namespace.
 - UUID suffix length expands when needed so equal short prefixes cannot re-collide.
 - historical title-only deep links remain readable as backward-compatible fallback.
 - runtime Creator links, Sitemap, Markdown/GEO, and IndexNow use the same canonical contract.
-- release-gate includes behavior regressions for collision routing, sitemap uniqueness, and IndexNow canonical enforcement.
+- release-gate includes behavior regressions for collision routing, reserved-namespace separation, sitemap uniqueness, and IndexNow canonical enforcement.
+- PR #73 remains OPEN / NOT MERGED.
+- current Vercel Preview blocker: `build-rate-limit`; classify as BLOCKED external, never as Preview PASS or a reason to bypass the gate.
 
 ## P1 remaining
 

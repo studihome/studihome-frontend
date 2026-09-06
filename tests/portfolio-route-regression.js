@@ -38,9 +38,9 @@ const collisionSlugs = duplicates.map(
 
 assert.equal(new Set(collisionSlugs).size, duplicates.length);
 assert.deepEqual(collisionSlugs, [
-  'ai-video-growth-showcase-layanan-aaaaaaaa',
-  'ai-video-growth-showcase-layanan-bbbbbbbb',
-  'ai-video-growth-showcase-layanan-cccccccc'
+  'ai-video-growth-showcase-layanan--aaaaaaaa',
+  'ai-video-growth-showcase-layanan--bbbbbbbb',
+  'ai-video-growth-showcase-layanan--cccccccc'
 ]);
 
 collisionSlugs.forEach((value, index) => {
@@ -87,8 +87,26 @@ const sharedPrefixSlugs = sharedPrefix.map(
   item => routeSlug(item, sharedPrefix)
 );
 assert.equal(new Set(sharedPrefixSlugs).size, 2);
-assert.match(sharedPrefixSlugs[0], /-aaaaaaaa1111$/);
-assert.match(sharedPrefixSlugs[1], /-aaaaaaaa2222$/);
+assert.match(sharedPrefixSlugs[0], /--aaaaaaaa1111$/);
+assert.match(sharedPrefixSlugs[1], /--aaaaaaaa2222$/);
+
+// Collision canonicals use a reserved "--" separator that normal title
+// slugification can never emit, because punctuation runs collapse to one "-".
+const reservedNamespace = [
+  { id: 'aaaaaaaa-1111-4111-8111-111111111111', title: 'Demo' },
+  { id: 'bbbbbbbb-2222-4222-8222-222222222222', title: 'Demo' },
+  { id: 'cccccccc-3333-4333-8333-333333333333', title: 'Demo AAAAAAAA' }
+];
+const reservedSlugs = reservedNamespace.map(
+  item => routeSlug(item, reservedNamespace)
+);
+assert.deepEqual(reservedSlugs, [
+  'demo--aaaaaaaa',
+  'demo--bbbbbbbb',
+  'demo-aaaaaaaa'
+]);
+assert.equal(new Set(reservedSlugs).size, reservedSlugs.length);
+assert.equal(slugify('Demo--AAAAAAAA'), 'demo-aaaaaaaa');
 
 assert.equal(
   routeSlug(

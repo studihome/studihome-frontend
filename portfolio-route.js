@@ -1,6 +1,7 @@
 'use strict';
 
 const MAX_SLUG_LENGTH = 120;
+const COLLISION_SEPARATOR = '--';
 const COLLISION_SUFFIX_STEPS = [8, 12, 16, 20, 24, 28, 32];
 
 const slugify = value => String(value || '')
@@ -50,9 +51,9 @@ const routeSlug = (item, siblings = []) => {
   const suffix = normalizedId.slice(0, suffixLength);
   const baseLimit = Math.max(
     1,
-    MAX_SLUG_LENGTH - 1 - suffix.length
+    MAX_SLUG_LENGTH - COLLISION_SEPARATOR.length - suffix.length
   );
-  return `${base.slice(0, baseLimit)}-${suffix}`;
+  return `${base.slice(0, baseLimit)}${COLLISION_SEPARATOR}${suffix}`;
 };
 
 const findByRouteSlug = (siblings = [], candidateSlug = '') => {
@@ -75,6 +76,7 @@ const findByRouteSlug = (siblings = [], candidateSlug = '') => {
 
 module.exports = {
   MAX_SLUG_LENGTH,
+  COLLISION_SEPARATOR,
   slugify,
   baseSlug,
   routeSlug,
