@@ -32,7 +32,7 @@ jobs:
       - name: JavaScript syntax
         run: |
           set -euo pipefail
-          for file in             studio-ai-creator-card.js             dapur-entry.js             dapur-editor.js             sw.js             supabase-sdk-loader-v1.js             supabase-config.js             api/agent-search.js             api/index-push.js             api/markdown.js             api/sitemap.js             api/version.js
+          for file in             studio-ai-creator-card.js             dapur-entry.js             dapur-editor.js             sw.js             supabase-sdk-loader-v1.js             supabase-config.js             api/agent-search.js             api/index-push.js             api/markdown.js             api/sitemap.js             api/version.js             portfolio-route.js
           do
             if [ -f "$file" ]; then
               echo "Checking $file"
@@ -487,6 +487,99 @@ jobs:
 
       - name: Public API resilience regression
         run: node tests/api-resilience-regression.js
+
+      - name: Portfolio route collision regression
+        run: node tests/portfolio-route-regression.js
+
+      - name: Sitemap collision regression
+        run: node tests/sitemap-collision-regression.js
+
+      - name: IndexNow portfolio canonical regression
+        run: node tests/index-push-canonical-regression.js
+
+      - name: Portfolio canonical route guardrails
+        shell: python3 {0}
+        run: |
+          from pathlib import Path
+
+          route = Path('portfolio-route.js').read_text(encoding='utf-8')
+          sitemap = Path('api/sitemap.js').read_text(encoding='utf-8')
+          markdown = Path('api/markdown.js').read_text(encoding='utf-8')
+          index_push = Path('api/index-push.js').read_text(encoding='utf-8')
+          index = Path('index.html').read_text(encoding='utf-8')
+
+          required_route = [
+              'COLLISION_SUFFIX_STEPS',
+              'routeSlug',
+              'findByRouteSlug',
+              'Backward compatibility for historical title-only deep links',
+          ]
+          for value in required_route:
+              if value not in route:
+                  raise SystemExit(
+                      f'Portfolio route helper guard missing: {value}'
+                  )
+
+          required_server = {
+              'api/sitemap.js': (
+                  sitemap,
+                  [
+                      'portfolioRouteSlug',
+                      'portfoliosByCreatorId',
+                      'select=id,creator_id,title',
+                  ],
+              ),
+              'api/markdown.js': (
+                  markdown,
+                  [
+                      'portfolioRouteSlug',
+                      'findPortfolioByRouteSlug',
+                      'canonicalPortfolioSlug',
+                  ],
+              ),
+              'api/index-push.js': (
+                  index_push,
+                  [
+                      'portfolioRouteSlug',
+                      'findPortfolioByRouteSlug',
+                      'Use the canonical portfolio URL.',
+                      'canonicalUrl',
+                  ],
+              ),
+          }
+          for path, (body, markers) in required_server.items():
+              for value in markers:
+                  if value not in body:
+                      raise SystemExit(
+                          f'Portfolio canonical guard missing in {path}: {value}'
+                      )
+
+          required_browser = [
+              '_routeSlug:',
+              '_findPortfolioByRoute:',
+              'targetPortfolioSlug',
+              'window.history.replaceState',
+              'App.creator._routeSlug(savedPortfolio,siblings)',
+          ]
+          for value in required_browser:
+              if value not in index:
+                  raise SystemExit(
+                      f'Browser portfolio canonical guard missing: {value}'
+                  )
+
+          forbidden = [
+              'find(p => App.creator._slugify(p.title) === String(portfolioSlug).toLowerCase())',
+              'triggerIndexNow(this.data.profile.username,App.creator._slugify(title))',
+              'const slug = slugify(portfolio.title);',
+          ]
+          combined = '\n'.join((index, sitemap, markdown, index_push))
+          for value in forbidden:
+              if value in combined:
+                  raise SystemExit(
+                      f'Legacy title-only portfolio route restored: {value}'
+                  )
+
+          print('Portfolio canonical route guardrails: PASS')
 
       - name: Edge Function dependency pin guardrails
         shell: python3 {0}
