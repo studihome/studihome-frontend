@@ -21,6 +21,8 @@ Status: **SECURITY/RELEASE HARDENING ACTIVE**
 
 Always refresh `main`, Vercel, and live Supabase before new work.
 
+Manual Vercel recovery playbook: `VERCEL_MANUAL_DEPLOY.md`. Current approved production source target is `main` SHA `49db8b39591752e6486506415bda42abb2096744`; never use PR #74 head as application production source.
+
 ## Release governance — RESOLVED
 
 GitHub Ruleset:
@@ -276,6 +278,17 @@ Current repo target:
 - `smooth-action` and `swift-endpoint` are legacy/quarantined; no current repo runtime caller was found and CI blocks new runtime references.
 - direct HTTP Edge invocation smoke remains **NOT VERIFIED** because the connected tooling exposes deploy/read but not invoke/logs, while the local shell has no DNS route to the Supabase host.
 - do not retire legacy functions until independent invocation evidence is available.
+
+## Manual Vercel deployment recovery — DOCUMENTED
+
+- preferred recovery path is Vercel Dashboard -> Deployments -> Create Deployment -> exact approved Git SHA;
+- current approved source target: `49db8b39591752e6486506415bda42abb2096744` from `main`;
+- if branch configuration is requested, use `main` / Production configuration;
+- avoid untracked ZIP upload because `/api/version` verification depends on Git deployment provenance;
+- a manual deployment is still quota-counted and cannot bypass `build-rate-limit`;
+- only Promote to Production after confirming the deployment Git SHA;
+- after promotion, `/api/version` must equal the approved SHA and production smoke must PASS;
+- full operator procedure: `VERCEL_MANUAL_DEPLOY.md`.
 
 ## Production deployment verification — FIX IN PROGRESS
 
