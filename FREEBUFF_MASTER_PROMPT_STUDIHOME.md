@@ -36,6 +36,13 @@ CURRENT KNOWN CONTEXT — 6 SEP 2026
 
 Do not claim the merged portfolio fix is live until Vercel successfully deploys current main, /api/version equals the current main SHA, and production smoke passes.
 
+CONSOLE TRIAGE BASELINE — 7 SEP 2026
+- `/studio-ai` message-channel errors (`Receiving end does not exist`, `listener indicated an asynchronous response... channel closed`) have no matching `chrome.runtime`/`browser.runtime`/`sendMessage`/`onMessage` implementation in the repository; classify as external/browser-extension provenance unless a Studihome-owned stack frame is proven;
+- YouTube `compute-pressure` warnings are third-party iframe diagnostics; do not relax Studihome Permissions-Policy to silence them;
+- Chromium `powerPreference ... ignored on Windows` is browser diagnostic noise;
+- `beforeinstallprompt.preventDefault()` can be expected for a custom install flow; only change code if the user-facing install action itself is broken;
+- reproduce console reports with extensions disabled/incognito before modifying runtime.
+
 PORTFOLIO CANONICAL CONTRACT
 - unique active portfolio title slug keeps historical title-only path;
 - collisions among active siblings use deterministic UUID prefix;
