@@ -87,6 +87,7 @@ Applied production migrations:
 - `20260906143452_convert_creator_read_helpers_to_security_invoker`
 - `20260906143850_fix_creator_review_submission_trigger_contract`
 - `20260906143929_harden_creator_review_submission_rowcount`
+- `20260906144934_convert_creator_self_service_rpcs_to_security_invoker`
 
 All are tracked under `supabase/migrations/`.
 
@@ -106,7 +107,7 @@ Current findings:
 
 - `rls_enabled_no_policy`: 3 INFO
 - `anon_security_definer_function_executable`: 8 WARN
-- `authenticated_security_definer_function_executable`: 23 WARN
+- `authenticated_security_definer_function_executable`: 20 WARN
 - `auth_leaked_password_protection`: 1 WARN (Free-plan limitation)
 
 The three RLS/no-policy tables are intentional direct-access deny surfaces:
@@ -143,8 +144,17 @@ Converted and regression-tested as `SECURITY INVOKER`:
 - `is_creator_eligible()`
 - `has_creator_workspace_access()`
 - `can_publish_creator(uuid)`
+- `change_creator_username_once(text)`
+- `change_creator_username_for_profile(uuid, text)`
+- `submit_creator_for_review()`
 
 Admin-success and non-admin-denial regression tests: PASS.
+
+Creator self-service INVOKER regression tests:
+- change username once baseline vs after: PASS
+- change username by profile baseline vs after: PASS
+- submit review baseline vs after: PASS
+- non-owner username change denial: PASS
 
 Creator helper INVOKER equivalence tests:
 - admin baseline/output: PASS
