@@ -23,6 +23,13 @@ Always refresh `main`, Vercel, and live Supabase before new work.
 
 Manual Vercel recovery playbook: `VERCEL_MANUAL_DEPLOY.md`. Current approved production source target is `main` SHA `49db8b39591752e6486506415bda42abb2096744`; never use PR #74 head as application production source.
 
+Vercel capacity recovery revalidation — 7 Sep 2026:
+- operator reports deployments are available again;
+- prior GitHub Vercel `build-rate-limit` status is stale until superseded by a fresh check;
+- PR #74 is intentionally retriggered with a documentation-only commit;
+- merge remains blocked until the new Vercel check succeeds;
+- production remains NOT VERIFIED until `studihome.id/api/version` equals current approved main SHA and production smoke passes.
+
 ## Release governance — RESOLVED
 
 GitHub Ruleset:
