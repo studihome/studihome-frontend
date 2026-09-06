@@ -271,13 +271,17 @@ Current repo target:
 - direct HTTP Edge invocation smoke remains **NOT VERIFIED** because the connected tooling exposes deploy/read but not invoke/logs, while the local shell has no DNS route to the Supabase host.
 - do not retire legacy functions until independent invocation evidence is available.
 
-## Production deployment verification — IMPLEMENTING
+## Production deployment verification — FIX IN PROGRESS
 
 Planned/current mechanism:
 - `api/version.js` exposes only the current Vercel Git commit SHA and deployment environment; no secret/config values.
 - response is `no-store` and GET/HEAD only.
 - post-deploy GitHub workflow waits until `studihome.id/api/version` equals the pushed `github.sha` before testing production.
 - production smoke validates global security headers, trust pages, Dapur noindex, sitemap uniqueness/private-route exclusion, Agent Search, pSEO Markdown, and unauthenticated 401 boundaries for the two active Edge Functions.
+- the first merged workflow definition failed before job creation because embedded Python heredocs made the YAML invalid.
+- corrective design moves all network/assertion logic to dependency-free `scripts/production-smoke.py`.
+- release-gate now runs `python3 -m py_compile` and `--self-test` for the smoke runner before merge.
+- production workflow YAML is intentionally minimal: checkout + one Python command.
 - this workflow runs after pushes to `main`; it complements, not replaces, the pre-merge `release-gate`.
 
 ## P1 remaining
