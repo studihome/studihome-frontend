@@ -7,7 +7,12 @@ Status: **SECURITY/RELEASE HARDENING ACTIVE**
 
 - Repository: `studihome/studihome-frontend`
 - Branch: `main`
-- Latest deployed production main before portfolio-collision PR: `bc3f31f445e21ac3b8582bd40ea70c10a7db167f`
+- Current source `main`: `49db8b39591752e6486506415bda42abb2096744`
+- PR #73: **MERGED**
+- Main push release-gate run 602: **PASS 25/25**
+- Vercel production deployment for current main: **BLOCKED / FAIL — build-rate-limit**
+- Last known production alias SHA before merge: `bc3f31f445e21ac3b8582bd40ea70c10a7db167f`
+- Current main production verification: **NOT VERIFIED**
 - Latest fully production-smoke verified main: **NOT YET ESTABLISHED**
 - Frontend: static HTML/CSS/Vanilla JS
 - Backend/Auth: Supabase
@@ -15,6 +20,15 @@ Status: **SECURITY/RELEASE HARDENING ACTIVE**
 - Canonical Dapur: `dapur.html`, `dapur-entry.js`, `dapur-editor.js`, `supabase-config.js`
 
 Always refresh `main`, Vercel, and live Supabase before new work.
+
+Manual Vercel recovery playbook: `VERCEL_MANUAL_DEPLOY.md`. Current approved production source target is `main` SHA `49db8b39591752e6486506415bda42abb2096744`; never use PR #74 head as application production source.
+
+Vercel capacity recovery revalidation — 7 Sep 2026:
+- operator reports deployments are available again;
+- prior GitHub Vercel `build-rate-limit` status is stale until superseded by a fresh check;
+- PR #74 is intentionally retriggered with a documentation-only commit;
+- merge remains blocked until the new Vercel check succeeds;
+- production remains NOT VERIFIED until `studihome.id/api/version` equals current approved main SHA and production smoke passes.
 
 ## Release governance — RESOLVED
 
@@ -272,6 +286,17 @@ Current repo target:
 - direct HTTP Edge invocation smoke remains **NOT VERIFIED** because the connected tooling exposes deploy/read but not invoke/logs, while the local shell has no DNS route to the Supabase host.
 - do not retire legacy functions until independent invocation evidence is available.
 
+## Manual Vercel deployment recovery — DOCUMENTED
+
+- preferred recovery path is Vercel Dashboard -> Deployments -> Create Deployment -> exact approved Git SHA;
+- current approved source target: `49db8b39591752e6486506415bda42abb2096744` from `main`;
+- if branch configuration is requested, use `main` / Production configuration;
+- avoid untracked ZIP upload because `/api/version` verification depends on Git deployment provenance;
+- a manual deployment is still quota-counted and cannot bypass `build-rate-limit`;
+- only Promote to Production after confirming the deployment Git SHA;
+- after promotion, `/api/version` must equal the approved SHA and production smoke must PASS;
+- full operator procedure: `VERCEL_MANUAL_DEPLOY.md`.
+
 ## Production deployment verification — FIX IN PROGRESS
 
 Current mechanism:
@@ -291,7 +316,7 @@ Latest production evidence for `bc3f31f445e21ac3b8582bd40ea70c10a7db167f`:
 - this is a real canonical/deep-link ambiguity, not only a test artifact.
 - no production data was deleted or rewritten to hide the conflict.
 
-Portfolio route correction in progress:
+Portfolio route correction — SOURCE MERGED / PRODUCTION BLOCKED:
 - unique portfolio titles preserve their historical title-only slug.
 - only colliding title slugs receive a deterministic UUID-derived suffix in the reserved `--` namespace (example: `demo--aaaaaaaa`).
 - normal title slugification collapses punctuation runs to a single `-`, so a natural title slug cannot occupy the reserved `--` collision namespace.
@@ -299,8 +324,56 @@ Portfolio route correction in progress:
 - historical title-only deep links remain readable as backward-compatible fallback.
 - runtime Creator links, Sitemap, Markdown/GEO, and IndexNow use the same canonical contract.
 - release-gate includes behavior regressions for collision routing, reserved-namespace separation, sitemap uniqueness, and IndexNow canonical enforcement.
-- PR #73 remains OPEN / NOT MERGED.
-- current Vercel Preview blocker: `build-rate-limit`; classify as BLOCKED external, never as Preview PASS or a reason to bypass the gate.
+- PR #73 merged to `main` as `49db8b39591752e6486506415bda42abb2096744` after release-gate PASS and Vercel Preview SUCCESS.
+- main push release-gate run 602: PASS 25/25.
+- production Vercel deployment for the merge SHA returned `build-rate-limit`; classify as BLOCKED external.
+- production smoke run `34047113620`: **FAIL** — all 36/36 alias checks still returned `bc3f31f445e21ac3b8582bd40ea70c10a7db167f`, not merge SHA `49db8b39591752e6486506415bda42abb2096744`.
+- exact smoke error: `Production alias did not converge to 49db8b39591752e6486506415bda42abb2096744`.
+- do not claim the collision fix live until `/api/version` equals current main and production smoke passes.
+
+## Console diagnostics triage — 7 Sep 2026
+
+User-supplied `/studio-ai` console evidence was audited against current main:
+- no repository implementation of `chrome.runtime`, `browser.runtime`, `sendMessage`, `onMessage`, or a matching page message listener was found;
+- repeated `Receiving end does not exist` / asynchronous message-channel-closed errors are **not proven Studihome defects** and are classified as likely browser-extension/content-script noise;
+- YouTube embed emits `compute-pressure` Permissions Policy warning; current Studihome policy remains unchanged because playback does not require weakening the security boundary;
+- Chromium Windows emits `powerPreference option is currently ignored` diagnostic from the embedded player path;
+- PWA banner warning reflects `beforeinstallprompt.preventDefault()` semantics; no runtime change is justified without evidence that the custom install CTA fails;
+- social-proof widget diagnostics show successful client readiness and 3 loaded items.
+
+No application/runtime/security-header change was made for this console report. Required reproduction rule: test with extensions disabled/incognito and obtain a Studihome-owned stack frame before opening a runtime-fix PR.
+
+## Legacy/runtime ownership audit — COMPLETED WITH CORRECTION
+
+Direct parsing of the large current-main `index.html` corrected an earlier incomplete code-search result.
+
+Verified current-main ownership:
+- `index.html` loads `/admin-dapur-creator-v5.js?v=10`.
+- Admin router calls `window.StudihomeAdminDapurCreatorV5?.open?.()` for the `dapur-creator` tab.
+- `index.html` loads `/admin-gudang-v2.js?v=5`.
+- Admin router calls `window.StudihomeGudangV2?.open?.()` for the `gudang` tab.
+- `dapur-profile-enhancements.js` is directly loaded by `index.html`.
+- `under-construction-gudang.js` is directly loaded by `index.html`.
+- `under-construction.js` is dynamically loaded by `maintenance-gate.js` and `under-construction-gudang.js`.
+- `admin-dapur-ui-v2.js` has no current direct HTML loader; its discovered consumers remain unproven as current-loaded runtimes.
+- `studio-ai-enhancements.js` and `studio-ai-production-enhancements.js` have no direct `index.html` loader and no external filename reference found in the current ownership audit.
+
+Classification:
+- `admin-dapur-creator-v5.js`: **KEEP / ACTIVE RUNTIME**.
+- `admin-gudang-v2.js`: **KEEP / ACTIVE RUNTIME**.
+- `dapur-profile-enhancements.js`: **KEEP**.
+- `under-construction-gudang.js`: **KEEP**.
+- `under-construction.js`: **KEEP**.
+- `admin-dapur-ui-v2.js`: **DELETE-CANDIDATE**.
+- `studio-ai-enhancements.js`: **DELETE-CANDIDATE / NOT CURRENTLY LOADED**.
+- `studio-ai-production-enhancements.js`: **DELETE-CANDIDATE / NOT CURRENTLY LOADED**.
+- Issue #21: **COMPLETED WITH CORRECTED EVIDENCE**.
+- Issue #22: **CLOSED / COMPLETED**.
+- Issue #24: **REOPENED** because active `admin-dapur-creator-v5.js` still contains a fallback Supabase SDK loader and secondary `window.__studihomeAdminSupabase` creation path.
+- no runtime file was deleted or changed in this audit.
+
+Audit rule: GitHub code search can miss references inside the very large `index.html`. Zero-consumer proof must include direct source parsing plus dynamic-loader inspection.
+
 
 ## P1 remaining
 
@@ -310,6 +383,7 @@ Portfolio route correction in progress:
 - evaluate strict nonce/hash CSP migration only after inline-runtime extraction
 - route-aware server/pre-render metadata for high-value public routes
 - continue runtime monolith reduction with canonical-owner discipline
+- resolve Issue #24 on a separate runtime PR: remove duplicate Admin Dapur Supabase client fallback only after focused singleton/readiness regression coverage
 
 ## No-regression boundary
 

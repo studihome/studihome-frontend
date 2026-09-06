@@ -16,42 +16,90 @@ Use Indonesian for reports unless the operator requests otherwise.
 
 Before changing anything, refresh and reconcile in this order:
 
-1. current GitHub `main` and the active PR/branch;
+1. current GitHub `main` and active PR/branch;
 2. current GitHub ruleset and `Studihome Release Gate / release-gate`;
 3. current Vercel deployment/status and production alias SHA;
-4. live Supabase schema, grants, RLS, Security/Performance Advisors, and Edge Functions when the task touches Supabase;
+4. live Supabase schema, grants, RLS, Advisors, and Edge Functions when the task touches Supabase;
 5. `PROJECT_CONSTITUTION.md`;
 6. `PROJECT_STATE_LATEST.md`;
 7. this document and `RELEASE_CHECKLIST_STUDIHOME.md`;
-8. `FREEBUFF_MASTER_PROMPT_STUDIHOME.md` for a continuation agent.
+8. `FREEBUFF_MASTER_PROMPT_STUDIHOME.md` for continuation agents;
+9. `VERCEL_MANUAL_DEPLOY.md` before any manual Vercel deployment.
 
 If dated documentation conflicts with live evidence, preserve Constitution principles but update the dated status. Do not substitute an old handoff claim for current verification.
 
 ## 3. Current release baseline
 
-Production `main` currently deployed before the portfolio-collision fix:
+Current GitHub `main` source SHA:
+
+`49db8b39591752e6486506415bda42abb2096744`
+
+This SHA is the squash merge of PR **#73** (portfolio canonical collision hardening).
+
+Evidence before merge:
+
+- PR head `704fe6d56039aea76b14dbb2985672eef5944b05`;
+- `release-gate`: **PASS 25/25**;
+- Vercel Preview: **SUCCESS**;
+- PR state before merge: clean.
+
+Evidence after merge:
+
+- main push `release-gate` run **602**: **PASS 25/25**;
+- Vercel production status for `49db8b39591752e6486506415bda42abb2096744`: **FAIL / BLOCKED** with provider `build-rate-limit`;
+- production smoke run `34047113620`: **FAIL** — all 36/36 alias checks still returned `bc3f31f445e21ac3b8582bd40ea70c10a7db167f`, not `49db8b39591752e6486506415bda42abb2096744`;
+- production release status for `49db8b...`: **NOT VERIFIED / BLOCKED BY VERCEL DEPLOYMENT**.
+- exact smoke error: `Production alias did not converge to 49db8b39591752e6486506415bda42abb2096744`.
+
+Last known production alias evidence before this merge:
 
 `bc3f31f445e21ac3b8582bd40ea70c10a7db167f`
 
-Production smoke evidence for that SHA:
+For that SHA:
 
-- deployment SHA reconciliation: **PASS**;
+- production alias SHA reconciliation: **PASS**;
 - global public security-header checks: **PASS**;
-- production smoke run `34045201632`: **FAIL** on duplicate sitemap URLs;
-- root cause: active portfolio rows within the same Creator can share the same title-derived route slug;
-- no production data has been deleted or renamed to conceal the conflict.
+- production smoke run `34045201632`: **FAIL** on duplicate sitemap URLs.
 
-Active corrective PR:
+Therefore do **not** claim the portfolio fix is live merely because it is merged to `main`. Re-run/complete deployment and production smoke only after Vercel can deploy the current main SHA.
 
-- PR **#73** — portfolio canonical collision hardening;
-- state at this handoff: **OPEN / NOT MERGED**;
-- merge requires `release-gate` PASS and Vercel Preview SUCCESS;
-- Vercel Preview is currently **BLOCKED** by provider `build-rate-limit`, not accepted as a code PASS;
-- never bypass this blocker by force-merging.
+Vercel capacity recovery revalidation — 7 Sep 2026:
+- operator reports Vercel is accepting deployments again;
+- GitHub's previous Vercel failure on PR #74 is treated as stale provider evidence until a fresh deployment/check completes;
+- this documentation commit intentionally retriggers PR Preview validation;
+- do not merge until the fresh Vercel check is SUCCESS and the current Release Gate remains PASS;
+- production for main `49db8b...` remains NOT VERIFIED until `/api/version` reports that SHA and production smoke passes.
 
-The latest fully production-smoke verified `main` is therefore **NOT YET ESTABLISHED**.
+Legacy/runtime ownership audit on current main:
 
-## 4. Portfolio canonical URL contract — DO NOT REGRESS
+- Issue #21 audit: **COMPLETED WITH CORRECTION** after direct parsing of the large `index.html`;
+- `admin-dapur-ui-v2.js`: **DELETE-CANDIDATE**, with no current direct HTML/loader reference found;
+- `admin-dapur-creator-v5.js`: **KEEP / ACTIVE RUNTIME** — `index.html` loads `/admin-dapur-creator-v5.js?v=10` and the Admin router calls `window.StudihomeAdminDapurCreatorV5?.open?.()`;
+- `admin-gudang-v2.js`: **KEEP / ACTIVE RUNTIME** — `index.html` loads `/admin-gudang-v2.js?v=5` and the Admin router calls `window.StudihomeGudangV2?.open?.()`;
+- `dapur-profile-enhancements.js`: **KEEP**, directly loaded by `index.html`;
+- `under-construction-gudang.js`: **KEEP**, directly loaded by `index.html`;
+- `under-construction.js`: **KEEP**, dynamically loaded by `maintenance-gate.js` and `under-construction-gudang.js`;
+- `studio-ai-enhancements.js` and `studio-ai-production-enhancements.js`: **DELETE-CANDIDATE / NOT CURRENTLY LOADED** based on direct HTML parsing plus repository reference checks;
+- Issue #22 ownership audit: **CLOSED / COMPLETED**;
+- Issue #24 duplicate Supabase-client refactor: **REOPENED** because `admin-dapur-creator-v5.js` is active and still contains a fallback SDK loader + secondary `window.__studihomeAdminSupabase` client path;
+- no runtime file has been deleted or modified by this audit.
+
+Important: GitHub code search can miss matches inside the very large `index.html`. For zero-consumer claims, parse the actual `index.html` source and inspect dynamic loaders before classifying a runtime as unused.
+
+## 4. Console diagnostics baseline — 7 Sep 2026
+
+Current `/studio-ai` console report was triaged against current main:
+
+- repository search found no `chrome.runtime`, `browser.runtime`, `sendMessage`, `onMessage`, or page `message` listener matching the reported extension-channel errors;
+- `Could not establish connection. Receiving end does not exist.` and `A listener indicated an asynchronous response... channel closed` are therefore classified **EXTERNAL / BROWSER-EXTENSION PROVENANCE LIKELY**, not a proven Studihome runtime defect;
+- YouTube `compute-pressure` Permissions Policy warnings originate inside `youtube.com` embed code. Do **not** weaken Studihome `Permissions-Policy` merely to silence that warning;
+- Chromium `powerPreference option is currently ignored... on Windows` is browser/driver diagnostic noise, not a Studihome application error;
+- `beforeinstallprompt.preventDefault()` warning is expected when a custom PWA install flow suppresses the browser banner. Treat as actionable only if the custom install CTA itself fails to call the saved prompt after a user gesture;
+- social-proof logs `supabaseClient ready immediately` and `loaded 3 items` are normal successful diagnostics.
+
+Before changing app code for similar reports, reproduce with extensions disabled/incognito and identify a Studihome-owned stack frame or failed feature. Do not add catch-all handlers or relax security headers solely to make DevTools quiet.
+
+## 5. Portfolio canonical URL contract — DO NOT REGRESS
 
 Public portfolio route:
 
@@ -61,23 +109,23 @@ Rules:
 
 1. A portfolio whose normalized title slug is unique among its **active public siblings** keeps the historical title-only slug.
 2. If active siblings collide on the same title slug, append a deterministic normalized UUID prefix.
-3. Collision canonicals MUST use the reserved separator `--`, for example `demo--aaaaaaaa`.
-4. Normal title slugification collapses punctuation runs to a single `-`, so natural title slugs cannot generate `--`. This reserves a non-overlapping namespace for collision canonicals.
-5. UUID prefix length expands 8 -> 12 -> 16 -> 20 -> 24 -> 28 -> 32 when needed so equal short prefixes do not re-collide.
+3. Collision canonicals MUST use reserved separator `--`, e.g. `demo--aaaaaaaa`.
+4. Normal title slugification collapses punctuation runs to a single `-`, therefore natural title slugs cannot generate `--`.
+5. UUID prefix length expands 8 -> 12 -> 16 -> 20 -> 24 -> 28 -> 32 when needed.
 6. Final slug remains <= 120 characters.
-7. Historical title-only deep links remain readable as a backward-compatible fallback, but canonical generation must return the collision-safe route.
+7. Historical title-only deep links remain readable as backward-compatible fallback, but canonical generation must return the collision-safe route.
 8. Browser runtime, sitemap, Markdown/GEO, share/canonical SEO, Creator Studio IndexNow trigger, and `api/index-push.js` must implement the same contract.
 9. IndexNow must reject an ambiguous/non-canonical portfolio URL and return the canonical URL instead of submitting the ambiguous path.
-10. Do not normalize the reserved `--` collision separator back to a single `-`.
+10. Never normalize reserved `--` back to a single `-`.
 
 Required regression coverage:
 
 - `tests/portfolio-route-regression.js`;
 - `tests/sitemap-collision-regression.js`;
 - `tests/index-push-canonical-regression.js`;
-- static release-gate guards against title-only resolver regression and single-hyphen collision-namespace regression.
+- release-gate static guards against title-only resolver regression and single-hyphen collision-namespace regression.
 
-## 5. Release governance
+## 6. Release governance
 
 GitHub main protection is active:
 
@@ -87,25 +135,27 @@ GitHub main protection is active:
 - force push and branch deletion blocked;
 - no bypass actors.
 
-Auto-deployment policy:
+Auto-deployment protocol:
 
 1. branch -> PR;
-2. release-gate must pass;
-3. Preview must succeed when available;
-4. merge only after gates are clean;
-5. Vercel may auto-deploy `main`;
-6. wait until `https://studihome.id/api/version` reports the merged `github.sha`;
-7. production smoke must pass against that same SHA;
-8. only then may the release be called production-verified.
+2. release-gate PASS;
+3. Preview SUCCESS;
+4. merge;
+5. Vercel production deployment;
+6. wait until `https://studihome.id/api/version` reports merged `github.sha`;
+7. production smoke PASS against that same SHA;
+8. only then production-verified.
 
-Never turn a provider quota/rate-limit into a fake PASS.
+A Vercel quota/rate-limit is **BLOCKED**, never PASS.
 
-## 6. Current release-gate scope
+Manual deployment rule: use the exact approved Git SHA from `main` through Vercel **Create Deployment**. Do not upload an untracked ZIP or deploy a documentation/feature branch as production. Current approved production source target is `49db8b39591752e6486506415bda42abb2096744`. If Vercel creates a staged deployment, confirm the Git SHA first and only then Promote to Production. Production remains NOT VERIFIED until `/api/version` matches and production smoke passes. See `VERCEL_MANUAL_DEPLOY.md`.
+
+## 7. Current release-gate scope
 
 The gate covers at least:
 
 - tracked JavaScript syntax;
-- inline JavaScript syntax in `index.html` and `dapur.html`;
+- inline JavaScript syntax;
 - structured JSON config;
 - P0 push rollout lock;
 - public secret-pattern scan;
@@ -126,30 +176,29 @@ The gate covers at least:
 - production-smoke workflow invariants;
 - diff hygiene.
 
-Do not weaken a failing assertion merely to make CI green. Fix the root cause or explicitly classify it BLOCKED.
+Do not weaken a failing assertion merely to make CI green.
 
-## 7. Supabase safety baseline
+## 8. Supabase safety baseline
 
 Project: `studihome` / ref `hbfmhwwxbgidsnljupca`.
 
-Important current facts:
+Current important facts:
 
-- project is on Supabase Free;
-- leaked-password HaveIBeenPwned protection is unavailable on this plan: **ACCEPTED / PLAN-LIMITED RISK**;
+- Supabase Free plan;
+- HaveIBeenPwned leaked-password protection unavailable on this plan: **ACCEPTED / PLAN-LIMITED RISK**;
 - minimum product password length remains 6 by operator decision;
-- do not fake leaked-password protection with SQL or client-only checks;
-- push notification rollout remains disabled;
-- M46 push source is hardened but **NOT applied**;
+- push rollout remains disabled;
+- M46 push source hardened but **NOT applied**;
 - `send-push-notification` remains **NOT production-ready**;
 - do not enable/deploy push until standards-compliant sender and real-device interoperability are verified.
 
-Recent production database hardening is tracked under `supabase/migrations/`. Current performance state recorded in `PROJECT_STATE_LATEST.md`:
+Current recorded database performance state:
 
 - duplicate indexes: 0;
 - unindexed foreign keys: 0;
 - multiple permissive policies: 0.
 
-Do not drop an index solely because an advisor calls it unused.
+Do not drop an index solely because an Advisor calls it unused.
 
 For any Supabase change:
 
@@ -164,27 +213,27 @@ For any Supabase change:
 
 Never expose service-role/secret credentials.
 
-## 8. Edge Functions
+## 9. Edge Functions
 
-Current tracked target for Supabase JS browser/Edge dependencies: `2.115.0`.
+Current tracked Supabase JS target: `2.115.0`.
 
-Recorded live/source status:
+Recorded state:
 
-- `send-email-verification`: live v5; explicit application bearer/session validation; `verify_jwt=false` retained intentionally;
+- `send-email-verification`: live v5; application bearer/session validation; `verify_jwt=false` retained intentionally;
 - `provision_managed_creators`: live v2; `verify_jwt=true`;
-- `send-push-notification`: source only / not production-ready;
+- `send-push-notification`: source-only / not production-ready;
 - `smooth-action` and `swift-endpoint`: legacy/quarantined; no current repo runtime caller found.
 
-Do not retire a legacy function without independent caller/invocation evidence.
+Do not retire legacy functions without independent caller/invocation evidence.
 
-## 9. Security and runtime boundaries
+## 10. Security and runtime boundaries
 
 Never:
 
 - reset/force-push history;
 - merge a blocked PR;
 - redesign unrelated UI while fixing a focused defect;
-- broaden database grants just to silence Advisors;
+- broaden DB grants merely to silence Advisors;
 - use RLS as a UI workaround;
 - fabricate customers, purchases, ratings, testimonials, activity, or social proof;
 - expose PII, private order data, secrets, service-role keys, or VAPID private material;
@@ -192,16 +241,16 @@ Never:
 - weaken CSP/security/noindex controls to make tests pass;
 - mutate checkout/payment flows without focused audit and regression coverage.
 
-## 10. SEO / GEO rules
+## 11. SEO / GEO rules
 
-- `llms.txt` may help non-Google machine consumers but is not a Google ranking lever.
-- Maintain canonical consistency between HTML/SPA runtime, sitemap, Markdown endpoints, IndexNow, and structured data.
-- Keep private/auth/admin routes out of public indexing with HTTP/meta controls; robots.txt is not a security boundary.
-- Programmatic SEO content must be useful, unique, factual, and not claim unsupported statistics.
+- `llms.txt` is not a Google ranking lever.
+- Maintain canonical consistency between runtime HTML/SPA, sitemap, Markdown endpoints, IndexNow, and structured data.
+- Private/auth/admin routes need HTTP/meta indexing controls; robots.txt is not a security boundary.
+- pSEO content must be useful, unique, factual, and free of unsupported claims.
 - Sitemap `<loc>` values must be unique.
-- Do not fabricate freshness/claims for ranking purposes.
+- Do not fabricate freshness or statistics.
 
-## 11. Definition of done
+## 12. Definition of done
 
 Allowed status vocabulary:
 
@@ -211,36 +260,35 @@ Allowed status vocabulary:
 - NOT VERIFIED
 - NOT APPLICABLE
 
-Do not claim "zero bugs", "100% bug-free", or "no regression" in an absolute sense.
+Do not claim "zero bugs", "100% bug-free", or absolute "no regression".
 
-Preferred statement after successful scoped validation:
+Preferred scoped statement:
 
 > Tidak ditemukan known regression pada test scope yang telah dijalankan untuk SHA <sha>.
 
 A production release is verified only after:
 
-- current source SHA is known;
+- source SHA is known;
 - required CI passes;
-- Preview/deployment is not blocked;
+- deployment is not blocked;
 - production alias reports the expected SHA;
 - production smoke passes;
-- relevant authenticated/browser checks are completed for the changed risk surface;
+- relevant authenticated/browser checks are completed;
 - documentation matches live evidence.
 
-## 12. Required engineering report
+## 13. Required engineering report
 
 Every substantive change report must include:
 
-- problem/root cause;
-- evidence;
-- risk level;
-- files/database objects changed;
-- tests run and result;
-- deployment status;
-- production SHA status;
+- root cause/evidence;
+- risk level/blast radius;
+- files/DB objects changed;
+- tests and exact result;
+- PR/CI/Preview/deployment state;
+- production SHA/smoke state;
 - known limitations/blockers;
 - rollback path;
 - documentation updated;
-- exact next action.
+- exact next safest action.
 
 Do not hide a blocker. Do not convert NOT VERIFIED into PASS.
