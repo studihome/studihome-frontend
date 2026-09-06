@@ -30,7 +30,9 @@ CURRENT KNOWN CONTEXT — 6 SEP 2026
 - last known production alias before merge was bc3f31f445e21ac3b8582bd40ea70c10a7db167f, whose production smoke failed on duplicate sitemap URLs;
 - exact smoke error: `Production alias did not converge to 49db8b39591752e6486506415bda42abb2096744`;
 - therefore 49db8b... is NOT VERIFIED in production;
-- push rollout remains disabled and send-push-notification is not production-ready.
+- push rollout remains disabled and send-push-notification is not production-ready;
+- legacy Admin Dapur audit #21 is complete: `admin-dapur-ui-v2.js` and `admin-dapur-creator-v5.js` are DELETE-CANDIDATE on current main, but no deletion has been performed;
+- issue #24 duplicate Supabase-client refactor is closed NOT PLANNED because the target runtime has no proven current loader/consumer; do not refactor dead/unproven runtime merely to clean code.
 
 Do not claim the merged portfolio fix is live until Vercel successfully deploys current main, /api/version equals the current main SHA, and production smoke passes.
 
