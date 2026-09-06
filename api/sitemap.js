@@ -157,9 +157,17 @@ module.exports = async (req, res) => {
     entries += buildUrl(`/${encodeURIComponent(slug)}`, null, 'weekly', '0.8');
   });
 
+  const portfoliosByCreatorId = new Map();
+  portfolios.forEach(portfolio => {
+    if (!portfolio?.creator_id) return;
+    const siblings = portfoliosByCreatorId.get(portfolio.creator_id) || [];
+    siblings.push(portfolio);
+    portfoliosByCreatorId.set(portfolio.creator_id, siblings);
+  });
+
   portfolios.forEach(portfolio => {
     const username = creatorMap.get(portfolio.creator_id);
-    const siblings = portfolios.filter(item => item.creator_id === portfolio.creator_id);
+    const siblings = portfoliosByCreatorId.get(portfolio.creator_id) || [];
     const slug = portfolioRouteSlug(portfolio, siblings);
     if (!username || !slug) return;
     entries += buildUrl(
