@@ -62,14 +62,21 @@ For that SHA:
 
 Therefore do **not** claim the portfolio fix is live merely because it is merged to `main`. Re-run/complete deployment and production smoke only after Vercel can deploy the current main SHA.
 
-Legacy Admin Dapur runtime audit on current main:
+Legacy/runtime ownership audit on current main:
 
-- Issue #21 audit: **COMPLETED**;
-- `admin-dapur-ui-v2.js`: **DELETE-CANDIDATE**, with no current HTML/loader reference found;
-- its only discovered `window.AdminDapurUI` consumers are `dapur-editor-hardening-v1.js` and `dapur-interaction-recovery-v1.js`, and neither consumer has a current loader/reference found;
-- `admin-dapur-creator-v5.js`: **DELETE-CANDIDATE**, with no external consumer found; current references are Constitution/CI inspection plus its own export;
-- Issue #24 duplicate Supabase-client refactor: **CLOSED / NOT PLANNED** because refactoring an unproven/dead runtime adds risk without production value;
-- no legacy file has been deleted; removal still requires a dedicated cleanup PR, release-gate, Preview/browser acceptance, and rollback path.
+- Issue #21 audit: **COMPLETED WITH CORRECTION** after direct parsing of the large `index.html`;
+- `admin-dapur-ui-v2.js`: **DELETE-CANDIDATE**, with no current direct HTML/loader reference found;
+- `admin-dapur-creator-v5.js`: **KEEP / ACTIVE RUNTIME** — `index.html` loads `/admin-dapur-creator-v5.js?v=10` and the Admin router calls `window.StudihomeAdminDapurCreatorV5?.open?.()`;
+- `admin-gudang-v2.js`: **KEEP / ACTIVE RUNTIME** — `index.html` loads `/admin-gudang-v2.js?v=5` and the Admin router calls `window.StudihomeGudangV2?.open?.()`;
+- `dapur-profile-enhancements.js`: **KEEP**, directly loaded by `index.html`;
+- `under-construction-gudang.js`: **KEEP**, directly loaded by `index.html`;
+- `under-construction.js`: **KEEP**, dynamically loaded by `maintenance-gate.js` and `under-construction-gudang.js`;
+- `studio-ai-enhancements.js` and `studio-ai-production-enhancements.js`: **DELETE-CANDIDATE / NOT CURRENTLY LOADED** based on direct HTML parsing plus repository reference checks;
+- Issue #22 ownership audit: **CLOSED / COMPLETED**;
+- Issue #24 duplicate Supabase-client refactor: **REOPENED** because `admin-dapur-creator-v5.js` is active and still contains a fallback SDK loader + secondary `window.__studihomeAdminSupabase` client path;
+- no runtime file has been deleted or modified by this audit.
+
+Important: GitHub code search can miss matches inside the very large `index.html`. For zero-consumer claims, parse the actual `index.html` source and inspect dynamic loaders before classifying a runtime as unused.
 
 ## 4. Console diagnostics baseline — 7 Sep 2026
 
