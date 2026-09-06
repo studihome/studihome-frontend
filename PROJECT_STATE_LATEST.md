@@ -7,7 +7,7 @@ Status: **SECURITY/RELEASE HARDENING ACTIVE**
 
 - Repository: `studihome/studihome-frontend`
 - Branch: `main`
-- Latest verified production main: `99ef3ffec71a902e2a74865678ad3bb1273f8d8a`
+- Latest verified production main: `94c3f94dd17439c2f15e99f928070ee7c8e3dcc8`
 - Frontend: static HTML/CSS/Vanilla JS
 - Backend/Auth: Supabase
 - Hosting: Vercel
@@ -258,6 +258,17 @@ Current bounded upstream behavior:
 - Agent Search timeout uses HTTP 504 with the existing JSON error envelope.
 - release-gate includes timeout guard markers for all four public API handlers.
 - runtime regression harness validates Agent Search success/timeout behavior and Markdown success/timeout/pSEO fallback behavior with mocked abortable upstreams.
+
+## Edge Function supply chain — HARDENING
+
+Current repo target:
+- browser and Edge Function Supabase SDK target: `2.115.0`.
+- `send-email-verification`: source/live exact match before dependency pin; live version 4; `verify_jwt=false` retained because the function performs its own bearer/session validation.
+- `provision_managed_creators`: source/live exact match before dependency pin; live version 1; `verify_jwt=true`.
+- `send-push-notification`: source-only pin; function remains NOT production-ready and must not be deployed/enabled from this dependency change alone.
+- release-gate rejects major-range `npm:@supabase/supabase-js@2` imports in tracked Edge Functions.
+
+Live redeploy of the two active functions is allowed only after this pin PR passes release-gate and source equivalence remains true.
 
 ## P1 remaining
 
