@@ -323,21 +323,37 @@ User-supplied `/studio-ai` console evidence was audited against current main:
 
 No application/runtime/security-header change was made for this console report. Required reproduction rule: test with extensions disabled/incognito and obtain a Studihome-owned stack frame before opening a runtime-fix PR.
 
-## Legacy Admin Dapur runtime audit — COMPLETED
+## Legacy/runtime ownership audit — COMPLETED WITH CORRECTION
 
-Current-main evidence:
-- `dapur.html` canonical shell does not load `admin-dapur-ui-v2.js` or `admin-dapur-creator-v5.js`.
-- exact repo search found no runtime loader/reference for `admin-dapur-ui-v2.js` outside Constitution.
-- `window.AdminDapurUI` is referenced by `dapur-editor-hardening-v1.js` and `dapur-interaction-recovery-v1.js`, but neither consumer has a current loader/reference found.
-- exact repo search for `admin-dapur-creator-v5.js` found Constitution/CI inspection only; `window.StudihomeAdminDapurCreatorV5` has no external consumer.
-- dynamic `script.src` audit found no loader path for either legacy runtime.
+Direct parsing of the large current-main `index.html` corrected an earlier incomplete code-search result.
+
+Verified current-main ownership:
+- `index.html` loads `/admin-dapur-creator-v5.js?v=10`.
+- Admin router calls `window.StudihomeAdminDapurCreatorV5?.open?.()` for the `dapur-creator` tab.
+- `index.html` loads `/admin-gudang-v2.js?v=5`.
+- Admin router calls `window.StudihomeGudangV2?.open?.()` for the `gudang` tab.
+- `dapur-profile-enhancements.js` is directly loaded by `index.html`.
+- `under-construction-gudang.js` is directly loaded by `index.html`.
+- `under-construction.js` is dynamically loaded by `maintenance-gate.js` and `under-construction-gudang.js`.
+- `admin-dapur-ui-v2.js` has no current direct HTML loader; its discovered consumers remain unproven as current-loaded runtimes.
+- `studio-ai-enhancements.js` and `studio-ai-production-enhancements.js` have no direct `index.html` loader and no external filename reference found in the current ownership audit.
 
 Classification:
+- `admin-dapur-creator-v5.js`: **KEEP / ACTIVE RUNTIME**.
+- `admin-gudang-v2.js`: **KEEP / ACTIVE RUNTIME**.
+- `dapur-profile-enhancements.js`: **KEEP**.
+- `under-construction-gudang.js`: **KEEP**.
+- `under-construction.js`: **KEEP**.
 - `admin-dapur-ui-v2.js`: **DELETE-CANDIDATE**.
-- `admin-dapur-creator-v5.js`: **DELETE-CANDIDATE**.
-- Issue #21: **CLOSED / COMPLETED** after evidence-first ownership audit.
-- Issue #24: **CLOSED / NOT PLANNED**; do not refactor duplicate Supabase client logic inside an unproven/dead runtime.
-- no deletion was performed; dedicated cleanup PR + release-gate + Preview/browser acceptance remains mandatory before removal.
+- `studio-ai-enhancements.js`: **DELETE-CANDIDATE / NOT CURRENTLY LOADED**.
+- `studio-ai-production-enhancements.js`: **DELETE-CANDIDATE / NOT CURRENTLY LOADED**.
+- Issue #21: **COMPLETED WITH CORRECTED EVIDENCE**.
+- Issue #22: **CLOSED / COMPLETED**.
+- Issue #24: **REOPENED** because active `admin-dapur-creator-v5.js` still contains a fallback Supabase SDK loader and secondary `window.__studihomeAdminSupabase` creation path.
+- no runtime file was deleted or changed in this audit.
+
+Audit rule: GitHub code search can miss references inside the very large `index.html`. Zero-consumer proof must include direct source parsing plus dynamic-loader inspection.
+
 
 ## P1 remaining
 
@@ -347,6 +363,7 @@ Classification:
 - evaluate strict nonce/hash CSP migration only after inline-runtime extraction
 - route-aware server/pre-render metadata for high-value public routes
 - continue runtime monolith reduction with canonical-owner discipline
+- resolve Issue #24 on a separate runtime PR: remove duplicate Admin Dapur Supabase client fallback only after focused singleton/readiness regression coverage
 
 ## No-regression boundary
 
