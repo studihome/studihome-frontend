@@ -3294,8 +3294,18 @@ App.router.bindCanonicalLinkGuard();
 
                 handleLogin: async (e) => {
                     e.preventDefault();
+                    if (App.auth._loginBusy) return;
                     const email = document.getElementById('login-email').value;
                     const password = document.getElementById('login-password').value;
+                    const loginBtn = document.querySelector('#login-form button[type="submit"]');
+                    const loginBtnLabel = loginBtn ? loginBtn.innerHTML : '';
+
+                    App.auth._loginBusy = true;
+                    if (loginBtn) {
+                        loginBtn.disabled = true;
+                        loginBtn.classList.add('opacity-60', 'cursor-not-allowed');
+                        loginBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin mr-1"></i> Memeriksa…';
+                    }
 
                     try {
                         const res = await App.api.post('AUTH_LOGIN', { email, password });
@@ -3318,6 +3328,13 @@ App.router.bindCanonicalLinkGuard();
                         }
                     } catch (err) {
                         App.ui.toast(err.message || "Login belum berhasil. Coba cek email dan password, ya.", "error");
+                    } finally {
+                        App.auth._loginBusy = false;
+                        if (loginBtn && loginBtn.isConnected) {
+                            loginBtn.disabled = false;
+                            loginBtn.classList.remove('opacity-60', 'cursor-not-allowed');
+                            loginBtn.innerHTML = loginBtnLabel;
+                        }
                     }
                 },
 
