@@ -1,5 +1,6 @@
 # Studihome.id — robots.txt
-# Generated: 2026-08-28
+# Reviewed: 2026-09-06
+# Crawling policy only. Access control is enforced by application/backend auth.
 
 User-agent: *
 Allow: /
@@ -10,30 +11,23 @@ Disallow: /dashboard
 Disallow: /creator-studio
 Disallow: /ruang-kerja
 
-# AI Crawlers — explicitly allow for GEO / Generative Engine Optimization
+# Named search/AI crawlers get the SAME private-route boundaries.
+# A specific user-agent group may override a generic group in crawler parsers,
+# so the disallows are intentionally repeated here.
 User-agent: GPTBot
-Allow: /
-
 User-agent: ChatGPT-User
-Allow: /
-
 User-agent: PerplexityBot
-Allow: /
-
 User-agent: ClaudeBot
-Allow: /
-
 User-agent: anthropic-ai
-Allow: /
-
 User-agent: Google-Extended
-Allow: /
-
 User-agent: Bingbot
-Allow: /
-
 User-agent: Googlebot
 Allow: /
+Disallow: /admin
+Disallow: /kamar
+Disallow: /dapur
+Disallow: /dashboard
+Disallow: /creator-studio
+Disallow: /ruang-kerja
 
-# Sitemaps
 Sitemap: https://studihome.id/sitemap.xml
