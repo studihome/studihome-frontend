@@ -31,8 +31,11 @@ CURRENT KNOWN CONTEXT — 6 SEP 2026
 - exact smoke error: `Production alias did not converge to 49db8b39591752e6486506415bda42abb2096744`;
 - therefore 49db8b... is NOT VERIFIED in production;
 - push rollout remains disabled and send-push-notification is not production-ready;
-- legacy Admin Dapur audit #21 is complete: `admin-dapur-ui-v2.js` and `admin-dapur-creator-v5.js` are DELETE-CANDIDATE on current main, but no deletion has been performed;
-- issue #24 duplicate Supabase-client refactor is closed NOT PLANNED because the target runtime has no proven current loader/consumer; do not refactor dead/unproven runtime merely to clean code.
+- legacy/runtime ownership audit was corrected by direct parsing of the large `index.html`: `admin-dapur-creator-v5.js` and `admin-gudang-v2.js` are ACTIVE/KEEP; `admin-dapur-ui-v2.js` remains DELETE-CANDIDATE;
+- `dapur-profile-enhancements.js`, `under-construction-gudang.js`, and dynamically loaded `under-construction.js` are KEEP;
+- `studio-ai-enhancements.js` and `studio-ai-production-enhancements.js` are DELETE-CANDIDATE / not currently loaded;
+- issue #22 is CLOSED/COMPLETED; issue #24 is REOPENED because the active Admin Dapur runtime still contains a fallback SDK loader and secondary Supabase client path;
+- never make a zero-consumer claim from GitHub code search alone when `index.html` is involved; parse the actual large file and inspect dynamic loaders.
 
 Do not claim the merged portfolio fix is live until Vercel successfully deploys current main, /api/version equals the current main SHA, and production smoke passes.
 
