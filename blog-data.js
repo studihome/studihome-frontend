@@ -330,7 +330,7 @@
     const featuredCards = featuredPosts.map((article, index) => renderBalkonCardHTML(article, index)).join('');
     const regularCards = regularPosts.map((article, index) => renderBalkonCardHTML(article, index + featuredPosts.length)).join('');
 
-    main.innerHTML = `${renderBlogImageGuardStyles()}<section class="max-w-6xl mx-auto px-4 sm:px-6 py-8 sm:py-12">
+    main.innerHTML = `${renderBlogImageGuardStyles()}<section class="py-8 sm:py-12">
       <a href="/" data-balkon-home-link class="inline-flex items-center gap-1.5 text-xs font-bold text-[#151c75] hover:text-[#3f48bf] transition-colors mb-6">
         <i class="fa-solid fa-arrow-left" aria-hidden="true"></i> Kembali ke Teras
       </a>
