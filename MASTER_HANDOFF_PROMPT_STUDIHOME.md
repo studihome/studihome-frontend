@@ -325,3 +325,19 @@ Production verification for Issue #24:
 - main Release Gate #621: PASS;
 - Production Smoke #12 / `34069115071`: PASS;
 - Issue #24: CLOSED / COMPLETED.
+
+
+## Dapur auth modal accessibility fix — 7 Sep 2026
+
+Console triage on `/dapur`:
+- AdobeClean slow-network font interventions reference `chrome-extension://efaidnbmnnnibpcajpcglclefindmkaj` and are external browser-extension noise;
+- async message-channel-closed errors remain extension/content-script provenance unless a Studihome stack frame is proven;
+- Supabase `signInWithPassword` HTTP 400 is an expected auth response for rejected credentials; Dapur catches the error and shows a toast. Local validation now blocks passwords shorter than the configured 6-character minimum before the network request;
+- real first-party bug: auth modal previously applied `aria-hidden=true` while `.auth-close` could still retain focus.
+
+Fix:
+- hidden auth modal is initialized with both `aria-hidden=true` and `inert=true`;
+- opening removes `inert`, exposes the dialog, and moves focus into the login email field;
+- closing blurs focus inside the modal before applying `inert` / `aria-hidden`, hides the modal, then restores focus to the invoking control when possible;
+- Dapur runtime asset bumped to `/dapur-entry.js?v=20260907a11y1`;
+- regression coverage: `tests/dapur-auth-modal-accessibility-regression.js` wired into Release Gate.
