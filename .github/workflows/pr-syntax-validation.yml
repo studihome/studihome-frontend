@@ -561,6 +561,9 @@ jobs:
       - name: CSP zero static inline handlers regression
         run: node tests/csp-static-shell-actions-regression.js
 
+      - name: CSP SMART generated action regression
+        run: node tests/csp-smart-generated-action-regression.js
+
       - name: Admin bulk portfolio intake regression
         run: node tests/admin-bulk-portfolio-intake-regression.js
 
