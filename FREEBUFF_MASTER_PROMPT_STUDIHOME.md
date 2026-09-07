@@ -211,3 +211,25 @@ CURRENT AUTHORITY UPDATE — 7 SEP 2026 / REFRESH 7
 - Previous #81 Preview failure is Vercel Free-plan quota. Because #81 has no frontend/API runtime delta relative to the already deployed main, persistent DB apply used a documented DB-only deployment-equivalence exception. Exact-head Release Gate PASS plus a no-runtime-diff check are still mandatory before merge.
 - PR #88 remains stacked; reconcile it with main only after #81 completes.
 
+ISSUE #23 CLEAN MAINLINE REBUILD — 7 SEP 2026
+- Do not revive/merge the stale stacked PR #88 branch after #81; rebuild from main `fec5512fd1f8449a31071a926a2ca5280c2ee498`.
+- Runtime base equality was proven for `dapur-editor.js`, `dapur-entry.js`, and the Release Gate workflow before transplant.
+- Keep Admin bulk intake closure-private inside `dapur-editor.js`; recheck `is_admin()`; reuse `window.supabaseClient`.
+- Max 100 lines; HTTPS only; reject embedded credentials; normalize/dedupe; one bounded batch insert; new rows inactive with `service_id=null`, empty description, deterministic title/sort order; no scraping or metadata fabrication.
+- Provider-specific typing must remain compatible with live CHECK constraints; non-default-port providers and generic/direct-video URLs use safe `link` fallback when required.
+- Regression: `tests/admin-bulk-portfolio-intake-regression.js`.
+- This is a runtime change: exact-head Release Gate PASS plus fresh Vercel Preview SUCCESS are mandatory before merge. The DB-only #81 Vercel-quota exception does not apply.
+
+CURRENT AUTHORITY UPDATE — 7 SEP 2026 / REFRESH 8
+- Source main is `fec5512fd1f8449a31071a926a2ca5280c2ee498` after PR #81; live trust-metric migration `20260907063648` is applied and verified.
+- Vercel for source-main `fec5512...` is BLOCKED by Free-plan build-rate-limit; last production-verified deployed runtime remains `2809811790ab12511886355f8a0cc42717a82745`. #81 has no frontend/API runtime delta.
+- Old PR #88 is CLOSED AS SUPERSEDED / DO NOT MERGE.
+- PR #102 is the canonical Issue #23 clean-mainline replacement on `feat/admin-bulk-portfolio-intake-mainline-2026-09-07`.
+- Because #102 changes browser runtime, require exact-head Release Gate PASS + Vercel Preview SUCCESS before merge. Never reuse the DB-only #81 quota exception.
+
+PR #102 DEDUPE SCOPE — 7 SEP 2026
+- Live same-URL audit: 45 duplicate groups, all service-only; 0 mixed generic/service and 0 multiple-generic groups.
+- Bulk intake dedupe must inspect existing generic rows (`service_id IS NULL`) only; never impose Creator-wide URL uniqueness across service-context variants.
+- Keep max sort-order calculation across all portfolio rows and batch-internal dedupe across new generic URLs.
+- No historical cleanup or DB uniqueness constraint.
+

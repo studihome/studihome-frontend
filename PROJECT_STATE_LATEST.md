@@ -551,3 +551,30 @@ Before continuing #81 -> #88, current console evidence was triaged.
 - Performance Advisor: INFO-only unused-index candidates; no index change performed;
 - before merging #81: require exact-head Release Gate PASS and confirm its diff remains DB/tests/docs/workflow only. PR #88 stays stacked until #81 is completed.
 
+## Issue #23 mainline rebuild — 7 Sep 2026
+
+- original PR #88 is superseded as a stale stacked branch after #81 merged;
+- clean feature work is rebuilt from main `fec5512fd1f8449a31071a926a2ca5280c2ee498` with only the intended Admin bulk-portfolio runtime/test/docs delta;
+- `dapur-editor.js` and `dapur-entry.js` old-base SHAs matched current main before transplant, preventing loss of intervening runtime changes;
+- contract: Admin recheck via `is_admin()`, canonical `window.supabaseClient`, HTTPS-only, max 100 lines, reject URL credentials, normalized dedupe, one bounded batch insert, deterministic draft rows, no scraping;
+- direct video/generic non-provider URLs stay DB-compatible via generic `link` classification where required;
+- no DB/RLS/Auth/grant/data mutation;
+- merge gate is strict: exact-head Release Gate PASS **and fresh Vercel Preview SUCCESS** are required because this branch changes browser runtime.
+
+## Current authority update — 7 Sep 2026 / refresh 8
+
+- source main: `fec5512fd1f8449a31071a926a2ca5280c2ee498` after completed PR #81;
+- last production-verified deployed runtime: `2809811790ab12511886355f8a0cc42717a82745`; Vercel for `fec5512...` is provider-quota BLOCKED, while #81 has no frontend/API runtime delta;
+- live Supabase trust-metric visibility hardening remains APPLIED + VERIFIED as migration `20260907063648`;
+- PR #88: CLOSED AS SUPERSEDED;
+- PR #102: canonical clean-mainline Admin bulk portfolio intake replacement, based directly on current main with seven intended feature/test/docs/workflow files;
+- PR #102 must not merge until exact-head Release Gate PASS and fresh Vercel Preview SUCCESS.
+
+## PR #102 generic-only dedupe correction — 7 Sep 2026
+
+- live audit confirms 45 duplicate URL groups are service-only variants; no generic duplicate group exists;
+- feature dedupe is corrected to existing `service_id IS NULL` rows plus same-batch URLs only;
+- service-linked variants remain legitimate and do not block generic bulk intake;
+- sort-order append still scans all Creator portfolio rows;
+- no data/schema/RLS/grant mutation.
+

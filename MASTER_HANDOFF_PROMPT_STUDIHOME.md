@@ -469,3 +469,34 @@ This section supersedes earlier contradictory status text.
 - rollback: `supabase/rollbacks/20260907063648_restore_creator_trust_metrics_visibility.sql`;
 - PR #88 remains stacked and must be reconciled with main after #81 is merged.
 
+## Admin bulk portfolio intake — clean mainline rebuild / 7 Sep 2026
+
+- the original stacked PR #88 diverged after #81 was merged into `main`; do not force-push or merge that stale stack;
+- a clean Issue #23 branch is rebuilt directly from production-lineage `main` `fec5512fd1f8449a31071a926a2ca5280c2ee498`;
+- runtime transplant is safe because `dapur-editor.js`, `dapur-entry.js`, and the Release Gate workflow had byte-identical base SHAs between the old #88 base and current main before applying the feature delta;
+- canonical implementation owner remains `dapur-editor.js`; `dapur-entry.js` only owns lazy loading/cache-busting;
+- Admin authorization is rechecked server-side through `is_admin()`; the browser reuses canonical `window.supabaseClient`;
+- bulk input is bounded to 100 lines, HTTPS-only, rejects embedded URL credentials, normalizes/deduplicates per Creator, uses one bounded batch insert, and creates inactive draft rows with `service_id=null`, empty description, deterministic title, and appended sort order;
+- supported provider typing remains constrained to the live DB contract; non-default-port provider URLs fall back to generic `link`; no scraping/OpenGraph/AI metadata fetch is introduced;
+- regression: `tests/admin-bulk-portfolio-intake-regression.js`; Release Gate wiring is retained;
+- this is a runtime change, therefore unlike the DB-only #81 exception it must not merge without a fresh Vercel Preview SUCCESS on the exact clean-branch head;
+- no schema, migration, RLS, grant, Auth, or production-data change belongs to this feature.
+
+## Current authority update — 7 Sep 2026 / refresh 8
+
+- source `main` is now `fec5512fd1f8449a31071a926a2ca5280c2ee498` after PR #81 merged with ancestry preserved;
+- live Creator trust hardening remains applied as Supabase migration `20260907063648`; post-apply verification passed;
+- Vercel deployment/status for `fec5512...` is BLOCKED by Free-plan build-rate-limit. The last production-verified deployed runtime remains `2809811790ab12511886355f8a0cc42717a82745`; #81 introduced no frontend/API runtime delta;
+- stale stacked PR #88 is CLOSED AS SUPERSEDED / DO NOT MERGE;
+- canonical Issue #23 implementation is replacement PR #102 on branch `feat/admin-bulk-portfolio-intake-mainline-2026-09-07`, rebuilt cleanly from `fec5512...`;
+- PR #102 is a browser-runtime change and has no DB-only quota exception: require exact-head Release Gate PASS + Vercel Preview SUCCESS + up-to-date/mergeable state before merge.
+
+## PR #102 dedupe-scope correction — 7 Sep 2026
+
+- live duplicate-shape audit: 45 same-URL groups; all 45 are service-linked-only, 0 mixed generic/service groups, 0 multiple-generic groups;
+- bulk intake must not treat service-linked portfolio rows as generic duplicates;
+- #102 now reads `service_id` with existing URLs, computes append `maxSort` across all rows, but adds an existing URL to the generic dedupe set only when `service_id IS NULL`;
+- batch-internal dedupe remains unchanged;
+- regression executes the generic-vs-service row predicate and locks the query/guard markers;
+- no live data cleanup or global uniqueness constraint is introduced.
+

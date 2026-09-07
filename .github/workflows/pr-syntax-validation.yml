@@ -549,6 +549,9 @@ jobs:
       - name: Dapur auth modal accessibility regression
         run: node tests/dapur-auth-modal-accessibility-regression.js
 
+      - name: Admin bulk portfolio intake regression
+        run: node tests/admin-bulk-portfolio-intake-regression.js
+
       - name: Creator trust metrics visibility regression
         run: node tests/creator-trust-metrics-visibility-regression.js
 
