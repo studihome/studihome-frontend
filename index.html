@@ -9359,6 +9359,27 @@ renderStudioAiControl: async () => {
                     try {
                         const parsed = new URL(value, window.location.origin);
                         if (parsed.protocol !== 'https:' && parsed.protocol !== 'http:') return fallback;
+                        if (parsed.username || parsed.password) return fallback;
+                        const avatarPrefix = '/storage/v1/object/public/creator-media/';
+                        if (
+                            parsed.protocol === 'https:' &&
+                            parsed.hostname === 'hbfmhwwxbgidsnljupca.supabase.co' &&
+                            !parsed.port &&
+                            parsed.pathname.startsWith(avatarPrefix)
+                        ) {
+                            const encodedPath = parsed.pathname.slice(avatarPrefix.length);
+                            let objectPath = '';
+                            try {
+                                objectPath = encodedPath.split('/').map(part => decodeURIComponent(part)).join('/');
+                            } catch (_) {
+                                return fallback;
+                            }
+                            const avatarPattern = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}(?:\/[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12})?\/avatar\.webp$/i;
+                            if (avatarPattern.test(objectPath)) {
+                                const version = String(parsed.searchParams.get('v') || '').slice(0, 64);
+                                return '/api/creator-avatar?path=' + encodeURIComponent(objectPath) + (version ? '&v=' + encodeURIComponent(version) : '');
+                            }
+                        }
                         return parsed.href;
                     } catch (e) {
                         return fallback;
@@ -11039,7 +11060,7 @@ window.StudihomeProductionPilotSimulation = {
 }
 </style>
 <!-- STUDIHOME CREATOR PROFILE FEATURES -->
-<script src="/studio-ai-creator-card.js?v=6"></script>
+<script src="/studio-ai-creator-card.js?v=7"></script>
 <script src="/dapur-profile-enhancements.js?v=2"></script>
 <!-- /STUDIHOME CREATOR PROFILE FEATURES -->
 <!-- ADMIN UNDER CONSTRUCTION PANEL -->
@@ -11048,7 +11069,7 @@ window.StudihomeProductionPilotSimulation = {
 <script src="/blog-data.js?v=40"></script>
 <script src="/featured-post-slider.js?v=14"></script>
 <!-- SOCIAL PROOF WIDGET (live toast notifications) -->
-<script src="/social-proof-widget.js?v=13"></script>
+<script src="/social-proof-widget.js?v=14"></script>
 <script src="/social-proof-admin.js?v=1"></script>
 <!-- PROGRAMMATIC SEO & GEO -->
 
