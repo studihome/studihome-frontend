@@ -537,3 +537,17 @@ Before continuing #81 -> #88, current console evidence was triaged.
 - Release Gate #657 PASS; Production Smoke #15 PASS;
 - PR #81 synchronized with console runtime/CI and retains Creator trust migration/preflight/verification/rollback artifacts;
 - migration remains NOT APPLIED pending fresh exact-head gate + Preview validation.
+
+## Current authority update — 7 Sep 2026 / refresh 7
+
+- production main: `2809811790ab12511886355f8a0cc42717a82745`; console hygiene/avatar resilience is production-verified;
+- the five reported Creator avatar objects exist in live `creator-media`; the observed `ERR_NAME_NOT_RESOLVED` was not a missing-object/RLS failure and current main routes eligible avatar rendering through the strict same-origin resilience endpoint;
+- Creator trust RPC hardening preflight: PASS;
+- persistent Supabase apply: PASS; live migration history version `20260907063648` / `constrain_creator_trust_metrics_visibility`;
+- post-apply visibility verification: PASS for published, anonymous-unpublished denial, Admin, and eligible owner/workspace cases;
+- migration source/rollback/test references are being reconciled to `20260907063648` before merge to avoid local-vs-remote migration-history drift;
+- no table/RLS/grant/storage/application-data change was introduced by this migration;
+- Security Advisor rerun completed; the target RPC retains intentional public EXECUTE for published Creator metrics and therefore remains visible to generic SECURITY DEFINER linting even though unpublished authorization is now enforced inside the RPC;
+- Performance Advisor: INFO-only unused-index candidates; no index change performed;
+- before merging #81: require exact-head Release Gate PASS and confirm its diff remains DB/tests/docs/workflow only. PR #88 stays stacked until #81 is completed.
+
