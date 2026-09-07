@@ -83,11 +83,16 @@ for (const marker of [
   'creator_portfolios_media_type_check',
   'creator_portfolios_media_url_https_check',
   'creator_portfolios_supported_media_check',
-  ') not valid;',
   'drop constraint creator_portfolios_media_policy_v2'
 ]) {
   assert(rollback.toLowerCase().includes(marker.toLowerCase()), `Rollback marker missing: ${marker}`);
 }
+
+const notValidCount=(rollback.match(/not\\s+valid;/gi)||[]).length;
+assert(
+  notValidCount===2,
+  `Rollback must restore exactly two NOT VALID legacy constraints, found ${notValidCount}`
+);
 
 for (const [label,source] of [
   ['migration',migration],
