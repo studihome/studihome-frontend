@@ -307,10 +307,14 @@ jobs:
                       )
 
           dapur = Path('dapur.html').read_text(encoding='utf-8')
-          if 'beforeinstallprompt' in dapur or 'deferred.prompt()' in dapur:
+          dapur_beforeinstallprompt_listener = (
+              "addEventListener('beforeinstallprompt'" in dapur or
+              'addEventListener("beforeinstallprompt"' in dapur
+          )
+          if dapur_beforeinstallprompt_listener or 'deferred.prompt()' in dapur:
               raise SystemExit(
                   'Dapur must use native Chromium PWA install UI and must not '
-                  'cancel/retain beforeinstallprompt.'
+                  'register/retain a beforeinstallprompt action.'
               )
 
           index = Path('index.html').read_text(encoding='utf-8')

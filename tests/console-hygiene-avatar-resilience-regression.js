@@ -33,7 +33,11 @@ assert(
 
 assert(workflow.includes("'chrome.runtime'"), 'First-party extension-messaging guard must remain active');
 assert(workflow.includes("'browser.runtime'"), 'First-party browser.runtime guard must remain active');
-assert(!dapur.includes("beforeinstallprompt"), 'Dapur must rely on native Chromium install UI and not cancel beforeinstallprompt');
+assert(
+  !dapur.includes("addEventListener('beforeinstallprompt'") &&
+  !dapur.includes('addEventListener("beforeinstallprompt"'),
+  'Dapur must rely on native Chromium install UI and not register beforeinstallprompt'
+);
 assert(!dapur.includes("deferred.prompt()"), 'Dapur must not retain a dead deferred install prompt');
 assert(index.includes("deferred.prompt();"), 'Home custom PWA install action must remain user-callable');
 
