@@ -9174,7 +9174,7 @@ renderStudioAiControl: async () => {
                                 <h4 class="font-bold text-sm text-[#151c75]">${App.utils.escapeHtml(p.title)}</h4>
                                 <span class="font-black text-xs text-[#151c75]">Rp ${Number(p.price).toLocaleString('id-ID')}</span>
                             </div>
-                            <form onsubmit="App.shop.submitOrderStep1(event)" class="space-y-3.5">
+                            <form data-shop-submit="order-step1" class="space-y-3.5">
                                 <div>
                                     <label class="block text-xs sm:text-sm font-bold text-slate-700 mb-1">Nama Lengkapmu</label>
                                     <input type="text" id="co-name" required value="${App.utils.escapeHtml(App.state.user?.name || '')}" class="w-full card-3d-inset px-3.5 py-2.5 rounded-xl text-xs sm:text-sm outline-none">
@@ -9222,14 +9222,14 @@ renderStudioAiControl: async () => {
                                     <div class="flex justify-between gap-3"><span class="text-slate-500">Total:</span><span class="font-black text-[#151c75]">Rp ${Number(qris.price).toLocaleString('id-ID')}</span></div>
                                 </div>
                                 <label class="flex items-start gap-2 text-left bg-amber-50 border border-amber-200 rounded-xl p-3 cursor-pointer">
-                                    <input id="confirm-payment-checkbox" type="checkbox" onchange="App.shop.updatePaymentConfirmButton()" class="mt-0.5 shrink-0">
+                                    <input id="confirm-payment-checkbox" type="checkbox" data-shop-change="payment-confirm" class="mt-0.5 shrink-0">
                                     <span class="text-xs text-slate-700 leading-relaxed"><strong>Lakukan Pembayaran lalu Centang ya</strong></span>
                                 </label>
-                                <button id="btn-confirm-payment" disabled onclick="App.shop.submitPaymentConfirmation()" class="w-full py-3 rounded-xl text-xs sm:text-sm font-extrabold text-white bg-emerald-600 disabled:bg-slate-300 disabled:cursor-not-allowed hover:bg-emerald-700 flex items-center justify-center gap-2 shadow-md transition-all">
+                                <button id="btn-confirm-payment" disabled data-shop-action="payment-confirm" class="w-full py-3 rounded-xl text-xs sm:text-sm font-extrabold text-white bg-emerald-600 disabled:bg-slate-300 disabled:cursor-not-allowed hover:bg-emerald-700 flex items-center justify-center gap-2 shadow-md transition-all">
                                     <i class="fa-solid fa-check"></i> KONFIRMASI PEMBAYARAN
                                 </button>
                                 <p class="text-[10px] text-slate-500">Jika ada kendala pembayaran, hubungi Admin ya..</p>
-                                <button onclick="App.ui.toggleModal('checkout-modal', false)" class="text-xs font-bold text-slate-500 hover:text-slate-800">Tutup</button>
+                                <button data-shop-action="checkout-close" class="text-xs font-bold text-slate-500 hover:text-slate-800">Tutup</button>
                             </div>`;
                         App.state.checkout.waUrl = waUrl;
                     }
@@ -11078,6 +11078,7 @@ window.StudihomeProductionPilotSimulation = {
 <script src="/generated-top-shell-actions.js?v=1"></script>
 <script src="/generated-home-actions.js?v=1"></script>
 <script src="/generated-utility-actions.js?v=1"></script>
+<script src="/generated-shop-actions.js?v=1"></script>
 <!-- STUDIHOME CREATOR PROFILE FEATURES -->
 <script src="/studio-ai-creator-card.js?v=7"></script>
 <script src="/dapur-profile-enhancements.js?v=2"></script>
