@@ -144,3 +144,14 @@ CURRENT AUTHORITY UPDATE — 7 SEP 2026
 - Issue #62: smooth-action ACTIVE v2 + swift-endpoint ACTIVE v1; retirement BLOCKED by missing invocation evidence.
 - Issue #23: live schema/RLS supports Admin bulk portfolio intake without DB changes; default new bulk rows inactive, dedupe normalized URLs, no scraping or fabricated metadata.
 - PR #43 and PR #50: closed as superseded; any revival requires a fresh current-main audit.
+
+
+CURRENT AUTHORITY UPDATE — 7 SEP 2026 / REFRESH 2
+- Production baseline: main `e213d6d98eab3c47f559cda8b285aebfb7a9895d`, Vercel SUCCESS, Release Gate #623 PASS, Production Smoke #13 PASS.
+- PR #79: current accessibility fix; do not merge until fresh Vercel Preview SUCCESS for the exact current head.
+- Issue #80 / draft PR #81: trust-RPC hardening prepared, migration NOT APPLIED live; keep signature + SECURITY DEFINER + search_path + ACL while adding published/owner/Admin visibility.
+- Issue #19 CLOSED as audit; #84 owns inactive Studio AI deletion, #85 owns phased CSP extraction/enforcement.
+- Issue #82 CLOSED; no Advisor-unused index was dropped. #83 separately tracks redundant `idx_entitlements_user_product`.
+- Issue #62 remains blocked by missing Edge invocation evidence.
+- Issue #23 canonical owner is `dapur-editor.js`, not `admin-dapur-creator-v5.js`. Reuse `window.supabaseClient`, require Admin via `is_admin()`, bump lazy editor cache-buster, HTTPS-only, supported media types only, max 100 lines, draft inactive rows, deterministic title, no scraping.
+- Existing same-URL portfolio rows are legitimate service-context variants; #86 CLOSED with NO CLEANUP. Never impose global URL uniqueness without product/schema redesign.
