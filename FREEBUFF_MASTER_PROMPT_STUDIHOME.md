@@ -272,3 +272,11 @@ ISSUE #98 PHASE A — STATIC SEARCH ACTIONS PREP / 7 SEP 2026
 - Regression + JS syntax gate required.
 - Keep draft/unmerged until Vercel Preview + Search keyboard/mouse browser acceptance pass.
 
+ISSUE #98 PHASE B — STATIC STUDIO BRIEF PREP / 7 SEP 2026
+- Stack on Phase A; never merge Phase B first.
+- Extract exactly 6 Smart Brief static onclick handlers to `static-studio-brief-actions.js`.
+- Static handler count becomes 12.
+- Preserve both close actions, three exact refinement values, and submit button element semantics.
+- No Auth/generated-template/CSS/CSP/DB/API change.
+- Keep draft until Phase A lands, branch is resynced, Preview succeeds, and Smart Brief browser acceptance passes.
+
