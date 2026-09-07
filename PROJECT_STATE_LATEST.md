@@ -507,25 +507,26 @@ This section supersedes earlier contradictory status sections.
 - Issue #90: overlapping portfolio media CHECK constraints audited; proposed unified policy is compatible with 139/139 live rows; no schema change applied.
 
 
-## Issue #23 stacked implementation state
+## Current authority update — 7 Sep 2026 / refresh 5
 
-- stacked branch: `feat/admin-bulk-portfolio-intake`;
-- dependency: PR #81 / `security/constrain-creator-trust-rpc`;
-- canonical implementation files: `dapur-editor.js`, `dapur-entry.js`;
-- Admin authorization rechecked through `is_admin()`;
-- bulk helper remains private to editor IIFE;
-- 100-line bounded intake, HTTPS-only normalization, existing+batch dedupe, one bounded insert;
-- draft rows only with null service_id, empty description, inactive state;
-- direct video-file URLs stored as link under current DB policy;
-- regression test integrated into Release Gate;
-- exact pre-sync head `4a01c183b282d3abbe07f67eabece35faa656afa` validated by Release Gate #643;
-- no schema/RLS/Auth/grant/production-data change;
-- do not merge ahead of PR #81.
+- production main `d32c7e04b5c3d916c85a57a5528f18e6501134a1` remains VERIFIED;
+- PR #81 prior exact head `55abd94353f319ff085e132bb51ad61eb9df6885`: Release Gate #646 PASS; live preflight PASS; transactional apply PASS; exact rollback PASS; migration NOT APPLIED;
+- Vercel provider recovery confirmed on PR #88 exact head `3a1d5a681d56ee5f957487aabc8ffbd18ba1054e`: Release Gate #648 PASS; Preview SUCCESS;
+- PR #88 remains stacked and unmerged; URL credential/non-default-port hardening included;
+- Issue #90 migration contract READY with transactional apply/deny/rollback proof; no live schema change;
+- Issue #83 cleanup contract READY with transactional drop/planner/rollback proof; no live index change;
+- Issue #62 remains BLOCKED by unavailable invocation telemetry.
 
 
-Bulk portfolio URL hardening — refresh 2
-- `normalizePortfolioUrl()` now rejects HTTPS URLs containing embedded username/password credentials.
-- platform-specific classification only applies on the expected host with no non-default port; otherwise the URL falls back to generic `link`.
-- lazy editor cache-buster is now `/dapur-editor.js?v=20260907bulk2` because editor source changed after the initial bulk feature build.
-- regression coverage includes embedded-credential rejection and non-default-port provider fallback.
-- no schema/RLS/Auth/grant/production-data change.
+## Issue #23 stacked implementation — current sync
+
+- dependency base: PR #81 `db56c5ae2ba6946c389f774f3d93a95c404b6166`;
+- feature branch: `feat/admin-bulk-portfolio-intake`;
+- canonical runtime files: `dapur-editor.js`, `dapur-entry.js`;
+- lazy editor asset: `/dapur-editor.js?v=20260907bulk2`;
+- Admin authorization rechecked server-side; bulk helper private;
+- HTTPS normalization rejects embedded credentials; platform classification rejects non-default-port provider forms to generic link;
+- 100-line bounded intake; normalized dedupe; one bounded insert; inactive draft rows only;
+- no schema/RLS/Auth/grant/data change;
+- exact pre-sync head `03c72292ee49c07e22f72a37e6c4d53cd2da6f55` validated by Release Gate #653;
+- fresh exact-head validation required after sync; do not merge ahead of PR #81.
