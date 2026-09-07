@@ -266,6 +266,64 @@ jobs:
 
           print('Security/dependency/PWA guardrails: PASS')
 
+      - name: First-party browser messaging and PWA prompt guardrails
+        shell: python3 {0}
+        run: |
+          from pathlib import Path
+
+          browser_runtime_files = [
+              Path('index.html'),
+              Path('dapur.html'),
+              Path('sw.js'),
+              Path('creator-public.js'),
+              Path('studio-ai-creator-card.js'),
+              Path('social-proof-widget.js'),
+              Path('dapur-entry.js'),
+              Path('dapur-editor.js'),
+          ]
+
+          forbidden_extension_messaging = [
+              'chrome.runtime',
+              'browser.runtime',
+              '.runtime.sendMessage(',
+              '.runtime.onMessage',
+          ]
+
+          for path in browser_runtime_files:
+              if not path.exists():
+                  continue
+              body = path.read_text(encoding='utf-8', errors='replace')
+              for marker in forbidden_extension_messaging:
+                  if marker in body:
+                      raise SystemExit(
+                          f'Unexpected browser-extension messaging API in '
+                          f'first-party runtime {path}: {marker}'
+                      )
+
+          index = Path('index.html').read_text(encoding='utf-8')
+          pwa_markers = [
+              "window.addEventListener('beforeinstallprompt'",
+              'e.preventDefault();',
+              'deferred = e;',
+              'deferred.prompt();',
+              'deferred.userChoice.then',
+              "window.addEventListener('appinstalled'",
+          ]
+          for marker in pwa_markers:
+              if marker not in index:
+                  raise SystemExit(
+                      f'Custom PWA install flow guard missing: {marker}'
+                  )
+
+          sw = Path('sw.js').read_text(encoding='utf-8')
+          if "addEventListener('message'" in sw or 'addEventListener("message"' in sw:
+              raise SystemExit(
+                  'Service worker message channel added without an explicit '
+                  'audited contract.'
+              )
+
+          print('First-party messaging/PWA prompt guardrails: PASS')
+
       - name: SEO, trust, and crawl guardrails
         shell: python3 {0}
         run: |
