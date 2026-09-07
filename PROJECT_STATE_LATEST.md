@@ -684,3 +684,15 @@ Before continuing #81 -> #88, current console evidence was triaged.
 - regression + syntax/Release Gate wiring prepared;
 - no merge while Vercel Preview is unavailable.
 
+## Issue #98 Phase G preparation — 7 Sep 2026
+
+- stacked after A-F;
+- bounded surface: Home/Hero generated actions only;
+- Home generated HTML handlers: 3 -> 0;
+- total generated HTML event attributes: 179 -> 176;
+- dynamic setAttribute('onclick') writes: 3 -> 2;
+- Hero CTA/Foyer actions now use delegated data contracts;
+- Hero Promo sync keeps prior selector semantics and no longer writes onclick;
+- regression + syntax/Release Gate wiring prepared;
+- no merge while Vercel Preview is unavailable.
+
