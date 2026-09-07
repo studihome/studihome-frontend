@@ -1185,7 +1185,7 @@
                 <span class="text-blue-100">2026 &copy; All Rights Reserved.</span>
             </div>
             <div class="flex items-center gap-4 sm:gap-6">
-                <a href="#install" onclick="window.StudihomePWA && window.StudihomePWA.show()" class="text-blue-100 hover:text-white transition-colors">Instal</a>
+                <a id="pwa-install-link" href="#install" class="text-blue-100 hover:text-white transition-colors">Instal</a>
                 <a href="/privasi" class="text-blue-100 hover:text-white transition-colors">Privasi</a>
                 <a href="/ketentuan" class="text-blue-100 hover:text-white transition-colors">Ketentuan</a>
                 <a href="https://wa.me/6285111581115" target="_blank" rel="noopener noreferrer" class="hover:brightness-110 font-bold flex items-center gap-1.5 text-slate-900 bg-gradient-to-r from-[#EAB308] to-[#F59E0B] px-3.5 py-1.5 rounded-xl shadow-xs transition-all text-xs">
@@ -1287,7 +1287,7 @@
     <div id="product-detail-modal" class="fixed inset-0 z-50 hidden bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-3 sm:p-4">
         <div class="card-3d w-full max-w-xl p-5 sm:p-6 rounded-3xl relative bg-white max-h-[90vh] overflow-y-auto my-auto">
             <!-- Modal Close Button repositioned to extreme top-right corner z-30 -->
-            <button onclick="document.querySelectorAll('#product-detail-modal iframe').forEach(f=>f.src='');App.ui.toggleModal('product-detail-modal', false)" class="modal-close-btn absolute top-3 right-3 sm:top-4 sm:right-4 w-9 h-9 rounded-full flex items-center justify-center transition-all shadow-lg font-extrabold hover:brightness-110 z-30 bg-white/20 backdrop-blur-sm text-white">
+            <button id="product-detail-modal-close" class="modal-close-btn absolute top-3 right-3 sm:top-4 sm:right-4 w-9 h-9 rounded-full flex items-center justify-center transition-all shadow-lg font-extrabold hover:brightness-110 z-30 bg-white/20 backdrop-blur-sm text-white">
                 <i class="fa-solid fa-xmark text-sm"></i>
             </button>
             <div id="product-detail-modal-content">
@@ -1298,7 +1298,7 @@
     <!-- CHECKOUT MODAL -->
     <div id="checkout-modal" class="fixed inset-0 z-50 hidden bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-3 sm:p-4">
         <div class="card-3d w-full max-w-lg p-5 sm:p-6 rounded-3xl relative bg-white max-h-[90vh] overflow-y-auto my-auto">
-            <button onclick="App.ui.toggleModal('checkout-modal', false)" class="modal-close-btn absolute top-4 right-4 w-8 h-8 rounded-full flex items-center justify-center transition-all shadow-md font-extrabold hover:brightness-110 z-20">
+            <button id="checkout-modal-close" class="modal-close-btn absolute top-4 right-4 w-8 h-8 rounded-full flex items-center justify-center transition-all shadow-md font-extrabold hover:brightness-110 z-20">
                 <i class="fa-solid fa-xmark"></i>
             </button>
             <div id="checkout-modal-content">
@@ -1309,7 +1309,7 @@
     <!-- MODULE PLAYER MODAL -->
     <div id="module-modal" class="fixed inset-0 z-50 hidden bg-slate-900/75 backdrop-blur-md flex items-center justify-center p-3 sm:p-4">
         <div class="card-3d w-full max-w-4xl p-5 sm:p-6 rounded-3xl relative max-h-[92vh] flex flex-col bg-white my-auto">
-            <button onclick="App.ui.toggleModal('module-modal', false)" class="modal-close-btn absolute top-4 right-4 w-9 h-9 rounded-full flex items-center justify-center font-extrabold z-20 shadow-md hover:brightness-110">
+            <button id="module-modal-close" class="modal-close-btn absolute top-4 right-4 w-9 h-9 rounded-full flex items-center justify-center font-extrabold z-20 shadow-md hover:brightness-110">
                 <i class="fa-solid fa-xmark text-lg"></i>
             </button>
             <div id="module-modal-content" class="flex-1 overflow-y-auto pr-1">
@@ -11063,6 +11063,7 @@ window.StudihomeProductionPilotSimulation = {
 <script src="/static-search-actions.js?v=1"></script>
 <script src="/static-studio-brief-actions.js?v=1"></script>
 <script src="/static-auth-actions.js?v=1"></script>
+<script src="/static-shell-actions.js?v=1"></script>
 <!-- STUDIHOME CREATOR PROFILE FEATURES -->
 <script src="/studio-ai-creator-card.js?v=7"></script>
 <script src="/dapur-profile-enhancements.js?v=2"></script>
