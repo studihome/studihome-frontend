@@ -667,3 +667,12 @@ This section supersedes earlier deployment/release status text.
 - binder is prohibited from injecting markup, performing fetches, or touching Supabase;
 - no CSS/style cleanup, strict CSP enforcement, DB, API, Storage, application-data, Creator, Admin, or Studio AI behavior change belongs to this phase;
 - merge remains blocked until exact-head Release Gate PASS + Vercel Preview SUCCESS + Shop browser acceptance + clean first-party console evidence.
+
+## Release checklist authority refresh — 7 Sep 2026
+
+- `RELEASE_CHECKLIST_STUDIHOME.md` was replaced from the stale 1 Sep snapshot with current 7 Sep evidence.
+- Current source `main`: `175110a8a3165611798919f0ed0bc37939d24661`; last fully production-verified application runtime: `57cd6e5e95890706f6954ee085bca0fadba088a7`.
+- Current PR #114 remains DRAFT/BLOCKED on real-browser A–I acceptance and clean first-party console evidence.
+- Release Gate #723 PASS is automated evidence only; it does not convert browser NOT VERIFIED items to PASS.
+- Supabase leaked-password protection is recorded as accepted/plan-limited risk on Free, not as a fabricated application FAIL.
+- Phase J must not expand PR #114 before the current release candidate is browser-accepted/merged.

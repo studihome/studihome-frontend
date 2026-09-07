@@ -339,3 +339,11 @@ ISSUE #98 PHASE I — GENERATED SHOP ACTIONS PREP / 7 SEP 2026
 - Regression must lock <=170 global generated handlers, zero Shop generated handlers, exact data-contract cardinality, one loader, no network/Supabase/markup injection, and executable VM DOM simulation for submit/change/click, idempotency, nested targets, unknown actions, and outside-container rejection.
 - No CSS/style cleanup, strict CSP enforcement, DB, API, Storage, Creator, Admin, or Studio AI behavior change.
 - Keep draft/unmerged until exact-head Release Gate PASS, Vercel Preview SUCCESS, Shop browser acceptance, and no new first-party console errors.
+
+RELEASE CHECKLIST AUTHORITY REFRESH — 7 SEP 2026
+- Treat `RELEASE_CHECKLIST_STUDIHOME.md` as current release-decision authority.
+- Source main: `175110a8a3165611798919f0ed0bc37939d24661`; last fully production-verified application runtime: `57cd6e5e95890706f6954ee085bca0fadba088a7`.
+- PR #114 A–I is automated-gate green at Release Gate #723 but still browser-acceptance BLOCKED.
+- Never turn NOT VERIFIED browser items into PASS from source/VM tests alone.
+- Supabase leaked-password protection is accepted/plan-limited on Free.
+- Do not expand PR #114 into Phase J before A–I browser acceptance/merge.

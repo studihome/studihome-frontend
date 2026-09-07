@@ -719,3 +719,12 @@ Before continuing #81 -> #88, current console evidence was triaged.
 - regression + JavaScript syntax/Release Gate wiring added; regression executes the delegated binder in a VM DOM harness and simulates submit/change/click, nested click targeting, idempotent binding, unknown-action rejection, and outside-container rejection;
 - no Home/Studio AI/Creator/Admin/CSS/CSP enforcement/DB/API/Storage/data change belongs to this phase;
 - keep PR draft/unmerged until exact-head Release Gate passes, Vercel Preview succeeds, Shop browser acceptance passes, and no new first-party console errors are observed.
+
+## Release checklist authority refresh — 7 Sep 2026
+
+- `RELEASE_CHECKLIST_STUDIHOME.md` was replaced from the stale 1 Sep snapshot with current 7 Sep evidence.
+- Current source `main`: `175110a8a3165611798919f0ed0bc37939d24661`; last fully production-verified application runtime: `57cd6e5e95890706f6954ee085bca0fadba088a7`.
+- Current PR #114 remains DRAFT/BLOCKED on real-browser A–I acceptance and clean first-party console evidence.
+- Release Gate #723 PASS is automated evidence only; it does not convert browser NOT VERIFIED items to PASS.
+- Supabase leaked-password protection is recorded as accepted/plan-limited risk on Free, not as a fabricated application FAIL.
+- Phase J must not expand PR #114 before the current release candidate is browser-accepted/merged.
