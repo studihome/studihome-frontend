@@ -3889,11 +3889,11 @@ App.router.bindCanonicalLinkGuard();
                                         </div>
                                     </div>
                                     <div class="flex flex-wrap items-center gap-3">
-                                        <button onclick="App.home.handleCtaClick('${App.utils.escapeHtml(primaryUrl)}')" class="font-extrabold px-5 sm:px-6 py-3 rounded-2xl text-xs sm:text-sm shadow-lg transition-all flex items-center gap-2" style="background:linear-gradient(135deg,#facc15,#f59e0b);color:#0f172a;box-shadow:0 4px 20px rgba(250,204,21,.3)">
+                                        <button data-home-cta-url="${App.utils.escapeHtml(primaryUrl)}" class="font-extrabold px-5 sm:px-6 py-3 rounded-2xl text-xs sm:text-sm shadow-lg transition-all flex items-center gap-2" style="background:linear-gradient(135deg,#facc15,#f59e0b);color:#0f172a;box-shadow:0 4px 20px rgba(250,204,21,.3)">
                                             <span>${App.utils.escapeHtml(primaryLabel)}</span>
                                             <i class="fa-solid fa-arrow-right"></i>
                                         </button>
-                                        <button onclick="App.home.handleCtaClick('${App.utils.escapeHtml(secondaryUrl)}')" class="font-bold px-5 sm:px-6 py-3 rounded-2xl text-xs sm:text-sm transition-all shadow-2xs" style="background:rgba(255,255,255,.08);color:#fff;border:1px solid rgba(255,255,255,.15);backdrop-filter:blur(8px)">
+                                        <button data-home-cta-url="${App.utils.escapeHtml(secondaryUrl)}" class="font-bold px-5 sm:px-6 py-3 rounded-2xl text-xs sm:text-sm transition-all shadow-2xs" style="background:rgba(255,255,255,.08);color:#fff;border:1px solid rgba(255,255,255,.15);backdrop-filter:blur(8px)">
                                             ${App.utils.escapeHtml(secondaryLabel)}
                                         </button>
                                     </div>
@@ -3911,7 +3911,7 @@ App.router.bindCanonicalLinkGuard();
                                     <h2 class="text-lg sm:text-xl font-extrabold text-[#151c75]">Paling banyak diminati</h2>
                                     <p class="text-xs text-slate-500">Solusi paling populer pilihan komunitas</p>
                                 </div>
-                                <button onclick="App.router.navigate('products')" class="inline-flex items-center gap-1.5 px-4 py-1.5 bg-blue-50 hover:bg-blue-100 text-blue-900 text-sm md:text-base font-bold rounded-full transition-colors duration-200 shadow-sm hover:shadow">
+                                <button data-home-route="products" class="inline-flex items-center gap-1.5 px-4 py-1.5 bg-blue-50 hover:bg-blue-100 text-blue-900 text-sm md:text-base font-bold rounded-full transition-colors duration-200 shadow-sm hover:shadow">
                                     Foyer <i class="fa-solid fa-chevron-right text-[10px] text-amber-500" aria-hidden="true"></i>
                                 </button>
                             </div>
@@ -3985,9 +3985,9 @@ App.router.bindCanonicalLinkGuard();
                     /* Cross-device hero promo sync: ensure CTA button always reflects module state */
                     function _syncHeroPromoCtaButton(mods) {
                         if (!mods || mods.length === 0) return;
-                        var ctaBtn = document.querySelector('.btn-brand-amber[onclick*="handleCtaClick"]');
+                        var ctaBtn = document.querySelector('.btn-brand-amber[data-home-cta-url]');
                         if (!ctaBtn) return;
-                        ctaBtn.setAttribute('onclick', "App.home.handleCtaClick('#hero-promo-modules')");
+                        ctaBtn.dataset.homeCtaUrl = '#hero-promo-modules';
                         var span = ctaBtn.querySelector('span');
                         if (span && (!span.textContent || span.textContent === 'Jelajahi Produk' || span.textContent === 'Selengkapnya')) {
                             span.textContent = 'Lihat Modul Hero Promo';
@@ -11076,6 +11076,7 @@ window.StudihomeProductionPilotSimulation = {
 <script src="/static-auth-actions.js?v=1"></script>
 <script src="/static-shell-actions.js?v=1"></script>
 <script src="/generated-top-shell-actions.js?v=1"></script>
+<script src="/generated-home-actions.js?v=1"></script>
 <!-- STUDIHOME CREATOR PROFILE FEATURES -->
 <script src="/studio-ai-creator-card.js?v=7"></script>
 <script src="/dapur-profile-enhancements.js?v=2"></script>
