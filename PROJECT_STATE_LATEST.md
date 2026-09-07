@@ -468,3 +468,19 @@ This section supersedes older contradictory status paragraphs in this file.
 - Issue #62: `smooth-action` ACTIVE v2, `swift-endpoint` ACTIVE v1; no repo runtime caller, but retirement remains BLOCKED by missing invocation-log evidence;
 - Issue #23: live creator_portfolios schema/grants/RLS support Admin bulk intake without DB changes; implementation contract is deterministic URL-only classification/title, same-Creator normalized URL dedupe, `is_active=false`, explicit added/skipped/duplicate/invalid counts, no scraping;
 - PR #43 and PR #50 were closed as superseded on 7 Sep 2026.
+
+
+## Current authority update — 7 Sep 2026 / refresh 2
+
+This section supersedes earlier contradictory status sections.
+
+- production-verified main: `e213d6d98eab3c47f559cda8b285aebfb7a9895d`; Vercel SUCCESS; Release Gate #623 PASS; Production Smoke #13 PASS;
+- PR #79: Dapur auth-modal accessibility fix; source/CI ready but merge blocked until fresh Vercel Preview SUCCESS for current head;
+- Issue #80 / draft PR #81: Creator trust RPC hardening prepared and CI-validated; migration remains NOT APPLIED live;
+- Issue #19: CLOSED / COMPLETED audit. Follow-ups: #84 inactive Studio AI cleanup, #85 phased CSP extraction/enforcement;
+- Issue #82: CLOSED / COMPLETED audit; no Advisor-unused index dropped;
+- Issue #83: redundant `idx_entitlements_user_product` cleanup candidate, isolated/reversible only;
+- Issue #62: legacy Edge retirement blocked by missing invocation evidence;
+- Issue #23: canonical CRUD owner corrected to `dapur-editor.js`. Live DB requires HTTPS-only portfolio URLs. Bulk intake contract: private Admin-only path, canonical Supabase singleton, normalize/dedupe new generic URLs only, no historical cleanup, max 100 lines, deterministic title, `service_id=null`, `description=''`, `is_active=false`, append deterministic sort order, no scraping;
+- Issue #86: CLOSED / COMPLETED with NO CLEANUP after proving 45 same-URL groups are service-linked variants, not safe duplicates;
+- PR #43 and PR #50 remain CLOSED AS SUPERSEDED.
