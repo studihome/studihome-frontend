@@ -549,6 +549,9 @@ jobs:
       - name: Dapur auth modal accessibility regression
         run: node tests/dapur-auth-modal-accessibility-regression.js
 
+      - name: Studio AI inactive runtime cleanup regression
+        run: node tests/studio-ai-inactive-runtime-cleanup-regression.js
+
       - name: Admin bulk portfolio intake regression
         run: node tests/admin-bulk-portfolio-intake-regression.js
 
