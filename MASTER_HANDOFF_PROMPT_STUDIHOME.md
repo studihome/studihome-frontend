@@ -552,3 +552,14 @@ This section supersedes earlier deployment/release status text.
 - exact rollback: `supabase/rollbacks/20260907110644_restore_redundant_entitlements_user_product_index.sql`;
 - PR #105 requires fresh exact-head Release Gate + Preview after reconciliation before merge.
 
+## Issue #84 clean current-main implementation — 7 Sep 2026
+
+- stale PR #93 is CLOSED AS SUPERSEDED / DO NOT MERGE;
+- current-main revalidation at `175110a8a3165611798919f0ed0bc37939d24661`: zero direct/dynamic loader for `studio-ai-enhancements.js`, `studio-ai-production-enhancements.js`, and `studio-ai-search.js`;
+- active `studio-ai-creator-card.js?v=6` remains directly loaded and is preserved;
+- clean branch `cleanup/studio-ai-inactive-runtimes-current` removes only the three proven inactive runtime files;
+- regression recursively scans active runtime source for forbidden filename references and locks the active creator-card loader;
+- Release Gate wiring added;
+- no `index.html`, CSS, Supabase, Auth, API, renderer, or application-data change belongs to this cleanup;
+- branch is PREPARED ONLY while Vercel Preview remains `build-rate-limit`; do not merge until fresh exact-head Release Gate PASS + Preview SUCCESS + Studio AI/browser acceptance.
+
