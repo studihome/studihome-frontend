@@ -155,3 +155,12 @@ CURRENT AUTHORITY UPDATE — 7 SEP 2026 / REFRESH 2
 - Issue #62 remains blocked by missing Edge invocation evidence.
 - Issue #23 canonical owner is `dapur-editor.js`, not `admin-dapur-creator-v5.js`. Reuse `window.supabaseClient`, require Admin via `is_admin()`, bump lazy editor cache-buster, HTTPS-only, supported media types only, max 100 lines, draft inactive rows, deterministic title, no scraping.
 - Existing same-URL portfolio rows are legitimate service-context variants; #86 CLOSED with NO CLEANUP. Never impose global URL uniqueness without product/schema redesign.
+
+
+ISSUE #84 INACTIVE STUDIO AI CLEANUP — DRAFT
+- Delete only the three proven zero-consumer legacy files: studio-ai-enhancements.js, studio-ai-production-enhancements.js, studio-ai-search.js.
+- Keep studio-ai-creator-card.js?v=6.
+- Guard with tests/studio-ai-inactive-runtime-cleanup-regression.js.
+- Do not mix CSS/CSP/refactor work into this cleanup.
+- Rollback by restoring the exact three files.
+- Do not merge ahead of PR #81 / PR #88; resync to current main before final release validation.
