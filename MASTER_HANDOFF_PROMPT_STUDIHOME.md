@@ -394,3 +394,42 @@ Issue #80 / draft PR #81:
 - PR #81 is the next priority security workstream and must be validated on top of that production state.
 - Issue #23 remains next after #81; canonical portfolio CRUD owner is `dapur-editor.js`, HTTPS-only for new rows, max 100-line bulk intake, no historical URL cleanup.
 - Issue #84/#85 remain deferred Studio AI/CSP follow-ups; Issue #62 remains blocked by missing Edge invocation evidence.
+
+
+## Issue #23 bulk portfolio intake — STACKED / PREPARED
+
+This workstream is stacked on top of PR #81 and must not merge to main before #81 completes.
+
+Implementation owner:
+- canonical CRUD remains `dapur-editor.js`;
+- lazy loader remains `dapur-entry.js`, bumped to `/dapur-editor.js?v=20260907bulk1`;
+- canonical Supabase client remains `window.supabaseClient`;
+- no new browser SDK/client/parallel asset.
+
+Security:
+- `adminPanel()` now rechecks server-backed `is_admin()`;
+- private `bulkPortfolioIntake(id)` rechecks `is_admin()` before DB reads/writes;
+- bulk helper is closure-private and is NOT exported on `window.AdminDapurUI`.
+
+Data contract:
+- one URL per line, max 100 lines;
+- HTTPS-only, fragment removed, query preserved;
+- normalized URL dedupe against existing Creator portfolio URLs and current batch;
+- historical service-linked same-URL rows are untouched;
+- bulk rows use `service_id=null`, `description=''`, deterministic title, append-only sort order, `is_active=false`;
+- one bounded insert after full validation;
+- explicit result counts: added / duplicate / invalid / skipped;
+- no scraping, OpenGraph fetch, AI generation, or external metadata API.
+
+Media contract correction from live CHECK constraints:
+- supported platform types: youtube / drive / tiktok / instagram;
+- image extension -> image;
+- generic HTTPS -> link;
+- direct video-file URLs currently fall back to link because validated `creator_portfolios_external_media_policy` does not permit `media_type='video'`.
+
+Single-item portfolio editor now shares the same HTTPS normalization/media detector, preventing DB-rejected HTTP/video-type requests.
+
+Regression:
+- `tests/admin-bulk-portfolio-intake-regression.js` executes the pure helper block extracted from `dapur-editor.js`;
+- Release Gate runs the bulk intake regression;
+- stacked PR must remain draft until PR #81 completes and its own Preview/CI/browser acceptance are successful.
