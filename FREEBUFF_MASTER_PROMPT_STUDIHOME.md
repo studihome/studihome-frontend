@@ -155,3 +155,14 @@ CURRENT AUTHORITY UPDATE — 7 SEP 2026 / REFRESH 2
 - Issue #62 remains blocked by missing Edge invocation evidence.
 - Issue #23 canonical owner is `dapur-editor.js`, not `admin-dapur-creator-v5.js`. Reuse `window.supabaseClient`, require Admin via `is_admin()`, bump lazy editor cache-buster, HTTPS-only, supported media types only, max 100 lines, draft inactive rows, deterministic title, no scraping.
 - Existing same-URL portfolio rows are legitimate service-context variants; #86 CLOSED with NO CLEANUP. Never impose global URL uniqueness without product/schema redesign.
+
+
+ISSUE #90 CREATOR PORTFOLIO MEDIA POLICY — DRAFT
+- Unified CHECK migration is prepared but NOT APPLIED live.
+- image/video/link require HTTPS; youtube/drive/tiktok/instagram require HTTPS + approved host.
+- Fail closed if legacy constraint baseline or validation states drift.
+- Add v2 NOT VALID -> validate -> only then drop four legacy media constraints.
+- Rollback must recreate exact old VALID / NOT VALID states before dropping v2.
+- Preflight, verification, rollback and static regression artifacts are required.
+- Do not mix RLS/grant/Auth/frontend redesign into this migration.
+- Do not merge/apply before #81/#88 release chain is clear and branch is resynchronized.
