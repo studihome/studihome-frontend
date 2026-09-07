@@ -590,3 +590,14 @@ Before continuing #81 -> #88, current console evidence was triaged.
 - pause additional runtime merges until production catches current source;
 - recovery path: docs-only branch/PR, exact-head Release Gate + Preview, merge only if both pass, then require Vercel Production SUCCESS + SHA-aware Production Smoke PASS.
 
+## Current authority update — 7 Sep 2026 / refresh 10
+
+- production-verified SHA: `57cd6e5e95890706f6954ee085bca0fadba088a7`;
+- Vercel Production SUCCESS;
+- Release Gate #674 PASS;
+- Production Smoke #18 / `34114129036` PASS with exact SHA reconciliation;
+- PR #102 Admin bulk portfolio runtime is production-deployed;
+- Issue #80 CLOSED / COMPLETED;
+- Issue #23 remains open pending explicit authenticated browser acceptance;
+- previous Vercel quota blocker is resolved.
+
