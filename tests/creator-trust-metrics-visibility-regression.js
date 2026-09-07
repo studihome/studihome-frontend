@@ -4,6 +4,7 @@ const fs = require('fs');
 
 const migrationPath = 'supabase/migrations/20260907004000_constrain_creator_trust_metrics_visibility.sql';
 const migration = fs.readFileSync(migrationPath, 'utf8');
+const verification = fs.readFileSync('supabase/tests/creator_trust_metrics_visibility_verification.sql', 'utf8');
 const index = fs.readFileSync('index.html', 'utf8');
 
 function assert(condition, message) {
@@ -44,6 +45,39 @@ for (const marker of forbiddenMigrationMarkers) {
   assert(
     !migration.toLowerCase().includes(marker),
     `Unexpected blast-radius expansion in trust metrics migration: ${marker}`
+  );
+}
+
+const requiredVerificationMarkers = [
+  'begin;',
+  "set_config('request.jwt.claim.sub'",
+  'Published Creator metrics unexpectedly denied.',
+  'Anonymous caller can still read unpublished Creator metrics.',
+  'Active Admin unexpectedly denied unpublished Creator metrics.',
+  'Owning Creator with workspace access unexpectedly denied.',
+  'rollback;'
+];
+
+for (const marker of requiredVerificationMarkers) {
+  assert(
+    verification.includes(marker),
+    `Creator trust SQL verification marker missing: ${marker}`
+  );
+}
+
+const forbiddenVerificationMarkers = [
+  'insert into ',
+  'update public.',
+  'delete from ',
+  'alter table ',
+  'drop table ',
+  'create table '
+];
+
+for (const marker of forbiddenVerificationMarkers) {
+  assert(
+    !verification.toLowerCase().includes(marker),
+    `Creator trust verification must stay application-data read-only: ${marker}`
   );
 }
 
