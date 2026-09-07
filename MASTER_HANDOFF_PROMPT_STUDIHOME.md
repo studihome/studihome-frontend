@@ -412,30 +412,30 @@ This section supersedes earlier status blocks.
 - Issue #90 tracks reconciliation of overlapping portfolio media CHECK constraints; target unified policy was read-only tested against all 139 current rows with 139 compatible / 0 incompatible; no schema change has been made.
 
 
-## Issue #23 bulk portfolio intake — STACKED / PREPARED
+## Current authority update — 7 Sep 2026 / refresh 5
 
-This workstream is stacked on top of PR #81 and must not merge to main before #81 completes.
+- production main remains `d32c7e04b5c3d916c85a57a5528f18e6501134a1`; PR #79 remains production-verified;
+- PR #81 prior exact head `55abd94353f319ff085e132bb51ad61eb9df6885`: Release Gate #646 PASS, preflight PASS, actual migration transactional test PASS, exact rollback transactional test PASS, migration NOT APPLIED live;
+- Vercel provider recovery is now proven by PR #88 exact head `3a1d5a681d56ee5f957487aabc8ffbd18ba1054e`: Release Gate #648 PASS + Vercel Preview SUCCESS;
+- PR #88 remains stacked on #81 and DRAFT; latest hardening rejects embedded URL credentials and prevents platform-specific typing on non-default ports;
+- Issue #90 media CHECK reconciliation contract is READY after transactional apply/deny tests and 4/4 exact rollback reconstruction; no live schema change;
+- Issue #83 redundant entitlement index cleanup contract is READY after transactional drop/planner/rollback verification; no live index change;
+- Issue #62 remains BLOCKED BY MISSING TELEMETRY because available Supabase tooling still exposes no Edge invocation logs.
 
-- canonical CRUD owner: `dapur-editor.js`;
-- lazy loader: `dapur-entry.js` -> `/dapur-editor.js?v=20260907bulk2`;
-- canonical Supabase client: `window.supabaseClient`;
-- `adminPanel()` and private `bulkPortfolioIntake(id)` both recheck server-backed `is_admin()`;
-- bulk helper remains closure-private and is not exported on `window.AdminDapurUI`;
-- max 100 lines; HTTPS-only; fragment removed; query preserved;
-- normalized URL dedupe against existing Creator rows and current batch;
-- historical service-linked same-URL rows remain untouched;
-- bulk rows: `service_id=null`, `description=''`, deterministic title, appended sort order, `is_active=false`;
-- one bounded insert; explicit added/duplicate/invalid/skipped result;
-- no scraping, OpenGraph fetch, AI generation, or external metadata API;
-- under current validated DB constraints, direct video-file URLs map to `link`;
+
+## Issue #23 bulk portfolio intake — STACKED / CURRENT
+
+- stacked dependency: PR #81 current head `db56c5ae2ba6946c389f774f3d93a95c404b6166`;
+- canonical owner: `dapur-editor.js`; lazy loader: `/dapur-editor.js?v=20260907bulk2`;
+- reuse `window.supabaseClient` only;
+- `adminPanel()` and private `bulkPortfolioIntake(id)` recheck server-backed `is_admin()`;
+- HTTPS-only normalization rejects embedded username/password credentials;
+- provider classification requires the expected host with no non-default port, otherwise generic `link`;
+- max 100 lines; fragment removed; query preserved; normalized dedupe against existing Creator rows + current batch;
+- one bounded insert; bulk rows use `service_id=null`, `description=''`, deterministic title, appended sort order, `is_active=false`;
+- direct video-file URLs remain `link` under current live DB policy;
+- no scraping/metadata fabrication;
 - regression: `tests/admin-bulk-portfolio-intake-regression.js`;
-- exact feature head before this sync: `4a01c183b282d3abbe07f67eabece35faa656afa`; Release Gate #643 PASS via temporary validation-only PR #89; Vercel BLOCKED;
-- Issue #90 owns future media CHECK reconciliation; #88 does not change schema.
-
-
-Bulk portfolio URL hardening — refresh 2
-- `normalizePortfolioUrl()` now rejects HTTPS URLs containing embedded username/password credentials.
-- platform-specific classification only applies on the expected host with no non-default port; otherwise the URL falls back to generic `link`.
-- lazy editor cache-buster is now `/dapur-editor.js?v=20260907bulk2` because editor source changed after the initial bulk feature build.
-- regression coverage includes embedded-credential rejection and non-default-port provider fallback.
-- no schema/RLS/Auth/grant/production-data change.
+- latest pre-sync exact head `03c72292ee49c07e22f72a37e6c4d53cd2da6f55`: Release Gate #653 PASS; Vercel provider-blocked;
+- no schema/RLS/Auth/grant/production-data change;
+- must not merge before PR #81.
