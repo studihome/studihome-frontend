@@ -135,3 +135,10 @@ CREATOR TRUST RPC HARDENING — PREPARED / NOT APPLIED
 - Migration source: `supabase/migrations/20260907004000_constrain_creator_trust_metrics_visibility.sql`.
 - Regression source: `tests/creator-trust-metrics-visibility-regression.js`.
 - Do not apply live or merge while required Preview/release gates are unavailable.
+
+
+ISSUE #80 VERIFICATION ARTIFACTS
+- SQL post-apply verification: `supabase/tests/creator_trust_metrics_visibility_verification.sql`.
+- Rollback SQL: `supabase/rollbacks/20260907004000_restore_creator_trust_metrics_visibility.sql`.
+- Direct live read-only probe proved unpublished Creator metrics currently return non-NULL from the RPC in unauthenticated context.
+- Do not apply migration live until PR gate + Preview + post-apply SQL verification are available.
