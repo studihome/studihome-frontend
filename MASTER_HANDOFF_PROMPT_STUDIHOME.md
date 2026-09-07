@@ -552,3 +552,15 @@ This section supersedes earlier deployment/release status text.
 - exact rollback: `supabase/rollbacks/20260907110644_restore_redundant_entitlements_user_product_index.sql`;
 - PR #105 requires fresh exact-head Release Gate + Preview after reconciliation before merge.
 
+## Issue #98 Phase A — static Search actions prepared / 7 Sep 2026
+
+- current-main static inline handler baseline: 25 total = onclick 21 + onkeydown 1 + onsubmit 3;
+- Phase A touches only the Search/home-brand surface: 7 handlers;
+- extracted ownership lives in new same-origin `static-search-actions.js`, loaded once near the existing bottom runtime loaders after core `App` definition;
+- Search/home-brand elements now use stable IDs and no executable `on*=...` attributes;
+- after Phase A static handler count is 18 = onclick 15 + onsubmit 3; static onkeydown is 0;
+- Enter-key Search submit, desktop/mobile open, both close actions, button submit, and brand-home navigation are preserved by addEventListener bindings;
+- regression locks exact static counts, IDs, loader count, behavior markers, and prohibits markup/network/Supabase behavior in the binder;
+- no Auth, Studio Smart Brief, generated template handlers, CSS, CSP header, Supabase, API, or application-data change belongs to this phase;
+- PREPARED ONLY while Vercel Preview is `build-rate-limit`; do not merge until exact-head Release Gate PASS + Preview SUCCESS + Search keyboard/mouse browser acceptance.
+
