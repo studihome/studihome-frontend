@@ -304,3 +304,14 @@ Every substantive change report must include:
 - exact next safest action.
 
 Do not hide a blocker. Do not convert NOT VERIFIED into PASS.
+
+
+## Admin Dapur canonical Supabase singleton refactor — 7 Sep 2026
+
+Issue #24 implementation:
+- active `admin-dapur-creator-v5.js` no longer owns a duplicate Supabase URL/key, SDK loader, or `window.__studihomeAdminSupabase` client;
+- Admin Dapur now accepts only the canonical `window.supabaseClient` created by `supabase-config.js`;
+- if the singleton is not ready immediately, the runtime waits for `studihome:supabase-client-ready` for up to 3000 ms and then fails with an explicit reload/retry message;
+- `index.html` still loads `supabase-config.js?v=boot5` before Admin Dapur and now loads `admin-dapur-creator-v5.js?v=11`;
+- regression coverage: `tests/admin-dapur-supabase-singleton-regression.js` plus Release Gate integration;
+- no DB, RLS, grant, Auth policy, Supabase project, or service-role change.
