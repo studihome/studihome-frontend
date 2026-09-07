@@ -615,3 +615,16 @@ This section supersedes earlier deployment/release status text.
 - no core runtime handler refactor, CSS/style cleanup, CSP enforcement, DB, API, Storage, or data change belongs to this phase;
 - PREPARED ONLY while Vercel remains quota-blocked; after prior phases land, retarget/sync before Preview/browser acceptance.
 
+## Issue #98 Phase F — generated top shell actions prepared / 7 Sep 2026
+
+- stacked after Phase E -> D -> C -> B -> A; never merge out of order;
+- Phase F removes 4 generated HTML handlers owned by top navigation/top-auth;
+- generated HTML event attributes after Phase F: 179, all still inside core runtime script #5;
+- desktop/mobile navigation buttons now render `data-app-route`;
+- top auth login/logout buttons now render `data-top-auth-action`;
+- same-origin `generated-top-shell-actions.js` binds delegated click handling once to `top-nav-links`, `mobile-nav-links`, and `top-auth-area`;
+- existing `App.router.navigate`, `App.auth.logout`, and `App.ui.toggleModal('auth-modal', true)` business logic is unchanged;
+- regression locks global generated-handler ceiling <=179, exact data-contract cardinality, one loader, and delegated behavior markers;
+- no other core generated-handler refactor, CSS/style cleanup, CSP enforcement, DB, API, Storage, or data change belongs to this phase;
+- PREPARED ONLY while Vercel remains quota-blocked; after prior phases land, retarget/sync before Preview/browser acceptance.
+
