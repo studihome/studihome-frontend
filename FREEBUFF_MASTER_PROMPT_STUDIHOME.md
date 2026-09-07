@@ -125,3 +125,13 @@ ISSUE #24 VERIFIED RELEASE
 - Release Gate #621: PASS;
 - Production Smoke #12 / `34069115071`: PASS;
 - Admin Dapur now uses only `window.supabaseClient`; do not reintroduce a duplicate SDK loader/client.
+
+
+CREATOR TRUST RPC HARDENING — PREPARED / NOT APPLIED
+- Issue #80 tracks direct anon exposure of `get_creator_trust_metrics(uuid)`.
+- Keep its current signature, SECURITY DEFINER mode, search_path='', and ACL.
+- Add internal visibility gate: published OR active Admin OR owning Creator with workspace access.
+- Unauthorized/unpublished arbitrary UUID must return NULL rather than metrics.
+- Migration source: `supabase/migrations/20260907004000_constrain_creator_trust_metrics_visibility.sql`.
+- Regression source: `tests/creator-trust-metrics-visibility-regression.js`.
+- Do not apply live or merge while required Preview/release gates are unavailable.
