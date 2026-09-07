@@ -654,3 +654,16 @@ This section supersedes earlier deployment/release status text.
 - regression locks core handler ceiling <=174, zero generated handlers in ui/auth sections, exact two data contracts, one loader, and delegated behavior markers;
 - no Home/Studio AI/Creator/Admin/Shop handler change, CSS/style cleanup, CSP enforcement, DB, API, Storage, or data change belongs to this phase.
 
+## Issue #98 Phase I — generated Shop actions prepared / 7 Sep 2026
+
+- Phase I continues directly on canonical PR #114 after Phase H; no new stacked PR;
+- Shop checkout removes exactly 4 generated HTML event attributes: order-step submit, payment checkbox change, payment-confirm click, and checkout-close click;
+- total core generated HTML event attributes after Phase I: **170**;
+- Shop section generated HTML event attributes after Phase I: **0**;
+- ownership moves to same-origin `generated-shop-actions.js`, delegated once from stable `checkout-modal-content`;
+- `submitOrderStep1` still receives the native submit Event object so its existing `preventDefault()` contract is preserved;
+- payment-confirm enablement, payment submission, and checkout modal close call the same existing `App.shop` / `App.ui` methods;
+- regression locks the <=170 global ceiling, zero Shop generated handlers, exact 1 submit + 1 change + 2 click data contracts, one loader, and delegated behavior markers;
+- binder is prohibited from injecting markup, performing fetches, or touching Supabase;
+- no CSS/style cleanup, strict CSP enforcement, DB, API, Storage, application-data, Creator, Admin, or Studio AI behavior change belongs to this phase;
+- merge remains blocked until exact-head Release Gate PASS + Vercel Preview SUCCESS + Shop browser acceptance + clean first-party console evidence.

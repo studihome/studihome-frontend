@@ -706,3 +706,16 @@ Before continuing #81 -> #88, current console evidence was triaged.
 - two utility actions now use delegated data contracts;
 - regression + syntax/Release Gate wiring prepared.
 
+## Issue #98 Phase I preparation — 7 Sep 2026
+
+- canonical PR #114 extended in-place after Phase H;
+- bounded surface: generated Shop checkout actions only;
+- removed 4 generated HTML event attributes: 1 onsubmit, 1 onchange, 2 onclick;
+- generated handler count: 174 -> 170;
+- Shop section generated HTML event attributes: 4 -> 0;
+- same-origin `generated-shop-actions.js` delegates submit/change/click from stable `checkout-modal-content`;
+- native submit Event semantics remain passed to `App.shop.submitOrderStep1(event)`;
+- payment checkbox, payment confirmation, and checkout-close behavior remain delegated to the same existing App methods;
+- regression + JavaScript syntax/Release Gate wiring added;
+- no Home/Studio AI/Creator/Admin/CSS/CSP enforcement/DB/API/Storage/data change belongs to this phase;
+- keep PR draft/unmerged until exact-head Release Gate passes, Vercel Preview succeeds, Shop browser acceptance passes, and no new first-party console errors are observed.

@@ -330,3 +330,12 @@ ISSUE #98 PHASE H — GENERATED UTILITY ACTIONS PREP / 7 SEP 2026
 - Preserve window.location.reload and App.router.navigate('home') semantics.
 - No Shop/Studio AI/Creator/Admin/CSS/CSP/DB/API change.
 
+ISSUE #98 PHASE I — GENERATED SHOP ACTIONS PREP / 7 SEP 2026
+- Continue on canonical PR #114 after Phase H.
+- Remove exactly 4 Shop generated HTML event attributes: submitOrderStep1 onsubmit, payment checkbox onchange, payment-confirm onclick, checkout-close onclick.
+- Generated handler count becomes 170; Shop section becomes zero.
+- Use data-shop-submit / data-shop-change / data-shop-action with one delegated binder on checkout-modal-content.
+- Preserve native submit Event -> App.shop.submitOrderStep1(event), App.shop.updatePaymentConfirmButton(), App.shop.submitPaymentConfirmation(), and App.ui.toggleModal('checkout-modal', false).
+- Regression must lock <=170 global generated handlers, zero Shop generated handlers, exact data-contract cardinality, one loader, and no network/Supabase/markup injection from the binder.
+- No CSS/style cleanup, strict CSP enforcement, DB, API, Storage, Creator, Admin, or Studio AI behavior change.
+- Keep draft/unmerged until exact-head Release Gate PASS, Vercel Preview SUCCESS, Shop browser acceptance, and no new first-party console errors.
