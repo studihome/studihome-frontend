@@ -494,3 +494,19 @@ This section supersedes earlier contradictory status sections.
 - prepared migration constrains unpublished direct trust-metric visibility while retaining published/owner/Admin access;
 - post-apply SQL verification and explicit rollback artifacts are present;
 - migration remains NOT APPLIED live pending fresh PR #81 Preview + Release Gate and post-apply SQL verification.
+
+
+## Issue #23 stacked implementation state
+
+- stacked branch: `feat/admin-bulk-portfolio-intake`;
+- base dependency: PR #81 / `security/constrain-creator-trust-rpc`;
+- canonical implementation files: `dapur-editor.js`, `dapur-entry.js`;
+- Admin authorization is rechecked through `is_admin()` before panel enumeration and bulk portfolio DB access;
+- bulk intake helper remains private to the editor IIFE;
+- 100-line bounded intake, HTTPS-only normalization, same-Creator normalized dedupe, single batch insert;
+- all bulk rows are draft/inactive with null service_id and empty description;
+- direct video-file URLs are stored as link under current validated DB media policy;
+- single-item editor now also rejects non-HTTPS URLs before Supabase request;
+- regression test added and wired into Release Gate;
+- no schema, migration, RLS, grant, Auth, or production-data change;
+- this workstream must not merge ahead of PR #81.
