@@ -174,3 +174,11 @@ CURRENT AUTHORITY UPDATE — 7 SEP 2026 / REFRESH 4
 - PR #88 is stacked on #81 and must not merge first. Exact head `4a01c183b282d3abbe07f67eabece35faa656afa`; Release Gate #643 PASS; Vercel BLOCKED.
 - #88 uses canonical `dapur-editor.js` + `window.supabaseClient`, Admin recheck, HTTPS-only URLs, max 100 lines, normalized dedupe, one batch insert, draft inactive rows, no scraping.
 - Issue #90 owns portfolio media CHECK reconciliation. Do not change schema inside #88; current safe frontend maps direct video files to `link`.
+
+
+CURRENT AUTHORITY UPDATE — 7 SEP 2026 / REFRESH 5
+- PR #81 prior validated head `55abd94353f319ff085e132bb51ad61eb9df6885`: Release Gate #646 PASS; preflight/apply/rollback transaction tests PASS; migration NOT APPLIED.
+- Vercel capacity recovery is proven on PR #88 head `3a1d5a681d56ee5f957487aabc8ffbd18ba1054e`: Release Gate #648 PASS + Vercel Preview SUCCESS.
+- PR #88 remains DRAFT / STACKED on #81; latest URL hardening rejects embedded credentials and non-default platform ports from special media classification.
+- Issue #90 DB media-policy migration contract READY; Issue #83 redundant-index cleanup contract READY; neither is applied live.
+- Issue #62 remains blocked by missing Edge invocation telemetry.
