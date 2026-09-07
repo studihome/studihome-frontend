@@ -654,3 +654,13 @@ Before continuing #81 -> #88, current console evidence was triaged.
 - regression + syntax/Release Gate wiring prepared;
 - no merge while Vercel Preview is unavailable.
 
+## Issue #98 Phase D preparation — 7 Sep 2026
+
+- stacked on Phase C/B/A;
+- final 4 static onclick attributes extracted;
+- static inline event-handler count: 4 -> **0**;
+- javascript: URLs remain zero;
+- PWA install + product/checkout/module close behaviors owned by external binder;
+- product iframe cleanup ordering locked by regression;
+- static attribute workstream is source-prepared but remains unmerged until sequential Preview/browser gates are available.
+
