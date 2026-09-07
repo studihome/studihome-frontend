@@ -125,3 +125,33 @@ ISSUE #24 VERIFIED RELEASE
 - Release Gate #621: PASS;
 - Production Smoke #12 / `34069115071`: PASS;
 - Admin Dapur now uses only `window.supabaseClient`; do not reintroduce a duplicate SDK loader/client.
+
+
+DAPUR AUTH MODAL ACCESSIBILITY
+- never set `aria-hidden=true` on the auth modal while focus is still inside it;
+- use `inert` for the hidden modal;
+- on close: move/blur focus out first, then set inert/aria-hidden/display-none, then restore focus to the invoker;
+- on open: clear inert, set aria-hidden=false, display, and focus a meaningful control;
+- keep the 6-character login minimum validation before `signInWithPassword`;
+- HTTP 400 from Supabase for rejected credentials is an auth response, not a frontend crash; handle it with UI messaging rather than suppressing network diagnostics;
+- regression test: `tests/dapur-auth-modal-accessibility-regression.js`.
+
+
+CURRENT AUTHORITY UPDATE — 7 SEP 2026
+- PR #79 remains open: Release Gate previously PASS; Vercel Preview currently BLOCKED by build-rate-limit.
+- Issue #24: CLOSED / COMPLETED / production-verified.
+- Issue #19: three inactive Studio AI legacy files are DELETE-CANDIDATE only; no deletion or CSP tightening yet. Current index still has 25 inline scripts and 9 inline styles.
+- Issue #62: smooth-action ACTIVE v2 + swift-endpoint ACTIVE v1; retirement BLOCKED by missing invocation evidence.
+- Issue #23: live schema/RLS supports Admin bulk portfolio intake without DB changes; default new bulk rows inactive, dedupe normalized URLs, no scraping or fabricated metadata.
+- PR #43 and PR #50: closed as superseded; any revival requires a fresh current-main audit.
+
+
+CURRENT AUTHORITY UPDATE — 7 SEP 2026 / REFRESH 2
+- Production baseline: main `e213d6d98eab3c47f559cda8b285aebfb7a9895d`, Vercel SUCCESS, Release Gate #623 PASS, Production Smoke #13 PASS.
+- PR #79: current accessibility fix; do not merge until fresh Vercel Preview SUCCESS for the exact current head.
+- Issue #80 / draft PR #81: trust-RPC hardening prepared, migration NOT APPLIED live; keep signature + SECURITY DEFINER + search_path + ACL while adding published/owner/Admin visibility.
+- Issue #19 CLOSED as audit; #84 owns inactive Studio AI deletion, #85 owns phased CSP extraction/enforcement.
+- Issue #82 CLOSED; no Advisor-unused index was dropped. #83 separately tracks redundant `idx_entitlements_user_product`.
+- Issue #62 remains blocked by missing Edge invocation evidence.
+- Issue #23 canonical owner is `dapur-editor.js`, not `admin-dapur-creator-v5.js`. Reuse `window.supabaseClient`, require Admin via `is_admin()`, bump lazy editor cache-buster, HTTPS-only, supported media types only, max 100 lines, draft inactive rows, deterministic title, no scraping.
+- Existing same-URL portfolio rows are legitimate service-context variants; #86 CLOSED with NO CLEANUP. Never impose global URL uniqueness without product/schema redesign.

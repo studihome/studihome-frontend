@@ -546,6 +546,9 @@ jobs:
       - name: Admin Dapur Supabase singleton regression
         run: node tests/admin-dapur-supabase-singleton-regression.js
 
+      - name: Dapur auth modal accessibility regression
+        run: node tests/dapur-auth-modal-accessibility-regression.js
+
       - name: Public API resilience regression
         run: node tests/api-resilience-regression.js
 
