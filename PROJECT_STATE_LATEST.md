@@ -674,3 +674,13 @@ Before continuing #81 -> #88, current console evidence was triaged.
 - SMART uses data action + delegated click; behavior/ranking unchanged;
 - regression + Release Gate wiring prepared; draft/unmerged while Vercel Preview unavailable.
 
+## Issue #98 Phase F preparation — 7 Sep 2026
+
+- stacked after A-E;
+- bounded surface: generated top navigation + top-auth only;
+- 4 generated HTML event attributes removed;
+- generated-handler count: 183 -> 179;
+- navigation/login/logout behavior preserved through delegated data-action binder;
+- regression + syntax/Release Gate wiring prepared;
+- no merge while Vercel Preview is unavailable.
+
