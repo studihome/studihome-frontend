@@ -484,3 +484,13 @@ This section supersedes earlier contradictory status sections.
 - Issue #23: canonical CRUD owner corrected to `dapur-editor.js`. Live DB requires HTTPS-only portfolio URLs. Bulk intake contract: private Admin-only path, canonical Supabase singleton, normalize/dedupe new generic URLs only, no historical cleanup, max 100 lines, deterministic title, `service_id=null`, `description=''`, `is_active=false`, append deterministic sort order, no scraping;
 - Issue #86: CLOSED / COMPLETED with NO CLEANUP after proving 45 same-URL groups are service-linked variants, not safe duplicates;
 - PR #43 and PR #50 remain CLOSED AS SUPERSEDED.
+
+
+## Issue #90 media policy draft implementation state
+
+- migration branch prepared from production main;
+- unified creator_portfolios media CHECK migration + exact rollback + preflight + post-apply verification + Release Gate regression added;
+- prior transactional live simulation proved allowed/denied behavior and exact rollback reconstruction;
+- current production schema remains unchanged;
+- no data/RLS/grant/Auth change;
+- draft implementation must remain unmerged/unapplied until #81 -> #88 completes and branch is refreshed to current main.
