@@ -160,9 +160,9 @@ CURRENT AUTHORITY UPDATE — 7 SEP 2026 / REFRESH 2
 CREATOR TRUST RPC HARDENING — SYNCHRONIZED AFTER PR #79
 - PR #79 is production-verified at `d32c7e04b5c3d916c85a57a5528f18e6501134a1` (Vercel SUCCESS, Release Gate #638 PASS, Production Smoke #14 PASS).
 - PR #81 must be validated on top of that main; no merge from a stale branch.
-- Migration: `supabase/migrations/20260907004000_constrain_creator_trust_metrics_visibility.sql`.
+- Migration: `supabase/migrations/20260907063648_constrain_creator_trust_metrics_visibility.sql`.
 - Verification: `supabase/tests/creator_trust_metrics_visibility_verification.sql`.
-- Rollback: `supabase/rollbacks/20260907004000_restore_creator_trust_metrics_visibility.sql`.
+- Rollback: `supabase/rollbacks/20260907063648_restore_creator_trust_metrics_visibility.sql`.
 - Preserve function signature, SECURITY DEFINER, search_path='', and ACL; only constrain unpublished visibility to owner/Admin.
 - Migration remains NOT APPLIED until fresh PR #81 Release Gate + Vercel Preview and post-apply SQL verification succeed.
 
@@ -198,3 +198,16 @@ CURRENT AUTHORITY UPDATE — 7 SEP 2026 / REFRESH 6
 - Production main: `2809811790ab12511886355f8a0cc42717a82745`; PR #101 console hygiene/avatar resilience is production-verified.
 - PR #81 preserves PR #101 runtime/CI while retaining Creator trust migration/test artifacts.
 - Migration remains NOT APPLIED until fresh exact-head Release Gate + Vercel Preview PASS.
+
+CURRENT AUTHORITY UPDATE — 7 SEP 2026 / REFRESH 7
+- Production main remains `2809811790ab12511886355f8a0cc42717a82745`; PR #101 console hygiene/avatar resilience is production-verified.
+- Creator trust visibility hardening is APPLIED LIVE in Supabase as migration version `20260907063648` / `constrain_creator_trust_metrics_visibility`.
+- Immediate preflight PASS; post-apply published/anonymous-denial/Admin/eligible-owner verification PASS.
+- Canonical source migration: `supabase/migrations/20260907063648_constrain_creator_trust_metrics_visibility.sql`.
+- Canonical rollback: `supabase/rollbacks/20260907063648_restore_creator_trust_metrics_visibility.sql`.
+- No table, RLS, grant, storage-object, or application-data mutation belongs to this migration.
+- Security Advisor has been rerun. The target RPC intentionally retains anon/auth EXECUTE for published metrics, so generic SECURITY DEFINER lints remain expected; do not revoke public access or convert security mode without redesigning the public metrics contract.
+- Performance Advisor returned INFO-only unused-index candidates; do not drop them in this workstream.
+- Previous #81 Preview failure is Vercel Free-plan quota. Because #81 has no frontend/API runtime delta relative to the already deployed main, persistent DB apply used a documented DB-only deployment-equivalence exception. Exact-head Release Gate PASS plus a no-runtime-diff check are still mandatory before merge.
+- PR #88 remains stacked; reconcile it with main only after #81 completes.
+
