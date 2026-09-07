@@ -696,3 +696,13 @@ Before continuing #81 -> #88, current console evidence was triaged.
 - regression + syntax/Release Gate wiring prepared;
 - no merge while Vercel Preview is unavailable.
 
+## Issue #98 Phase H preparation — 7 Sep 2026
+
+- canonical PR #114 extended in-place; no new stacked PR;
+- bounded surface: backend-error reload + reset-password back-home;
+- generated handler count: 176 -> 174;
+- ui section: 1 -> 0;
+- auth section: 1 -> 0;
+- two utility actions now use delegated data contracts;
+- regression + syntax/Release Gate wiring prepared.
+
