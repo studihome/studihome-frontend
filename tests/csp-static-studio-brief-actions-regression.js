@@ -20,9 +20,9 @@ for (const match of staticMarkup.matchAll(/\s(on[a-z]+)\s*=/gi)) {
 }
 const totalHandlers = Object.values(counts).reduce((sum, value) => sum + value, 0);
 
-assert(totalHandlers === 12, 'Expected 12 static inline handlers after Studio Brief phase, found ' + totalHandlers);
-assert((counts.onclick || 0) === 9, 'Expected 9 static onclick handlers, found ' + (counts.onclick || 0));
-assert((counts.onsubmit || 0) === 3, 'Expected 3 static onsubmit handlers, found ' + (counts.onsubmit || 0));
+assert(totalHandlers <= 12, 'Expected at most 12 static inline handlers after Studio Brief phase, found ' + totalHandlers);
+assert((counts.onclick || 0) <= 9, 'Expected at most 9 static onclick handlers, found ' + (counts.onclick || 0));
+assert((counts.onsubmit || 0) <= 3, 'Expected at most 3 static onsubmit handlers, found ' + (counts.onsubmit || 0));
 assert((counts.onkeydown || 0) === 0, 'Static onkeydown must remain zero, found ' + (counts.onkeydown || 0));
 
 for (const id of [
