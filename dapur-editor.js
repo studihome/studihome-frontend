@@ -62,17 +62,18 @@
     try{
       const url=new URL(String(raw||'').trim());
       if(url.protocol!=='https:')return null;
+      if(url.username||url.password)return null;
       url.hash='';
       return url.toString();
     }catch{return null}
   }
   function detectPortfolioMedia(raw){
     try{
-      const url=new URL(raw),host=url.hostname.toLowerCase(),path=url.pathname.toLowerCase();
-      if(['youtube.com','www.youtube.com','youtu.be','www.youtu.be'].includes(host))return'youtube';
-      if(['drive.google.com','www.drive.google.com','docs.google.com','www.docs.google.com'].includes(host))return'drive';
-      if(['tiktok.com','www.tiktok.com'].includes(host))return'tiktok';
-      if(['instagram.com','www.instagram.com'].includes(host))return'instagram';
+      const url=new URL(raw),host=url.hostname.toLowerCase(),path=url.pathname.toLowerCase(),platformPortOk=!url.port;
+      if(platformPortOk&&['youtube.com','www.youtube.com','youtu.be','www.youtu.be'].includes(host))return'youtube';
+      if(platformPortOk&&['drive.google.com','www.drive.google.com','docs.google.com','www.docs.google.com'].includes(host))return'drive';
+      if(platformPortOk&&['tiktok.com','www.tiktok.com'].includes(host))return'tiktok';
+      if(platformPortOk&&['instagram.com','www.instagram.com'].includes(host))return'instagram';
       if(/\.(png|jpe?g|webp|gif|avif|svg)$/i.test(path))return'image';
       return'link';
     }catch{return null}
