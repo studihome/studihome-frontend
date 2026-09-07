@@ -167,16 +167,23 @@ CREATOR TRUST RPC HARDENING — SYNCHRONIZED AFTER PR #79
 - Migration remains NOT APPLIED until fresh PR #81 Release Gate + Vercel Preview and post-apply SQL verification succeed.
 
 
+CURRENT AUTHORITY UPDATE — 7 SEP 2026 / REFRESH 4
+- Production main remains `d32c7e04b5c3d916c85a57a5528f18e6501134a1`; PR #79 production verification is complete.
+- PR #81 preflight PASS; Release Gate #642 PASS; Vercel remains build-rate-limited; migration NOT APPLIED live.
+- PR #81 actual migration and actual rollback were both transaction-tested against live Supabase and rolled back completely. Published parity 0 mismatch; anonymous unpublished leak 0; Admin PASS; owner PASS; ACL/security contract preserved; rollback exact-match PASS.
+- PR #88 is stacked on #81 and must not merge first. Exact head `4a01c183b282d3abbe07f67eabece35faa656afa`; Release Gate #643 PASS; Vercel BLOCKED.
+- #88 uses canonical `dapur-editor.js` + `window.supabaseClient`, Admin recheck, HTTPS-only URLs, max 100 lines, normalized dedupe, one batch insert, draft inactive rows, no scraping.
+- Issue #90 owns portfolio media CHECK reconciliation. Do not change schema inside #88; current safe frontend maps direct video files to `link`.
+
+
 ISSUE #23 BULK PORTFOLIO INTAKE — STACKED / PREPARED
-- Base this workstream on PR #81; do not merge before #81.
-- Canonical owner: `dapur-editor.js`; lazy loader cache-buster: `v=20260907bulk1`.
+- Must remain stacked on PR #81 and must not merge first.
+- Canonical owner: `dapur-editor.js`; lazy loader cache-buster `v=20260907bulk1`.
 - Reuse `window.supabaseClient` only.
-- Require `is_admin()` inside both adminPanel and private bulkPortfolioIntake.
-- HTTPS-only; strip fragment; preserve query.
-- Max 100 pasted lines.
-- Deduplicate normalized URL against existing Creator rows + current batch.
-- Do not modify historical service-linked same-URL rows.
-- Insert drafts only: service_id null, description empty, deterministic title, appended sort order, is_active false.
+- Require `is_admin()` inside adminPanel and private bulkPortfolioIntake.
+- HTTPS-only; max 100 lines; strip fragment; preserve query; dedupe normalized URLs.
+- Insert draft rows only: service_id null, description empty, deterministic title, appended sort order, is_active false.
 - No scraping/fabricated metadata.
-- Under current live CHECK constraints, direct video files map to link; do not write media_type=video.
+- Direct video-file URLs remain `link` until Issue #90 reconciles DB checks.
 - Regression: `tests/admin-bulk-portfolio-intake-regression.js`.
+- Release Gate #643 PASS on exact pre-sync feature head; fresh validation required after any head change.
