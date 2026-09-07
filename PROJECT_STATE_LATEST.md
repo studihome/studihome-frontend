@@ -611,3 +611,14 @@ Before continuing #81 -> #88, current console evidence was triaged.
 - no persistent index change yet;
 - apply gate: exact-head Release Gate PASS + Vercel Preview SUCCESS + fresh live preflight.
 
+## Issue #83 live apply state — 7 Sep 2026
+
+- live migration: `20260907110644_remove_redundant_entitlements_user_product_index` APPLIED;
+- redundant non-unique index absent: PASS;
+- UNIQUE constraint index retained/valid: PASS;
+- FK-leading indexes retained: PASS;
+- indexed lookup path retained: PASS;
+- Performance Advisor rerun: target redundant index finding absent;
+- source migration/rollback reconciled to live version;
+- PR #105 remains unmerged pending fresh exact-head gates after reconciliation.
+
