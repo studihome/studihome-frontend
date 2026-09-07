@@ -127,18 +127,41 @@ ISSUE #24 VERIFIED RELEASE
 - Admin Dapur now uses only `window.supabaseClient`; do not reintroduce a duplicate SDK loader/client.
 
 
-CREATOR TRUST RPC HARDENING — PREPARED / NOT APPLIED
-- Issue #80 tracks direct anon exposure of `get_creator_trust_metrics(uuid)`.
-- Keep its current signature, SECURITY DEFINER mode, search_path='', and ACL.
-- Add internal visibility gate: published OR active Admin OR owning Creator with workspace access.
-- Unauthorized/unpublished arbitrary UUID must return NULL rather than metrics.
-- Migration source: `supabase/migrations/20260907004000_constrain_creator_trust_metrics_visibility.sql`.
-- Regression source: `tests/creator-trust-metrics-visibility-regression.js`.
-- Do not apply live or merge while required Preview/release gates are unavailable.
+DAPUR AUTH MODAL ACCESSIBILITY
+- never set `aria-hidden=true` on the auth modal while focus is still inside it;
+- use `inert` for the hidden modal;
+- on close: move/blur focus out first, then set inert/aria-hidden/display-none, then restore focus to the invoker;
+- on open: clear inert, set aria-hidden=false, display, and focus a meaningful control;
+- keep the 6-character login minimum validation before `signInWithPassword`;
+- HTTP 400 from Supabase for rejected credentials is an auth response, not a frontend crash; handle it with UI messaging rather than suppressing network diagnostics;
+- regression test: `tests/dapur-auth-modal-accessibility-regression.js`.
 
 
-ISSUE #80 VERIFICATION ARTIFACTS
-- SQL post-apply verification: `supabase/tests/creator_trust_metrics_visibility_verification.sql`.
-- Rollback SQL: `supabase/rollbacks/20260907004000_restore_creator_trust_metrics_visibility.sql`.
-- Direct live read-only probe proved unpublished Creator metrics currently return non-NULL from the RPC in unauthenticated context.
-- Do not apply migration live until PR gate + Preview + post-apply SQL verification are available.
+CURRENT AUTHORITY UPDATE — 7 SEP 2026
+- PR #79 remains open: Release Gate previously PASS; Vercel Preview currently BLOCKED by build-rate-limit.
+- Issue #24: CLOSED / COMPLETED / production-verified.
+- Issue #19: three inactive Studio AI legacy files are DELETE-CANDIDATE only; no deletion or CSP tightening yet. Current index still has 25 inline scripts and 9 inline styles.
+- Issue #62: smooth-action ACTIVE v2 + swift-endpoint ACTIVE v1; retirement BLOCKED by missing invocation evidence.
+- Issue #23: live schema/RLS supports Admin bulk portfolio intake without DB changes; default new bulk rows inactive, dedupe normalized URLs, no scraping or fabricated metadata.
+- PR #43 and PR #50: closed as superseded; any revival requires a fresh current-main audit.
+
+
+CURRENT AUTHORITY UPDATE — 7 SEP 2026 / REFRESH 2
+- Production baseline: main `e213d6d98eab3c47f559cda8b285aebfb7a9895d`, Vercel SUCCESS, Release Gate #623 PASS, Production Smoke #13 PASS.
+- PR #79: current accessibility fix; do not merge until fresh Vercel Preview SUCCESS for the exact current head.
+- Issue #80 / draft PR #81: trust-RPC hardening prepared, migration NOT APPLIED live; keep signature + SECURITY DEFINER + search_path + ACL while adding published/owner/Admin visibility.
+- Issue #19 CLOSED as audit; #84 owns inactive Studio AI deletion, #85 owns phased CSP extraction/enforcement.
+- Issue #82 CLOSED; no Advisor-unused index was dropped. #83 separately tracks redundant `idx_entitlements_user_product`.
+- Issue #62 remains blocked by missing Edge invocation evidence.
+- Issue #23 canonical owner is `dapur-editor.js`, not `admin-dapur-creator-v5.js`. Reuse `window.supabaseClient`, require Admin via `is_admin()`, bump lazy editor cache-buster, HTTPS-only, supported media types only, max 100 lines, draft inactive rows, deterministic title, no scraping.
+- Existing same-URL portfolio rows are legitimate service-context variants; #86 CLOSED with NO CLEANUP. Never impose global URL uniqueness without product/schema redesign.
+
+
+CREATOR TRUST RPC HARDENING — SYNCHRONIZED AFTER PR #79
+- PR #79 is production-verified at `d32c7e04b5c3d916c85a57a5528f18e6501134a1` (Vercel SUCCESS, Release Gate #638 PASS, Production Smoke #14 PASS).
+- PR #81 must be validated on top of that main; no merge from a stale branch.
+- Migration: `supabase/migrations/20260907004000_constrain_creator_trust_metrics_visibility.sql`.
+- Verification: `supabase/tests/creator_trust_metrics_visibility_verification.sql`.
+- Rollback: `supabase/rollbacks/20260907004000_restore_creator_trust_metrics_visibility.sql`.
+- Preserve function signature, SECURITY DEFINER, search_path='', and ACL; only constrain unpublished visibility to owner/Admin.
+- Migration remains NOT APPLIED until fresh PR #81 Release Gate + Vercel Preview and post-apply SQL verification succeed.

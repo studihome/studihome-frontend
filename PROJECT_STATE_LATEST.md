@@ -439,21 +439,58 @@ Issue #24:
 Verified evidence: PR #77 Release Gate #620 PASS; Vercel Preview SUCCESS; merged main SHA `1c1702f1020c6743b09d84d0dce559484754284b`; Vercel Production SUCCESS; main Release Gate #621 PASS; Production Smoke #12 / `34069115071` PASS.
 
 
-## Creator trust RPC hardening — PREPARED / NOT APPLIED
+## Dapur auth modal accessibility — FIX IMPLEMENTED
 
-Issue #80:
-- live Security Advisor baseline remains unchanged: 3 RLS-no-policy INFO, 8 anon SECURITY DEFINER WARN, 20 authenticated SECURITY DEFINER WARN, 1 leaked-password WARN;
-- `get_creator_trust_metrics(uuid)` has an active caller in the large `index.html`, so anon EXECUTE cannot simply be revoked;
-- current caller rejects unpublished Creator before RPC, but live RPC does not enforce that rule internally;
-- live aggregate audit found 1 unpublished Creator and 0 with nonzero trust metrics, so no demonstrated current leak;
-- prepared migration adds published/owner/Admin visibility gating while preserving signature, SECURITY DEFINER, search_path, and ACL;
-- no live DB change has been made;
-- regression test is integrated into Release Gate.
+User console evidence on `/dapur`:
+- AdobeClean slow-network intervention: external Chrome extension;
+- async message channel closed: external/extension provenance unless first-party stack is proven;
+- Supabase login 400: expected rejected-auth response, already caught by Dapur UI;
+- actionable Studihome warning: focused `.auth-close` remained inside `#dapur-auth-modal` when `aria-hidden=true` was applied.
+
+Implementation:
+- hidden modal starts `inert=true` + `aria-hidden=true`;
+- open flow clears inert and focuses `#login-email`;
+- close flow blurs contained focus before inert/aria-hidden, then restores invoking control focus;
+- login now blocks passwords shorter than 6 characters before network auth;
+- `dapur-entry.js` cache-buster bumped to `v=20260907a11y1`;
+- added `tests/dapur-auth-modal-accessibility-regression.js` and Release Gate integration;
+- no DB, RLS, Auth configuration, Supabase project, or security-header change.
 
 
-Issue #80 verification artifacts:
-- direct live read-only probe: published metrics returned; unpublished metrics also returned, confirming the internal visibility gap;
-- post-apply SQL verification script added for published success, unpublished anonymous denial, Admin access, and owner workspace access;
-- explicit rollback SQL added to restore the prior RPC definition;
-- migration remains repository-only / NOT APPLIED;
-- Vercel Preview remains provider-BLOCKED by build-rate-limit.
+## Current authority update — 7 Sep 2026
+
+This section supersedes older contradictory status paragraphs in this file.
+
+- production-verified main baseline before PR #79: `e213d6d98eab3c47f559cda8b285aebfb7a9895d`;
+- PR #79 accessibility fix remains open; prior Release Gate PASS, Vercel Preview currently BLOCKED by build-rate-limit;
+- Issue #24: CLOSED / COMPLETED / production-verified;
+- Issue #19: Studio AI legacy files `studio-ai-enhancements.js`, `studio-ai-production-enhancements.js`, and `studio-ai-search.js` are DELETE-CANDIDATE / not loaded; no deletion yet. CSP tightening is deferred because index.html still contains 25 inline script blocks and 9 inline style blocks;
+- Issue #62: `smooth-action` ACTIVE v2, `swift-endpoint` ACTIVE v1; no repo runtime caller, but retirement remains BLOCKED by missing invocation-log evidence;
+- Issue #23: live creator_portfolios schema/grants/RLS support Admin bulk intake without DB changes; implementation contract is deterministic URL-only classification/title, same-Creator normalized URL dedupe, `is_active=false`, explicit added/skipped/duplicate/invalid counts, no scraping;
+- PR #43 and PR #50 were closed as superseded on 7 Sep 2026.
+
+
+## Current authority update — 7 Sep 2026 / refresh 2
+
+This section supersedes earlier contradictory status sections.
+
+- production-verified main: `e213d6d98eab3c47f559cda8b285aebfb7a9895d`; Vercel SUCCESS; Release Gate #623 PASS; Production Smoke #13 PASS;
+- PR #79: Dapur auth-modal accessibility fix; source/CI ready but merge blocked until fresh Vercel Preview SUCCESS for current head;
+- Issue #80 / draft PR #81: Creator trust RPC hardening prepared and CI-validated; migration remains NOT APPLIED live;
+- Issue #19: CLOSED / COMPLETED audit. Follow-ups: #84 inactive Studio AI cleanup, #85 phased CSP extraction/enforcement;
+- Issue #82: CLOSED / COMPLETED audit; no Advisor-unused index dropped;
+- Issue #83: redundant `idx_entitlements_user_product` cleanup candidate, isolated/reversible only;
+- Issue #62: legacy Edge retirement blocked by missing invocation evidence;
+- Issue #23: canonical CRUD owner corrected to `dapur-editor.js`. Live DB requires HTTPS-only portfolio URLs. Bulk intake contract: private Admin-only path, canonical Supabase singleton, normalize/dedupe new generic URLs only, no historical cleanup, max 100 lines, deterministic title, `service_id=null`, `description=''`, `is_active=false`, append deterministic sort order, no scraping;
+- Issue #86: CLOSED / COMPLETED with NO CLEANUP after proving 45 same-URL groups are service-linked variants, not safe duplicates;
+- PR #43 and PR #50 remain CLOSED AS SUPERSEDED.
+
+
+## Creator trust RPC hardening — synchronized branch state
+
+- production main after PR #79: `d32c7e04b5c3d916c85a57a5528f18e6501134a1`;
+- PR #79 verification: Vercel Production SUCCESS; Release Gate #638 PASS; Production Smoke #14 PASS;
+- PR #81 security branch must be synchronized with this production state before fresh Preview/CI;
+- prepared migration constrains unpublished direct trust-metric visibility while retaining published/owner/Admin access;
+- post-apply SQL verification and explicit rollback artifacts are present;
+- migration remains NOT APPLIED live pending fresh PR #81 Preview + Release Gate and post-apply SQL verification.

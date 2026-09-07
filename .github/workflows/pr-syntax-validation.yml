@@ -546,6 +546,9 @@ jobs:
       - name: Admin Dapur Supabase singleton regression
         run: node tests/admin-dapur-supabase-singleton-regression.js
 
+      - name: Dapur auth modal accessibility regression
+        run: node tests/dapur-auth-modal-accessibility-regression.js
+
       - name: Creator trust metrics visibility regression
         run: node tests/creator-trust-metrics-visibility-regression.js
 
