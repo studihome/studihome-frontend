@@ -155,3 +155,13 @@ CURRENT AUTHORITY UPDATE — 7 SEP 2026 / REFRESH 2
 - Issue #62 remains blocked by missing Edge invocation evidence.
 - Issue #23 canonical owner is `dapur-editor.js`, not `admin-dapur-creator-v5.js`. Reuse `window.supabaseClient`, require Admin via `is_admin()`, bump lazy editor cache-buster, HTTPS-only, supported media types only, max 100 lines, draft inactive rows, deterministic title, no scraping.
 - Existing same-URL portfolio rows are legitimate service-context variants; #86 CLOSED with NO CLEANUP. Never impose global URL uniqueness without product/schema redesign.
+
+
+CONSOLE HYGIENE REMEDIATION — 7 SEP 2026
+- Remove first-party informational console noise, not diagnostic failures.
+- Preserve the custom PWA beforeinstallprompt contract; Chromium's "Banner not shown" message is expected when preventDefault is used for a deferred user-gesture prompt.
+- Treat message-channel "Receiving end does not exist" / channel-closed errors as extension/content-script provenance unless a Studihome-owned stack frame is proven. Never globally suppress unhandledrejection.
+- Live storage verified all 5 reported Creator avatar objects exist; ERR_NAME_NOT_RESOLVED is DNS/network-layer.
+- Use strict same-origin /api/creator-avatar resilience only for Studihome UUID[/UUID]/avatar.webp paths. Fixed upstream host, no arbitrary fetch, fallback 200 image, CDN cache.
+- Social-proof success/debug logs removed; real failures remain warnings.
+- Regression: tests/console-hygiene-avatar-resilience-regression.js.
