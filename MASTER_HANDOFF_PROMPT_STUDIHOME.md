@@ -552,3 +552,15 @@ This section supersedes earlier deployment/release status text.
 - exact rollback: `supabase/rollbacks/20260907110644_restore_redundant_entitlements_user_product_index.sql`;
 - PR #105 requires fresh exact-head Release Gate + Preview after reconciliation before merge.
 
+## Issue #90 media CHECK reconciliation — clean rebuild / 7 Sep 2026
+
+- stale branch `db/reconcile-creator-portfolio-media-policy` is 51 commits behind current main and must not be merged or force-updated;
+- live state still has four overlapping media CHECK constraints with validation states fingerprinted in the clean preflight;
+- current EFFECTIVE policy is the intersection of those checks: link/image HTTPS; provider-specific youtube/drive/tiktok/instagram on the current root/www host contract; native `video` is currently denied;
+- 139/139 live rows comply with that preserved effective policy; live media distribution is 137 link + 2 youtube + 0 video;
+- the older proposal to enable `media_type=video` is rejected as an unnecessary semantic expansion;
+- transaction-only apply + 12 allow/deny cases + explicit rollback exact-restoration test PASS;
+- clean migration consolidates four constraints into one VALIDATED `creator_portfolios_media_policy_v2` while preserving current semantics, including case-sensitive media_type behavior;
+- frontend direct video URLs remain safe `link` fallback and regression coverage locks that behavior;
+- migration is **NOT APPLIED LIVE** while source main `175110a...` has a provider-quota-blocked production deployment; prepare/validate PR only.
+
