@@ -67,7 +67,8 @@
       return url.toString();
     }catch{return null}
   }
-  function isGenericPortfolioRow(row){return !!row&&row.service_id==null}\n  function detectPortfolioMedia(raw){
+  function isGenericPortfolioRow(row){return !!row&&row.service_id==null}
+  function detectPortfolioMedia(raw){
     try{
       const url=new URL(raw),host=url.hostname.toLowerCase(),path=url.pathname.toLowerCase(),platformPortOk=!url.port;
       if(platformPortOk&&['youtube.com','www.youtube.com','youtu.be','www.youtu.be'].includes(host))return'youtube';
