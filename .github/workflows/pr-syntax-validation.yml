@@ -32,7 +32,7 @@ jobs:
       - name: JavaScript syntax
         run: |
           set -euo pipefail
-          for file in             static-search-actions.js             static-studio-brief-actions.js             studio-ai-creator-card.js             dapur-entry.js             dapur-editor.js             sw.js             supabase-sdk-loader-v1.js             supabase-config.js             api/agent-search.js             api/index-push.js             api/markdown.js             api/sitemap.js             api/version.js             portfolio-route.js
+          for file in             static-search-actions.js             static-studio-brief-actions.js             static-auth-actions.js             studio-ai-creator-card.js             dapur-entry.js             dapur-editor.js             sw.js             supabase-sdk-loader-v1.js             supabase-config.js             api/agent-search.js             api/index-push.js             api/markdown.js             api/sitemap.js             api/version.js             portfolio-route.js
           do
             if [ -f "$file" ]; then
               echo "Checking $file"
@@ -554,6 +554,9 @@ jobs:
 
       - name: CSP static Studio Brief actions regression
         run: node tests/csp-static-studio-brief-actions-regression.js
+
+      - name: CSP static Auth actions regression
+        run: node tests/csp-static-auth-actions-regression.js
 
       - name: Admin bulk portfolio intake regression
         run: node tests/admin-bulk-portfolio-intake-regression.js
