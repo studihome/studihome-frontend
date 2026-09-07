@@ -264,3 +264,10 @@ ISSUE #83 LIVE APPLY — 7 SEP 2026
 - Canonical rollback: `supabase/rollbacks/20260907110644_restore_redundant_entitlements_user_product_index.sql`.
 - PR #105 must rerun exact-head Release Gate + Vercel Preview after source-version reconciliation before merge.
 
+CONSOLE HYGIENE FOLLOW-UP — 7 SEP 2026
+- Treat `social-proof-widget.js?v=13` success logs as stale-client evidence; current widget source contains only real failure warnings. Current fix bumps the runtime reference to v15.
+- Dapur must not cancel `beforeinstallprompt`; Chromium uses native PWA install UI there, while iOS retains Share -> Add to Home Screen guidance.
+- Home intentionally retains the standards-documented custom Chromium flow: cancel `beforeinstallprompt`, store it, call `prompt()` only from a user action. Do not degrade that UX solely to hide Chrome's diagnostic.
+- First-party root JS/HTML must contain no `chrome.runtime`, `browser.runtime`, runtime `sendMessage`/onMessage, or global `unhandledrejection` suppression.
+- Repeated "message channel closed" console rejections observed with extensions are external unless reproducible in a clean browser with extensions disabled.
+- No DB/API/Auth/Storage/data change belongs to this console fix.

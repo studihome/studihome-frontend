@@ -552,3 +552,14 @@ This section supersedes earlier deployment/release status text.
 - exact rollback: `supabase/rollbacks/20260907110644_restore_redundant_entitlements_user_product_index.sql`;
 - PR #105 requires fresh exact-head Release Gate + Preview after reconciliation before merge.
 
+## Console hygiene follow-up — 7 Sep 2026
+
+- User-reported `social-proof-widget.js?v=13` success logs are stale-client evidence: current source already removed success/debug `[SP]` logs and referenced v14.
+- Runtime cache-buster advanced to `/social-proof-widget.js?v=15` so a refreshed current shell cannot satisfy the widget request from v13/v14 cache entries.
+- Social-proof warning/error diagnostics for real RPC/fetch failures remain intact.
+- Dapur no longer cancels/retains `beforeinstallprompt` on Chromium. Dapur has no explicit custom install CTA, so Chromium/desktop now uses the browser-native PWA install affordance; iOS keeps the existing Share -> Add to Home Screen guidance.
+- Home keeps its intentional custom Chromium install flow (`preventDefault` + deferred `prompt()` on a user action). The Chromium "Banner not shown..." message on that custom flow is a browser diagnostic, not an application exception; do not suppress it globally.
+- GitHub code search found no first-party `chrome.runtime`, `browser.runtime`, or runtime `sendMessage` usage. The user-reported "message channel closed" rejection matches browser-extension/content-script behavior, not Studihome messaging.
+- Release Gate extension-messaging coverage is widened from a hand-maintained subset to all root first-party `.js` browser runtimes plus `index.html`/`dapur.html`.
+- CI now also forbids global `unhandledrejection` suppression across those first-party runtimes.
+- No Supabase/database/RLS/Auth/API/Storage/data change is included.
