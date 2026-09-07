@@ -515,3 +515,15 @@ This section supersedes earlier deployment/release status text.
 - next safest action is a docs-only protected PR from current main to refresh the stale Vercel playbook and safely retrigger deployment capacity. Merge that recovery PR only when its exact head has Release Gate PASS + Vercel Preview SUCCESS;
 - do not add another browser-runtime change while current runtime deployment is unresolved.
 
+## Current authority update — 7 Sep 2026 / refresh 10
+
+- production-verified SHA: `57cd6e5e95890706f6954ee085bca0fadba088a7`;
+- Vercel Production: SUCCESS;
+- main Release Gate #674: PASS;
+- Production Smoke #18 / `34114129036`: PASS with SHA-aware alias convergence;
+- PR #102 Admin bulk portfolio runtime is live in this verified deployment;
+- Issue #80 Creator trust RPC hardening is CLOSED / COMPLETED;
+- Issue #23 remains open only for its explicit authenticated-browser acceptance criterion; source, CI, Preview, deployment, and production smoke are verified;
+- previous Vercel `build-rate-limit` blocker is resolved for this release chain;
+- resume the normal protected release flow for subsequent work.
+
