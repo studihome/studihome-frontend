@@ -623,6 +623,11 @@ jobs:
             exit 1
           fi
 
+      - name: Preview browser acceptance harness self-test
+        run: |
+          python3 -m py_compile scripts/preview-browser-acceptance.py
+          python3 scripts/preview-browser-acceptance.py --self-test
+
       - name: Admin bulk portfolio intake regression
         run: node tests/admin-bulk-portfolio-intake-regression.js
 

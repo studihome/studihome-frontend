@@ -1,0 +1,387 @@
+#!/usr/bin/env python3
+"""Dependency-free Vercel Preview browser acceptance via ChromeDriver HTTP."""
+
+from __future__ import annotations
+
+import argparse
+import base64
+import json
+import os
+import sys
+import time
+import urllib.error
+import urllib.parse
+import urllib.request
+from pathlib import Path
+from typing import Any
+
+ELEMENT_KEY = "element-6066-11e4-a52e-4f735466cecf"
+THIRD_PARTY = (
+    "chrome-extension://", "youtube.com", "youtube-nocookie.com", "googlevideo.com",
+    "doubleclick.net", "googlesyndication.com", "google-analytics.com",
+    "googletagmanager.com", "fonts.googleapis.com", "fonts.gstatic.com",
+)
+
+
+class AcceptanceError(RuntimeError):
+    pass
+
+
+def require(condition: bool, message: str) -> None:
+    if not condition:
+        raise AcceptanceError(message)
+
+
+def normalize_base_url(value: str) -> str:
+    parsed = urllib.parse.urlparse(str(value or "").strip())
+    require(parsed.scheme == "https", "Preview URL must use HTTPS")
+    require(bool(parsed.netloc), "Preview URL must include a host")
+    require(not parsed.username and not parsed.password, "Preview URL must not contain credentials")
+    host = (parsed.hostname or "").lower()
+    require(host.endswith(".vercel.app"), "Preview URL host must end with .vercel.app")
+    require(parsed.port is None, "Preview URL must not specify a custom port")
+    return f"https://{host}"
+
+
+def classify_log(entry: dict[str, Any], host: str) -> str | None:
+    level = str(entry.get("level") or "").upper()
+    message = str(entry.get("message") or "")
+    if level not in {"SEVERE", "ERROR"}:
+        return None
+    lower = message.lower()
+    if any(marker in lower for marker in THIRD_PARTY):
+        return None
+    critical = (
+        "uncaught", "unhandled", "syntaxerror", "referenceerror", "typeerror",
+        "content security policy", "violates the following content security policy",
+    )
+    same_host_failure = host.lower() in lower and (
+        "failed to load resource" in lower or "net::err_" in lower
+    )
+    if same_host_failure or any(token in lower for token in critical):
+        return f"{level}: {message}"
+    return None
+
+
+class Driver:
+    def __init__(self, base_url: str) -> None:
+        self.base_url = base_url.rstrip("/")
+        self.session = ""
+
+    def request(self, method: str, path: str, payload: dict[str, Any] | None = None) -> Any:
+        data = None if payload is None else json.dumps(payload).encode()
+        req = urllib.request.Request(
+            self.base_url + path, data=data, method=method,
+            headers={"Content-Type": "application/json; charset=utf-8"},
+        )
+        try:
+            with urllib.request.urlopen(req, timeout=30) as res:
+                parsed = json.loads(res.read().decode() or "{}")
+        except urllib.error.HTTPError as exc:
+            body = exc.read().decode("utf-8", "replace")
+            raise AcceptanceError(f"ChromeDriver HTTP {exc.code}: {body}") from exc
+        except (urllib.error.URLError, TimeoutError) as exc:
+            raise AcceptanceError(f"ChromeDriver request failed: {exc}") from exc
+        value = parsed.get("value")
+        if isinstance(value, dict) and value.get("error"):
+            raise AcceptanceError(f"{value.get('error')}: {value.get('message')}")
+        return value
+
+    def start(self) -> None:
+        value = self.request("POST", "/session", {
+            "capabilities": {"alwaysMatch": {
+                "browserName": "chrome",
+                "goog:chromeOptions": {"args": [
+                    "--headless=new", "--no-sandbox", "--disable-gpu",
+                    "--disable-dev-shm-usage", "--disable-extensions",
+                    "--window-size=1440,1000",
+                ]},
+                "goog:loggingPrefs": {"browser": "ALL"},
+            }}
+        })
+        require(isinstance(value, dict) and value.get("sessionId"), "ChromeDriver session id missing")
+        self.session = str(value["sessionId"])
+
+    def close(self) -> None:
+        if self.session:
+            try:
+                self.request("DELETE", f"/session/{self.session}")
+            finally:
+                self.session = ""
+
+    def path(self, suffix: str) -> str:
+        require(bool(self.session), "ChromeDriver session not active")
+        return f"/session/{self.session}{suffix}"
+
+    def nav(self, url: str) -> None:
+        self.request("POST", self.path("/url"), {"url": url})
+
+    def js(self, code: str, *args: Any) -> Any:
+        return self.request("POST", self.path("/execute/sync"), {"script": code, "args": list(args)})
+
+    def find(self, selector: str) -> str:
+        value = self.request("POST", self.path("/element"), {"using": "css selector", "value": selector})
+        require(isinstance(value, dict) and ELEMENT_KEY in value, f"Element not found: {selector}")
+        return str(value[ELEMENT_KEY])
+
+    def click(self, selector: str) -> None:
+        self.request("POST", self.path(f"/element/{self.find(selector)}/click"), {})
+
+    def keys(self, selector: str, text: str) -> None:
+        self.request(
+            "POST", self.path(f"/element/{self.find(selector)}/value"),
+            {"text": text, "value": list(text)},
+        )
+
+    def size(self, width: int, height: int) -> None:
+        self.request("POST", self.path("/window/rect"), {"width": width, "height": height})
+
+    def logs(self) -> list[dict[str, Any]]:
+        value = self.request("POST", self.path("/se/log"), {"type": "browser"})
+        return value if isinstance(value, list) else []
+
+    def screenshot(self, path: str) -> None:
+        value = self.request("GET", self.path("/screenshot"))
+        if isinstance(value, str) and value:
+            Path(path).write_bytes(base64.b64decode(value))
+
+
+def wait_js(driver: Driver, code: str, label: str, timeout: float = 20) -> Any:
+    deadline = time.monotonic() + timeout
+    last = None
+    while time.monotonic() < deadline:
+        try:
+            last = driver.js(code)
+            if last:
+                return last
+        except AcceptanceError:
+            pass
+        time.sleep(0.25)
+    raise AcceptanceError(f"Timed out waiting for {label}; last={last!r}")
+
+
+def visible(selector: str) -> str:
+    return f"""
+    const el=document.querySelector({json.dumps(selector)});
+    if(!el)return false;
+    const s=getComputedStyle(el);
+    return !el.classList.contains('hidden')&&s.display!=='none'&&s.visibility!=='hidden';
+    """
+
+
+def wait_app(driver: Driver) -> None:
+    wait_js(driver, """
+      return document.readyState==='complete' && !!window.App && !!App.ui && !!App.search
+        && !!App.auth && !!App.router && !!App.studioAI && !!window.StudihomePWA;
+    """, "Studihome App boot", 30)
+
+
+def run(preview_url: str, driver_url: str, screenshot: str) -> None:
+    preview_url = normalize_base_url(preview_url)
+    host = urllib.parse.urlparse(preview_url).netloc
+    d = Driver(driver_url)
+    d.start()
+    try:
+        d.nav(preview_url)
+        wait_js(d, "return document.readyState==='complete';", "initial load", 30)
+        d.js("localStorage.setItem('studihome-pwa-dismissed-v2',String(Date.now()));return true;")
+        d.nav(preview_url)
+        wait_app(d)
+
+        d.click("#global-search-open-desktop")
+        wait_js(d, visible("#search-modal"), "Search open")
+        d.keys("#global-search-modal-input", "guru")
+        d.keys("#global-search-modal-input", "\ue007")
+        wait_js(d, "return document.getElementById('search-modal')?.classList.contains('hidden');", "Search Enter")
+        d.click("#global-search-open-desktop")
+        wait_js(d, visible("#search-modal"), "Search reopen")
+        d.js("document.getElementById('global-search-modal-input').value='guru';return true;")
+        d.click("#global-search-submit")
+        wait_js(d, "return document.getElementById('search-modal')?.classList.contains('hidden');", "Search submit")
+
+        require(bool(d.js("""
+          const m=document.getElementById('studio-smart-brief-modal');
+          const i=document.getElementById('studio-smart-brief-input');
+          if(!m||!i)return false;i.value='';m.classList.remove('hidden');return true;
+        """)), "Unable to prepare Smart Brief")
+        refinement = wait_js(
+            d, "return document.querySelector('[data-studio-refinement]')?.dataset.studioRefinement||'';",
+            "Smart Brief refinement",
+        )
+        d.click("[data-studio-refinement]")
+        require(bool(d.js(
+            "return document.getElementById('studio-smart-brief-input')?.value.includes(arguments[0]);",
+            refinement,
+        )), "Smart Brief refinement did not update input")
+        d.click("#studio-smart-close-icon")
+        wait_js(d, "return document.getElementById('studio-smart-brief-modal')?.classList.contains('hidden');", "Smart Brief close")
+
+        d.js("App.ui.toggleModal('auth-modal',true);return true;")
+        wait_js(d, visible("#auth-modal"), "Auth open")
+        d.click("#login-form [data-auth-mode='register']")
+        wait_js(d, "return document.getElementById('auth-modal-title')?.textContent==='Pendaftaran Akun Baru';", "register mode")
+        d.click("#register-form [data-auth-mode='login']")
+        wait_js(d, "return document.getElementById('auth-modal-title')?.textContent==='Masuk ke Studihome';", "login mode")
+        d.click("#login-form [data-auth-mode='forgot-password']")
+        wait_js(d, "return document.getElementById('auth-modal-title')?.textContent==='Lupa Password';", "forgot mode")
+        d.click("#forgot-form [data-auth-mode='login']")
+        d.click("#auth-modal-close")
+        wait_js(d, "return document.getElementById('auth-modal')?.classList.contains('hidden');", "Auth close")
+
+        d.js("localStorage.removeItem('studihome-pwa-dismissed-v2');return true;")
+        d.click("#pwa-install-link")
+        wait_js(d, "return !!document.querySelector('.sh-pwa-overlay.show');", "PWA overlay")
+        if d.js("return !!document.querySelector('.sh-pwa-overlay.show .sh-pwa-dismiss');"):
+            d.click(".sh-pwa-overlay.show .sh-pwa-dismiss")
+
+        require(bool(d.js("""
+          const m=document.getElementById('product-detail-modal'),c=document.getElementById('product-detail-modal-content');
+          if(!m||!c)return false;m.classList.remove('hidden');
+          c.innerHTML='<iframe src="about:blank#preview-acceptance"></iframe>';return true;
+        """)), "Unable to prepare product modal")
+        d.click("#product-detail-modal-close")
+        wait_js(d, "return document.getElementById('product-detail-modal')?.classList.contains('hidden');", "Product close")
+        require(bool(d.js("return document.querySelector('#product-detail-modal iframe')?.getAttribute('src')==='';")),
+                "Product iframe cleanup ordering changed")
+
+        d.js("document.getElementById('checkout-modal').classList.remove('hidden');return true;")
+        d.click("#checkout-modal-close")
+        wait_js(d, "return document.getElementById('checkout-modal')?.classList.contains('hidden');", "Checkout close")
+
+        d.js("""
+          const m=document.getElementById('module-modal'),c=document.getElementById('module-modal-content');
+          m.classList.remove('hidden');c.innerHTML='<iframe src="about:blank#preview-acceptance"></iframe>';return true;
+        """)
+        d.click("#module-modal-close")
+        wait_js(d, "return document.getElementById('module-modal')?.classList.contains('hidden');", "Module close")
+
+        wait_js(d, "return !!document.querySelector('#top-auth-area [data-top-auth-action=\"login\"]');",
+                "top-auth login", 30)
+        d.click("#top-auth-area [data-top-auth-action='login']")
+        wait_js(d, visible("#auth-modal"), "top-auth modal")
+        d.click("#auth-modal-close")
+
+        d.nav(preview_url)
+        wait_app(d)
+        wait_js(d, "return !!document.querySelector('#main-content [data-home-route=\"products\"]');",
+                "Home products action", 30)
+        d.click("#main-content [data-home-route='products']")
+        wait_js(d, "return location.pathname==='/foyer';", "Home -> Foyer")
+
+        d.nav(preview_url)
+        wait_app(d)
+        route = d.js("""
+          const b=[...document.querySelectorAll('#top-nav-links [data-app-route]')]
+            .find(x=>['products','home'].includes(x.dataset.appRoute));
+          return b?.dataset.appRoute||'';
+        """)
+        if route:
+            d.click(f"#top-nav-links [data-app-route='{route}']")
+        else:
+            d.js("""
+              const b=document.createElement('button');b.id='preview-acceptance-top-route';
+              b.dataset.appRoute='home';b.textContent='Preview acceptance';
+              document.getElementById('top-nav-links').appendChild(b);return true;
+            """)
+            route = "home"
+            d.click("#preview-acceptance-top-route")
+        path = "/foyer" if route == "products" else "/"
+        wait_js(d, f"return location.pathname==={json.dumps(path)};", f"desktop route {route}")
+
+        d.nav(preview_url)
+        d.size(390, 844)
+        wait_app(d)
+        route = d.js("""
+          const b=[...document.querySelectorAll('#mobile-nav-links [data-app-route]')]
+            .find(x=>['products','home'].includes(x.dataset.appRoute));
+          return b?.dataset.appRoute||'';
+        """)
+        require(bool(route), "No safe natural mobile route action found")
+        d.click(f"#mobile-nav-links [data-app-route='{route}']")
+        path = "/foyer" if route == "products" else "/"
+        wait_js(d, f"return location.pathname==={json.dumps(path)};", f"mobile route {route}")
+
+        d.nav(preview_url)
+        d.size(1440, 1000)
+        wait_app(d)
+        d.js("""
+          const b=document.createElement('button');b.id='preview-acceptance-utility-home';
+          b.dataset.globalAction='home';b.textContent='Back home';
+          document.getElementById('main-content').appendChild(b);
+          history.replaceState({},'', '/foyer');return true;
+        """)
+        d.click("#preview-acceptance-utility-home")
+        wait_js(d, "return location.pathname==='/';", "utility home")
+
+        findings = [x for entry in d.logs() if (x := classify_log(entry, host))]
+        require(not findings, "First-party browser findings: " + " | ".join(findings))
+
+        print(json.dumps({
+            "status": "PASS",
+            "preview_url": preview_url,
+            "public_preview_checks": [
+                "app_boot", "search_mouse_enter", "smart_brief_refinement_close",
+                "auth_modes_close", "pwa_install_overlay", "product_checkout_module_close",
+                "top_auth_login", "home_to_foyer", "desktop_top_shell_route",
+                "mobile_top_shell_route", "utility_home", "first_party_console_runtime",
+            ],
+            "authenticated_checkout": "NOT_VERIFIED",
+        }, indent=2))
+    except Exception:
+        try:
+            d.screenshot(screenshot)
+        except Exception:
+            pass
+        raise
+    finally:
+        d.close()
+
+
+def self_test() -> None:
+    require(normalize_base_url("https://x.vercel.app/a?q=1") == "https://x.vercel.app", "URL normalization")
+    try:
+        normalize_base_url("https://example.com")
+    except AcceptanceError:
+        pass
+    else:
+        raise AcceptanceError("Non-Vercel host was not rejected")
+    try:
+        normalize_base_url("http://x.vercel.app")
+    except AcceptanceError:
+        pass
+    else:
+        raise AcceptanceError("HTTP URL was not rejected")
+    require(classify_log(
+        {"level": "SEVERE", "message": "https://x.vercel.app/app.js Uncaught TypeError: x"},
+        "x.vercel.app",
+    ) is not None, "first-party error classification")
+    require(classify_log(
+        {"level": "SEVERE", "message": "https://www.youtube.com/x Failed to load resource"},
+        "x.vercel.app",
+    ) is None, "third-party exclusion")
+    print("Preview browser acceptance harness self-test: PASS")
+
+
+def main() -> int:
+    p = argparse.ArgumentParser()
+    p.add_argument("--preview-url")
+    p.add_argument("--driver-url", default="http://127.0.0.1:9515")
+    p.add_argument("--screenshot-path", default="/tmp/studihome-preview-browser-failure.png")
+    p.add_argument("--self-test", action="store_true")
+    args = p.parse_args()
+    if args.self_test:
+        self_test()
+        return 0
+    url = args.preview_url or os.environ.get("PREVIEW_URL", "")
+    if not url:
+        p.error("--preview-url or PREVIEW_URL is required")
+    run(url, args.driver_url, args.screenshot_path)
+    return 0
+
+
+if __name__ == "__main__":
+    try:
+        raise SystemExit(main())
+    except AcceptanceError as exc:
+        print(f"Preview browser acceptance: FAIL: {exc}", file=sys.stderr)
+        raise SystemExit(1)

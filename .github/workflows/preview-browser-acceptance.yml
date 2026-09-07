@@ -1,0 +1,158 @@
+name: Studihome Preview Browser Acceptance
+
+on:
+  pull_request:
+    branches:
+      - main
+    types:
+      - opened
+      - synchronize
+      - reopened
+      - ready_for_review
+    paths:
+      - index.html
+      - 'static-*-actions.js'
+      - 'generated-*-actions.js'
+      - scripts/preview-browser-acceptance.py
+      - .github/workflows/preview-browser-acceptance.yml
+  workflow_dispatch:
+    inputs:
+      preview_url:
+        description: Exact Vercel Preview URL (https://*.vercel.app)
+        required: true
+        type: string
+      expected_sha:
+        description: Expected 40-character source commit SHA
+        required: true
+        type: string
+
+permissions:
+  contents: read
+  pull-requests: read
+  issues: read
+
+concurrency:
+  group: studihome-preview-browser-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  preview-browser:
+    if: github.event_name == 'workflow_dispatch' || github.event.pull_request.head.repo.full_name == github.repository
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    env:
+      GH_TOKEN: ${{ github.token }}
+      EXPECTED_SHA: ${{ github.event_name == 'pull_request' && github.event.pull_request.head.sha || inputs.expected_sha }}
+      PR_NUMBER: ${{ github.event.pull_request.number }}
+      MANUAL_PREVIEW_URL: ${{ inputs.preview_url }}
+
+    steps:
+      - name: Checkout exact source
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ env.EXPECTED_SHA }}
+
+      - name: Preview browser harness self-test
+        run: |
+          set -euo pipefail
+          python3 -m py_compile scripts/preview-browser-acceptance.py
+          python3 scripts/preview-browser-acceptance.py --self-test
+
+      - name: Resolve exact-head Vercel Preview
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          if ! [[ "$EXPECTED_SHA" =~ ^[0-9a-f]{40}$ ]]; then
+            echo "Expected SHA is invalid: $EXPECTED_SHA" >&2
+            exit 1
+          fi
+
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+            preview="$MANUAL_PREVIEW_URL"
+          else
+            preview=""
+          fi
+
+          for attempt in $(seq 1 60); do
+            if [ -z "$preview" ] && [ -n "${PR_NUMBER:-}" ]; then
+              comments="$(gh api "repos/$GITHUB_REPOSITORY/issues/$PR_NUMBER/comments?per_page=100")"
+              preview="$(jq -r '
+                [ .[]
+                  | select(.user.login == "vercel[bot]")
+                  | .body
+                  | (try capture("\\[Preview\\]\\((?<url>https://[^)]+)\\)").url catch empty)
+                ] | last // empty
+              ' <<<"$comments")"
+            fi
+
+            if [[ "$preview" =~ ^https://[A-Za-z0-9.-]+\.vercel\.app/?$ ]]; then
+              preview="${preview%/}"
+              if version="$(curl -fsS --max-time 15 "$preview/api/version" 2>/dev/null)"; then
+                deployed_sha="$(jq -r '.commit // empty' <<<"$version")"
+                if [ "$deployed_sha" = "$EXPECTED_SHA" ]; then
+                  echo "Exact-head Preview ready: $preview"
+                  echo "PREVIEW_URL=$preview" >> "$GITHUB_ENV"
+                  exit 0
+                fi
+                echo "Preview available but SHA is $deployed_sha; waiting for $EXPECTED_SHA (attempt $attempt/60)."
+              else
+                echo "Preview not ready yet (attempt $attempt/60)."
+              fi
+            else
+              echo "Vercel Preview URL not available yet (attempt $attempt/60)."
+            fi
+
+            if [ "${{ github.event_name }}" != "workflow_dispatch" ]; then
+              preview=""
+            fi
+            sleep 10
+          done
+
+          echo "Exact-head Vercel Preview did not become ready within the bounded wait window." >&2
+          exit 1
+
+      - name: Start local ChromeDriver
+        shell: bash
+        run: |
+          set -euo pipefail
+          command -v google-chrome >/dev/null
+          command -v chromedriver >/dev/null
+          chromedriver --port=9515 --verbose --log-path=/tmp/studihome-chromedriver.log &
+          echo "CHROMEDRIVER_PID=$!" >> "$GITHUB_ENV"
+
+          ready=0
+          for _ in $(seq 1 40); do
+            if curl -fsS http://127.0.0.1:9515/status >/dev/null; then
+              ready=1
+              break
+            fi
+            sleep 0.25
+          done
+          if [ "$ready" -ne 1 ]; then
+            cat /tmp/studihome-chromedriver.log >&2 || true
+            echo "ChromeDriver did not become ready." >&2
+            exit 1
+          fi
+
+      - name: Public Preview browser acceptance
+        run: |
+          set -euo pipefail
+          python3 scripts/preview-browser-acceptance.py --preview-url "$PREVIEW_URL"
+
+      - name: ChromeDriver diagnostics on failure
+        if: failure()
+        shell: bash
+        run: |
+          cat /tmp/studihome-chromedriver.log >&2 || true
+          if [ -f /tmp/studihome-preview-browser-failure.png ]; then
+            echo "Failure screenshot captured at /tmp/studihome-preview-browser-failure.png"
+          fi
+
+      - name: Stop ChromeDriver
+        if: always()
+        shell: bash
+        run: |
+          if [ -n "${CHROMEDRIVER_PID:-}" ]; then
+            kill "$CHROMEDRIVER_PID" >/dev/null 2>&1 || true
+          fi
