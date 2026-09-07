@@ -67,7 +67,7 @@
       return url.toString();
     }catch{return null}
   }
-  function detectPortfolioMedia(raw){
+  function isGenericPortfolioRow(row){return !!row&&row.service_id==null}\n  function detectPortfolioMedia(raw){
     try{
       const url=new URL(raw),host=url.hostname.toLowerCase(),path=url.pathname.toLowerCase(),platformPortOk=!url.port;
       if(platformPortOk&&['youtube.com','www.youtube.com','youtu.be','www.youtu.be'].includes(host))return'youtube';
@@ -132,13 +132,13 @@
         const lines=String(f.get('portfolio_urls')||'').split(/\r?\n/);
         const limited=lines.slice(0,100);
         let skipped=Math.max(0,lines.length-100),invalid=0,duplicate=0;
-        const current=await S().from('creator_portfolios').select('media_url,sort_order').eq('creator_id',id);
+        const current=await S().from('creator_portfolios').select('media_url,sort_order,service_id').eq('creator_id',id);
         if(current.error)throw current.error;
         const existing=new Set();
         let maxSort=-1;
         for(const row of current.data||[]){
           const normalized=normalizePortfolioUrl(row.media_url);
-          if(normalized)existing.add(normalized);
+          if(isGenericPortfolioRow(row)&&normalized)existing.add(normalized);
           maxSort=Math.max(maxSort,Number(row.sort_order)||0);
         }
         const batchSeen=new Set(),rows=[];

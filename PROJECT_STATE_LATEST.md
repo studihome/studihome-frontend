@@ -570,3 +570,11 @@ Before continuing #81 -> #88, current console evidence was triaged.
 - PR #102: canonical clean-mainline Admin bulk portfolio intake replacement, based directly on current main with seven intended feature/test/docs/workflow files;
 - PR #102 must not merge until exact-head Release Gate PASS and fresh Vercel Preview SUCCESS.
 
+## PR #102 generic-only dedupe correction — 7 Sep 2026
+
+- live audit confirms 45 duplicate URL groups are service-only variants; no generic duplicate group exists;
+- feature dedupe is corrected to existing `service_id IS NULL` rows plus same-batch URLs only;
+- service-linked variants remain legitimate and do not block generic bulk intake;
+- sort-order append still scans all Creator portfolio rows;
+- no data/schema/RLS/grant mutation.
+

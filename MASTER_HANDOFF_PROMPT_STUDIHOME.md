@@ -491,3 +491,12 @@ This section supersedes earlier contradictory status text.
 - canonical Issue #23 implementation is replacement PR #102 on branch `feat/admin-bulk-portfolio-intake-mainline-2026-09-07`, rebuilt cleanly from `fec5512...`;
 - PR #102 is a browser-runtime change and has no DB-only quota exception: require exact-head Release Gate PASS + Vercel Preview SUCCESS + up-to-date/mergeable state before merge.
 
+## PR #102 dedupe-scope correction — 7 Sep 2026
+
+- live duplicate-shape audit: 45 same-URL groups; all 45 are service-linked-only, 0 mixed generic/service groups, 0 multiple-generic groups;
+- bulk intake must not treat service-linked portfolio rows as generic duplicates;
+- #102 now reads `service_id` with existing URLs, computes append `maxSort` across all rows, but adds an existing URL to the generic dedupe set only when `service_id IS NULL`;
+- batch-internal dedupe remains unchanged;
+- regression executes the generic-vs-service row predicate and locks the query/guard markers;
+- no live data cleanup or global uniqueness constraint is introduced.
+

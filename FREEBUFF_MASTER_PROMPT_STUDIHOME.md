@@ -227,3 +227,9 @@ CURRENT AUTHORITY UPDATE — 7 SEP 2026 / REFRESH 8
 - PR #102 is the canonical Issue #23 clean-mainline replacement on `feat/admin-bulk-portfolio-intake-mainline-2026-09-07`.
 - Because #102 changes browser runtime, require exact-head Release Gate PASS + Vercel Preview SUCCESS before merge. Never reuse the DB-only #81 quota exception.
 
+PR #102 DEDUPE SCOPE — 7 SEP 2026
+- Live same-URL audit: 45 duplicate groups, all service-only; 0 mixed generic/service and 0 multiple-generic groups.
+- Bulk intake dedupe must inspect existing generic rows (`service_id IS NULL`) only; never impose Creator-wide URL uniqueness across service-context variants.
+- Keep max sort-order calculation across all portfolio rows and batch-internal dedupe across new generic URLs.
+- No historical cleanup or DB uniqueness constraint.
+

@@ -22,11 +22,11 @@ const context = { URL };
 vm.createContext(context);
 vm.runInContext(
   pureSource +
-    '\nthis.__helpers={normalizePortfolioUrl,detectPortfolioMedia,derivePortfolioTitle};',
+    '\nthis.__helpers={normalizePortfolioUrl,isGenericPortfolioRow,detectPortfolioMedia,derivePortfolioTitle};',
   context
 );
 
-const { normalizePortfolioUrl, detectPortfolioMedia, derivePortfolioTitle } =
+const { normalizePortfolioUrl, isGenericPortfolioRow, detectPortfolioMedia, derivePortfolioTitle } =
   context.__helpers;
 
 assert(normalizePortfolioUrl('http://example.com/a') === null, 'HTTP must be rejected');
@@ -44,6 +44,15 @@ assert(
   normalizePortfolioUrl('https://example.com/watch?v=1#x') ===
     'https://example.com/watch?v=1',
   'Query must be preserved while fragment is removed'
+);
+
+assert(
+  isGenericPortfolioRow({ service_id: null }) === true,
+  'Generic portfolio row must participate in bulk dedupe'
+);
+assert(
+  isGenericPortfolioRow({ service_id: '11111111-1111-4111-8111-111111111111' }) === false,
+  'Service-linked portfolio row must not block a generic bulk row'
 );
 
 assert(
@@ -108,6 +117,8 @@ const requiredEditorMarkers = [
   "description:''",
   "is_active:false",
   ".from('creator_portfolios').insert(rows)",
+  "select('media_url,sort_order,service_id')",
+  "if(isGenericPortfolioRow(row)&&normalized)existing.add(normalized)",
   "existing.has(normalized)||batchSeen.has(normalized)",
   "result?.message||'Berhasil disimpan! 🎉'"
 ];
