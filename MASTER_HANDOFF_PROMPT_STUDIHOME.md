@@ -577,3 +577,15 @@ This section supersedes earlier deployment/release status text.
 - no Search behavior change beyond inherited Phase A; no Auth, generated template, CSS, CSP header, DB, API, or data change;
 - PREPARED ONLY while Vercel is quota-blocked; after Phase A merges, retarget/sync this branch before Preview/merge.
 
+## Issue #98 Phase C — static Auth actions prepared / 7 Sep 2026
+
+- stacked on Phase B, which itself depends on Phase A; never merge out of order;
+- Phase C removes exactly 8 static Auth handlers = 5 click + 3 submit;
+- static handler count after Phase C: 4 total, all onclick; static onsubmit/onkeydown are zero;
+- ownership moves to same-origin `static-auth-actions.js`;
+- auth mode switches use `data-auth-mode`; login/register/forgot forms keep their existing IDs and receive native submit Event objects through addEventListener;
+- modal close preserves `App.ui.toggleModal('auth-modal', false)`;
+- regression locks static counts, auth-mode cardinality, form ownership, exact loader count, and absence of inline Auth handlers;
+- no Search/Smart Brief change beyond inherited stack; no generated templates, CSS, CSP enforcement, DB, API, Storage, or data change;
+- PREPARED ONLY while Vercel remains quota-blocked; after prior phases land, retarget/sync before Preview/browser acceptance.
+
