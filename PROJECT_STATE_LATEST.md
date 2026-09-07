@@ -421,3 +421,19 @@ Use:
 Preferred statement:
 
 “Tidak ditemukan known regression pada test scope yang telah dijalankan untuk SHA <sha>.”
+
+
+## Admin Dapur Supabase singleton — FIX IMPLEMENTED
+
+Issue #24:
+- removed duplicate hardcoded Supabase URL/key ownership from `admin-dapur-creator-v5.js`;
+- removed dynamic Supabase SDK injection from that runtime;
+- removed secondary `window.__studihomeAdminSupabase` creation path;
+- runtime now uses only canonical `window.supabaseClient`;
+- delayed readiness is handled by waiting for `studihome:supabase-client-ready` with a 3000 ms timeout;
+- failure is explicit instead of silently creating a second auth client;
+- `index.html` loader bumped from `v=10` to `v=11`;
+- added `tests/admin-dapur-supabase-singleton-regression.js` and wired it into Release Gate;
+- no schema, migration, RLS, grant, Auth configuration, or production data change.
+
+Merge remains gated by Release Gate + Vercel Preview; production verification is required after merge.

@@ -1,51 +1,49 @@
 (() => {
   'use strict';
 
-  const SUPABASE_URL = 'https://hbfmhwwxbgidsnljupca.supabase.co';
-  const SUPABASE_KEY = 'sb_publishable_134slHOJ_kcw5-kxDQDVaw_y1jFO4Lv';
   const isAdmin = () => (location.pathname || '/').replace(/\/+$/, '') === '/admin';
   const esc = (v) => window.App?.utils?.escapeHtml ? window.App.utils.escapeHtml(v) : String(v ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
   const toast = (m, t = 'info') => window.App?.ui?.toast?.(m, t);
 
+  const CANONICAL_CLIENT_READY_EVENT = 'studihome:supabase-client-ready';
+  const CANONICAL_CLIENT_WAIT_MS = 3000;
   let clientPromise = null;
   let rowsCache = [];
 
-  function getExistingClient() {
-    const candidates = [window.supabaseClient, window.App?.supabase, window.App?.db];
-    return candidates.find(db => db && typeof db.from === 'function') || null;
+  function getCanonicalClient() {
+    const db = window.supabaseClient;
+    return db && typeof db.from === 'function' && db.auth ? db : null;
   }
 
-  function loadSupabaseSdk() {
-    if (window.supabase?.createClient) return Promise.resolve();
+  function getClient() {
+    const existing = getCanonicalClient();
+    if (existing) return Promise.resolve(existing);
     if (clientPromise) return clientPromise;
-    clientPromise = new Promise((resolve, reject) => {
-      const existing = document.querySelector('script[data-studihome-supabase-sdk]');
-      if (existing) {
-        existing.addEventListener('load', () => window.supabase?.createClient ? resolve() : reject(new Error('Library Supabase gagal dimuat.')), { once: true });
-        existing.addEventListener('error', () => reject(new Error('Library Supabase gagal dimuat.')), { once: true });
-        return;
-      }
-      const script = document.createElement('script');
-      script.src = 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.115.0';
-      script.async = true;
-      script.dataset.studihomeSupabaseSdk = '1';
-      script.onload = () => window.supabase?.createClient ? resolve() : reject(new Error('Library Supabase tidak tersedia.'));
-      script.onerror = () => reject(new Error('Library Supabase gagal dimuat.'));
-      document.head.appendChild(script);
-    });
-    return clientPromise;
-  }
 
-  async function getClient() {
-    const existing = getExistingClient();
-    if (existing) return existing;
-    await loadSupabaseSdk();
-    if (!window.__studihomeAdminSupabase) {
-      window.__studihomeAdminSupabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY, {
-        auth: { persistSession: true, autoRefreshToken: true, detectSessionInUrl: true }
-      });
-    }
-    return window.__studihomeAdminSupabase;
+    clientPromise = new Promise((resolve, reject) => {
+      let settled = false;
+      const finish = (error) => {
+        if (settled) return;
+        settled = true;
+        window.clearTimeout(timeoutId);
+        window.removeEventListener(CANONICAL_CLIENT_READY_EVENT, onReady);
+        clientPromise = null;
+        if (error) reject(error);
+        else resolve(getCanonicalClient());
+      };
+      const onReady = () => {
+        const db = getCanonicalClient();
+        if (db) finish();
+      };
+      const timeoutId = window.setTimeout(() => {
+        finish(new Error('Koneksi data utama belum siap. Muat ulang halaman Admin lalu coba lagi.'));
+      }, CANONICAL_CLIENT_WAIT_MS);
+
+      window.addEventListener(CANONICAL_CLIENT_READY_EVENT, onReady);
+      onReady();
+    });
+
+    return clientPromise;
   }
 
   async function requireAdminClient() {

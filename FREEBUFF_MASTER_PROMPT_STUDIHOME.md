@@ -107,3 +107,13 @@ REQUIRED OUTPUT
 
 If docs conflict with current source/live evidence, update them through the protected PR flow.
 ```
+
+
+ADMIN DAPUR SUPABASE SINGLETON — ISSUE #24
+- canonical browser client is `window.supabaseClient` from `supabase-config.js`;
+- Admin Dapur must not create `window.__studihomeAdminSupabase`, duplicate the publishable key, or dynamically load the Supabase SDK;
+- if canonical client readiness is delayed, wait only for `studihome:supabase-client-ready` with a bounded timeout and surface an explicit error;
+- keep `supabase-config.js` before `admin-dapur-creator-v5.js` in `index.html`;
+- current runtime asset version: `/admin-dapur-creator-v5.js?v=11`;
+- regression test: `tests/admin-dapur-supabase-singleton-regression.js`;
+- do not broaden RLS/grants or alter Auth to compensate for frontend readiness.
