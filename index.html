@@ -1938,7 +1938,7 @@ App.router.bindCanonicalLinkGuard();
                                 <summary class="text-[11px] font-bold text-slate-600 cursor-pointer">Detail teknis</summary>
                                 <pre class="mt-2 whitespace-pre-wrap text-[10px] text-red-600 break-words">${App.utils.escapeHtml(message)}</pre>
                             </details>
-                            <button onclick="window.location.reload()" class="btn-brand-gradient px-5 py-2.5 rounded-xl text-xs font-bold mt-4">Muat Ulang</button>
+                            <button data-global-action="reload" class="btn-brand-gradient px-5 py-2.5 rounded-xl text-xs font-bold mt-4">Muat Ulang</button>
                         </div>`;
                 },
 
@@ -3588,7 +3588,7 @@ App.router.bindCanonicalLinkGuard();
                                         <p id="reset-error" class="hidden text-center text-red-500 text-xs font-bold"></p>
                                     </form>
                                     <div class="text-center mt-5 pt-4 border-t border-gray-100">
-                                        <button onclick="App.router.navigate('home')" class="text-xs font-bold text-[#151c75] hover:underline">← Kembali ke Studihome</button>
+                                        <button data-global-action="home" class="text-xs font-bold text-[#151c75] hover:underline">← Kembali ke Studihome</button>
                                     </div>
                                 </div>
                             </div>
@@ -11077,6 +11077,7 @@ window.StudihomeProductionPilotSimulation = {
 <script src="/static-shell-actions.js?v=1"></script>
 <script src="/generated-top-shell-actions.js?v=1"></script>
 <script src="/generated-home-actions.js?v=1"></script>
+<script src="/generated-utility-actions.js?v=1"></script>
 <!-- STUDIHOME CREATOR PROFILE FEATURES -->
 <script src="/studio-ai-creator-card.js?v=7"></script>
 <script src="/dapur-profile-enhancements.js?v=2"></script>
