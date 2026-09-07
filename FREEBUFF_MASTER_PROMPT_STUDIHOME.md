@@ -178,7 +178,7 @@ CURRENT AUTHORITY UPDATE — 7 SEP 2026 / REFRESH 4
 
 ISSUE #23 BULK PORTFOLIO INTAKE — STACKED / PREPARED
 - Must remain stacked on PR #81 and must not merge first.
-- Canonical owner: `dapur-editor.js`; lazy loader cache-buster `v=20260907bulk1`.
+- Canonical owner: `dapur-editor.js`; lazy loader cache-buster `v=20260907bulk2`.
 - Reuse `window.supabaseClient` only.
 - Require `is_admin()` inside adminPanel and private bulkPortfolioIntake.
 - HTTPS-only; max 100 lines; strip fragment; preserve query; dedupe normalized URLs.
@@ -187,3 +187,11 @@ ISSUE #23 BULK PORTFOLIO INTAKE — STACKED / PREPARED
 - Direct video-file URLs remain `link` until Issue #90 reconciles DB checks.
 - Regression: `tests/admin-bulk-portfolio-intake-regression.js`.
 - Release Gate #643 PASS on exact pre-sync feature head; fresh validation required after any head change.
+
+
+Bulk portfolio URL hardening — refresh 2
+- `normalizePortfolioUrl()` now rejects HTTPS URLs containing embedded username/password credentials.
+- platform-specific classification only applies on the expected host with no non-default port; otherwise the URL falls back to generic `link`.
+- lazy editor cache-buster is now `/dapur-editor.js?v=20260907bulk2` because editor source changed after the initial bulk feature build.
+- regression coverage includes embedded-credential rejection and non-default-port provider fallback.
+- no schema/RLS/Auth/grant/production-data change.
