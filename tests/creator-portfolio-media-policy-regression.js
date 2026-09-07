@@ -88,7 +88,7 @@ for (const marker of [
   assert(rollback.toLowerCase().includes(marker.toLowerCase()), `Rollback marker missing: ${marker}`);
 }
 
-const notValidCount=(rollback.match(/not\\s+valid;/gi)||[]).length;
+const notValidCount=(rollback.match(/not\s+valid;/gi)||[]).length;
 assert(
   notValidCount===2,
   `Rollback must restore exactly two NOT VALID legacy constraints, found ${notValidCount}`
