@@ -124,7 +124,7 @@ assert(
 );
 
 assert(
-  entry.includes('/dapur-editor.js?v=20260907bulk1'),
+  entry.includes('/dapur-editor.js?v=20260907bulk2'),
   'Dapur lazy loader must use the refreshed bulk editor asset'
 );
 
