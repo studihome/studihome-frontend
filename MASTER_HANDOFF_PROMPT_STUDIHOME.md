@@ -564,3 +564,16 @@ This section supersedes earlier deployment/release status text.
 - no Auth, Studio Smart Brief, generated template handlers, CSS, CSP header, Supabase, API, or application-data change belongs to this phase;
 - PREPARED ONLY while Vercel Preview is `build-rate-limit`; do not merge until exact-head Release Gate PASS + Preview SUCCESS + Search keyboard/mouse browser acceptance.
 
+## Issue #98 Phase B — static Studio Brief actions prepared / 7 Sep 2026
+
+- stacked on Phase A Search branch; do not merge before Phase A;
+- Phase B removes exactly 6 static Smart Brief onclick handlers;
+- static handler count after Phase B: 12 = onclick 9 + onsubmit 3;
+- ownership moves to same-origin `static-studio-brief-actions.js`;
+- close icon + secondary close use stable IDs;
+- three conversational chips use `data-studio-refinement` contracts;
+- submit preserves the original button element argument to `App.studioAI.submitSmartBrief`;
+- regression locks counts, exact refinement values, IDs, loader, and no inline `App.studioAI`;
+- no Search behavior change beyond inherited Phase A; no Auth, generated template, CSS, CSP header, DB, API, or data change;
+- PREPARED ONLY while Vercel is quota-blocked; after Phase A merges, retarget/sync this branch before Preview/merge.
+
