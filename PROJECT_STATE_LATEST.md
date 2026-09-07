@@ -622,3 +622,13 @@ Before continuing #81 -> #88, current console evidence was triaged.
 - source migration/rollback reconciled to live version;
 - PR #105 remains unmerged pending fresh exact-head gates after reconciliation.
 
+## Issue #90 clean preparation — 7 Sep 2026
+
+- stale media-policy branch is superseded; clean rebuild is based on current main;
+- live constraints fingerprinted; 139/139 rows compatible with preserved effective semantics;
+- target does NOT enable native video and does NOT broaden media_type case handling;
+- transaction-only migration + allowed/denied cases + exact rollback restoration: PASS;
+- direct video frontend behavior remains generic `link`;
+- no persistent schema change yet;
+- migration remains NOT APPLIED while current source-main production deployment is quota-blocked.
+

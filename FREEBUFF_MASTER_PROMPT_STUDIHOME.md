@@ -264,3 +264,11 @@ ISSUE #83 LIVE APPLY — 7 SEP 2026
 - Canonical rollback: `supabase/rollbacks/20260907110644_restore_redundant_entitlements_user_product_index.sql`.
 - PR #105 must rerun exact-head Release Gate + Vercel Preview after source-version reconciliation before merge.
 
+ISSUE #90 MEDIA POLICY — CLEAN PREP / 7 SEP 2026
+- Do not use stale `db/reconcile-creator-portfolio-media-policy` ancestry; rebuild from current main.
+- Preserve current effective DB semantics: link/image HTTPS; provider-specific root/www hosts; native video denied; case-sensitive media_type behavior preserved.
+- 139/139 live rows compatible; 0 video rows.
+- Transaction-only apply + 12 allow/deny cases + explicit exact rollback restoration PASS.
+- Frontend direct video stays `link` fallback.
+- Migration is NOT APPLIED while source-main production remains Vercel quota-blocked.
+
