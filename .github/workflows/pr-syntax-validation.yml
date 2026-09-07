@@ -549,6 +549,9 @@ jobs:
       - name: Dapur auth modal accessibility regression
         run: node tests/dapur-auth-modal-accessibility-regression.js
 
+      - name: Creator portfolio media policy regression
+        run: node tests/creator-portfolio-media-policy-regression.js
+
       - name: Public API resilience regression
         run: node tests/api-resilience-regression.js
 
