@@ -313,3 +313,12 @@ ISSUE #98 PHASE F — GENERATED TOP SHELL PREP / 7 SEP 2026
 - No other core handler/CSS/CSP/DB/API change.
 - Keep draft until prior phases land, branch is resynced, Preview succeeds, and top-nav/Auth browser acceptance passes.
 
+ISSUE #98 PHASE G — GENERATED HOME ACTIONS PREP / 7 SEP 2026
+- Stack after A-F; never merge out of order.
+- Remove all 3 Home generated HTML event attributes plus the Home runtime setAttribute('onclick') write.
+- Generated handler count becomes 176; dynamic onclick setters become 2.
+- Use data-home-cta-url / data-home-route + delegated main-content listener.
+- Preserve App.home.handleCtaClick, App.router.navigate, and existing Hero Promo selector semantics.
+- No Studio AI/Creator/Admin/CSS/CSP/DB/API change.
+- Keep draft until prior phases land, branch is resynced, Preview succeeds, and Home/Hero browser acceptance passes.
+
