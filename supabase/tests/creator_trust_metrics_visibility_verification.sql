@@ -3,7 +3,7 @@
 -- JWT settings are transaction-local and the transaction is rolled back.
 --
 -- Run only after applying:
---   20260907004000_constrain_creator_trust_metrics_visibility.sql
+--   20260907063648_constrain_creator_trust_metrics_visibility.sql
 
 begin;
 
