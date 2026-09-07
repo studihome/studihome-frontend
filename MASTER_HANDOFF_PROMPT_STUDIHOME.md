@@ -628,3 +628,17 @@ This section supersedes earlier deployment/release status text.
 - no other core generated-handler refactor, CSS/style cleanup, CSP enforcement, DB, API, Storage, or data change belongs to this phase;
 - PREPARED ONLY while Vercel remains quota-blocked; after prior phases land, retarget/sync before Preview/browser acceptance.
 
+## Issue #98 Phase G — generated Home actions prepared / 7 Sep 2026
+
+- stacked after Phase F -> E -> D -> C -> B -> A; never merge out of order;
+- Phase G removes all 3 generated HTML event attributes from the `home` section and replaces the Hero runtime `setAttribute('onclick', ...)` update;
+- generated HTML event attributes after Phase G: 176;
+- dynamic runtime `setAttribute('onclick', ...)` count after Phase G: 2 total, both outside Home;
+- primary/secondary Hero CTA buttons now render `data-home-cta-url`; Foyer button renders `data-home-route`;
+- same-origin `generated-home-actions.js` delegates Home clicks once from stable `main-content`;
+- `App.home.handleCtaClick` and `App.router.navigate` business logic remain unchanged;
+- Hero Promo sync preserves the existing `.btn-brand-amber` selector requirement while changing only its stored action from onclick text to `dataset.homeCtaUrl`, avoiding accidental behavior expansion;
+- regression locks zero Home generated event attributes, zero Home dynamic event-attribute setters, data-contract counts, one loader, and global handler ceiling <=176;
+- no Studio AI/Creator/Admin handler work, CSS/style cleanup, CSP enforcement, DB, API, Storage, or data change belongs to this phase;
+- PREPARED ONLY while Vercel remains quota-blocked; after prior phases land, retarget/sync before Preview/browser acceptance.
+
