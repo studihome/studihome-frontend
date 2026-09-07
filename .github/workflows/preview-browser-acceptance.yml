@@ -18,7 +18,7 @@ on:
   workflow_dispatch:
     inputs:
       preview_url:
-        description: Exact Vercel Preview URL (https://*.vercel.app)
+        description: Vercel Preview URL (https://*.vercel.app)
         required: true
         type: string
       expected_sha:
@@ -52,6 +52,7 @@ jobs:
         uses: actions/checkout@v4
         with:
           ref: ${{ env.EXPECTED_SHA }}
+          fetch-depth: 0
 
       - name: Preview browser harness self-test
         run: |
@@ -59,7 +60,7 @@ jobs:
           python3 -m py_compile scripts/preview-browser-acceptance.py
           python3 scripts/preview-browser-acceptance.py --self-test
 
-      - name: Resolve exact-head Vercel Preview
+      - name: Resolve Vercel-backed Preview
         shell: bash
         run: |
           set -euo pipefail
@@ -69,101 +70,71 @@ jobs:
             exit 1
           fi
 
-          manual_preview=""
-          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
-            manual_preview="$MANUAL_PREVIEW_URL"
+          preview="$MANUAL_PREVIEW_URL"
+          if [ "${{ github.event_name }}" != "workflow_dispatch" ]; then
+            preview="$(gh api "repos/$GITHUB_REPOSITORY/issues/$PR_NUMBER/comments?per_page=100" \
+              --jq '.[] | select(.user.login == "vercel[bot]") | .body' \
+              | grep -oE '\[Preview\]\(https://[^)]+\)' \
+              | sed -E 's/^\[Preview\]\((https:\/\/[^)]+)\)$/\1/' \
+              | tail -n 1 || true)"
           fi
 
-          for attempt in $(seq 1 60); do
-            preview="$manual_preview"
+          if ! [[ "$preview" =~ ^https://[A-Za-z0-9.-]+\.vercel\.app/?$ ]]; then
+            echo "A valid Vercel Preview URL is not available yet." >&2
+            exit 1
+          fi
+          preview="${preview%/}"
 
-            gh api "repos/$GITHUB_REPOSITORY/commits/$EXPECTED_SHA/status"               > /tmp/studihome-vercel-status.json
-            vercel_state="$(python3 - /tmp/studihome-vercel-status.json <<'PY'
-import json
-import sys
+          deployed_source_sha=""
+          binding=""
 
-with open(sys.argv[1], encoding='utf-8') as handle:
-    payload = json.load(handle)
+          for candidate in $(git rev-list --first-parent --max-count=6 "$EXPECTED_SHA"); do
+            state="$(gh api "repos/$GITHUB_REPOSITORY/commits/$candidate/status" \
+              --jq '.statuses[] | select(.context == "Vercel") | .state' \
+              | head -n 1 || true)"
+            [ "$state" = "success" ] || continue
 
-statuses = [
-    item for item in payload.get('statuses', [])
-    if str(item.get('context', '')).lower() == 'vercel'
-]
-print(str(statuses[0].get('state', '')) if statuses else '')
-PY
-)"
-
-            if [ -z "$preview" ] && [ -n "${PR_NUMBER:-}" ]; then
-              gh api "repos/$GITHUB_REPOSITORY/issues/$PR_NUMBER/comments?per_page=100"                 > /tmp/studihome-pr-comments.json
-              preview="$(python3 - /tmp/studihome-pr-comments.json <<'PY'
-import json
-import re
-import sys
-
-with open(sys.argv[1], encoding='utf-8') as handle:
-    comments = json.load(handle)
-
-urls = []
-for comment in comments:
-    if comment.get('user', {}).get('login') != 'vercel[bot]':
-        continue
-    match = re.search(r'\[Preview\]\((https://[^)]+)\)', str(comment.get('body', '')))
-    if match:
-        urls.append(match.group(1))
-
-print(urls[-1] if urls else '')
-PY
-)"
+            if [ "$candidate" = "$EXPECTED_SHA" ]; then
+              deployed_source_sha="$candidate"
+              binding="exact-vercel-status"
+              break
             fi
 
-            if [[ "$preview" =~ ^https://[A-Za-z0-9.-]+\.vercel\.app/?$ ]] && [ "$vercel_state" = "success" ]; then
-              preview="${preview%/}"
-              version_state="unavailable"
-              deployed_sha=""
-
-              if curl -fsS --max-time 15 "$preview/api/version"                 > /tmp/studihome-preview-version 2>/dev/null; then
-                readarray -t version_fields < <(python3 - /tmp/studihome-preview-version <<'PY'
-import json
-import sys
-
-try:
-    with open(sys.argv[1], encoding='utf-8') as handle:
-        payload = json.load(handle)
-except Exception:
-    print('')
-    print('non-json')
-else:
-    print(str(payload.get('commit') or ''))
-    print(str(payload.get('status') or ''))
-PY
-)
-                deployed_sha="${version_fields[0]:-}"
-                version_state="${version_fields[1]:-}"
-              fi
-
-              if [ -n "$deployed_sha" ] && [ "$deployed_sha" != "$EXPECTED_SHA" ]; then
-                echo "Preview alias still reports $deployed_sha; waiting for $EXPECTED_SHA (attempt $attempt/60)."
-              else
-                if [ "$deployed_sha" = "$EXPECTED_SHA" ]; then
-                  echo "Exact-head Preview verified by Vercel status + /api/version: $preview"
-                  echo "PREVIEW_BINDING=version-endpoint" >> "$GITHUB_ENV"
-                else
-                  echo "Exact-head Vercel commit status is SUCCESS; /api/version is $version_state."
-                  echo "Browser acceptance will fail closed if the Preview alias is not the Studihome app."
-                  echo "PREVIEW_BINDING=vercel-commit-status" >> "$GITHUB_ENV"
-                fi
-                echo "PREVIEW_URL=$preview" >> "$GITHUB_ENV"
-                exit 0
-              fi
-            else
-              echo "Waiting for Vercel exact-head SUCCESS + Preview URL (state=${vercel_state:-missing}, attempt $attempt/60)."
+            unsafe="$(git diff --name-only "$candidate" "$EXPECTED_SHA" \
+              | grep -Ev '^(\.github/workflows/(preview-browser-acceptance|pr-syntax-validation)\.yml|scripts/preview-browser-acceptance\.py|tests/csp-actions-browser-smoke\.html|PROJECT_STATE_LATEST\.md|MASTER_HANDOFF_PROMPT_STUDIHOME\.md|FREEBUFF_MASTER_PROMPT_STUDIHOME\.md|RELEASE_CHECKLIST_STUDIHOME\.md)$' \
+              || true)"
+            if [ -z "$unsafe" ]; then
+              deployed_source_sha="$candidate"
+              binding="runtime-equivalent-vercel-ancestor"
+              break
             fi
-
-            sleep 10
           done
 
-          echo "Exact-head Vercel Preview did not become ready within the bounded wait window." >&2
-          exit 1
+          if [ -z "$deployed_source_sha" ]; then
+            echo "No Vercel-Ready exact/runtime-equivalent source found in bounded first-parent history." >&2
+            exit 1
+          fi
+
+          deployed_sha=""
+          version_state="unavailable"
+          if curl -fsS --max-time 15 "$preview/api/version" \
+            > /tmp/studihome-preview-version 2>/dev/null; then
+            deployed_sha="$(python3 -c 'import json,sys; p=json.load(open(sys.argv[1],encoding="utf-8")); print(str(p.get("commit") or ""))' /tmp/studihome-preview-version 2>/dev/null || true)"
+            version_state="$(python3 -c 'import json,sys; p=json.load(open(sys.argv[1],encoding="utf-8")); print(str(p.get("status") or ""))' /tmp/studihome-preview-version 2>/dev/null || true)"
+            [ -n "$version_state" ] || version_state="non-json"
+          fi
+
+          if [ -n "$deployed_sha" ] && [ "$deployed_sha" != "$deployed_source_sha" ]; then
+            echo "Preview alias reports $deployed_sha but selected Vercel source is $deployed_source_sha." >&2
+            exit 1
+          fi
+
+          echo "Preview source binding: $binding"
+          echo "Selected Vercel source: $deployed_source_sha"
+          echo "/api/version status: $version_state"
+          echo "PREVIEW_URL=$preview" >> "$GITHUB_ENV"
+          echo "PREVIEW_BINDING=$binding" >> "$GITHUB_ENV"
+          echo "DEPLOYED_SOURCE_SHA=$deployed_source_sha" >> "$GITHUB_ENV"
 
       - name: Start local ChromeDriver
         shell: bash
@@ -191,7 +162,8 @@ PY
       - name: Public Preview browser acceptance
         run: |
           set -euo pipefail
-          echo "Preview binding: ${PREVIEW_BINDING:-unknown}"
+          echo "Preview binding: $PREVIEW_BINDING"
+          echo "Deployed source: $DEPLOYED_SOURCE_SHA"
           python3 scripts/preview-browser-acceptance.py --preview-url "$PREVIEW_URL"
 
       - name: ChromeDriver diagnostics on failure
