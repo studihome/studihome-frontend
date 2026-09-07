@@ -417,7 +417,7 @@ This section supersedes earlier status blocks.
 This workstream is stacked on top of PR #81 and must not merge to main before #81 completes.
 
 - canonical CRUD owner: `dapur-editor.js`;
-- lazy loader: `dapur-entry.js` -> `/dapur-editor.js?v=20260907bulk1`;
+- lazy loader: `dapur-entry.js` -> `/dapur-editor.js?v=20260907bulk2`;
 - canonical Supabase client: `window.supabaseClient`;
 - `adminPanel()` and private `bulkPortfolioIntake(id)` both recheck server-backed `is_admin()`;
 - bulk helper remains closure-private and is not exported on `window.AdminDapurUI`;
@@ -431,3 +431,11 @@ This workstream is stacked on top of PR #81 and must not merge to main before #8
 - regression: `tests/admin-bulk-portfolio-intake-regression.js`;
 - exact feature head before this sync: `4a01c183b282d3abbe07f67eabece35faa656afa`; Release Gate #643 PASS via temporary validation-only PR #89; Vercel BLOCKED;
 - Issue #90 owns future media CHECK reconciliation; #88 does not change schema.
+
+
+Bulk portfolio URL hardening — refresh 2
+- `normalizePortfolioUrl()` now rejects HTTPS URLs containing embedded username/password credentials.
+- platform-specific classification only applies on the expected host with no non-default port; otherwise the URL falls back to generic `link`.
+- lazy editor cache-buster is now `/dapur-editor.js?v=20260907bulk2` because editor source changed after the initial bulk feature build.
+- regression coverage includes embedded-credential rejection and non-default-port provider fallback.
+- no schema/RLS/Auth/grant/production-data change.
