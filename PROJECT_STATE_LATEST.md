@@ -622,3 +622,13 @@ Before continuing #81 -> #88, current console evidence was triaged.
 - source migration/rollback reconciled to live version;
 - PR #105 remains unmerged pending fresh exact-head gates after reconciliation.
 
+## Issue #98 Phase A preparation — 7 Sep 2026
+
+- bounded surface: static Global Search + home-brand handlers only;
+- 7 executable attributes removed from static markup;
+- static handler count: 25 -> 18;
+- new external `static-search-actions.js` owns click/Enter behavior via addEventListener;
+- regression + syntax/Release Gate wiring added;
+- no Auth/Studio/template/CSS/CSP/DB/API change;
+- draft-only until Preview + browser parity are available.
+
