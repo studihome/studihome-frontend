@@ -394,3 +394,19 @@ Issue #80 / draft PR #81:
 - PR #81 is the next priority security workstream and must be validated on top of that production state.
 - Issue #23 remains next after #81; canonical portfolio CRUD owner is `dapur-editor.js`, HTTPS-only for new rows, max 100-line bulk intake, no historical URL cleanup.
 - Issue #84/#85 remain deferred Studio AI/CSP follow-ups; Issue #62 remains blocked by missing Edge invocation evidence.
+
+
+## Current authority update — 7 Sep 2026 / refresh 4
+
+This section supersedes earlier status blocks.
+
+- production main remains `d32c7e04b5c3d916c85a57a5528f18e6501134a1`; PR #79 is production-verified with Vercel Production SUCCESS, Release Gate #638 PASS, Production Smoke #14 PASS;
+- PR #81 current head before this documentation refresh: `c89700a336850b716e602d2ebd903c1ee72d3679`; Release Gate #642 PASS; Vercel Preview BLOCKED by build-rate-limit; migration NOT APPLIED live;
+- PR #81 pre-apply guard `supabase/tests/creator_trust_metrics_preflight.sql` now validates signature, SECURITY DEFINER, empty search_path encoding, anon/authenticated EXECUTE ACL, expected metric dependencies, and fails closed on drift/already-hardened state;
+- live preflight PASS;
+- actual migration SQL has been executed transactionally against live Supabase and fully rolled back: 0 published output mismatches, 0 anonymous unpublished leaks, Admin access PASS, owner workspace access PASS, ACL/security contract preserved;
+- actual rollback SQL has been transaction-tested: 48 Creators checked, 0 output mismatches, security contract restored, pg_get_functiondef exact-match with baseline;
+- final live preflight after rollback PASS, proving production RPC remains on the original definition;
+- Issue #23 is implemented as stacked draft PR #88 on top of #81; exact feature head `4a01c183b282d3abbe07f67eabece35faa656afa`; Release Gate #643 PASS via temporary validation PR #89, Vercel BLOCKED; #88 must not merge before #81;
+- PR #88 canonical owner is `dapur-editor.js`, with Admin recheck, HTTPS-only normalization, 100-line bound, normalized dedupe, one bounded insert, draft rows only, no scraping, and direct video-file URLs mapped to `link` under current live CHECK constraints;
+- Issue #90 tracks reconciliation of overlapping portfolio media CHECK constraints; target unified policy was read-only tested against all 139 current rows with 139 compatible / 0 incompatible; no schema change has been made.
