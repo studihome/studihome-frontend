@@ -280,3 +280,11 @@ ISSUE #98 PHASE B — STATIC STUDIO BRIEF PREP / 7 SEP 2026
 - No Auth/generated-template/CSS/CSP/DB/API change.
 - Keep draft until Phase A lands, branch is resynced, Preview succeeds, and Smart Brief browser acceptance passes.
 
+ISSUE #98 PHASE C — STATIC AUTH PREP / 7 SEP 2026
+- Stack after Phase A then B; never merge out of order.
+- Extract exactly 8 Auth static handlers to `static-auth-actions.js`.
+- Static handler count becomes 4; static onsubmit/onkeydown become zero.
+- Preserve login/register/forgot native submit Event objects, auth-mode switches, and auth modal close behavior.
+- No generated-template/CSS/CSP/DB/API change.
+- Keep draft until prior phases land, branch is resynced, Preview passes, and Auth browser acceptance passes.
+
