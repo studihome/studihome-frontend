@@ -423,19 +423,54 @@ This section supersedes earlier status blocks.
 - Issue #62 remains BLOCKED BY MISSING TELEMETRY because available Supabase tooling still exposes no Edge invocation logs.
 
 
-## Issue #23 bulk portfolio intake — STACKED / CURRENT
+## Console hygiene remediation — 7 Sep 2026
 
-- stacked dependency: PR #81 current head `db56c5ae2ba6946c389f774f3d93a95c404b6166`;
-- canonical owner: `dapur-editor.js`; lazy loader: `/dapur-editor.js?v=20260907bulk2`;
-- reuse `window.supabaseClient` only;
-- `adminPanel()` and private `bulkPortfolioIntake(id)` recheck server-backed `is_admin()`;
-- HTTPS-only normalization rejects embedded username/password credentials;
-- provider classification requires the expected host with no non-default port, otherwise generic `link`;
-- max 100 lines; fragment removed; query preserved; normalized dedupe against existing Creator rows + current batch;
-- one bounded insert; bulk rows use `service_id=null`, `description=''`, deterministic title, appended sort order, `is_active=false`;
-- direct video-file URLs remain `link` under current live DB policy;
-- no scraping/metadata fabrication;
+User console evidence was re-audited before continuing the release chain.
+
+Classification:
+- `[SP] supabaseClient ready immediately` / `[SP] loaded N items`: first-party informational noise; removed. Real query/fetch failures remain warnings.
+- `beforeinstallprompt.preventDefault()` banner diagnostic: expected Chromium behavior for the intentional custom install flow. Keep `preventDefault()` + deferred `prompt()`; do not remove merely to silence the browser.
+- `Could not establish connection. Receiving end does not exist` / asynchronous response channel closed: no first-party `chrome.runtime`, `browser.runtime`, `sendMessage`, `onMessage`, MessageChannel, or matching postMessage implementation. Existing Release Gate extension-messaging guard remains authoritative. Do not add global unhandledrejection suppression.
+- reported Supabase Creator avatar `ERR_NAME_NOT_RESOLVED`: live storage audit confirmed bucket `creator-media` exists and all 5 reported avatar objects exist. This is DNS/network-layer failure, not missing data.
+
+First-party remediation branch:
+- `fix/console-hygiene-avatar-resilience`;
+- same-origin `/api/creator-avatar` proxy accepts only Studihome UUID[/UUID]/avatar.webp object paths and fetches only the fixed Studihome Supabase public origin;
+- no arbitrary URL input / no SSRF;
+- upstream failure returns a short-cache transparent SVG with HTTP 200;
+- successful avatar responses are CDN-cacheable;
+- core `App.utils.safeUrl` proxies only exact Studihome creator-media avatar paths; other URLs preserve existing behavior;
+- active `studio-ai-creator-card.js` uses the shared helper;
+- asset bumps: creator card v7, social proof v14;
+- regression: `tests/console-hygiene-avatar-resilience-regression.js`;
+- no DB/RLS/Auth/grant/storage object change.
+
+
+## Current authority update — 7 Sep 2026 / refresh 6
+
+- production main is `2809811790ab12511886355f8a0cc42717a82745` after PR #101 console hygiene/avatar resilience;
+- PR #101 verification: Vercel Production SUCCESS, Release Gate #657 PASS, Production Smoke #15 PASS;
+- PR #81 now includes the verified console runtime + console regression while preserving Creator trust migration/preflight/rollback artifacts;
+- Creator trust migration remains NOT APPLIED live;
+- fresh exact-head Release Gate + Vercel Preview are required again after this synchronization before persistent migration/merge.
+
+
+## Issue #23 bulk portfolio intake — current stacked authority
+
+- canonical PR: #88, branch `feat/admin-bulk-portfolio-intake`;
+- base dependency: PR #81 / `security/constrain-creator-trust-rpc`;
+- canonical runtime owner: `dapur-editor.js`; lazy loader `dapur-entry.js?v=20260907bulk2`;
+- canonical Supabase client: `window.supabaseClient`;
+- `adminPanel()` and private `bulkPortfolioIntake(id)` both recheck `is_admin()`;
+- helper stays closure-private, not exported on `window.AdminDapurUI`;
+- max 100 lines; HTTPS-only; embedded credentials rejected; fragment removed; query preserved;
+- provider classification requires exact supported host and no non-default port; otherwise generic `link`;
+- dedupe normalized URL against existing Creator rows + same batch;
+- historical service-linked same-URL rows are untouched;
+- inserted rows: `service_id=null`, `description=''`, deterministic title, appended sort order, `is_active=false`;
+- one bounded insert; explicit added/duplicate/invalid/skipped result;
+- no scraping, OpenGraph, AI metadata, or external metadata API;
+- under current DB checks, direct video file URL maps to `link`; Issue #90 owns schema reconciliation;
 - regression: `tests/admin-bulk-portfolio-intake-regression.js`;
-- latest pre-sync exact head `03c72292ee49c07e22f72a37e6c4d53cd2da6f55`: Release Gate #653 PASS; Vercel provider-blocked;
-- no schema/RLS/Auth/grant/production-data change;
-- must not merge before PR #81.
+- PR #88 must remain DRAFT and must not merge before PR #81;
+- after every base/head change, require fresh exact-head Release Gate + Preview before merge.
