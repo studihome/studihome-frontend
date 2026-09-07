@@ -53,7 +53,7 @@ const topShellSource = index.slice(topShellStart, topShellEnd);
 for (const forbidden of [
   'onclick="App.router.navigate',
   'onclick="App.auth.logout()',
-  'onclick="App.ui.toggleModal(\\'auth-modal\\', true)"'
+  "onclick=\"App.ui.toggleModal('auth-modal', true)\""
 ]) {
   assert(!topShellSource.includes(forbidden), 'Legacy top-shell generated handler restored: ' + forbidden);
 }
