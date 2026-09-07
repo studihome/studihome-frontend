@@ -104,10 +104,10 @@ begin
       when 'image' then media_url ~* '^https://'
       when 'video' then media_url ~* '^https://'
       when 'link' then media_url ~* '^https://'
-      when 'youtube' then media_url ~* '^https://(www\\.)?(youtube\\.com|youtu\\.be)/'
-      when 'drive' then media_url ~* '^https://(www\\.)?(drive\\.google\\.com|docs\\.google\\.com)/'
-      when 'tiktok' then media_url ~* '^https://(www\\.)?tiktok\\.com/'
-      when 'instagram' then media_url ~* '^https://(www\\.)?instagram\\.com/'
+      when 'youtube' then media_url ~* '^https://(www\.)?(youtube\.com|youtu\.be)/'
+      when 'drive' then media_url ~* '^https://(www\.)?(drive\.google\.com|docs\.google\.com)/'
+      when 'tiktok' then media_url ~* '^https://(www\.)?tiktok\.com/'
+      when 'instagram' then media_url ~* '^https://(www\.)?instagram\.com/'
       else false
     end
   );
@@ -125,10 +125,10 @@ alter table public.creator_portfolios
       when 'image' then media_url ~* '^https://'
       when 'video' then media_url ~* '^https://'
       when 'link' then media_url ~* '^https://'
-      when 'youtube' then media_url ~* '^https://(www\\.)?(youtube\\.com|youtu\\.be)/'
-      when 'drive' then media_url ~* '^https://(www\\.)?(drive\\.google\\.com|docs\\.google\\.com)/'
-      when 'tiktok' then media_url ~* '^https://(www\\.)?tiktok\\.com/'
-      when 'instagram' then media_url ~* '^https://(www\\.)?instagram\\.com/'
+      when 'youtube' then media_url ~* '^https://(www\.)?(youtube\.com|youtu\.be)/'
+      when 'drive' then media_url ~* '^https://(www\.)?(drive\.google\.com|docs\.google\.com)/'
+      when 'tiktok' then media_url ~* '^https://(www\.)?tiktok\.com/'
+      when 'instagram' then media_url ~* '^https://(www\.)?instagram\.com/'
       else false
     end
   ) not valid;
