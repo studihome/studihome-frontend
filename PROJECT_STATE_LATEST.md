@@ -484,3 +484,15 @@ This section supersedes earlier contradictory status sections.
 - Issue #23: canonical CRUD owner corrected to `dapur-editor.js`. Live DB requires HTTPS-only portfolio URLs. Bulk intake contract: private Admin-only path, canonical Supabase singleton, normalize/dedupe new generic URLs only, no historical cleanup, max 100 lines, deterministic title, `service_id=null`, `description=''`, `is_active=false`, append deterministic sort order, no scraping;
 - Issue #86: CLOSED / COMPLETED with NO CLEANUP after proving 45 same-URL groups are service-linked variants, not safe duplicates;
 - PR #43 and PR #50 remain CLOSED AS SUPERSEDED.
+
+
+## Console hygiene remediation state — 7 Sep 2026
+
+Before continuing #81 -> #88, current console evidence was triaged.
+
+- Social proof successful boot/load logs: first-party noise, remediation prepared.
+- PWA beforeinstallprompt banner diagnostic: expected custom-install behavior; no functional change.
+- message-channel errors: extension/content-script provenance remains the supported classification; first-party extension-messaging regression guard remains active.
+- Creator avatar DNS failures: all 5 reported storage objects exist in live `creator-media`; no data repair required.
+- isolated remediation branch adds strict same-origin avatar proxy, fallback image behavior, active Studio AI renderer integration, social-proof log cleanup, cache-buster updates, and regression coverage.
+- no persistent Supabase/storage/schema/RLS/Auth/grant change.
