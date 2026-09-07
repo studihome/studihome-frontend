@@ -410,3 +410,14 @@ This section supersedes earlier status blocks.
 - Issue #23 is implemented as stacked draft PR #88 on top of #81; exact feature head `4a01c183b282d3abbe07f67eabece35faa656afa`; Release Gate #643 PASS via temporary validation PR #89, Vercel BLOCKED; #88 must not merge before #81;
 - PR #88 canonical owner is `dapur-editor.js`, with Admin recheck, HTTPS-only normalization, 100-line bound, normalized dedupe, one bounded insert, draft rows only, no scraping, and direct video-file URLs mapped to `link` under current live CHECK constraints;
 - Issue #90 tracks reconciliation of overlapping portfolio media CHECK constraints; target unified policy was read-only tested against all 139 current rows with 139 compatible / 0 incompatible; no schema change has been made.
+
+
+## Current authority update — 7 Sep 2026 / refresh 5
+
+- production main remains `d32c7e04b5c3d916c85a57a5528f18e6501134a1`; PR #79 remains production-verified;
+- PR #81 prior exact head `55abd94353f319ff085e132bb51ad61eb9df6885`: Release Gate #646 PASS, preflight PASS, actual migration transactional test PASS, exact rollback transactional test PASS, migration NOT APPLIED live;
+- Vercel provider recovery is now proven by PR #88 exact head `3a1d5a681d56ee5f957487aabc8ffbd18ba1054e`: Release Gate #648 PASS + Vercel Preview SUCCESS;
+- PR #88 remains stacked on #81 and DRAFT; latest hardening rejects embedded URL credentials and prevents platform-specific typing on non-default ports;
+- Issue #90 media CHECK reconciliation contract is READY after transactional apply/deny tests and 4/4 exact rollback reconstruction; no live schema change;
+- Issue #83 redundant entitlement index cleanup contract is READY after transactional drop/planner/rollback verification; no live index change;
+- Issue #62 remains BLOCKED BY MISSING TELEMETRY because available Supabase tooling still exposes no Edge invocation logs.
