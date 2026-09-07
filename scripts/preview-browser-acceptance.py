@@ -27,6 +27,11 @@ class AcceptanceError(RuntimeError):
     pass
 
 
+class PreviewAccessBlocked(AcceptanceError):
+    """The selected Preview exists but platform protection prevents app access."""
+    pass
+
+
 def require(condition: bool, message: str) -> None:
     if not condition:
         raise AcceptanceError(message)
@@ -41,6 +46,28 @@ def normalize_base_url(value: str) -> str:
     require(host.endswith(".vercel.app"), "Preview URL host must end with .vercel.app")
     require(parsed.port is None, "Preview URL must not specify a custom port")
     return f"https://{host}"
+
+
+def preview_destination_issue(value: str, expected_host: str) -> tuple[str, str] | None:
+    parsed = urllib.parse.urlparse(str(value or ""))
+    host = (parsed.hostname or "").lower()
+    expected = str(expected_host or "").lower()
+    if host == expected:
+        return None
+
+    if host in {"vercel.com", "www.vercel.com"} and (
+        parsed.path.startswith("/login") or parsed.path.startswith("/sso-api")
+    ):
+        return (
+            "blocked",
+            "Vercel Deployment Protection/SSO redirected the Preview browser "
+            f"to {host}{parsed.path}; Studihome did not load.",
+        )
+
+    return (
+        "unexpected-origin",
+        f"Preview navigation left expected host {expected!r} for {host!r}.",
+    )
 
 
 def classify_log(entry: dict[str, Any], host: str) -> str | None:
@@ -116,6 +143,10 @@ class Driver:
     def nav(self, url: str) -> None:
         self.request("POST", self.path("/url"), {"url": url})
 
+    def current_url(self) -> str:
+        value = self.request("GET", self.path("/url"))
+        return str(value or "")
+
     def js(self, code: str, *args: Any) -> Any:
         return self.request("POST", self.path("/execute/sync"), {"script": code, "args": list(args)})
 
@@ -169,11 +200,35 @@ def visible(selector: str) -> str:
     """
 
 
-def wait_app(driver: Driver) -> None:
-    wait_js(driver, """
-      return document.readyState==='complete' && !!window.App && !!App.ui && !!App.search
-        && !!App.auth && !!App.router && !!App.studioAI && !!window.StudihomePWA;
-    """, "Studihome App boot", 30)
+def require_preview_origin(driver: Driver, expected_host: str) -> None:
+    current = driver.current_url()
+    issue = preview_destination_issue(current, expected_host)
+    if issue is None:
+        return
+    kind, message = issue
+    if kind == "blocked":
+        raise PreviewAccessBlocked(message)
+    raise AcceptanceError(message)
+
+
+def wait_app(driver: Driver, expected_host: str) -> None:
+    deadline = time.monotonic() + 30
+    last = None
+    while time.monotonic() < deadline:
+        require_preview_origin(driver, expected_host)
+        try:
+            last = driver.js("""
+              return document.readyState==='complete' && !!window.App && !!App.ui && !!App.search
+                && !!App.auth && !!App.router && !!App.studioAI && !!window.StudihomePWA;
+            """)
+            if last:
+                return
+        except PreviewAccessBlocked:
+            raise
+        except AcceptanceError:
+            pass
+        time.sleep(0.25)
+    raise AcceptanceError(f"Timed out waiting for Studihome App boot; last={last!r}")
 
 
 def run(preview_url: str, driver_url: str, screenshot: str) -> None:
@@ -184,9 +239,10 @@ def run(preview_url: str, driver_url: str, screenshot: str) -> None:
     try:
         d.nav(preview_url)
         wait_js(d, "return document.readyState==='complete';", "initial load", 30)
+        require_preview_origin(d, host)
         d.js("localStorage.setItem('studihome-pwa-dismissed-v2',String(Date.now()));return true;")
         d.nav(preview_url)
-        wait_app(d)
+        wait_app(d, host)
 
         d.click("#global-search-open-desktop")
         wait_js(d, visible("#search-modal"), "Search open")
@@ -262,14 +318,14 @@ def run(preview_url: str, driver_url: str, screenshot: str) -> None:
         d.click("#auth-modal-close")
 
         d.nav(preview_url)
-        wait_app(d)
+        wait_app(d, host)
         wait_js(d, "return !!document.querySelector('#main-content [data-home-route=\"products\"]');",
                 "Home products action", 30)
         d.click("#main-content [data-home-route='products']")
         wait_js(d, "return location.pathname==='/foyer';", "Home -> Foyer")
 
         d.nav(preview_url)
-        wait_app(d)
+        wait_app(d, host)
         route = d.js("""
           const b=[...document.querySelectorAll('#top-nav-links [data-app-route]')]
             .find(x=>['products','home'].includes(x.dataset.appRoute));
@@ -290,7 +346,7 @@ def run(preview_url: str, driver_url: str, screenshot: str) -> None:
 
         d.nav(preview_url)
         d.size(390, 844)
-        wait_app(d)
+        wait_app(d, host)
         route = d.js("""
           const b=[...document.querySelectorAll('#mobile-nav-links [data-app-route]')]
             .find(x=>['products','home'].includes(x.dataset.appRoute));
@@ -303,7 +359,7 @@ def run(preview_url: str, driver_url: str, screenshot: str) -> None:
 
         d.nav(preview_url)
         d.size(1440, 1000)
-        wait_app(d)
+        wait_app(d, host)
         d.js("""
           const b=document.createElement('button');b.id='preview-acceptance-utility-home';
           b.dataset.globalAction='home';b.textContent='Back home';
@@ -359,6 +415,20 @@ def self_test() -> None:
         {"level": "SEVERE", "message": "https://www.youtube.com/x Failed to load resource"},
         "x.vercel.app",
     ) is None, "third-party exclusion")
+    require(
+        preview_destination_issue("https://x.vercel.app/foyer", "x.vercel.app") is None,
+        "same Preview origin classification",
+    )
+    blocked = preview_destination_issue(
+        "https://vercel.com/login?next=%2Fsso-api",
+        "x.vercel.app",
+    )
+    require(blocked is not None and blocked[0] == "blocked", "Vercel protection classification")
+    unexpected = preview_destination_issue("https://example.com/", "x.vercel.app")
+    require(
+        unexpected is not None and unexpected[0] == "unexpected-origin",
+        "unexpected Preview origin classification",
+    )
     print("Preview browser acceptance harness self-test: PASS")
 
 
@@ -382,6 +452,9 @@ def main() -> int:
 if __name__ == "__main__":
     try:
         raise SystemExit(main())
+    except PreviewAccessBlocked as exc:
+        print(f"Preview browser acceptance: BLOCKED: {exc}", file=sys.stderr)
+        raise SystemExit(2)
     except AcceptanceError as exc:
         print(f"Preview browser acceptance: FAIL: {exc}", file=sys.stderr)
         raise SystemExit(1)

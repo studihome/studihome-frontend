@@ -41,7 +41,7 @@ This checklist is the release-decision surface. Source-level tests do not replac
 - PASS — Shop delegated binder has executable VM-DOM behavior regression for submit/change/click, original Event forwarding, nested targets, idempotency, unknown-action rejection, and outside-container rejection.
 - PASS — dependency-free real-Chromium action-binder smoke is Release-Gate wired for A–I external binders using local DOM + mocked App; this verifies real browser event/delegation semantics without touching Supabase or production data.
 - BLOCKED — strict `script-src-attr` / `style-src-attr` enforcement; **170 generated handlers**, **36 core generated style attributes**, and **2 core dynamic event-attribute setters** remain.
-- NOT VERIFIED — full application/Preview browser parity for the complete A–I interaction set; the local real-Chromium binder smoke is narrower and must not be misreported as production E2E.\n- NOT VERIFIED — public Vercel Preview browser acceptance: run #1 failed in resolver parsing before ChromeDriver; run #2 had zero jobs because invalid YAML prevented workflow execution. Both are CI automation failures, not application-regression evidence. The corrected workflow may use only an exact Vercel-SUCCESS head or an explicitly allowlisted runtime-equivalent Vercel-SUCCESS ancestor; browser assertions must still PASS before this item becomes PASS.
+- NOT VERIFIED — full application/Preview browser parity for the complete A–I interaction set; the local real-Chromium binder smoke is narrower and must not be misreported as production E2E.\n- BLOCKED — public Vercel Preview browser acceptance: run #3 passed resolver/source binding and started real ChromeDriver, but Vercel Deployment Protection/SSO redirected the browser to `vercel.com/login?...sso-api...` before Studihome loaded. Runs #1–#2 were CI automation failures; run #3 proves the current remaining public-Preview blocker is platform access, not an A–I application regression. The harness now classifies this redirect explicitly as BLOCKED.
 
 ## C. Database and security
 
@@ -61,7 +61,7 @@ This checklist is the release-decision surface. Source-level tests do not replac
 - PASS — active Creator avatar rendering uses strict same-origin resilience for eligible Studihome avatar paths.
 - PASS — custom PWA `beforeinstallprompt` / deferred `prompt()` contract is guarded in CI.
 - PASS — first-party browser runtimes are guarded against unexpected `chrome.runtime` / `browser.runtime` messaging.
-- NOT VERIFIED — clean-console evidence on PR #114 in a real browser with extensions disabled/incognito.
+- BLOCKED — clean-console evidence on the Vercel Preview cannot currently be collected by the GitHub runner because Deployment Protection redirects to Vercel login before Studihome loads; local real-Chromium binder smoke remains PASS.
 - NOT VERIFIED — real-device PWA install flow after the current CSP candidate.
 
 ## E. Auth, ownership, and privileged flows
