@@ -8,9 +8,13 @@ const index = fs.readFileSync('index.html', 'utf8');
 const social = fs.readFileSync('social-proof-widget.js', 'utf8');
 const card = fs.readFileSync('studio-ai-creator-card.js', 'utf8');
 const workflow = fs.readFileSync('.github/workflows/pr-syntax-validation.yml', 'utf8');
+const dapur = fs.readFileSync('dapur.html', 'utf8');
+const rootBrowserRuntimeFiles = fs.readdirSync('.')
+  .filter(name => /\.(?:js|html)$/.test(name))
+  .filter(name => fs.statSync(name).isFile());
 
 assert(index.includes('/studio-ai-creator-card.js?v=7'), 'Studio AI creator card cache-buster must be v7');
-assert(index.includes('/social-proof-widget.js?v=14'), 'Social proof widget cache-buster must be v14');
+assert(index.includes('/social-proof-widget.js?v=15'), 'Social proof widget cache-buster must be v15');
 assert(index.includes("/api/creator-avatar?path="), 'Core safeUrl must route Studihome avatars through same-origin proxy');
 assert(index.includes("parsed.hostname === 'hbfmhwwxbgidsnljupca.supabase.co'"), 'Avatar proxy host allowlist missing');
 assert(index.includes("avatarPattern.test(objectPath)"), 'Avatar object-path allowlist missing');
@@ -29,7 +33,35 @@ assert(
 
 assert(workflow.includes("'chrome.runtime'"), 'First-party extension-messaging guard must remain active');
 assert(workflow.includes("'browser.runtime'"), 'First-party browser.runtime guard must remain active');
-assert(!index.includes("unhandledrejection"), 'Do not globally suppress promise rejection diagnostics');
+assert(
+  !dapur.includes("addEventListener('beforeinstallprompt'") &&
+  !dapur.includes('addEventListener("beforeinstallprompt"'),
+  'Dapur must rely on native Chromium install UI and not register beforeinstallprompt'
+);
+assert(!dapur.includes("deferred.prompt()"), 'Dapur must not retain a dead deferred install prompt');
+assert(index.includes("deferred.prompt();"), 'Home custom PWA install action must remain user-callable');
+
+const forbiddenMessaging = [
+  'chrome.runtime',
+  'browser.runtime',
+  '.runtime.sendMessage(',
+  '.runtime.onMessage',
+];
+const forbiddenSuppression = [
+  "addEventListener('unhandledrejection'",
+  'addEventListener("unhandledrejection"',
+  'window.onunhandledrejection',
+];
+
+for (const file of rootBrowserRuntimeFiles) {
+  const body = fs.readFileSync(file, 'utf8');
+  for (const marker of forbiddenMessaging) {
+    assert(!body.includes(marker), `Unexpected extension messaging API in first-party runtime ${file}: ${marker}`);
+  }
+  for (const marker of forbiddenSuppression) {
+    assert(!body.includes(marker), `Global promise rejection suppression is forbidden in first-party runtime ${file}: ${marker}`);
+  }
+}
 
 const apiPath = path.resolve('api/creator-avatar.js');
 delete require.cache[apiPath];

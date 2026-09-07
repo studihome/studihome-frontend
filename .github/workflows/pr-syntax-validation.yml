@@ -271,22 +271,22 @@ jobs:
         run: |
           from pathlib import Path
 
-          browser_runtime_files = [
+          browser_runtime_files = sorted({
               Path('index.html'),
               Path('dapur.html'),
-              Path('sw.js'),
-              Path('creator-public.js'),
-              Path('studio-ai-creator-card.js'),
-              Path('social-proof-widget.js'),
-              Path('dapur-entry.js'),
-              Path('dapur-editor.js'),
-          ]
+              *Path('.').glob('*.js'),
+          })
 
           forbidden_extension_messaging = [
               'chrome.runtime',
               'browser.runtime',
               '.runtime.sendMessage(',
               '.runtime.onMessage',
+          ]
+          forbidden_global_suppression = [
+              "addEventListener('unhandledrejection'",
+              'addEventListener("unhandledrejection"',
+              'window.onunhandledrejection',
           ]
 
           for path in browser_runtime_files:
@@ -299,6 +299,23 @@ jobs:
                           f'Unexpected browser-extension messaging API in '
                           f'first-party runtime {path}: {marker}'
                       )
+              for marker in forbidden_global_suppression:
+                  if marker in body:
+                      raise SystemExit(
+                          f'Global promise rejection suppression is forbidden '
+                          f'in first-party runtime {path}: {marker}'
+                      )
+
+          dapur = Path('dapur.html').read_text(encoding='utf-8')
+          dapur_beforeinstallprompt_listener = (
+              "addEventListener('beforeinstallprompt'" in dapur or
+              'addEventListener("beforeinstallprompt"' in dapur
+          )
+          if dapur_beforeinstallprompt_listener or 'deferred.prompt()' in dapur:
+              raise SystemExit(
+                  'Dapur must use native Chromium PWA install UI and must not '
+                  'register/retain a beforeinstallprompt action.'
+              )
 
           index = Path('index.html').read_text(encoding='utf-8')
           pwa_markers = [
