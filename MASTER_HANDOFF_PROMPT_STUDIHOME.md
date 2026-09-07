@@ -379,12 +379,12 @@ This section supersedes earlier authority/status blocks in this document.
 Issue #80 / draft PR #81:
 - branch must stay synchronized with production-verified main `d32c7e04b5c3d916c85a57a5528f18e6501134a1`;
 - live `get_creator_trust_metrics(uuid)` currently returns non-NULL for both published and unpublished Creator IDs in unauthenticated context;
-- prepared migration: `supabase/migrations/20260907004000_constrain_creator_trust_metrics_visibility.sql`;
+- prepared migration: `supabase/migrations/20260907063648_constrain_creator_trust_metrics_visibility.sql`;
 - target behavior: published Creator -> metrics; active Admin -> metrics; owning Creator with workspace access -> metrics; every other unpublished access -> NULL;
 - preserve signature, SECURITY DEFINER, `search_path=''`, and current ACL;
 - no table/schema/RLS/grant/data change is included;
 - verification: `supabase/tests/creator_trust_metrics_visibility_verification.sql`;
-- rollback: `supabase/rollbacks/20260907004000_restore_creator_trust_metrics_visibility.sql`;
+- rollback: `supabase/rollbacks/20260907063648_restore_creator_trust_metrics_visibility.sql`;
 - regression: `tests/creator-trust-metrics-visibility-regression.js`;
 - migration remains NOT APPLIED live until fresh PR #81 Release Gate + Vercel Preview succeed and post-apply SQL verification passes.
 
@@ -453,3 +453,19 @@ First-party remediation branch:
 - PR #81 now includes the verified console runtime + console regression while preserving Creator trust migration/preflight/rollback artifacts;
 - Creator trust migration remains NOT APPLIED live;
 - fresh exact-head Release Gate + Vercel Preview are required again after this synchronization before persistent migration/merge.
+
+## Current authority update — 7 Sep 2026 / refresh 7
+
+This section supersedes earlier contradictory status text.
+
+- production main remains `2809811790ab12511886355f8a0cc42717a82745`; PR #101 console hygiene/avatar resilience is production-verified (Vercel Production SUCCESS, Release Gate #657 PASS, Production Smoke #15 PASS);
+- live Supabase preflight for `get_creator_trust_metrics(uuid)` passed immediately before persistent apply;
+- Creator trust visibility hardening is now **APPLIED LIVE** as Supabase migration history version `20260907063648` / `constrain_creator_trust_metrics_visibility`;
+- post-apply verification passed: published Creator access retained, anonymous unpublished access denied, active Admin access retained, and eligible owner/workspace access retained;
+- repository migration and rollback filenames are reconciled to the exact live migration version `20260907063648`; no table, RLS, grant, storage-object, or application-data mutation is part of this migration;
+- Security Advisor was rerun. `get_creator_trust_metrics` still receives the generic anon/auth SECURITY DEFINER lint because public EXECUTE is intentionally retained for published Creator metrics; the function now performs internal publication/owner/Admin authorization. Other Advisor findings remain separate workstreams and must not be broadened into this focused change;
+- Performance Advisor reported INFO-level unused-index candidates only; do not drop indexes from this workstream;
+- the previous PR #81 Vercel Preview blocker was the Free-plan deployment quota. The #81 diff contains DB migration/tests/docs/workflow only, while current production runtime at main is already Vercel-successful. Treat this as a narrowly documented DB-only deployment-equivalence exception; exact-head Release Gate PASS and a no-runtime-diff check are still required before merge;
+- rollback: `supabase/rollbacks/20260907063648_restore_creator_trust_metrics_visibility.sql`;
+- PR #88 remains stacked and must be reconciled with main after #81 is merged.
+
