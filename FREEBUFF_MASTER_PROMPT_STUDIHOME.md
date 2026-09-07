@@ -117,3 +117,11 @@ ADMIN DAPUR SUPABASE SINGLETON — ISSUE #24
 - current runtime asset version: `/admin-dapur-creator-v5.js?v=11`;
 - regression test: `tests/admin-dapur-supabase-singleton-regression.js`;
 - do not broaden RLS/grants or alter Auth to compensate for frontend readiness.
+
+
+ISSUE #24 VERIFIED RELEASE
+- merged main SHA: `1c1702f1020c6743b09d84d0dce559484754284b`;
+- Vercel Production: SUCCESS;
+- Release Gate #621: PASS;
+- Production Smoke #12 / `34069115071`: PASS;
+- Admin Dapur now uses only `window.supabaseClient`; do not reintroduce a duplicate SDK loader/client.
