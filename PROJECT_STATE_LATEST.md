@@ -664,3 +664,13 @@ Before continuing #81 -> #88, current console evidence was triaged.
 - product iframe cleanup ordering locked by regression;
 - static attribute workstream is source-prepared but remains unmerged until sequential Preview/browser gates are available.
 
+## Issue #98 Phase E preparation — 7 Sep 2026
+
+- stacked after static A-D;
+- corrected generated HTML-handler baseline: 184, not 190;
+- Phase E removes only SMART script #6 generated onclick;
+- generated HTML event attributes: 184 -> 183;
+- all 183 remaining attributes are in core runtime script #5;
+- SMART uses data action + delegated click; behavior/ranking unchanged;
+- regression + Release Gate wiring prepared; draft/unmerged while Vercel Preview unavailable.
+
