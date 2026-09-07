@@ -561,3 +561,12 @@ Before continuing #81 -> #88, current console evidence was triaged.
 - no DB/RLS/Auth/grant/data mutation;
 - merge gate is strict: exact-head Release Gate PASS **and fresh Vercel Preview SUCCESS** are required because this branch changes browser runtime.
 
+## Current authority update — 7 Sep 2026 / refresh 8
+
+- source main: `fec5512fd1f8449a31071a926a2ca5280c2ee498` after completed PR #81;
+- last production-verified deployed runtime: `2809811790ab12511886355f8a0cc42717a82745`; Vercel for `fec5512...` is provider-quota BLOCKED, while #81 has no frontend/API runtime delta;
+- live Supabase trust-metric visibility hardening remains APPLIED + VERIFIED as migration `20260907063648`;
+- PR #88: CLOSED AS SUPERSEDED;
+- PR #102: canonical clean-mainline Admin bulk portfolio intake replacement, based directly on current main with seven intended feature/test/docs/workflow files;
+- PR #102 must not merge until exact-head Release Gate PASS and fresh Vercel Preview SUCCESS.
+

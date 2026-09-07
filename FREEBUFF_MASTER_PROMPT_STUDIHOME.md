@@ -220,3 +220,10 @@ ISSUE #23 CLEAN MAINLINE REBUILD — 7 SEP 2026
 - Regression: `tests/admin-bulk-portfolio-intake-regression.js`.
 - This is a runtime change: exact-head Release Gate PASS plus fresh Vercel Preview SUCCESS are mandatory before merge. The DB-only #81 Vercel-quota exception does not apply.
 
+CURRENT AUTHORITY UPDATE — 7 SEP 2026 / REFRESH 8
+- Source main is `fec5512fd1f8449a31071a926a2ca5280c2ee498` after PR #81; live trust-metric migration `20260907063648` is applied and verified.
+- Vercel for source-main `fec5512...` is BLOCKED by Free-plan build-rate-limit; last production-verified deployed runtime remains `2809811790ab12511886355f8a0cc42717a82745`. #81 has no frontend/API runtime delta.
+- Old PR #88 is CLOSED AS SUPERSEDED / DO NOT MERGE.
+- PR #102 is the canonical Issue #23 clean-mainline replacement on `feat/admin-bulk-portfolio-intake-mainline-2026-09-07`.
+- Because #102 changes browser runtime, require exact-head Release Gate PASS + Vercel Preview SUCCESS before merge. Never reuse the DB-only #81 quota exception.
+

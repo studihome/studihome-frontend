@@ -482,3 +482,12 @@ This section supersedes earlier contradictory status text.
 - this is a runtime change, therefore unlike the DB-only #81 exception it must not merge without a fresh Vercel Preview SUCCESS on the exact clean-branch head;
 - no schema, migration, RLS, grant, Auth, or production-data change belongs to this feature.
 
+## Current authority update — 7 Sep 2026 / refresh 8
+
+- source `main` is now `fec5512fd1f8449a31071a926a2ca5280c2ee498` after PR #81 merged with ancestry preserved;
+- live Creator trust hardening remains applied as Supabase migration `20260907063648`; post-apply verification passed;
+- Vercel deployment/status for `fec5512...` is BLOCKED by Free-plan build-rate-limit. The last production-verified deployed runtime remains `2809811790ab12511886355f8a0cc42717a82745`; #81 introduced no frontend/API runtime delta;
+- stale stacked PR #88 is CLOSED AS SUPERSEDED / DO NOT MERGE;
+- canonical Issue #23 implementation is replacement PR #102 on branch `feat/admin-bulk-portfolio-intake-mainline-2026-09-07`, rebuilt cleanly from `fec5512...`;
+- PR #102 is a browser-runtime change and has no DB-only quota exception: require exact-head Release Gate PASS + Vercel Preview SUCCESS + up-to-date/mergeable state before merge.
+
