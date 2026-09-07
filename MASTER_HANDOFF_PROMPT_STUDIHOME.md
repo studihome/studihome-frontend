@@ -538,3 +538,17 @@ This section supersedes earlier deployment/release status text.
 - preflight + post-apply planner/FK verification + Release Gate regression are included;
 - migration is **NOT APPLIED LIVE** until exact-head Release Gate PASS + Vercel Preview SUCCESS, followed by fresh live preflight.
 
+## Issue #83 live apply — 7 Sep 2026
+
+- exact-head PR #105 pre-apply Release Gate #677 PASS + Vercel Preview SUCCESS; branch was behind main 0 / mergeable true;
+- fresh live fail-closed preflight PASS;
+- persistent Supabase migration APPLIED as `20260907110644_remove_redundant_entitlements_user_product_index`;
+- `public.idx_entitlements_user_product` is now absent live;
+- VALID/READY UNIQUE constraint-backed `entitlements_user_id_product_id_key` remains present;
+- expected FK-leading indexes `idx_entitlements_user_id`, `idx_entitlements_product_id`, and `idx_entitlements_order_id` remain present;
+- post-apply representative lookup remains indexed / no Seq Scan;
+- Performance Advisor rerun completed and no longer reports `idx_entitlements_user_product`;
+- source migration + rollback filenames are reconciled to live version `20260907110644`;
+- exact rollback: `supabase/rollbacks/20260907110644_restore_redundant_entitlements_user_product_index.sql`;
+- PR #105 requires fresh exact-head Release Gate + Preview after reconciliation before merge.
+
