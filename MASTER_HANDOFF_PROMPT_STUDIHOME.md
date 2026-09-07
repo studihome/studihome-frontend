@@ -469,3 +469,16 @@ This section supersedes earlier contradictory status text.
 - rollback: `supabase/rollbacks/20260907063648_restore_creator_trust_metrics_visibility.sql`;
 - PR #88 remains stacked and must be reconciled with main after #81 is merged.
 
+## Admin bulk portfolio intake — clean mainline rebuild / 7 Sep 2026
+
+- the original stacked PR #88 diverged after #81 was merged into `main`; do not force-push or merge that stale stack;
+- a clean Issue #23 branch is rebuilt directly from production-lineage `main` `fec5512fd1f8449a31071a926a2ca5280c2ee498`;
+- runtime transplant is safe because `dapur-editor.js`, `dapur-entry.js`, and the Release Gate workflow had byte-identical base SHAs between the old #88 base and current main before applying the feature delta;
+- canonical implementation owner remains `dapur-editor.js`; `dapur-entry.js` only owns lazy loading/cache-busting;
+- Admin authorization is rechecked server-side through `is_admin()`; the browser reuses canonical `window.supabaseClient`;
+- bulk input is bounded to 100 lines, HTTPS-only, rejects embedded URL credentials, normalizes/deduplicates per Creator, uses one bounded batch insert, and creates inactive draft rows with `service_id=null`, empty description, deterministic title, and appended sort order;
+- supported provider typing remains constrained to the live DB contract; non-default-port provider URLs fall back to generic `link`; no scraping/OpenGraph/AI metadata fetch is introduced;
+- regression: `tests/admin-bulk-portfolio-intake-regression.js`; Release Gate wiring is retained;
+- this is a runtime change, therefore unlike the DB-only #81 exception it must not merge without a fresh Vercel Preview SUCCESS on the exact clean-branch head;
+- no schema, migration, RLS, grant, Auth, or production-data change belongs to this feature.
+
