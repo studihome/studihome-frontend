@@ -23,9 +23,12 @@ assert(
 );
 
 const index = fs.readFileSync('index.html', 'utf8');
+const activeLoaderMatches = index.match(
+  /<script[^>]+src=["']\/studio-ai-creator-card\.js\?v=\d+["'][^>]*><\/script>/gi
+) || [];
 assert(
-  index.includes('studio-ai-creator-card.js?v=6'),
-  'Active Studio AI creator-card loader must remain in index.html'
+  activeLoaderMatches.length === 1,
+  `Active Studio AI creator-card loader must remain exactly once, found ${activeLoaderMatches.length}`
 );
 
 for (const file of removed) {
