@@ -182,3 +182,19 @@ CURRENT AUTHORITY UPDATE — 7 SEP 2026 / REFRESH 5
 - PR #88 remains DRAFT / STACKED on #81; latest URL hardening rejects embedded credentials and non-default platform ports from special media classification.
 - Issue #90 DB media-policy migration contract READY; Issue #83 redundant-index cleanup contract READY; neither is applied live.
 - Issue #62 remains blocked by missing Edge invocation telemetry.
+
+
+CONSOLE HYGIENE REMEDIATION — 7 SEP 2026
+- Remove first-party informational console noise, not diagnostic failures.
+- Preserve the custom PWA beforeinstallprompt contract; Chromium's "Banner not shown" message is expected when preventDefault is used for a deferred user-gesture prompt.
+- Treat message-channel "Receiving end does not exist" / channel-closed errors as extension/content-script provenance unless a Studihome-owned stack frame is proven. Never globally suppress unhandledrejection.
+- Live storage verified all 5 reported Creator avatar objects exist; ERR_NAME_NOT_RESOLVED is DNS/network-layer.
+- Use strict same-origin /api/creator-avatar resilience only for Studihome UUID[/UUID]/avatar.webp paths. Fixed upstream host, no arbitrary fetch, fallback 200 image, CDN cache.
+- Social-proof success/debug logs removed; real failures remain warnings.
+- Regression: tests/console-hygiene-avatar-resilience-regression.js.
+
+
+CURRENT AUTHORITY UPDATE — 7 SEP 2026 / REFRESH 6
+- Production main: `2809811790ab12511886355f8a0cc42717a82745`; PR #101 console hygiene/avatar resilience is production-verified.
+- PR #81 preserves PR #101 runtime/CI while retaining Creator trust migration/test artifacts.
+- Migration remains NOT APPLIED until fresh exact-head Release Gate + Vercel Preview PASS.
