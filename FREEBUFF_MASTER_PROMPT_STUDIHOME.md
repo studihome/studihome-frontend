@@ -184,12 +184,28 @@ CURRENT AUTHORITY UPDATE — 7 SEP 2026 / REFRESH 5
 - Issue #62 remains blocked by missing Edge invocation telemetry.
 
 
-ISSUE #23 BULK PORTFOLIO INTAKE — STACKED / CURRENT
-- Base dependency: PR #81 current head `db56c5ae2ba6946c389f774f3d93a95c404b6166`; never merge #88 first.
-- Canonical owner `dapur-editor.js`; lazy cache-buster `v=20260907bulk2`.
-- Admin recheck via `is_admin()`; helper stays closure-private.
-- HTTPS only; reject embedded credentials; non-default-port provider URLs fall back to link.
-- Max 100 lines; strip fragment; preserve query; dedupe existing + batch.
-- One bounded draft insert; service_id null; description empty; is_active false; deterministic title.
-- Direct video remains link until Issue #90 DB-policy reconciliation.
-- Exact pre-sync head `03c72292ee49c07e22f72a37e6c4d53cd2da6f55` had Release Gate #653 PASS; fresh validation required after this sync.
+CONSOLE HYGIENE REMEDIATION — 7 SEP 2026
+- Remove first-party informational console noise, not diagnostic failures.
+- Preserve the custom PWA beforeinstallprompt contract; Chromium's "Banner not shown" message is expected when preventDefault is used for a deferred user-gesture prompt.
+- Treat message-channel "Receiving end does not exist" / channel-closed errors as extension/content-script provenance unless a Studihome-owned stack frame is proven. Never globally suppress unhandledrejection.
+- Live storage verified all 5 reported Creator avatar objects exist; ERR_NAME_NOT_RESOLVED is DNS/network-layer.
+- Use strict same-origin /api/creator-avatar resilience only for Studihome UUID[/UUID]/avatar.webp paths. Fixed upstream host, no arbitrary fetch, fallback 200 image, CDN cache.
+- Social-proof success/debug logs removed; real failures remain warnings.
+- Regression: tests/console-hygiene-avatar-resilience-regression.js.
+
+
+CURRENT AUTHORITY UPDATE — 7 SEP 2026 / REFRESH 6
+- Production main: `2809811790ab12511886355f8a0cc42717a82745`; PR #101 console hygiene/avatar resilience is production-verified.
+- PR #81 preserves PR #101 runtime/CI while retaining Creator trust migration/test artifacts.
+- Migration remains NOT APPLIED until fresh exact-head Release Gate + Vercel Preview PASS.
+
+
+ISSUE #23 CURRENT STACKED AUTHORITY
+- PR #88 is stacked on #81 and cannot merge first.
+- Reuse `window.supabaseClient`; Admin recheck required inside panel + private bulk intake.
+- HTTPS only; reject credentials; no non-default-port provider classification.
+- Max 100 lines, normalized dedupe, one bounded insert, draft inactive rows.
+- No scraping/fabricated metadata.
+- Direct video remains `link` until Issue #90 DB policy reconciliation.
+- Lazy editor cache-buster: `v=20260907bulk2`.
+- Fresh exact-head Release Gate + Vercel Preview required after any sync.
