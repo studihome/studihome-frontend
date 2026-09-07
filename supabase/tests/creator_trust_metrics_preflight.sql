@@ -30,7 +30,11 @@ begin
     raise exception 'Preflight failed: RPC is no longer SECURITY DEFINER.';
   end if;
 
-  if not (coalesce(v_proconfig, '{}'::text[]) @> array['search_path=']) then
+  if not exists (
+    select 1
+    from unnest(coalesce(v_proconfig, '{}'::text[])) cfg
+    where cfg in ('search_path=""', 'search_path=')
+  ) then
     raise exception 'Preflight failed: expected empty search_path contract missing.';
   end if;
 
