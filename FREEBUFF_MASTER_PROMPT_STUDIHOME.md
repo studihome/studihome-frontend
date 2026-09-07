@@ -165,3 +165,18 @@ CREATOR TRUST RPC HARDENING — SYNCHRONIZED AFTER PR #79
 - Rollback: `supabase/rollbacks/20260907004000_restore_creator_trust_metrics_visibility.sql`.
 - Preserve function signature, SECURITY DEFINER, search_path='', and ACL; only constrain unpublished visibility to owner/Admin.
 - Migration remains NOT APPLIED until fresh PR #81 Release Gate + Vercel Preview and post-apply SQL verification succeed.
+
+
+ISSUE #23 BULK PORTFOLIO INTAKE — STACKED / PREPARED
+- Base this workstream on PR #81; do not merge before #81.
+- Canonical owner: `dapur-editor.js`; lazy loader cache-buster: `v=20260907bulk1`.
+- Reuse `window.supabaseClient` only.
+- Require `is_admin()` inside both adminPanel and private bulkPortfolioIntake.
+- HTTPS-only; strip fragment; preserve query.
+- Max 100 pasted lines.
+- Deduplicate normalized URL against existing Creator rows + current batch.
+- Do not modify historical service-linked same-URL rows.
+- Insert drafts only: service_id null, description empty, deterministic title, appended sort order, is_active false.
+- No scraping/fabricated metadata.
+- Under current live CHECK constraints, direct video files map to link; do not write media_type=video.
+- Regression: `tests/admin-bulk-portfolio-intake-regression.js`.
