@@ -5,6 +5,7 @@ const fs = require('fs');
 const migrationPath = 'supabase/migrations/20260907004000_constrain_creator_trust_metrics_visibility.sql';
 const migration = fs.readFileSync(migrationPath, 'utf8');
 const verification = fs.readFileSync('supabase/tests/creator_trust_metrics_visibility_verification.sql', 'utf8');
+const rollback = fs.readFileSync('supabase/rollbacks/20260907004000_restore_creator_trust_metrics_visibility.sql', 'utf8');
 const index = fs.readFileSync('index.html', 'utf8');
 
 function assert(condition, message) {
@@ -78,6 +79,27 @@ for (const marker of forbiddenVerificationMarkers) {
   assert(
     !verification.toLowerCase().includes(marker),
     `Creator trust verification must stay application-data read-only: ${marker}`
+  );
+}
+
+const requiredRollbackMarkers = [
+  'create or replace function public.get_creator_trust_metrics(p_creator_id uuid)',
+  'security definer',
+  "set search_path to ''",
+  'where creator_id = p_creator_id'
+];
+
+for (const marker of requiredRollbackMarkers) {
+  assert(
+    rollback.toLowerCase().includes(marker.toLowerCase()),
+    `Creator trust rollback marker missing: ${marker}`
+  );
+}
+
+for (const marker of ['grant ', 'revoke ', 'alter table ', 'create policy ', 'drop policy ']) {
+  assert(
+    !rollback.toLowerCase().includes(marker),
+    `Creator trust rollback must not widen blast radius: ${marker}`
   );
 }
 
