@@ -552,6 +552,9 @@ jobs:
       - name: Admin bulk portfolio intake regression
         run: node tests/admin-bulk-portfolio-intake-regression.js
 
+      - name: Entitlements redundant index regression
+        run: node tests/entitlements-redundant-index-regression.js
+
       - name: Creator trust metrics visibility regression
         run: node tests/creator-trust-metrics-visibility-regression.js
 

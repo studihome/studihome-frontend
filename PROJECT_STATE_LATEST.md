@@ -601,3 +601,13 @@ Before continuing #81 -> #88, current console evidence was triaged.
 - Issue #23 remains open pending explicit authenticated browser acceptance;
 - previous Vercel quota blocker is resolved.
 
+## Issue #83 implementation state — 7 Sep 2026
+
+- redundant entitlements composite index live re-audit: PASS;
+- structural equivalence to valid UNIQUE constraint index: PASS;
+- no predicate/expression/include/opclass difference;
+- transaction-only drop/planner/rollback: PASS; indexed lookup path preserved and index restored;
+- isolated migration/preflight/verification/rollback/regression prepared;
+- no persistent index change yet;
+- apply gate: exact-head Release Gate PASS + Vercel Preview SUCCESS + fresh live preflight.
+
