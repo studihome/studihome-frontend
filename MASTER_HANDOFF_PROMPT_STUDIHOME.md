@@ -355,3 +355,20 @@ This section supersedes older contradictory status text in this document.
 - Issue #62: `smooth-action` ACTIVE v2 and `swift-endpoint` ACTIVE v1; retirement remains BLOCKED BY MISSING INVOCATION EVIDENCE;
 - Issue #23: live creator_portfolios schema/RLS supports bulk Admin intake without schema/RLS changes; default bulk rows inactive, dedupe normalized URL per Creator, no scraping or fabricated metadata;
 - PR #43 and PR #50 were closed as superseded on 7 Sep 2026.
+
+
+## Current authority update — 7 Sep 2026 / refresh 2
+
+This section supersedes earlier authority/status blocks in this document.
+
+- production-verified main baseline remains `e213d6d98eab3c47f559cda8b285aebfb7a9895d`; Vercel production SUCCESS, Release Gate #623 PASS, Production Smoke #13 PASS;
+- PR #79 Dapur auth-modal accessibility: current branch workstream; merge remains forbidden until a fresh Vercel Preview SUCCESS exists for the same head SHA;
+- Issue #80 / draft PR #81: Creator trust RPC hardening is PREPARED, Release Gate PASS on its current validated head, Vercel Preview provider-blocked, migration NOT APPLIED live;
+- Issue #19 audit is CLOSED / COMPLETED; implementation split to Issue #84 (remove proven inactive Studio AI runtimes) and Issue #85 (phased inline extraction before CSP enforcement);
+- Issue #82 unused-index audit is CLOSED / COMPLETED; 23 Advisor unused indexes were not dropped; 13/23 are FK-leading indexes;
+- Issue #83 tracks the separate redundant non-unique `idx_entitlements_user_product` candidate; do not drop until isolated reversible migration + re-audit;
+- Issue #62 remains BLOCKED BY MISSING INVOCATION EVIDENCE for `smooth-action` / `swift-endpoint`;
+- Issue #23 canonical portfolio CRUD owner is `dapur-editor.js`, lazy-loaded by `dapur-entry.js`; do not implement bulk CRUD in `admin-dapur-creator-v5.js`;
+- Issue #23 live contract requires HTTPS-only new portfolio URLs, existing media types `image|youtube|drive|tiktok|instagram|video|link`, canonical `window.supabaseClient`, Admin recheck via `is_admin()`, max 100 pasted lines, draft `is_active=false`, and no scraping/fabricated metadata;
+- Issue #86 historical same-URL audit is CLOSED / COMPLETED with NO CLEANUP: the 45 groups are service-context variants with distinct non-null `service_id` values; never add global UNIQUE(`creator_id`, `media_url`) based on URL equality alone;
+- PR #43 and PR #50 remain CLOSED AS SUPERSEDED.
