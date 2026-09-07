@@ -350,7 +350,7 @@ This section supersedes older contradictory status text in this document.
 - production-verified main baseline before PR #79: `e213d6d98eab3c47f559cda8b285aebfb7a9895d`;
 - PR #79 remains open: prior Release Gate PASS; Vercel Preview currently BLOCKED by build-rate-limit; merge waits for a fresh Vercel SUCCESS;
 - Issue #24 is CLOSED / COMPLETED / production-verified;
-- Issue #19 audit: `studio-ai-enhancements.js`, `studio-ai-production-enhancements.js`, and `studio-ai-search.js` are DELETE-CANDIDATE / not currently loaded; `studio-ai-creator-card.js?v=6` is ACTIVE / KEEP;
+- Issue #19 audit: `studio-ai-enhancements.js`, `studio-ai-production-enhancements.js`, and `studio-ai-search.js` are DELETE-CANDIDATE / not currently loaded; `studio-ai-creator-card.js?v=7` is ACTIVE / KEEP;
 - strict CSP migration is deferred because current index.html still contains 25 inline scripts and 9 inline styles;
 - Issue #62: `smooth-action` ACTIVE v2 and `swift-endpoint` ACTIVE v1; retirement remains BLOCKED BY MISSING INVOCATION EVIDENCE;
 - Issue #23: live creator_portfolios schema/RLS supports bulk Admin intake without schema/RLS changes; default bulk rows inactive, dedupe normalized URL per Creator, no scraping or fabricated metadata;
@@ -551,4 +551,15 @@ This section supersedes earlier deployment/release status text.
 - source migration + rollback filenames are reconciled to live version `20260907110644`;
 - exact rollback: `supabase/rollbacks/20260907110644_restore_redundant_entitlements_user_product_index.sql`;
 - PR #105 requires fresh exact-head Release Gate + Preview after reconciliation before merge.
+
+## Issue #84 clean current-main implementation — 7 Sep 2026
+
+- stale PR #93 is CLOSED AS SUPERSEDED / DO NOT MERGE;
+- current-main revalidation at `175110a8a3165611798919f0ed0bc37939d24661`: zero direct/dynamic loader for `studio-ai-enhancements.js`, `studio-ai-production-enhancements.js`, and `studio-ai-search.js`;
+- active `studio-ai-creator-card.js?v=7` remains directly loaded and is preserved;
+- clean branch `cleanup/studio-ai-inactive-runtimes-current` removes only the three proven inactive runtime files;
+- regression recursively scans active runtime source for forbidden filename references and locks the active creator-card loader;
+- Release Gate wiring added;
+- no `index.html`, CSS, Supabase, Auth, API, renderer, or application-data change belongs to this cleanup;
+- branch is PREPARED ONLY while Vercel Preview remains `build-rate-limit`; do not merge until fresh exact-head Release Gate PASS + Preview SUCCESS + Studio AI/browser acceptance.
 

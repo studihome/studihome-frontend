@@ -264,3 +264,11 @@ ISSUE #83 LIVE APPLY — 7 SEP 2026
 - Canonical rollback: `supabase/rollbacks/20260907110644_restore_redundant_entitlements_user_product_index.sql`.
 - PR #105 must rerun exact-head Release Gate + Vercel Preview after source-version reconciliation before merge.
 
+ISSUE #84 CLEAN CURRENT-MAIN PREP — 7 SEP 2026
+- Old PR #93 is superseded; never merge its stale ancestry.
+- Current-main cleanup removes only `studio-ai-enhancements.js`, `studio-ai-production-enhancements.js`, and `studio-ai-search.js` after fresh zero-consumer audit.
+- Keep `studio-ai-creator-card.js?v=7` active.
+- Regression scans active runtime files for reintroduced references.
+- No index/CSS/DB/Auth/API behavior change.
+- Keep draft/unmerged until Release Gate + Vercel Preview + browser Studio AI acceptance pass.
+

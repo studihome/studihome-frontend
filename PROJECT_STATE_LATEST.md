@@ -622,3 +622,12 @@ Before continuing #81 -> #88, current console evidence was triaged.
 - source migration/rollback reconciled to live version;
 - PR #105 remains unmerged pending fresh exact-head gates after reconciliation.
 
+## Issue #84 clean implementation state — 7 Sep 2026
+
+- PR #93 stale branch closed as superseded;
+- clean branch based on current main removes exactly three zero-consumer Studio AI legacy runtimes;
+- active `studio-ai-creator-card.js?v=7` retained;
+- regression + Release Gate wiring prepared;
+- no active runtime owner/index/CSS/DB/Auth change;
+- merge/deploy blocked until Vercel Preview returns and browser acceptance passes.
+
