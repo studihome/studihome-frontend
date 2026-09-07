@@ -30,6 +30,7 @@ permissions:
   contents: read
   pull-requests: read
   issues: read
+  statuses: read
 
 concurrency:
   group: studihome-preview-browser-${{ github.event.pull_request.number || github.ref }}
@@ -68,44 +69,96 @@ jobs:
             exit 1
           fi
 
+          manual_preview=""
           if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
-            preview="$MANUAL_PREVIEW_URL"
-          else
-            preview=""
+            manual_preview="$MANUAL_PREVIEW_URL"
           fi
 
           for attempt in $(seq 1 60); do
+            preview="$manual_preview"
+
+            gh api "repos/$GITHUB_REPOSITORY/commits/$EXPECTED_SHA/status"               > /tmp/studihome-vercel-status.json
+            vercel_state="$(python3 - /tmp/studihome-vercel-status.json <<'PY'
+import json
+import sys
+
+with open(sys.argv[1], encoding='utf-8') as handle:
+    payload = json.load(handle)
+
+statuses = [
+    item for item in payload.get('statuses', [])
+    if str(item.get('context', '')).lower() == 'vercel'
+]
+print(str(statuses[0].get('state', '')) if statuses else '')
+PY
+)"
+
             if [ -z "$preview" ] && [ -n "${PR_NUMBER:-}" ]; then
-              comments="$(gh api "repos/$GITHUB_REPOSITORY/issues/$PR_NUMBER/comments?per_page=100")"
-              preview="$(jq -r '
-                [ .[]
-                  | select(.user.login == "vercel[bot]")
-                  | .body
-                  | (try capture("\\[Preview\\]\\((?<url>https://[^)]+)\\)").url catch empty)
-                ] | last // empty
-              ' <<<"$comments")"
+              gh api "repos/$GITHUB_REPOSITORY/issues/$PR_NUMBER/comments?per_page=100"                 > /tmp/studihome-pr-comments.json
+              preview="$(python3 - /tmp/studihome-pr-comments.json <<'PY'
+import json
+import re
+import sys
+
+with open(sys.argv[1], encoding='utf-8') as handle:
+    comments = json.load(handle)
+
+urls = []
+for comment in comments:
+    if comment.get('user', {}).get('login') != 'vercel[bot]':
+        continue
+    match = re.search(r'\[Preview\]\((https://[^)]+)\)', str(comment.get('body', '')))
+    if match:
+        urls.append(match.group(1))
+
+print(urls[-1] if urls else '')
+PY
+)"
             fi
 
-            if [[ "$preview" =~ ^https://[A-Za-z0-9.-]+\.vercel\.app/?$ ]]; then
+            if [[ "$preview" =~ ^https://[A-Za-z0-9.-]+\.vercel\.app/?$ ]] && [ "$vercel_state" = "success" ]; then
               preview="${preview%/}"
-              if version="$(curl -fsS --max-time 15 "$preview/api/version" 2>/dev/null)"; then
-                deployed_sha="$(jq -r '.commit // empty' <<<"$version")"
-                if [ "$deployed_sha" = "$EXPECTED_SHA" ]; then
-                  echo "Exact-head Preview ready: $preview"
-                  echo "PREVIEW_URL=$preview" >> "$GITHUB_ENV"
-                  exit 0
-                fi
-                echo "Preview available but SHA is $deployed_sha; waiting for $EXPECTED_SHA (attempt $attempt/60)."
+              version_state="unavailable"
+              deployed_sha=""
+
+              if curl -fsS --max-time 15 "$preview/api/version"                 > /tmp/studihome-preview-version 2>/dev/null; then
+                readarray -t version_fields < <(python3 - /tmp/studihome-preview-version <<'PY'
+import json
+import sys
+
+try:
+    with open(sys.argv[1], encoding='utf-8') as handle:
+        payload = json.load(handle)
+except Exception:
+    print('')
+    print('non-json')
+else:
+    print(str(payload.get('commit') or ''))
+    print(str(payload.get('status') or ''))
+PY
+)
+                deployed_sha="${version_fields[0]:-}"
+                version_state="${version_fields[1]:-}"
+              fi
+
+              if [ -n "$deployed_sha" ] && [ "$deployed_sha" != "$EXPECTED_SHA" ]; then
+                echo "Preview alias still reports $deployed_sha; waiting for $EXPECTED_SHA (attempt $attempt/60)."
               else
-                echo "Preview not ready yet (attempt $attempt/60)."
+                if [ "$deployed_sha" = "$EXPECTED_SHA" ]; then
+                  echo "Exact-head Preview verified by Vercel status + /api/version: $preview"
+                  echo "PREVIEW_BINDING=version-endpoint" >> "$GITHUB_ENV"
+                else
+                  echo "Exact-head Vercel commit status is SUCCESS; /api/version is $version_state."
+                  echo "Browser acceptance will fail closed if the Preview alias is not the Studihome app."
+                  echo "PREVIEW_BINDING=vercel-commit-status" >> "$GITHUB_ENV"
+                fi
+                echo "PREVIEW_URL=$preview" >> "$GITHUB_ENV"
+                exit 0
               fi
             else
-              echo "Vercel Preview URL not available yet (attempt $attempt/60)."
+              echo "Waiting for Vercel exact-head SUCCESS + Preview URL (state=${vercel_state:-missing}, attempt $attempt/60)."
             fi
 
-            if [ "${{ github.event_name }}" != "workflow_dispatch" ]; then
-              preview=""
-            fi
             sleep 10
           done
 
@@ -138,6 +191,7 @@ jobs:
       - name: Public Preview browser acceptance
         run: |
           set -euo pipefail
+          echo "Preview binding: ${PREVIEW_BINDING:-unknown}"
           python3 scripts/preview-browser-acceptance.py --preview-url "$PREVIEW_URL"
 
       - name: ChromeDriver diagnostics on failure
