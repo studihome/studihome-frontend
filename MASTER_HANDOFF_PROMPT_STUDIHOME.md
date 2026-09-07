@@ -603,3 +603,15 @@ This section supersedes earlier deployment/release status text.
 - no generated-template handler/style refactor, CSS, CSP enforcement, DB, API, Storage, or data change belongs to this phase;
 - PREPARED ONLY while Vercel remains quota-blocked; after prior phases land, retarget/sync before Preview/browser acceptance.
 
+## Issue #98 Phase E — SMART generated handler prepared / 7 Sep 2026
+
+- stacked after static Phase D/C/B/A; never merge out of order;
+- corrected generated HTML-handler inventory excludes DOM property assignments such as `.onclick = fn`;
+- actual generated HTML event attributes before Phase E: 184 = core script #5 (183) + SMART script #6 (1);
+- Phase E removes the single SMART generated onclick and replaces it with `data-smart-next-action` + once-bound delegated click handling on the existing container;
+- generated HTML event attributes after Phase E: 183, all remaining in core runtime script #5;
+- SMART action values remain internal `open-best` / `compare`; ranking/team-vs-solo logic is unchanged;
+- regression locks zero generated handler attributes in script #6, one data contract, delegated listener markers, and global generated-handler ceiling <=183;
+- no core runtime handler refactor, CSS/style cleanup, CSP enforcement, DB, API, Storage, or data change belongs to this phase;
+- PREPARED ONLY while Vercel remains quota-blocked; after prior phases land, retarget/sync before Preview/browser acceptance.
+
