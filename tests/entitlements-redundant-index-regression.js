@@ -6,7 +6,7 @@ function assert(condition, message) {
   if (!condition) throw new Error(message);
 }
 
-const version = '20260907110000';
+const version = '20260907110644';
 const migrationPath = `supabase/migrations/${version}_remove_redundant_entitlements_user_product_index.sql`;
 const rollbackPath = `supabase/rollbacks/${version}_restore_redundant_entitlements_user_product_index.sql`;
 const preflightPath = 'supabase/tests/entitlements_redundant_index_preflight.sql';
