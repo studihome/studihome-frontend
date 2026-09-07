@@ -1053,7 +1053,7 @@
         <div class="max-w-7xl mx-auto flex items-center justify-between gap-2 sm:gap-4">
 
             <!-- Brand Logo: Clean icon & Studihome without subtext -->
-            <div class="flex items-center gap-2 cursor-pointer select-none" onclick="App.router.navigate('home')">
+            <div id="studihome-brand-home" class="flex items-center gap-2 cursor-pointer select-none">
                 <span class="text-[#EAB308] font-black text-2xl sm:text-3xl animate-spin-slow leading-none flex items-center justify-center">✦</span>
                 <span class="font-black text-xl sm:text-2xl text-[#151c75] tracking-tight leading-none">Studihome</span>
             </div>
@@ -1066,7 +1066,7 @@
             <!-- Top Right Utilities -->
             <div class="flex items-center gap-2 sm:gap-3">
                 <!-- Global Search — Desktop Icon -->
-                <button type="button" onclick="App.search.openModal()" aria-label="Buka pencarian" title="Cari di Foyer" class="hidden lg:flex w-9 h-9 items-center justify-center rounded-xl text-[#151c75] hover:bg-blue-50 transition-all">
+                <button id="global-search-open-desktop" type="button" aria-label="Buka pencarian" title="Cari di Foyer" class="hidden lg:flex w-9 h-9 items-center justify-center rounded-xl text-[#151c75] hover:bg-blue-50 transition-all">
                     <i class="fa-solid fa-magnifying-glass text-sm"></i>
                 </button>
 
@@ -1076,7 +1076,7 @@
                 </div>
 
                 <!-- Global Search — Mobile Icon -->
-                <button type="button" onclick="App.search.openModal()" aria-label="Buka pencarian" title="Cari produk" class="flex sm:hidden w-9 h-9 items-center justify-center rounded-xl text-[#151c75] hover:bg-blue-50 transition-all">
+                <button id="global-search-open-mobile" type="button" aria-label="Buka pencarian" title="Cari produk" class="flex sm:hidden w-9 h-9 items-center justify-center rounded-xl text-[#151c75] hover:bg-blue-50 transition-all">
                     <i class="fa-solid fa-magnifying-glass text-sm"></i>
                 </button>
 
@@ -1102,7 +1102,7 @@
     <!-- GLOBAL SEARCH MODAL -->
     <div id="search-modal" class="fixed inset-0 z-[90] hidden bg-slate-900/60 backdrop-blur-sm items-center justify-center p-4">
         <div class="card-3d w-full max-w-md rounded-3xl relative bg-white p-5 sm:p-6">
-            <button type="button" onclick="App.search.closeModal()" aria-label="Tutup pencarian" class="modal-close-btn absolute top-4 right-4 w-8 h-8 rounded-full flex items-center justify-center font-extrabold shadow-md">
+            <button id="global-search-close-icon" type="button" aria-label="Tutup pencarian" class="modal-close-btn absolute top-4 right-4 w-8 h-8 rounded-full flex items-center justify-center font-extrabold shadow-md">
                 <i class="fa-solid fa-xmark"></i>
             </button>
             <div class="pr-10">
@@ -1112,11 +1112,11 @@
             </div>
             <div class="mt-4 flex items-center gap-2 card-3d-inset px-3 py-2.5 rounded-xl">
                 <i class="fa-solid fa-magnifying-glass text-[#151c75]"></i>
-                <input id="global-search-modal-input" type="search" autocomplete="off" placeholder="Contoh: guru, UMKM, automation..." class="w-full bg-transparent text-xs sm:text-sm font-semibold text-slate-700 outline-none" onkeydown="if(event.key==='Enter') App.search.submitFromModal(this.value)">
+                <input id="global-search-modal-input" type="search" autocomplete="off" placeholder="Contoh: guru, UMKM, automation..." class="w-full bg-transparent text-xs sm:text-sm font-semibold text-slate-700 outline-none">
             </div>
             <div class="mt-4 flex items-center justify-between gap-2">
-                <button type="button" onclick="App.search.closeModal()" class="px-4 py-2.5 rounded-xl text-xs font-bold text-slate-600 bg-slate-100 hover:bg-slate-200 transition-all">Nanti dulu</button>
-                <button type="button" onclick="App.search.submitFromModal(document.getElementById('global-search-modal-input').value)" class="btn-brand-gradient px-4 py-2.5 rounded-xl text-xs font-extrabold">Cari Sekarang <i class="fa-solid fa-arrow-right ml-1 text-[#FACC15]"></i></button>
+                <button id="global-search-close-secondary" type="button" class="px-4 py-2.5 rounded-xl text-xs font-bold text-slate-600 bg-slate-100 hover:bg-slate-200 transition-all">Nanti dulu</button>
+                <button id="global-search-submit" type="button" class="btn-brand-gradient px-4 py-2.5 rounded-xl text-xs font-extrabold">Cari Sekarang <i class="fa-solid fa-arrow-right ml-1 text-[#FACC15]"></i></button>
             </div>
         </div>
     </div>
@@ -11059,6 +11059,8 @@ window.StudihomeProductionPilotSimulation = {
   #creator-media-modal iframe,#creator-media-modal video{height:100%;max-height:none}
 }
 </style>
+<!-- STATIC SEARCH ACTIONS — CSP PHASE A -->
+<script src="/static-search-actions.js?v=1"></script>
 <!-- STUDIHOME CREATOR PROFILE FEATURES -->
 <script src="/studio-ai-creator-card.js?v=7"></script>
 <script src="/dapur-profile-enhancements.js?v=2"></script>
