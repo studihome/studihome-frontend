@@ -129,8 +129,7 @@
   // ---- Loop ----
   async function start() {
     var items = await fetchItems();
-    if (!items.length) { console.warn('[SP] no active items found'); return; }
-    console.log('[SP] loaded ' + items.length + ' items');
+    if (!items.length) return;
     var q = shuffle(items);
     var idx = 0;
     function next() {
@@ -153,19 +152,16 @@
 
     // Immediate check: if client already exists, start now
     if (db() && db().from) {
-      console.log('[SP] supabaseClient ready immediately');
       start();
       return;
     }
 
     // Poll until client appears or timeout
-    console.log('[SP] polling for supabaseClient...');
     var elapsed = 0;
     var timer = setInterval(function() {
       elapsed += POLL_INTERVAL;
       if (db() && db().from) {
         clearInterval(timer);
-        console.log('[SP] supabaseClient ready after ' + elapsed + 'ms');
         start();
       } else if (elapsed >= POLL_TIMEOUT) {
         clearInterval(timer);
