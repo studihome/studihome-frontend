@@ -372,3 +372,26 @@ This section supersedes earlier authority/status blocks in this document.
 - Issue #23 live contract requires HTTPS-only new portfolio URLs, existing media types `image|youtube|drive|tiktok|instagram|video|link`, canonical `window.supabaseClient`, Admin recheck via `is_admin()`, max 100 pasted lines, draft `is_active=false`, and no scraping/fabricated metadata;
 - Issue #86 historical same-URL audit is CLOSED / COMPLETED with NO CLEANUP: the 45 groups are service-context variants with distinct non-null `service_id` values; never add global UNIQUE(`creator_id`, `media_url`) based on URL equality alone;
 - PR #43 and PR #50 remain CLOSED AS SUPERSEDED.
+
+
+## Issue #90 Creator portfolio media policy — DRAFT
+
+- branch: `db/reconcile-creator-portfolio-media-policy`;
+- migration: `supabase/migrations/20260907040000_reconcile_creator_portfolio_media_policy.sql`;
+- target policy:
+  - image/video/link -> HTTPS;
+  - youtube -> HTTPS + bare/www youtube.com or youtu.be;
+  - drive -> HTTPS + bare/www drive.google.com or docs.google.com;
+  - tiktok -> HTTPS + bare/www tiktok.com;
+  - instagram -> HTTPS + bare/www instagram.com;
+  - all other media types -> reject;
+- migration contains fail-closed preflight for exact four legacy constraint names + validation-state baseline and rejects drift/already-applied state;
+- all 139 current live rows were previously read-only validated compatible with target policy;
+- actual apply/validate/drop flow and allowed/denied cases were transaction-tested against live Supabase and rolled back;
+- rollback exact-state reconstruction previously matched 4/4 validation states and 4/4 normalized definitions;
+- standalone preflight: `supabase/tests/creator_portfolio_media_policy_preflight.sql`;
+- post-apply verification: `supabase/tests/creator_portfolio_media_policy_verification.sql`;
+- rollback: `supabase/rollbacks/20260907040000_restore_creator_portfolio_media_policy.sql`;
+- regression: `tests/creator-portfolio-media-policy-regression.js`;
+- no RLS/grant/Auth/data mutation is part of this migration;
+- live schema remains unchanged; do not apply or merge before current #81 -> #88 release chain is completed and branch is resynchronized to then-current main.
