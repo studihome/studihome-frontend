@@ -257,3 +257,10 @@ ISSUE #83 REDUNDANT INDEX CLEANUP — PREPARED / 7 SEP 2026
 - Use the isolated migration + exact rollback only. No table/RLS/grant/data changes.
 - Migration remains NOT APPLIED until exact-head Release Gate PASS + Vercel Preview SUCCESS + fresh live preflight.
 
+ISSUE #83 LIVE APPLY — 7 SEP 2026
+- Supabase migration `20260907110644_remove_redundant_entitlements_user_product_index` is APPLIED LIVE.
+- `idx_entitlements_user_product` is absent; the valid UNIQUE constraint-backed replacement and FK-leading indexes remain.
+- Post-apply planner verification PASS; Performance Advisor no longer reports the removed index.
+- Canonical rollback: `supabase/rollbacks/20260907110644_restore_redundant_entitlements_user_product_index.sql`.
+- PR #105 must rerun exact-head Release Gate + Vercel Preview after source-version reconciliation before merge.
+
