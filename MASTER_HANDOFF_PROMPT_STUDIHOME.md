@@ -527,3 +527,28 @@ This section supersedes earlier deployment/release status text.
 - previous Vercel `build-rate-limit` blocker is resolved for this release chain;
 - resume the normal protected release flow for subsequent work.
 
+## Issue #83 redundant entitlements index cleanup — prepared / 7 Sep 2026
+
+- live re-audit confirms `entitlements_user_id_product_id_key` is VALID/READY UNIQUE constraint-backed btree on `(user_id, product_id)`;
+- `idx_entitlements_user_product` is VALID/READY non-unique, non-constraint-backed, same two keys/order/opclasses, no predicate/expression/include difference, 16 kB;
+- table remains tiny (~11 estimated rows);
+- transaction-only drop/rollback test PASS; representative equality lookup remained indexed/no Seq Scan after temporary drop, and rollback restored the redundant index;
+- prepared isolated migration uses fail-closed catalog guards and drops only `public.idx_entitlements_user_product`;
+- exact rollback recreates `CREATE INDEX idx_entitlements_user_product ON public.entitlements USING btree (user_id, product_id)`;
+- preflight + post-apply planner/FK verification + Release Gate regression are included;
+- migration is **NOT APPLIED LIVE** until exact-head Release Gate PASS + Vercel Preview SUCCESS, followed by fresh live preflight.
+
+## Issue #83 live apply — 7 Sep 2026
+
+- exact-head PR #105 pre-apply Release Gate #677 PASS + Vercel Preview SUCCESS; branch was behind main 0 / mergeable true;
+- fresh live fail-closed preflight PASS;
+- persistent Supabase migration APPLIED as `20260907110644_remove_redundant_entitlements_user_product_index`;
+- `public.idx_entitlements_user_product` is now absent live;
+- VALID/READY UNIQUE constraint-backed `entitlements_user_id_product_id_key` remains present;
+- expected FK-leading indexes `idx_entitlements_user_id`, `idx_entitlements_product_id`, and `idx_entitlements_order_id` remain present;
+- post-apply representative lookup remains indexed / no Seq Scan;
+- Performance Advisor rerun completed and no longer reports `idx_entitlements_user_product`;
+- source migration + rollback filenames are reconciled to live version `20260907110644`;
+- exact rollback: `supabase/rollbacks/20260907110644_restore_redundant_entitlements_user_product_index.sql`;
+- PR #105 requires fresh exact-head Release Gate + Preview after reconciliation before merge.
+

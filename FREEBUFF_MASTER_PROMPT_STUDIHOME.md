@@ -251,3 +251,16 @@ CURRENT AUTHORITY UPDATE — 7 SEP 2026 / REFRESH 10
 - Issue #23 stays open only for explicit authenticated browser acceptance.
 - The previous Vercel build-rate-limit blocker is resolved for this release chain.
 
+ISSUE #83 REDUNDANT INDEX CLEANUP — PREPARED / 7 SEP 2026
+- `idx_entitlements_user_product` is a proven redundant non-unique btree on `(user_id, product_id)`; the valid UNIQUE constraint-backed `entitlements_user_id_product_id_key` has identical keys/order/opclasses and no predicate/expression difference.
+- Transaction-only drop/planner/rollback PASS; representative lookup remained indexed/no Seq Scan and rollback restored the index.
+- Use the isolated migration + exact rollback only. No table/RLS/grant/data changes.
+- Migration remains NOT APPLIED until exact-head Release Gate PASS + Vercel Preview SUCCESS + fresh live preflight.
+
+ISSUE #83 LIVE APPLY — 7 SEP 2026
+- Supabase migration `20260907110644_remove_redundant_entitlements_user_product_index` is APPLIED LIVE.
+- `idx_entitlements_user_product` is absent; the valid UNIQUE constraint-backed replacement and FK-leading indexes remain.
+- Post-apply planner verification PASS; Performance Advisor no longer reports the removed index.
+- Canonical rollback: `supabase/rollbacks/20260907110644_restore_redundant_entitlements_user_product_index.sql`.
+- PR #105 must rerun exact-head Release Gate + Vercel Preview after source-version reconciliation before merge.
+
