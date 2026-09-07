@@ -30,9 +30,11 @@ If dated documentation conflicts with live evidence, preserve Constitution princ
 
 ## 3. Current release baseline
 
-Current GitHub `main` source SHA:
+Verified production evidence SHA:
 
-`49db8b39591752e6486506415bda42abb2096744`
+`1ce0b628fb1733d404c5125ff4ab0176791e58e4`
+
+This is a documentation-only merge whose parent `49db8b39591752e6486506415bda42abb2096744` contains the portfolio runtime fix.
 
 This SHA is the squash merge of PR **#73** (portfolio canonical collision hardening).
 
@@ -63,12 +65,16 @@ For that SHA:
 
 Therefore do **not** claim the portfolio fix is live merely because it is merged to `main`. Re-run/complete deployment and production smoke only after Vercel can deploy the current main SHA.
 
-Vercel capacity recovery revalidation — 7 Sep 2026:
-- operator reports Vercel is accepting deployments again;
-- GitHub's previous Vercel failure on PR #74 is treated as stale provider evidence until a fresh deployment/check completes;
-- this documentation commit intentionally retriggers PR Preview validation;
-- do not merge until the fresh Vercel check is SUCCESS and the current Release Gate remains PASS;
-- production for main `49db8b...` remains NOT VERIFIED until `/api/version` reports that SHA and production smoke passes.
+Vercel capacity recovery and production verification — 7 Sep 2026:
+- fresh PR #74 Vercel check: **SUCCESS**;
+- PR #74 Release Gate #614: **PASS**;
+- PR #74 merged as `1ce0b628fb1733d404c5125ff4ab0176791e58e4`;
+- main push Release Gate #615: **PASS**;
+- Vercel production deployment for `1ce0b628...`: **SUCCESS**;
+- Studihome Production Smoke run #9 / `34068317674`: **PASS**;
+- production alias SHA reconciliation therefore passed for `1ce0b628...`;
+- production is **VERIFIED** for that deployment evidence.
+
 
 Legacy/runtime ownership audit on current main:
 

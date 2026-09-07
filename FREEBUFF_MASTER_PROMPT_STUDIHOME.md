@@ -21,24 +21,15 @@ Refresh:
 9. VERCEL_MANUAL_DEPLOY.md before any manual Vercel deployment;
 10. live Supabase state/Advisors/Edge Functions if the task touches Supabase.
 
-CURRENT KNOWN CONTEXT — 6 SEP 2026
-- current source main is 49db8b39591752e6486506415bda42abb2096744;
-- PR #73 is MERGED;
-- PR head release-gate PASS 25/25 and Vercel Preview SUCCESS;
-- main push release-gate run 602 PASS 25/25;
-- Vercel production deployment for 49db8b... is BLOCKED/FAIL with build-rate-limit;
-- production smoke run 34047113620 is FAIL: all 36/36 alias checks still returned bc3f31f445e21ac3b8582bd40ea70c10a7db167f instead of 49db8b39591752e6486506415bda42abb2096744;
-- last known production alias before merge was bc3f31f445e21ac3b8582bd40ea70c10a7db167f, whose production smoke failed on duplicate sitemap URLs;
-- exact smoke error: `Production alias did not converge to 49db8b39591752e6486506415bda42abb2096744`;
-- therefore 49db8b... is NOT VERIFIED in production;
-- push rollout remains disabled and send-push-notification is not production-ready;
-- legacy/runtime ownership audit was corrected by direct parsing of the large `index.html`: `admin-dapur-creator-v5.js` and `admin-gudang-v2.js` are ACTIVE/KEEP; `admin-dapur-ui-v2.js` remains DELETE-CANDIDATE;
-- `dapur-profile-enhancements.js`, `under-construction-gudang.js`, and dynamically loaded `under-construction.js` are KEEP;
-- `studio-ai-enhancements.js` and `studio-ai-production-enhancements.js` are DELETE-CANDIDATE / not currently loaded;
-- issue #22 is CLOSED/COMPLETED; issue #24 is REOPENED because the active Admin Dapur runtime still contains a fallback SDK loader and secondary Supabase client path;
-- never make a zero-consumer claim from GitHub code search alone when `index.html` is involved; parse the actual large file and inspect dynamic loaders.
-
-Do not claim the merged portfolio fix is live until Vercel successfully deploys current main, /api/version equals the current main SHA, and production smoke passes.
+CURRENT VERIFIED RELEASE CONTEXT — 7 SEP 2026
+- portfolio runtime fix remains rooted in parent source SHA 49db8b39591752e6486506415bda42abb2096744;
+- PR #74 documentation/handoff merge is 1ce0b628fb1733d404c5125ff4ab0176791e58e4;
+- fresh Vercel deployment for 1ce0b628...: SUCCESS;
+- main Release Gate #615: PASS;
+- Production Smoke run #9 / 34068317674: PASS;
+- production alias SHA reconciliation passed for 1ce0b628...;
+- production state is VERIFIED for that deployment evidence;
+- push rollout remains disabled and send-push-notification remains not production-ready.
 
 VERCEL RECOVERY REVALIDATION — 7 SEP 2026
 - operator reports Vercel capacity is available again;

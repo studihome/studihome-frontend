@@ -6,15 +6,17 @@ Updated: 7 September 2026, Asia/Jakarta
 
 Use this only when the normal Git-triggered Vercel deployment is unavailable or missed. Manual deployment must preserve the same source-of-truth and verification discipline as the normal release flow.
 
-## Current production source target
+## Verified production evidence
 
 Repository: `studihome/studihome-frontend`
 
 Production branch: `main`
 
-Expected source SHA:
+Verified deployment SHA:
 
-`49db8b39591752e6486506415bda42abb2096744`
+`1ce0b628fb1733d404c5125ff4ab0176791e58e4`
+
+Its parent `49db8b39591752e6486506415bda42abb2096744` contains the portfolio runtime fix.
 
 Do **not** deploy PR #74 head or another branch as production. PR #74 is documentation-only and is not the production application source.
 
@@ -69,4 +71,11 @@ If the new production deployment fails verification:
 
 ## Current blocker
 
-At this snapshot Vercel still reports `build-rate-limit` for the current release attempt. Manual deployment is therefore a recovery procedure for use after Vercel accepts new deployments; it is not a quota bypass.
+Resolved as of 7 September 2026:
+- provider accepted new deployments;
+- merged main deployment succeeded;
+- Release Gate #615 passed;
+- Production Smoke run #9 / `34068317674` passed;
+- deployment evidence `1ce0b628...` is production verified.
+
+Keep this playbook for future recovery only.
