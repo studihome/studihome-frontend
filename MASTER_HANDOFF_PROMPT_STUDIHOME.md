@@ -105,6 +105,12 @@ Current `/studio-ai` console report was triaged against current main:
 
 Before changing app code for similar reports, reproduce with extensions disabled/incognito and identify a Studihome-owned stack frame or failed feature. Do not add catch-all handlers or relax security headers solely to make DevTools quiet.
 
+First-party console-noise regression guard — 7 Sep 2026:
+- Release Gate now rejects `chrome.runtime` / `browser.runtime` extension-messaging APIs in audited first-party browser runtimes;
+- Release Gate rejects an unaudited Service Worker `message` channel;
+- Release Gate locks the custom PWA install contract: `beforeinstallprompt` -> `preventDefault()` -> saved event -> `prompt()` -> `userChoice` -> `appinstalled`;
+- this guard does not suppress external browser-extension or YouTube warnings; it prevents Studihome from accidentally becoming their source.
+
 ## 5. Portfolio canonical URL contract — DO NOT REGRESS
 
 Public portfolio route:

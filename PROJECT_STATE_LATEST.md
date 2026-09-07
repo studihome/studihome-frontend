@@ -345,7 +345,13 @@ User-supplied `/studio-ai` console evidence was audited against current main:
 - PWA banner warning reflects `beforeinstallprompt.preventDefault()` semantics; no runtime change is justified without evidence that the custom install CTA fails;
 - social-proof widget diagnostics show successful client readiness and 3 loaded items.
 
-No application/runtime/security-header change was made for this console report. Required reproduction rule: test with extensions disabled/incognito and obtain a Studihome-owned stack frame before opening a runtime-fix PR.
+No application/runtime/security-header change was made for the reported third-party/extension-origin console messages. Required reproduction rule: test with extensions disabled/incognito and obtain a Studihome-owned stack frame before opening a runtime-fix PR.
+
+Console regression guard — ACTIVE:
+- CI scans audited first-party browser runtimes and rejects `chrome.runtime` / `browser.runtime` extension messaging;
+- CI rejects a Service Worker `message` listener unless the release guard is deliberately updated with an audited contract;
+- CI verifies the custom PWA install flow retains `beforeinstallprompt`, `preventDefault`, saved deferred event, `prompt()`, `userChoice`, and `appinstalled`;
+- no global `unhandledrejection`/`window.onerror` suppression was introduced.
 
 ## Legacy/runtime ownership audit — COMPLETED WITH CORRECTION
 

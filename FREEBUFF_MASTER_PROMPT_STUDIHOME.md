@@ -45,6 +45,12 @@ CONSOLE TRIAGE BASELINE — 7 SEP 2026
 - `beforeinstallprompt.preventDefault()` can be expected for a custom install flow; only change code if the user-facing install action itself is broken;
 - reproduce console reports with extensions disabled/incognito before modifying runtime.
 
+FIRST-PARTY CONSOLE REGRESSION GUARD
+- Release Gate must reject `chrome.runtime` / `browser.runtime` messaging in first-party browser runtimes unless deliberately audited;
+- Service Worker `message` channels require an explicit audited contract;
+- preserve the custom PWA install chain: beforeinstallprompt + preventDefault + saved event + prompt + userChoice + appinstalled;
+- never add global error/rejection swallowing merely to hide third-party console noise.
+
 PORTFOLIO CANONICAL CONTRACT
 - unique active portfolio title slug keeps historical title-only path;
 - collisions among active siblings use deterministic UUID prefix;
