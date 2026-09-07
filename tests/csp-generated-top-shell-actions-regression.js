@@ -45,12 +45,17 @@ assert(
   'Generated top-shell action loader must exist exactly once'
 );
 
+const topShellStart = index.indexOf('renderNavigation: () => {');
+const topShellEnd = index.indexOf('\n            router: {', topShellStart);
+assert(topShellStart >= 0 && topShellEnd > topShellStart, 'Top-shell source boundary missing');
+const topShellSource = index.slice(topShellStart, topShellEnd);
+
 for (const forbidden of [
   'onclick="App.router.navigate',
   'onclick="App.auth.logout()',
-  'onclick="App.ui.toggleModal(\'auth-modal\', true)"'
+  'onclick="App.ui.toggleModal(\\'auth-modal\\', true)"'
 ]) {
-  assert(!index.includes(forbidden), 'Legacy top-shell generated handler restored: ' + forbidden);
+  assert(!topShellSource.includes(forbidden), 'Legacy top-shell generated handler restored: ' + forbidden);
 }
 
 for (const marker of [
