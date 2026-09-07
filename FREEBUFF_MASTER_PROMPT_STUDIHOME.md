@@ -264,3 +264,11 @@ ISSUE #83 LIVE APPLY — 7 SEP 2026
 - Canonical rollback: `supabase/rollbacks/20260907110644_restore_redundant_entitlements_user_product_index.sql`.
 - PR #105 must rerun exact-head Release Gate + Vercel Preview after source-version reconciliation before merge.
 
+ISSUE #98 PHASE A — STATIC SEARCH ACTIONS PREP / 7 SEP 2026
+- Extract only 7 static Search/home-brand handlers from HTML into same-origin `static-search-actions.js`.
+- Static handler count becomes 18 from 25; static onkeydown becomes zero.
+- Preserve desktop/mobile open, close buttons, Enter submit, button submit, and brand-home navigation.
+- Do not mix Auth, Smart Brief, generated templates, CSS, CSP enforcement, DB, or API changes.
+- Regression + JS syntax gate required.
+- Keep draft/unmerged until Vercel Preview + Search keyboard/mouse browser acceptance pass.
+
