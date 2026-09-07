@@ -576,6 +576,53 @@ jobs:
       - name: CSP generated Shop actions regression
         run: node tests/csp-generated-shop-actions-regression.js
 
+      - name: CSP action binders real-Chromium smoke
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          browser=""
+          for candidate in google-chrome chromium google-chrome-stable chromium-browser; do
+            if command -v "$candidate" >/dev/null 2>&1; then
+              browser="$(command -v "$candidate")"
+              break
+            fi
+          done
+          if [ -z "$browser" ]; then
+            echo "No Chrome/Chromium binary found on the GitHub runner." >&2
+            exit 1
+          fi
+
+          python3 -m http.server 8765 --bind 127.0.0.1             >/tmp/studihome-csp-browser-http.log 2>&1 &
+          server_pid=$!
+          trap 'kill "$server_pid" >/dev/null 2>&1 || true' EXIT
+
+          ready=0
+          for _ in $(seq 1 20); do
+            if curl -fsS               http://127.0.0.1:8765/tests/csp-actions-browser-smoke.html               >/dev/null; then
+              ready=1
+              break
+            fi
+            sleep 0.25
+          done
+          if [ "$ready" -ne 1 ]; then
+            cat /tmp/studihome-csp-browser-http.log >&2 || true
+            echo "Local browser-smoke server did not become ready." >&2
+            exit 1
+          fi
+
+          if ! timeout 20s "$browser"             --headless=new             --disable-gpu             --no-sandbox             --virtual-time-budget=3000             --dump-dom             http://127.0.0.1:8765/tests/csp-actions-browser-smoke.html             >/tmp/studihome-csp-browser-dom.html             2>/tmp/studihome-csp-browser-chrome.log; then
+            cat /tmp/studihome-csp-browser-chrome.log >&2 || true
+            exit 1
+          fi
+
+          cat /tmp/studihome-csp-browser-dom.html
+          if ! grep -q 'id="csp-browser-smoke-result">PASS<'             /tmp/studihome-csp-browser-dom.html; then
+            cat /tmp/studihome-csp-browser-chrome.log >&2 || true
+            echo "Real-Chromium CSP action-binder smoke did not pass." >&2
+            exit 1
+          fi
+
       - name: Admin bulk portfolio intake regression
         run: node tests/admin-bulk-portfolio-intake-regression.js
 

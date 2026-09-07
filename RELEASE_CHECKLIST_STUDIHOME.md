@@ -39,8 +39,9 @@ This checklist is the release-decision surface. Source-level tests do not replac
 - PASS — Shop checkout generated event attributes: 0.
 - PASS — `javascript:` URLs remain 0.
 - PASS — Shop delegated binder has executable VM-DOM behavior regression for submit/change/click, original Event forwarding, nested targets, idempotency, unknown-action rejection, and outside-container rejection.
+- PASS — dependency-free real-Chromium action-binder smoke is Release-Gate wired for A–I external binders using local DOM + mocked App; this verifies real browser event/delegation semantics without touching Supabase or production data.
 - BLOCKED — strict `script-src-attr` / `style-src-attr` enforcement; **170 generated handlers**, **36 core generated style attributes**, and **2 core dynamic event-attribute setters** remain.
-- NOT VERIFIED — real browser parity for the complete A–I interaction set.
+- NOT VERIFIED — full application/Preview browser parity for the complete A–I interaction set; the local real-Chromium binder smoke is narrower and must not be misreported as production E2E.
 
 ## C. Database and security
 

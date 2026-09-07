@@ -347,3 +347,10 @@ RELEASE CHECKLIST AUTHORITY REFRESH — 7 SEP 2026
 - Never turn NOT VERIFIED browser items into PASS from source/VM tests alone.
 - Supabase leaked-password protection is accepted/plan-limited on Free.
 - Do not expand PR #114 into Phase J before A–I browser acceptance/merge.
+
+REAL-CHROMIUM CSP ACTION-BINDER SMOKE — 7 SEP 2026
+- Release Gate owns `tests/csp-actions-browser-smoke.html`: dependency-free local real-Chromium smoke for A–I external action binders.
+- Use the runner-provided Chrome/Chromium + local Python HTTP server; do not add npm/Playwright solely for this bounded binder test.
+- Treat PASS as real browser event/delegation evidence only, not authenticated Preview/production E2E or visual parity.
+- Browser errors/unhandled rejections in the harness are failures.
+- Full PR #114 browser acceptance remains required before merge.

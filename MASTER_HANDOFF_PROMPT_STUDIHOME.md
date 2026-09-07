@@ -676,3 +676,12 @@ This section supersedes earlier deployment/release status text.
 - Release Gate #723 PASS is automated evidence only; it does not convert browser NOT VERIFIED items to PASS.
 - Supabase leaked-password protection is recorded as accepted/plan-limited risk on Free, not as a fabricated application FAIL.
 - Phase J must not expand PR #114 before the current release candidate is browser-accepted/merged.
+
+## Real-Chromium CSP action-binder smoke — 7 Sep 2026
+
+- Added dependency-free `tests/csp-actions-browser-smoke.html`.
+- Release Gate launches the Chrome/Chromium binary already present on GitHub's Ubuntu runner against a local Python HTTP server; no npm/package/browser download is introduced.
+- The harness loads the actual A–I external action binders and a mocked `window.App`, then exercises real DOM click/keydown/submit/change/delegation semantics.
+- Covered contracts include Search open/close/Enter/submit, Smart Brief close/refinement/submit, Auth mode + native submit Event forwarding, PWA install call, product iframe cleanup + modal closes, desktop/mobile top routes, top-auth login/logout, Home CTA/route, utility home action, and Shop submit/change/confirm/close.
+- Browser `error` and `unhandledrejection` events fail the harness.
+- This is intentionally narrower than full application/Preview E2E: it does not authenticate, call Supabase, mutate data, or prove visual/network parity.
