@@ -372,3 +372,20 @@ This section supersedes earlier authority/status blocks in this document.
 - Issue #23 live contract requires HTTPS-only new portfolio URLs, existing media types `image|youtube|drive|tiktok|instagram|video|link`, canonical `window.supabaseClient`, Admin recheck via `is_admin()`, max 100 pasted lines, draft `is_active=false`, and no scraping/fabricated metadata;
 - Issue #86 historical same-URL audit is CLOSED / COMPLETED with NO CLEANUP: the 45 groups are service-context variants with distinct non-null `service_id` values; never add global UNIQUE(`creator_id`, `media_url`) based on URL equality alone;
 - PR #43 and PR #50 remain CLOSED AS SUPERSEDED.
+
+
+## Issue #84 inactive Studio AI runtime cleanup — DRAFT
+
+- branch: `cleanup/studio-ai-inactive-runtimes`;
+- removed on branch only:
+  - `studio-ai-enhancements.js`
+  - `studio-ai-production-enhancements.js`
+  - `studio-ai-search.js`
+- direct current-main `index.html` references before deletion: 0 / 0 / 0;
+- repository dynamic-loader audit found no active loader/import/service-worker cache consumer for any removed file;
+- active `studio-ai-creator-card.js?v=6` remains present and loaded;
+- regression: `tests/studio-ai-inactive-runtime-cleanup-regression.js`;
+- Release Gate now fails if any removed file reappears or is re-referenced by active root runtime;
+- no CSS consolidation, CSP change, Supabase change, schema change, or runtime ownership refactor is included;
+- rollback: revert the cleanup commit(s) / restore the three exact files from production main;
+- this cleanup must remain DRAFT and must not merge before the current #81 -> #88 release chain is completed and the branch is resynchronized with then-current main.
