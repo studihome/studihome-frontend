@@ -74,22 +74,19 @@ If the new production deployment fails verification:
 4. record the observed deployment SHA and failing smoke assertion;
 5. fix through branch -> PR -> release-gate -> Preview before another production attempt.
 
-## Current blocker — 7 September 2026
+## Current status — 7 September 2026
 
-Current source main at recovery start:
-`db7c47adc4c365d32b7a79bdc4cdb8c6ba811baa`
+Recovery completed successfully.
 
-Observed blocker:
-- Vercel production Git-triggered deployment returned `build-rate-limit`;
-- Production Smoke #17 checked the alias 36 times and always received `2809811790ab12511886355f8a0cc42717a82745`;
-- therefore source `db7c47a...` is **NOT PRODUCTION VERIFIED**.
+Verified production SHA:
+`57cd6e5e95890706f6954ee085bca0fadba088a7`
 
-Recovery discipline:
-1. first use a docs-only protected PR as a low-risk capacity probe/retrigger;
-2. require exact-head Release Gate PASS + Vercel Preview SUCCESS before merge;
-3. after merge, require Vercel Production SUCCESS;
-4. require `/api/version` to match the resulting merge SHA;
-5. require Production Smoke PASS;
-6. if quota remains blocked, do not spam retries and do not merge additional runtime changes.
+Evidence:
+- Vercel Production: SUCCESS;
+- main Release Gate #674: PASS;
+- Production Smoke #18 / `34114129036`: PASS;
+- SHA-aware production alias reconciliation: PASS.
 
-The last production-verified deployed runtime remains `2809811790ab12511886355f8a0cc42717a82745` until all recovery checks pass.
+The previous `build-rate-limit` incident is resolved for this release chain.
+
+For future recovery, confirm the exact protected `main` SHA immediately before deployment and require production SHA reconciliation plus Production Smoke before calling the release verified.
