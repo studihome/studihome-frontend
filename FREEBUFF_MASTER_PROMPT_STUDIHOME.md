@@ -243,3 +243,11 @@ CURRENT AUTHORITY UPDATE — 7 SEP 2026 / REFRESH 9
 - Do not stack another runtime feature while deployment is unresolved.
 - Preferred recovery: docs-only protected PR to refresh deployment authority and retrigger Vercel; merge only on exact-head Release Gate PASS + Preview SUCCESS; production becomes PASS only after expected merge SHA reaches `/api/version` and Production Smoke passes.
 
+CURRENT AUTHORITY UPDATE — 7 SEP 2026 / REFRESH 10
+- Production verified at `57cd6e5e95890706f6954ee085bca0fadba088a7`.
+- Vercel Production SUCCESS; Release Gate #674 PASS; Production Smoke #18 / `34114129036` PASS.
+- PR #102 Admin bulk portfolio runtime is live.
+- Issue #80 is CLOSED / COMPLETED.
+- Issue #23 stays open only for explicit authenticated browser acceptance.
+- The previous Vercel build-rate-limit blocker is resolved for this release chain.
+
