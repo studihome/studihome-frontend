@@ -176,22 +176,20 @@ CURRENT AUTHORITY UPDATE — 7 SEP 2026 / REFRESH 4
 - Issue #90 owns portfolio media CHECK reconciliation. Do not change schema inside #88; current safe frontend maps direct video files to `link`.
 
 
-ISSUE #23 BULK PORTFOLIO INTAKE — STACKED / PREPARED
-- Must remain stacked on PR #81 and must not merge first.
-- Canonical owner: `dapur-editor.js`; lazy loader cache-buster `v=20260907bulk2`.
-- Reuse `window.supabaseClient` only.
-- Require `is_admin()` inside adminPanel and private bulkPortfolioIntake.
-- HTTPS-only; max 100 lines; strip fragment; preserve query; dedupe normalized URLs.
-- Insert draft rows only: service_id null, description empty, deterministic title, appended sort order, is_active false.
-- No scraping/fabricated metadata.
-- Direct video-file URLs remain `link` until Issue #90 reconciles DB checks.
-- Regression: `tests/admin-bulk-portfolio-intake-regression.js`.
-- Release Gate #643 PASS on exact pre-sync feature head; fresh validation required after any head change.
+CURRENT AUTHORITY UPDATE — 7 SEP 2026 / REFRESH 5
+- PR #81 prior validated head `55abd94353f319ff085e132bb51ad61eb9df6885`: Release Gate #646 PASS; preflight/apply/rollback transaction tests PASS; migration NOT APPLIED.
+- Vercel capacity recovery is proven on PR #88 head `3a1d5a681d56ee5f957487aabc8ffbd18ba1054e`: Release Gate #648 PASS + Vercel Preview SUCCESS.
+- PR #88 remains DRAFT / STACKED on #81; latest URL hardening rejects embedded credentials and non-default platform ports from special media classification.
+- Issue #90 DB media-policy migration contract READY; Issue #83 redundant-index cleanup contract READY; neither is applied live.
+- Issue #62 remains blocked by missing Edge invocation telemetry.
 
 
-Bulk portfolio URL hardening — refresh 2
-- `normalizePortfolioUrl()` now rejects HTTPS URLs containing embedded username/password credentials.
-- platform-specific classification only applies on the expected host with no non-default port; otherwise the URL falls back to generic `link`.
-- lazy editor cache-buster is now `/dapur-editor.js?v=20260907bulk2` because editor source changed after the initial bulk feature build.
-- regression coverage includes embedded-credential rejection and non-default-port provider fallback.
-- no schema/RLS/Auth/grant/production-data change.
+ISSUE #23 BULK PORTFOLIO INTAKE — STACKED / CURRENT
+- Base dependency: PR #81 current head `db56c5ae2ba6946c389f774f3d93a95c404b6166`; never merge #88 first.
+- Canonical owner `dapur-editor.js`; lazy cache-buster `v=20260907bulk2`.
+- Admin recheck via `is_admin()`; helper stays closure-private.
+- HTTPS only; reject embedded credentials; non-default-port provider URLs fall back to link.
+- Max 100 lines; strip fragment; preserve query; dedupe existing + batch.
+- One bounded draft insert; service_id null; description empty; is_active false; deterministic title.
+- Direct video remains link until Issue #90 DB-policy reconciliation.
+- Exact pre-sync head `03c72292ee49c07e22f72a37e6c4d53cd2da6f55` had Release Gate #653 PASS; fresh validation required after this sync.
