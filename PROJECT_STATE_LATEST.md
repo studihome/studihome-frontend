@@ -494,3 +494,14 @@ This section supersedes earlier contradictory status sections.
 - prepared migration constrains unpublished direct trust-metric visibility while retaining published/owner/Admin access;
 - post-apply SQL verification and explicit rollback artifacts are present;
 - migration remains NOT APPLIED live pending fresh PR #81 Preview + Release Gate and post-apply SQL verification.
+
+
+## Current authority update — 7 Sep 2026 / refresh 4
+
+- production main: `d32c7e04b5c3d916c85a57a5528f18e6501134a1`; Vercel Production SUCCESS; Release Gate #638 PASS; Production Smoke #14 PASS;
+- PR #81: security hardening workstream; current validated head before this docs refresh `c89700a336850b716e602d2ebd903c1ee72d3679`; Release Gate #642 PASS; Vercel BLOCKED; migration NOT APPLIED;
+- live preflight PASS and exact migration SQL transaction-test PASS; published parity 0 mismatch; unpublished anonymous denial PASS; Admin PASS; owner workspace PASS; ACL/security contract preserved;
+- exact rollback SQL transaction-test PASS on 48 Creator rows with 0 output mismatch and exact function-definition restoration;
+- final live preflight after rollback PASS;
+- PR #88: stacked draft Issue #23 implementation on #81; exact feature head `4a01c183b282d3abbe07f67eabece35faa656afa`; Release Gate #643 PASS; Vercel BLOCKED; no schema/RLS/Auth/grant/data change;
+- Issue #90: overlapping portfolio media CHECK constraints audited; proposed unified policy is compatible with 139/139 live rows; no schema change applied.
