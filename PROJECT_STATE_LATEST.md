@@ -643,3 +643,14 @@ Before continuing #81 -> #88, current console evidence was triaged.
 - regression + syntax/Release Gate wiring added;
 - draft/unmerged while Vercel Preview is unavailable.
 
+## Issue #98 Phase C preparation — 7 Sep 2026
+
+- stacked on Phase B/A;
+- bounded surface: static Auth modal/forms only;
+- 8 executable attributes extracted;
+- static handler count: 12 -> 4;
+- static onsubmit: 3 -> 0;
+- Auth mode/data + native submit Event semantics preserved by external binder;
+- regression + syntax/Release Gate wiring prepared;
+- no merge while Vercel Preview is unavailable.
+
