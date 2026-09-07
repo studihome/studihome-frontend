@@ -421,3 +421,35 @@ This section supersedes earlier status blocks.
 - Issue #90 media CHECK reconciliation contract is READY after transactional apply/deny tests and 4/4 exact rollback reconstruction; no live schema change;
 - Issue #83 redundant entitlement index cleanup contract is READY after transactional drop/planner/rollback verification; no live index change;
 - Issue #62 remains BLOCKED BY MISSING TELEMETRY because available Supabase tooling still exposes no Edge invocation logs.
+
+
+## Console hygiene remediation — 7 Sep 2026
+
+User console evidence was re-audited before continuing the release chain.
+
+Classification:
+- `[SP] supabaseClient ready immediately` / `[SP] loaded N items`: first-party informational noise; removed. Real query/fetch failures remain warnings.
+- `beforeinstallprompt.preventDefault()` banner diagnostic: expected Chromium behavior for the intentional custom install flow. Keep `preventDefault()` + deferred `prompt()`; do not remove merely to silence the browser.
+- `Could not establish connection. Receiving end does not exist` / asynchronous response channel closed: no first-party `chrome.runtime`, `browser.runtime`, `sendMessage`, `onMessage`, MessageChannel, or matching postMessage implementation. Existing Release Gate extension-messaging guard remains authoritative. Do not add global unhandledrejection suppression.
+- reported Supabase Creator avatar `ERR_NAME_NOT_RESOLVED`: live storage audit confirmed bucket `creator-media` exists and all 5 reported avatar objects exist. This is DNS/network-layer failure, not missing data.
+
+First-party remediation branch:
+- `fix/console-hygiene-avatar-resilience`;
+- same-origin `/api/creator-avatar` proxy accepts only Studihome UUID[/UUID]/avatar.webp object paths and fetches only the fixed Studihome Supabase public origin;
+- no arbitrary URL input / no SSRF;
+- upstream failure returns a short-cache transparent SVG with HTTP 200;
+- successful avatar responses are CDN-cacheable;
+- core `App.utils.safeUrl` proxies only exact Studihome creator-media avatar paths; other URLs preserve existing behavior;
+- active `studio-ai-creator-card.js` uses the shared helper;
+- asset bumps: creator card v7, social proof v14;
+- regression: `tests/console-hygiene-avatar-resilience-regression.js`;
+- no DB/RLS/Auth/grant/storage object change.
+
+
+## Current authority update — 7 Sep 2026 / refresh 6
+
+- production main is `2809811790ab12511886355f8a0cc42717a82745` after PR #101 console hygiene/avatar resilience;
+- PR #101 verification: Vercel Production SUCCESS, Release Gate #657 PASS, Production Smoke #15 PASS;
+- PR #81 now includes the verified console runtime + console regression while preserving Creator trust migration/preflight/rollback artifacts;
+- Creator trust migration remains NOT APPLIED live;
+- fresh exact-head Release Gate + Vercel Preview are required again after this synchronization before persistent migration/merge.
