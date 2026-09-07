@@ -372,3 +372,26 @@ This section supersedes earlier authority/status blocks in this document.
 - Issue #23 live contract requires HTTPS-only new portfolio URLs, existing media types `image|youtube|drive|tiktok|instagram|video|link`, canonical `window.supabaseClient`, Admin recheck via `is_admin()`, max 100 pasted lines, draft `is_active=false`, and no scraping/fabricated metadata;
 - Issue #86 historical same-URL audit is CLOSED / COMPLETED with NO CLEANUP: the 45 groups are service-context variants with distinct non-null `service_id` values; never add global UNIQUE(`creator_id`, `media_url`) based on URL equality alone;
 - PR #43 and PR #50 remain CLOSED AS SUPERSEDED.
+
+
+## Console hygiene remediation — 7 Sep 2026
+
+User console evidence was re-audited before continuing the release chain.
+
+Classification:
+- `[SP] supabaseClient ready immediately` / `[SP] loaded N items`: first-party informational noise; removed. Real query/fetch failures remain warnings.
+- `beforeinstallprompt.preventDefault()` banner diagnostic: expected Chromium behavior for the intentional custom install flow. Keep `preventDefault()` + deferred `prompt()`; do not remove merely to silence the browser.
+- `Could not establish connection. Receiving end does not exist` / asynchronous response channel closed: no first-party `chrome.runtime`, `browser.runtime`, `sendMessage`, `onMessage`, MessageChannel, or matching postMessage implementation. Existing Release Gate extension-messaging guard remains authoritative. Do not add global unhandledrejection suppression.
+- reported Supabase Creator avatar `ERR_NAME_NOT_RESOLVED`: live storage audit confirmed bucket `creator-media` exists and all 5 reported avatar objects exist. This is DNS/network-layer failure, not missing data.
+
+First-party remediation branch:
+- `fix/console-hygiene-avatar-resilience`;
+- same-origin `/api/creator-avatar` proxy accepts only Studihome UUID[/UUID]/avatar.webp object paths and fetches only the fixed Studihome Supabase public origin;
+- no arbitrary URL input / no SSRF;
+- upstream failure returns a short-cache transparent SVG with HTTP 200;
+- successful avatar responses are CDN-cacheable;
+- core `App.utils.safeUrl` proxies only exact Studihome creator-media avatar paths; other URLs preserve existing behavior;
+- active `studio-ai-creator-card.js` uses the shared helper;
+- asset bumps: creator card v7, social proof v14;
+- regression: `tests/console-hygiene-avatar-resilience-regression.js`;
+- no DB/RLS/Auth/grant/storage object change.
