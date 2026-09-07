@@ -496,17 +496,28 @@ This section supersedes earlier contradictory status sections.
 - migration remains NOT APPLIED live pending fresh PR #81 Preview + Release Gate and post-apply SQL verification.
 
 
+## Current authority update — 7 Sep 2026 / refresh 4
+
+- production main: `d32c7e04b5c3d916c85a57a5528f18e6501134a1`; Vercel Production SUCCESS; Release Gate #638 PASS; Production Smoke #14 PASS;
+- PR #81: security hardening workstream; current validated head before this docs refresh `c89700a336850b716e602d2ebd903c1ee72d3679`; Release Gate #642 PASS; Vercel BLOCKED; migration NOT APPLIED;
+- live preflight PASS and exact migration SQL transaction-test PASS; published parity 0 mismatch; unpublished anonymous denial PASS; Admin PASS; owner workspace PASS; ACL/security contract preserved;
+- exact rollback SQL transaction-test PASS on 48 Creator rows with 0 output mismatch and exact function-definition restoration;
+- final live preflight after rollback PASS;
+- PR #88: stacked draft Issue #23 implementation on #81; exact feature head `4a01c183b282d3abbe07f67eabece35faa656afa`; Release Gate #643 PASS; Vercel BLOCKED; no schema/RLS/Auth/grant/data change;
+- Issue #90: overlapping portfolio media CHECK constraints audited; proposed unified policy is compatible with 139/139 live rows; no schema change applied.
+
+
 ## Issue #23 stacked implementation state
 
 - stacked branch: `feat/admin-bulk-portfolio-intake`;
-- base dependency: PR #81 / `security/constrain-creator-trust-rpc`;
+- dependency: PR #81 / `security/constrain-creator-trust-rpc`;
 - canonical implementation files: `dapur-editor.js`, `dapur-entry.js`;
-- Admin authorization is rechecked through `is_admin()` before panel enumeration and bulk portfolio DB access;
-- bulk intake helper remains private to the editor IIFE;
-- 100-line bounded intake, HTTPS-only normalization, same-Creator normalized dedupe, single batch insert;
-- all bulk rows are draft/inactive with null service_id and empty description;
-- direct video-file URLs are stored as link under current validated DB media policy;
-- single-item editor now also rejects non-HTTPS URLs before Supabase request;
-- regression test added and wired into Release Gate;
-- no schema, migration, RLS, grant, Auth, or production-data change;
-- this workstream must not merge ahead of PR #81.
+- Admin authorization rechecked through `is_admin()`;
+- bulk helper remains private to editor IIFE;
+- 100-line bounded intake, HTTPS-only normalization, existing+batch dedupe, one bounded insert;
+- draft rows only with null service_id, empty description, inactive state;
+- direct video-file URLs stored as link under current DB policy;
+- regression test integrated into Release Gate;
+- exact pre-sync head `4a01c183b282d3abbe07f67eabece35faa656afa` validated by Release Gate #643;
+- no schema/RLS/Auth/grant/production-data change;
+- do not merge ahead of PR #81.
