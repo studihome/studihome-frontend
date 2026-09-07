@@ -578,3 +578,15 @@ Before continuing #81 -> #88, current console evidence was triaged.
 - sort-order append still scans all Creator portfolio rows;
 - no data/schema/RLS/grant mutation.
 
+## Current authority update — 7 Sep 2026 / refresh 9
+
+- source main: `db7c47adc4c365d32b7a79bdc4cdb8c6ba811baa`;
+- Release Gate #672: PASS;
+- Vercel production build: BLOCKED by `build-rate-limit`;
+- Production Smoke #17 / `34092938276`: FAIL at alias convergence only; 36/36 checks still reported `2809811790ab12511886355f8a0cc42717a82745`;
+- last production-verified deployed runtime: `2809811790ab12511886355f8a0cc42717a82745`;
+- PR #102 Admin bulk portfolio intake is merged in source but **NOT PRODUCTION VERIFIED**;
+- live Supabase trust visibility migration `20260907063648` remains APPLIED + VERIFIED;
+- pause additional runtime merges until production catches current source;
+- recovery path: docs-only branch/PR, exact-head Release Gate + Preview, merge only if both pass, then require Vercel Production SUCCESS + SHA-aware Production Smoke PASS.
+

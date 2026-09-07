@@ -500,3 +500,18 @@ This section supersedes earlier contradictory status text.
 - regression executes the generic-vs-service row predicate and locks the query/guard markers;
 - no live data cleanup or global uniqueness constraint is introduced.
 
+## Current authority update — 7 Sep 2026 / refresh 9
+
+This section supersedes earlier deployment/release status text.
+
+- source `main`: `db7c47adc4c365d32b7a79bdc4cdb8c6ba811baa` after PR #102;
+- PR #102 exact-head evidence before merge: Release Gate #671 PASS + Vercel Preview SUCCESS; clean branch was up-to-date and mergeable;
+- main Release Gate #672: PASS;
+- Vercel Production status for `db7c47a...`: **BLOCKED / build-rate-limit**;
+- Production Smoke #17 / run `34092938276`: **FAIL** only at SHA convergence; all 36 attempts observed production commit `2809811790ab12511886355f8a0cc42717a82745`, never `db7c47a...`;
+- therefore the last production-verified deployed runtime remains `2809811790ab12511886355f8a0cc42717a82745`; do not claim PR #102 live yet;
+- live Supabase Creator trust hardening remains independently APPLIED + VERIFIED as migration `20260907063648`;
+- Issue #23 source implementation is merged but remains production verification-pending until a production deployment reports the expected current-main SHA and Production Smoke passes;
+- next safest action is a docs-only protected PR from current main to refresh the stale Vercel playbook and safely retrigger deployment capacity. Merge that recovery PR only when its exact head has Release Gate PASS + Vercel Preview SUCCESS;
+- do not add another browser-runtime change while current runtime deployment is unresolved.
+

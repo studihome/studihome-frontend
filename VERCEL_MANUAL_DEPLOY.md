@@ -6,19 +6,27 @@ Updated: 7 September 2026, Asia/Jakarta
 
 Use this only when the normal Git-triggered Vercel deployment is unavailable or missed. Manual deployment must preserve the same source-of-truth and verification discipline as the normal release flow.
 
-## Verified production evidence
+## Current release evidence
 
 Repository: `studihome/studihome-frontend`
 
 Production branch: `main`
 
-Verified deployment SHA:
+Current source main at the start of this recovery:
 
-`1ce0b628fb1733d404c5125ff4ab0176791e58e4`
+`db7c47adc4c365d32b7a79bdc4cdb8c6ba811baa`
 
-Its parent `49db8b39591752e6486506415bda42abb2096744` contains the portfolio runtime fix.
+Last production-verified deployed runtime:
 
-Do **not** deploy PR #74 head or another branch as production. PR #74 is documentation-only and is not the production application source.
+`2809811790ab12511886355f8a0cc42717a82745`
+
+Current source status:
+- PR #102 merged into `db7c47a...`;
+- main Release Gate #672: PASS;
+- Vercel Production for `db7c47a...`: BLOCKED / `build-rate-limit`;
+- Production Smoke #17 / `34092938276`: FAIL because 36/36 alias checks still returned `2809811...`.
+
+Do not deploy a stale historical SHA merely because it appears earlier in this file. The approved deployment target is always the exact current protected `main` SHA at the time recovery is performed. If a docs-only recovery PR is merged, use that resulting merge SHA, because it contains the same application runtime plus the recovery documentation commit.
 
 ## Preferred manual method — Vercel Dashboard by Git SHA
 
@@ -26,16 +34,13 @@ Do **not** deploy PR #74 head or another branch as production. PR #74 is documen
 2. Open project `studihome-frontend`.
 3. Open **Deployments**.
 4. Use the deployment-header menu (**...**) and choose **Create Deployment**.
-5. Choose targeted deployment / Git reference and enter the exact SHA:
-   `49db8b39591752e6486506415bda42abb2096744`
+5. Choose targeted deployment / Git reference and enter the **exact current protected `main` SHA**. Confirm it from GitHub immediately before deployment; do not reuse an older SHA copied from historical notes.
 6. If Vercel asks which branch configuration to use, choose **main** so Production-scoped branch/environment configuration is used.
 7. Start the deployment.
 8. Do not retry repeatedly if Vercel returns `api-deployments-free-per-day` / `build-rate-limit`; classify as **BLOCKED**.
 9. When the deployment is **Ready**, inspect the deployment details and confirm the Git commit is the expected SHA.
 10. If the deployment is staged/Preview rather than assigned to the production domain, use its deployment menu and choose **Promote to Production** only after the source SHA is confirmed.
-11. Verify `https://studihome.id/api/version` reports:
-    - `sha = 49db8b39591752e6486506415bda42abb2096744`
-    - production environment.
+11. Verify `https://studihome.id/api/version` reports the exact SHA you just deployed and `environment = production`.
 12. Run/observe the production smoke workflow against the same SHA.
 13. Call production **PASS** only when SHA reconciliation and production smoke both pass.
 
@@ -69,13 +74,22 @@ If the new production deployment fails verification:
 4. record the observed deployment SHA and failing smoke assertion;
 5. fix through branch -> PR -> release-gate -> Preview before another production attempt.
 
-## Current blocker
+## Current blocker — 7 September 2026
 
-Resolved as of 7 September 2026:
-- provider accepted new deployments;
-- merged main deployment succeeded;
-- Release Gate #615 passed;
-- Production Smoke run #9 / `34068317674` passed;
-- deployment evidence `1ce0b628...` is production verified.
+Current source main at recovery start:
+`db7c47adc4c365d32b7a79bdc4cdb8c6ba811baa`
 
-Keep this playbook for future recovery only.
+Observed blocker:
+- Vercel production Git-triggered deployment returned `build-rate-limit`;
+- Production Smoke #17 checked the alias 36 times and always received `2809811790ab12511886355f8a0cc42717a82745`;
+- therefore source `db7c47a...` is **NOT PRODUCTION VERIFIED**.
+
+Recovery discipline:
+1. first use a docs-only protected PR as a low-risk capacity probe/retrigger;
+2. require exact-head Release Gate PASS + Vercel Preview SUCCESS before merge;
+3. after merge, require Vercel Production SUCCESS;
+4. require `/api/version` to match the resulting merge SHA;
+5. require Production Smoke PASS;
+6. if quota remains blocked, do not spam retries and do not merge additional runtime changes.
+
+The last production-verified deployed runtime remains `2809811790ab12511886355f8a0cc42717a82745` until all recovery checks pass.

@@ -233,3 +233,13 @@ PR #102 DEDUPE SCOPE — 7 SEP 2026
 - Keep max sort-order calculation across all portfolio rows and batch-internal dedupe across new generic URLs.
 - No historical cleanup or DB uniqueness constraint.
 
+CURRENT AUTHORITY UPDATE — 7 SEP 2026 / REFRESH 9
+- Source main: `db7c47adc4c365d32b7a79bdc4cdb8c6ba811baa`.
+- PR #102 merged after exact-head Release Gate #671 PASS + Vercel Preview SUCCESS. Main Release Gate #672 PASS.
+- Vercel Production for `db7c47a...` is BLOCKED by `build-rate-limit`.
+- Production Smoke #17 / `34092938276` failed only because production alias never left `2809811790ab12511886355f8a0cc42717a82745` across 36/36 checks.
+- Last production-verified deployed runtime remains `2809811790ab12511886355f8a0cc42717a82745`; Admin bulk portfolio intake is merged but NOT PRODUCTION VERIFIED.
+- Live Supabase trust hardening `20260907063648` remains applied/verified independently.
+- Do not stack another runtime feature while deployment is unresolved.
+- Preferred recovery: docs-only protected PR to refresh deployment authority and retrigger Vercel; merge only on exact-head Release Gate PASS + Preview SUCCESS; production becomes PASS only after expected merge SHA reaches `/api/version` and Production Smoke passes.
+
