@@ -15,7 +15,7 @@
   function showLoading(msg='Menyimpan…',sub='Tunggu sebentar ya.'){if(get('de-loading'))return;const d=document.createElement('div');d.id='de-loading';d.className='de-loading';d.innerHTML=`<div class="de-loading-box"><div class="de-spinner"></div><div class="de-loading-text">${esc(msg)}</div><div class="de-loading-sub">${esc(sub)}</div></div>`;document.body.appendChild(d)}
   function hideLoading(){get('de-loading')?.remove()}
   function shell(title,subtitle,body,onSave){ensureStyle();close();modal=document.createElement('div');modal.className='de-overlay';modal.innerHTML=`<div class="de-modal" role="dialog" aria-modal="true" aria-label="${esc(title)}"><header class="de-head"><div><span class="de-kicker">Dapur Studihome</span><h2>${esc(title)}</h2><p>${esc(subtitle)}</p></div><button class="de-close" type="button" id="de-close" aria-label="Tutup">×</button></header><form class="de-form" id="de-form">${body}<footer class="de-footer"><span id="de-state" style="font-size:11px;color:#64748b">Belum ada perubahan.</span><div class="de-actions"><button type="button" class="de-btn" id="de-cancel">Batal</button><button type="submit" class="de-btn primary" id="de-save">💾 Simpan Perubahan</button></div></footer></form></div>`;document.body.appendChild(modal);const form=get('de-form'),save=get('de-save'),stateEl=get('de-state');if(!form||!save){console.error('[Dapur] Form or save button not found after shell()');return}let state='IDLE';
-  const doSubmit=async()=>{if(state==='SAVING')return;transition('SAVING');showLoading('Menyimpan perubahan…','Data kamu aman, sabar ya!');try{await onSave(new FormData(form));hideLoading();transition('SUCCESS');toast('Berhasil disimpan! 🎉','success');setTimeout(()=>close(),1200)}catch(error){hideLoading();transition('ERROR');console.error('[Dapur Save Error]',error);const msg=String(error?.message||'');if(msg.includes('jasa aktif')||msg.includes('mempublikasikan')){toast('Simpan profil berhasil, tapi publish butuh minimal 1 jasa aktif. Tambahkan jasa dulu ya!','info')}else{toast(msg||'Data belum bisa disimpan. Coba lagi ya.','error')}}};
+  const doSubmit=async()=>{if(state==='SAVING')return;transition('SAVING');showLoading('Menyimpan perubahan…','Data kamu aman, sabar ya!');try{const result=await onSave(new FormData(form));hideLoading();transition('SUCCESS');toast(result?.message||'Berhasil disimpan! 🎉','success');setTimeout(()=>close(),1200)}catch(error){hideLoading();transition('ERROR');console.error('[Dapur Save Error]',error);const msg=String(error?.message||'');if(msg.includes('jasa aktif')||msg.includes('mempublikasikan')){toast('Simpan profil berhasil, tapi publish butuh minimal 1 jasa aktif. Tambahkan jasa dulu ya!','info')}else{toast(msg||'Data belum bisa disimpan. Coba lagi ya.','error')}}};
   const transition=next=>{state=next;form.dataset.state=next;form.setAttribute('aria-busy',next==='SAVING'?'true':'false');if(stateEl){const msgs={IDLE:'Belum ada perubahan.',DIRTY:'✨ Perubahan belum disimpan.',SAVING:'⏳ Menyimpan…',SUCCESS:'✅ Berhasil disimpan!',ERROR:'❌ Gagal menyimpan. Coba lagi ya.'};stateEl.textContent=msgs[next]||msgs.IDLE}if(save){save.disabled=next==='SAVING';save.textContent=next==='SAVING'?'⏳ Menyimpan…':next==='SUCCESS'?'✅ Tersimpan!':'💾 Simpan Perubahan'}};
   const markDirty=()=>{if(state==='IDLE'||state==='SUCCESS'||state==='ERROR')transition('DIRTY')};
   form.addEventListener('input',markDirty,{passive:true});
@@ -57,9 +57,190 @@
       await window.Dapur?.boot?.()
     })}
   async function service(id,editId=null){let s={title:'',description:'',price_from:0,price_to:0,delivery_days:3,is_active:true};if(editId){const r=await S().from('creator_services').select('*').eq('id',editId).eq('creator_id',id).maybeSingle();if(r.error||!r.data)throw r.error||new Error('Hidangan tidak ditemukan.');s=r.data}const lr=await S().from('creator_services').select('id,title,description,price_from,price_to,delivery_days,is_active').eq('creator_id',id).order('created_at',{ascending:false});if(lr.error)throw lr.error;shell(editId?'🍽️ Hidangan · Edit':'🍽️ Hidangan · Tambah','Bikin layanan yang gampang dipahami: apa yang kamu bantu, hasilnya apa, dan kapan selesai.',`${listBlock('Layanan yang sudah dibuat','Edit atau hapus langsung di sini.',lr.data||[],'service',id)}${field('title','📌 Nama Layanan',s.title,'text','Nama yang singkat dan gampang dicari.','required maxlength="100"')}${area('description','💬 Deskripsi & Manfaat',s.description,'Jelaskan output, manfaat, dan batas layanan dalam 1–3 kalimat. Yang penting jelas!')}<div class="de-grid"><div>${field('price_from','💰 Harga Mulai (Rp)',s.price_from,'number','Nominal terendah. Isi 0 kalau nego.','min="0" step="1"')}</div><div>${field('price_to','💰 Harga Sampai (Rp)',s.price_to,'number','Batas atas. Kosongin aja kalau nggak ada batas.','min="0" step="1"')}</div></div>${field('delivery_days','⏰ Estimasi Pengerjaan (hari)',s.delivery_days,'number','Berapa hari kira-kira selesai.','min="1" max="365" step="1"')}${check('is_active','👁️ Tampilkan Layanan',s.is_active,'Matiin sementara kalau layanan lagi ditutup.')}`,async f=>{const title=String(f.get('title')||'').trim(),description=String(f.get('description')||'').trim(),from=Math.max(0,Number(f.get('price_from')||0)),to=Math.max(0,Number(f.get('price_to')||0)),days=Math.max(1,Number(f.get('delivery_days')||1));if(!title||!description)throw new Error('Nama layanan dan deskripsi wajib diisi.');if(to&&to<from)throw new Error('Harga sampai tidak boleh lebih kecil dari harga mulai.');const p={creator_id:id,title,description,price_from:from,price_to:to,delivery_days:days,is_active:f.has('is_active')};const r=editId?await S().from('creator_services').update(p).eq('id',editId).eq('creator_id',id):await S().from('creator_services').insert(p);if(r.error)throw r.error;await window.Dapur?.boot?.()})}
-  async function portfolio(id,editId=null){let p={title:'',description:'',media_url:'',media_type:'link',sort_order:0,is_active:true};if(editId){const r=await S().from('creator_portfolios').select('*').eq('id',editId).eq('creator_id',id).maybeSingle();if(r.error||!r.data)throw r.error||new Error('Ambalan tidak ditemukan.');p=r.data}const detect=url=>{try{const x=new URL(String(url||'').trim()),host=x.hostname.toLowerCase(),path=x.pathname.toLowerCase();if(/(^|\.)youtube\.com$|^youtu\.be$/.test(host))return'youtube';if(/(^|\.)drive\.google\.com$|(^|\.)docs\.google\.com$/.test(host))return'drive';if(/(^|\.)tiktok\.com$/.test(host))return'tiktok';if(/(^|\.)instagram\.com$/.test(host))return'instagram';if(/\.(png|jpe?g|webp|gif|avif|svg)(?:$|[?#])/i.test(path))return'image';if(/\.(mp4|webm|m4v|mov|ogv)(?:$|[?#])/i.test(path))return'video';return'link'}catch{return null}};const lr=await S().from('creator_portfolios').select('id,title,description,media_type,media_url,sort_order,is_active').eq('creator_id',id).order('sort_order',{ascending:true}).order('created_at',{ascending:false});if(lr.error)throw lr.error;shell(editId?'🏆 Ambalan · Edit':'🏆 Ambalan · Tambah','Pamerin karya terbaikmu! Pilih yang relevan, kasih cerita singkat biar customer langsung paham.',`${listBlock('Karya yang sudah dibuat','Edit atau hapus langsung di sini.',lr.data||[],'portfolio',id)}${field('title','📌 Judul Karya',p.title,'text','Nama karya yang langsung jelas isinya.','required maxlength="100"')}${area('description','📖 Cerita Singkat',p.description,'Jelaskan peranmu, proses utama, atau hasil yang dicapai dalam 1–3 kalimat.')}${field('media_url','🔗 Link Karya / Media',p.media_url,'url','Tempel link publik: YouTube, Drive, foto, video, TikTok, atau Instagram.','required placeholder="https://..."')}${field('sort_order','🔢 Urutan Tampil',p.sort_order,'number','0 tampil paling awal. Pake angka kecil aja.','min="0" step="1"')}${check('is_active','👁️ Tampilkan Karya',p.is_active,'Matiin sementara kalau karya lagi mau disembunyikan.')}`,async f=>{const url=String(f.get('media_url')||'').trim(),type=detect(url);if(!url||!type)throw new Error('Link karya tidak valid.');const q={creator_id:id,title:String(f.get('title')||'').trim(),description:String(f.get('description')||'').trim(),media_url:url,media_type:type,sort_order:Math.max(0,Number(f.get('sort_order')||0)),is_active:f.has('is_active')};if(!q.title||!q.description)throw new Error('Judul dan cerita singkat wajib diisi.');const r=editId?await S().from('creator_portfolios').update(q).eq('id',editId).eq('creator_id',id):await S().from('creator_portfolios').insert(q);if(r.error)throw r.error;await window.Dapur?.boot?.()})}
+  /* PORTFOLIO_INTAKE_PURE_START */
+  function normalizePortfolioUrl(raw){
+    try{
+      const url=new URL(String(raw||'').trim());
+      if(url.protocol!=='https:')return null;
+      url.hash='';
+      return url.toString();
+    }catch{return null}
+  }
+  function detectPortfolioMedia(raw){
+    try{
+      const url=new URL(raw),host=url.hostname.toLowerCase(),path=url.pathname.toLowerCase();
+      if(['youtube.com','www.youtube.com','youtu.be','www.youtu.be'].includes(host))return'youtube';
+      if(['drive.google.com','www.drive.google.com','docs.google.com','www.docs.google.com'].includes(host))return'drive';
+      if(['tiktok.com','www.tiktok.com'].includes(host))return'tiktok';
+      if(['instagram.com','www.instagram.com'].includes(host))return'instagram';
+      if(/\.(png|jpe?g|webp|gif|avif|svg)$/i.test(path))return'image';
+      return'link';
+    }catch{return null}
+  }
+  function safeDecodePortfolioPart(value){try{return decodeURIComponent(String(value||''))}catch{return String(value||'')}}
+  function cleanPortfolioTitle(value){
+    return safeDecodePortfolioPart(value)
+      .replace(/\.(png|jpe?g|webp|gif|avif|svg|mp4|webm|m4v|mov|ogv)$/i,'')
+      .replace(/[-_]+/g,' ')
+      .replace(/\s+/g,' ')
+      .replace(/^[\s.,:;|/\\-]+|[\s.,:;|/\\-]+$/g,'')
+      .trim()
+      .slice(0,100);
+  }
+  function derivePortfolioTitle(raw,type){
+    const url=new URL(raw),parts=url.pathname.split('/').filter(Boolean);
+    let token='',prefix='';
+    if(type==='youtube'){
+      prefix='YouTube';
+      token=url.searchParams.get('v')||parts[parts.length-1]||'Portfolio';
+    }else if(type==='drive'){
+      prefix='Google Drive';
+      token=parts[parts.length-1]||'Portfolio';
+    }else if(type==='tiktok'){
+      prefix='TikTok';
+      token=parts[parts.length-1]||'Portfolio';
+    }else if(type==='instagram'){
+      prefix='Instagram';
+      token=parts[parts.length-1]||'Portfolio';
+    }else{
+      token=parts[parts.length-1]||url.hostname.replace(/^www\./,'');
+    }
+    let title=cleanPortfolioTitle(prefix?prefix+' '+token:token);
+    if(title.length<2)title=cleanPortfolioTitle(prefix?prefix+' Portfolio':url.hostname.replace(/^www\./,'')||'Portfolio');
+    if(title.length<2)title='Portfolio';
+    return title.slice(0,100);
+  }
+  /* PORTFOLIO_INTAKE_PURE_END */
+
+  async function requireAdmin(){
+    const r=await S().rpc('is_admin');
+    if(r.error)throw r.error;
+    if(r.data!==true)throw new Error('Akses Admin diperlukan.');
+    return true;
+  }
+
+  async function bulkPortfolioIntake(id){
+    await requireAdmin();
+    shell(
+      '📥 Ambalan · Impor URL',
+      'Tempel satu URL HTTPS per baris. Maksimal 100 baris sekali proses. Semua hasil impor disimpan sebagai draft untuk ditinjau dulu.',
+      '<div class="de-tip"><b>🔒 Admin bulk intake:</b> tanpa scraping, tanpa metadata buatan, dan URL yang sudah ada untuk Creator ini akan dilewati.</div>'+
+      area('portfolio_urls','🔗 Daftar URL','','Satu URL HTTPS per baris · maksimal 100 baris.'),
+      async f=>{
+        await requireAdmin();
+        const lines=String(f.get('portfolio_urls')||'').split(/\r?\n/);
+        const limited=lines.slice(0,100);
+        let skipped=Math.max(0,lines.length-100),invalid=0,duplicate=0;
+        const current=await S().from('creator_portfolios').select('media_url,sort_order').eq('creator_id',id);
+        if(current.error)throw current.error;
+        const existing=new Set();
+        let maxSort=-1;
+        for(const row of current.data||[]){
+          const normalized=normalizePortfolioUrl(row.media_url);
+          if(normalized)existing.add(normalized);
+          maxSort=Math.max(maxSort,Number(row.sort_order)||0);
+        }
+        const batchSeen=new Set(),rows=[];
+        for(const line of limited){
+          if(!String(line||'').trim()){skipped++;continue}
+          const normalized=normalizePortfolioUrl(line);
+          if(!normalized){invalid++;continue}
+          if(existing.has(normalized)||batchSeen.has(normalized)){duplicate++;continue}
+          const type=detectPortfolioMedia(normalized);
+          if(!type){invalid++;continue}
+          batchSeen.add(normalized);
+          rows.push({
+            creator_id:id,
+            service_id:null,
+            title:derivePortfolioTitle(normalized,type),
+            description:'',
+            media_type:type,
+            media_url:normalized,
+            sort_order:maxSort+rows.length+1,
+            is_active:false
+          });
+        }
+        if(rows.length){
+          const inserted=await S().from('creator_portfolios').insert(rows);
+          if(inserted.error)throw inserted.error;
+        }
+        await window.Dapur?.boot?.();
+        return{message:`Impor selesai: ${rows.length} ditambahkan · ${duplicate} duplikat · ${invalid} tidak valid · ${skipped} dilewati.`};
+      }
+    );
+  }
+
+  async function portfolio(id,editId=null){
+    let p={title:'',description:'',media_url:'',media_type:'link',sort_order:0,is_active:true};
+    if(editId){
+      const r=await S().from('creator_portfolios').select('*').eq('id',editId).eq('creator_id',id).maybeSingle();
+      if(r.error||!r.data)throw r.error||new Error('Ambalan tidak ditemukan.');
+      p=r.data;
+    }
+    const lr=await S().from('creator_portfolios').select('id,title,description,media_type,media_url,sort_order,is_active').eq('creator_id',id).order('sort_order',{ascending:true}).order('created_at',{ascending:false});
+    if(lr.error)throw lr.error;
+    shell(
+      editId?'🏆 Ambalan · Edit':'🏆 Ambalan · Tambah',
+      'Pamerin karya terbaikmu! Pilih yang relevan, kasih cerita singkat biar customer langsung paham.',
+      `${listBlock('Karya yang sudah dibuat','Edit atau hapus langsung di sini.',lr.data||[],'portfolio',id)}${field('title','📌 Judul Karya',p.title,'text','Nama karya yang langsung jelas isinya.','required maxlength="100"')}${area('description','📖 Cerita Singkat',p.description,'Jelaskan peranmu, proses utama, atau hasil yang dicapai dalam 1–3 kalimat.')}${field('media_url','🔗 Link Karya / Media',p.media_url,'url','Tempel link publik HTTPS: YouTube, Drive, foto, TikTok, Instagram, atau link lainnya.','required placeholder="https://..."')}${field('sort_order','🔢 Urutan Tampil',p.sort_order,'number','0 tampil paling awal. Pake angka kecil aja.','min="0" step="1"')}${check('is_active','👁️ Tampilkan Karya',p.is_active,'Matiin sementara kalau karya lagi mau disembunyikan.')}`,
+      async f=>{
+        const raw=String(f.get('media_url')||'').trim();
+        const url=normalizePortfolioUrl(raw);
+        const type=url?detectPortfolioMedia(url):null;
+        if(!url||!type)throw new Error('Link karya harus URL HTTPS publik yang valid.');
+        const q={
+          creator_id:id,
+          title:String(f.get('title')||'').trim(),
+          description:String(f.get('description')||'').trim(),
+          media_url:url,
+          media_type:type,
+          sort_order:Math.max(0,Number(f.get('sort_order')||0)),
+          is_active:f.has('is_active')
+        };
+        if(!q.title||!q.description)throw new Error('Judul dan cerita singkat wajib diisi.');
+        const r=editId
+          ?await S().from('creator_portfolios').update(q).eq('id',editId).eq('creator_id',id)
+          :await S().from('creator_portfolios').insert(q);
+        if(r.error)throw r.error;
+        await window.Dapur?.boot?.();
+      }
+    );
+  }
   async function categories(id){const [a,b]=await Promise.all([S().from('ai_categories').select('id,name,slug').eq('is_active',true).order('name'),S().from('creator_category_members').select('category_id,is_primary').eq('creator_id',id)]);if(a.error)throw a.error;if(b.error)throw b.error;const selected=(b.data||[]).map(x=>x.category_id);const primary=b.data?.find(x=>x.is_primary)?.category_id||selected[0]||'';const MAX_CATS=3;const allCats=a.data||[];const primaryCat=primary;shell('🧭 Menu · Fokus Creator','Pilih maksimal 3 kategori yang paling mewakili kemampuanmu. Satu kategori utama bikin fokusmu makin keliatan!',`<div class="de-tip"><b>💡 Tips praktis:</b> pilih maksimal 3 kategori yang paling nyambung sama layanan utamamu. Pilih 1 kategori utama biar customer langsung paham fokus kamu.</div><div id="de-cat-notice" class="de-cat-count">Dipilih: <strong>${selected.length}</strong> / ${MAX_CATS} kategori</div><div class="de-cat-grid">${allCats.map(c=>`<label class="de-cat ${selected.includes(c.id)?'selected':''}"><input type="checkbox" name="cat" value="${esc(c.id)}" data-cat-name="${esc(c.name)}" ${selected.includes(c.id)?'checked':''}><span>${esc(c.name)}</span></label>`).join('')}</div><div class="de-cat-primary"><label for="de-primary-cat">⭐ Kategori Utama</label><select id="de-primary-cat" name="primary_cat"><option value="">-- Pilih kategori utama --</option>${allCats.filter(c=>selected.includes(c.id)).map(c=>`<option value="${esc(c.id)}" ${c.id===primaryCat?'selected':''}>${esc(c.name)}</option>`).join('')}</select></div>`,async f=>{const ids=f.getAll('cat').map(String);const primaryCat=f.get('primary_cat');if(!ids.length)throw new Error('Pilih minimal satu kategori agar fokus Creator jelas.');if(ids.length>MAX_CATS)throw new Error(`Maksimal ${MAX_CATS} kategori aja ya! Pilih yang paling penting.`);if(primaryCat&&!ids.includes(primaryCat))throw new Error('Kategori utama harus dipilih dari kategori yang kamu centang.');let r=await S().from('creator_category_members').delete().eq('creator_id',id);if(r.error)throw r.error;r=await S().from('creator_category_members').insert(ids.map(category_id=>({creator_id:id,category_id,is_primary:category_id===primaryCat})));if(r.error)throw r.error;await window.Dapur?.boot?.()});setTimeout(()=>{const grid=modal?.querySelector('.de-cat-grid');const notice=modal?.querySelector('#de-cat-notice');const primarySel=modal?.querySelector('#de-primary-cat');if(!grid||!notice||!primarySel)return;grid.addEventListener('change',()=>{const checked=grid.querySelectorAll('input[type="checkbox"]:checked');const count=checked.length;notice.innerHTML=`Dipilih: <strong>${count}</strong> / ${MAX_CATS} kategori`;if(count>MAX_CATS){notice.style.color='#dc2626';notice.innerHTML+=` <span style="color:#dc2626">⚠️ Kebanyakan!</span>`}else{notice.style.color=''}const prevVal=primarySel.value;primarySel.innerHTML=`<option value="">-- Pilih kategori utama --</option>`;checked.forEach(cb=>{const opt=document.createElement('option');opt.value=cb.value;opt.textContent=cb.dataset.catName||cb.value;if(cb.value===prevVal)opt.selected=true;primarySel.appendChild(opt)});if(prevVal&&!primarySel.querySelector(`option[value="${prevVal}"]`))primarySel.value='';},{passive:true})},100)}
   async function adminManageCreator(creatorId){await profile(creatorId)}
-  async function adminPanel(){const r=await S().from('creator_profiles').select('id,user_id,username,display_name,is_published,is_verified').order('created_at',{ascending:false});if(r.error)throw r.error;const creators=r.data||[];shell('🛠️ Admin · Kelola Creator','Pilih Creator yang mau kamu kelola. Kamu bisa edit profil, layanan, karya, dan kategori mereka.',`<div class="de-admin-badge">🔒 Mode Admin</div><div class="de-admin-select"><label for="de-admin-creator">👤 Pilih Creator</label><select id="de-admin-creator"><option value="">-- Pilih Creator --</option>${creators.map(c=>`<option value="${esc(c.id)}">${esc(c.display_name||c.username)} (@${esc(c.username)}) ${c.is_published?'🟢':'⚫'} ${c.is_verified?'✅':''}</option>`).join('')}</select></div><div id="de-admin-actions" style="display:none"><div class="de-tip"><b>🎯 Yang bisa kamu lakukan:</b> edit profil, kelola layanan, karya, dan kategori Creator ini.</div><div class="de-grid" style="grid-template-columns:1fr 1fr"><button type="button" class="de-btn" data-admin-action="profile">✏️ Edit Profil</button><button type="button" class="de-btn" data-admin-action="categories">🧭 Kelola Menu</button><button type="button" class="de-btn" data-admin-action="service">🍽️ Kelola Hidangan</button><button type="button" class="de-btn" data-admin-action="portfolio">🏆 Kelola Ambalan</button></div></div>`,async()=>{close();toast('Panel admin ditutup.','info')});setTimeout(()=>{const sel=modal?.querySelector('#de-admin-creator');const actions=modal?.querySelector('#de-admin-actions');if(!sel||!actions)return;sel.addEventListener('change',()=>{if(sel.value){actions.style.display='block'}else{actions.style.display='none'}},{passive:true});actions.addEventListener('click',async e=>{const btn=e.target.closest('[data-admin-action]');if(!btn||!sel.value)return;const action=btn.dataset.adminAction;close();try{if(action==='profile')return await profile(sel.value);if(action==='categories')return await categories(sel.value);if(action==='service')return await service(sel.value);if(action==='portfolio')return await portfolio(sel.value)}catch(err){console.error('[Dapur Admin Error]',err);toast(err?.message||'Gagal membuka form.','error')}})},100)}
+  async function adminPanel(){
+    await requireAdmin();
+    const r=await S().from('creator_profiles').select('id,user_id,username,display_name,is_published,is_verified').order('created_at',{ascending:false});
+    if(r.error)throw r.error;
+    const creators=r.data||[];
+    shell(
+      '🛠️ Admin · Kelola Creator',
+      'Pilih Creator yang mau kamu kelola. Kamu bisa edit profil, layanan, karya, kategori, atau impor URL portfolio sebagai draft.',
+      `<div class="de-admin-badge">🔒 Mode Admin</div><div class="de-admin-select"><label for="de-admin-creator">👤 Pilih Creator</label><select id="de-admin-creator"><option value="">-- Pilih Creator --</option>${creators.map(c=>`<option value="${esc(c.id)}">${esc(c.display_name||c.username)} (@${esc(c.username)}) ${c.is_published?'🟢':'⚫'} ${c.is_verified?'✅':''}</option>`).join('')}</select></div><div id="de-admin-actions" style="display:none"><div class="de-tip"><b>🎯 Yang bisa kamu lakukan:</b> edit profil, kelola layanan, karya, kategori, atau impor URL portfolio sebagai draft.</div><div class="de-grid" style="grid-template-columns:1fr 1fr"><button type="button" class="de-btn" data-admin-action="profile">✏️ Edit Profil</button><button type="button" class="de-btn" data-admin-action="categories">🧭 Kelola Menu</button><button type="button" class="de-btn" data-admin-action="service">🍽️ Kelola Hidangan</button><button type="button" class="de-btn" data-admin-action="portfolio">🏆 Kelola Ambalan</button><button type="button" class="de-btn" data-admin-action="bulk-portfolio">📥 Impor URL Ambalan</button></div></div>`,
+      async()=>{close();toast('Panel admin ditutup.','info')}
+    );
+    setTimeout(()=>{
+      const sel=modal?.querySelector('#de-admin-creator');
+      const actions=modal?.querySelector('#de-admin-actions');
+      if(!sel||!actions)return;
+      sel.addEventListener('change',()=>{actions.style.display=sel.value?'block':'none'},{passive:true});
+      actions.addEventListener('click',async e=>{
+        const btn=e.target.closest('[data-admin-action]');
+        if(!btn||!sel.value)return;
+        const action=btn.dataset.adminAction;
+        close();
+        try{
+          if(action==='profile')return await profile(sel.value);
+          if(action==='categories')return await categories(sel.value);
+          if(action==='service')return await service(sel.value);
+          if(action==='portfolio')return await portfolio(sel.value);
+          if(action==='bulk-portfolio')return await bulkPortfolioIntake(sel.value);
+        }catch(err){
+          console.error('[Dapur Admin Error]',err);
+          toast(err?.message||'Gagal membuka form.','error');
+        }
+      });
+    },100);
+  }
   window.AdminDapurUI={profile,categories,service,portfolio,close,adminPanel};
 })();
