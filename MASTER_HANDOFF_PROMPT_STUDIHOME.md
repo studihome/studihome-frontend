@@ -589,3 +589,17 @@ This section supersedes earlier deployment/release status text.
 - no Search/Smart Brief change beyond inherited stack; no generated templates, CSS, CSP enforcement, DB, API, Storage, or data change;
 - PREPARED ONLY while Vercel remains quota-blocked; after prior phases land, retarget/sync before Preview/browser acceptance.
 
+## Issue #98 Phase D — zero static inline event handlers prepared / 7 Sep 2026
+
+- stacked after Phase C -> B -> A; never merge out of order;
+- Phase D removes the final 4 static onclick attributes: PWA install, product-detail close, checkout close, module close;
+- static inline event-handler count after Phase D: **0**;
+- static javascript: URL count remains 0;
+- ownership moves to same-origin `static-shell-actions.js`;
+- PWA install keeps `href="#install"` and calls `StudihomePWA.show()` without preventing the original anchor default;
+- product-detail close preserves iframe src cleanup BEFORE modal close;
+- checkout/module close behavior remains `App.ui.toggleModal(..., false)`;
+- regression locks zero static handlers, exact IDs/loader, no javascript: URLs, and product cleanup order;
+- no generated-template handler/style refactor, CSS, CSP enforcement, DB, API, Storage, or data change belongs to this phase;
+- PREPARED ONLY while Vercel remains quota-blocked; after prior phases land, retarget/sync before Preview/browser acceptance.
+
