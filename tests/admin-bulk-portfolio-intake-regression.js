@@ -32,6 +32,10 @@ const { normalizePortfolioUrl, detectPortfolioMedia, derivePortfolioTitle } =
 assert(normalizePortfolioUrl('http://example.com/a') === null, 'HTTP must be rejected');
 assert(normalizePortfolioUrl('not a url') === null, 'Malformed URL must be rejected');
 assert(
+  normalizePortfolioUrl('https://user:secret@example.com/work') === null,
+  'Embedded URL credentials must be rejected'
+);
+assert(
   normalizePortfolioUrl(' https://Example.COM/work#section ') ===
     'https://example.com/work',
   'HTTPS URL must normalize host and strip fragment'
@@ -49,6 +53,10 @@ assert(
 assert(
   detectPortfolioMedia('https://m.youtube.com/watch?v=abc') === 'link',
   'Unsupported YouTube subdomain must fall back to link'
+);
+assert(
+  detectPortfolioMedia('https://www.youtube.com:8443/watch?v=abc') === 'link',
+  'Platform URL with non-default port must fall back to generic link'
 );
 assert(
   detectPortfolioMedia('https://drive.google.com/file/d/abc/view') === 'drive',
