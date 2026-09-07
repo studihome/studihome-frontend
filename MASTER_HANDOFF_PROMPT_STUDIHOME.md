@@ -340,3 +340,12 @@ Issue #80 security work:
 - no schema/table/RLS/grant/data change is included;
 - regression: `tests/creator-trust-metrics-visibility-regression.js` wired into Release Gate;
 - migration is repository-only and **has not been applied to live Supabase**.
+
+
+Issue #80 verification artifacts:
+- post-apply SQL verification: `supabase/tests/creator_trust_metrics_visibility_verification.sql`;
+- explicit rollback: `supabase/rollbacks/20260907004000_restore_creator_trust_metrics_visibility.sql`;
+- direct live read-only probe confirmed current RPC returns non-NULL for both published and unpublished Creator IDs in unauthenticated context;
+- rollback restores the exact pre-hardening RPC behavior and does not alter ACL/RLS/schema/data;
+- latest validated draft head before any later edits: Release Gate PASS; Vercel remains BLOCKED by build-rate-limit;
+- migration remains NOT APPLIED to live Supabase.
