@@ -297,3 +297,11 @@ ISSUE #98 PHASE D — ZERO STATIC HANDLERS PREP / 7 SEP 2026
 - Generated template handlers/styles are a separate later phase.
 - Keep draft until prior phases land, branch is resynced, Preview succeeds, and PWA/modal browser acceptance passes.
 
+ISSUE #98 PHASE E — SMART GENERATED ACTION PREP / 7 SEP 2026
+- Correct generated HTML-event baseline is 184; DOM property `.onclick = fn` assignments are not script-src-attr blockers.
+- Stack after static A-D.
+- Remove only the one SMART Team-vs-Solo generated onclick via `data-smart-next-action` + delegated listener.
+- Generated HTML event attributes become 183, all in core runtime script #5.
+- Do not change ranking, CSS, CSP enforcement, DB, API, or data.
+- Keep draft until prior phases land, branch is resynced, Preview succeeds, and SMART browser acceptance passes.
+
