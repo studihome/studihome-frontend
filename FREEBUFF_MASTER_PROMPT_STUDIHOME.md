@@ -336,6 +336,6 @@ ISSUE #98 PHASE I — GENERATED SHOP ACTIONS PREP / 7 SEP 2026
 - Generated handler count becomes 170; Shop section becomes zero.
 - Use data-shop-submit / data-shop-change / data-shop-action with one delegated binder on checkout-modal-content.
 - Preserve native submit Event -> App.shop.submitOrderStep1(event), App.shop.updatePaymentConfirmButton(), App.shop.submitPaymentConfirmation(), and App.ui.toggleModal('checkout-modal', false).
-- Regression must lock <=170 global generated handlers, zero Shop generated handlers, exact data-contract cardinality, one loader, and no network/Supabase/markup injection from the binder.
+- Regression must lock <=170 global generated handlers, zero Shop generated handlers, exact data-contract cardinality, one loader, no network/Supabase/markup injection, and executable VM DOM simulation for submit/change/click, idempotency, nested targets, unknown actions, and outside-container rejection.
 - No CSS/style cleanup, strict CSP enforcement, DB, API, Storage, Creator, Admin, or Studio AI behavior change.
 - Keep draft/unmerged until exact-head Release Gate PASS, Vercel Preview SUCCESS, Shop browser acceptance, and no new first-party console errors.

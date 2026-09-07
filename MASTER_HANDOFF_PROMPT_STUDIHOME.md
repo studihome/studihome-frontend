@@ -663,7 +663,7 @@ This section supersedes earlier deployment/release status text.
 - ownership moves to same-origin `generated-shop-actions.js`, delegated once from stable `checkout-modal-content`;
 - `submitOrderStep1` still receives the native submit Event object so its existing `preventDefault()` contract is preserved;
 - payment-confirm enablement, payment submission, and checkout modal close call the same existing `App.shop` / `App.ui` methods;
-- regression locks the <=170 global ceiling, zero Shop generated handlers, exact 1 submit + 1 change + 2 click data contracts, one loader, and delegated behavior markers;
+- regression locks the <=170 global ceiling, zero Shop generated handlers, exact 1 submit + 1 change + 2 click data contracts, one loader, and delegated behavior markers; it also executes the binder in a VM DOM harness to prove original submit Event forwarding, checkbox change, nested payment-confirm click, checkout close arguments, one-time binding, unknown-action rejection, and outside-container rejection;
 - binder is prohibited from injecting markup, performing fetches, or touching Supabase;
 - no CSS/style cleanup, strict CSP enforcement, DB, API, Storage, application-data, Creator, Admin, or Studio AI behavior change belongs to this phase;
 - merge remains blocked until exact-head Release Gate PASS + Vercel Preview SUCCESS + Shop browser acceptance + clean first-party console evidence.
