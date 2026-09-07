@@ -4,6 +4,7 @@ const fs = require('fs');
 
 const migrationPath = 'supabase/migrations/20260907004000_constrain_creator_trust_metrics_visibility.sql';
 const migration = fs.readFileSync(migrationPath, 'utf8');
+const preflight = fs.readFileSync('supabase/tests/creator_trust_metrics_preflight.sql', 'utf8');
 const verification = fs.readFileSync('supabase/tests/creator_trust_metrics_visibility_verification.sql', 'utf8');
 const rollback = fs.readFileSync('supabase/rollbacks/20260907004000_restore_creator_trust_metrics_visibility.sql', 'utf8');
 const index = fs.readFileSync('index.html', 'utf8');
@@ -46,6 +47,32 @@ for (const marker of forbiddenMigrationMarkers) {
   assert(
     !migration.toLowerCase().includes(marker),
     `Unexpected blast-radius expansion in trust metrics migration: ${marker}`
+  );
+}
+
+const requiredPreflightMarkers = [
+  'get_creator_trust_metrics',
+  'SECURITY DEFINER',
+  'has_function_privilege',
+  'anon',
+  'authenticated',
+  'creator_like_adjustments',
+  'creator_external_ratings',
+  'already hardened or changed',
+  'creator_trust_metrics_preflight'
+];
+
+for (const marker of requiredPreflightMarkers) {
+  assert(
+    preflight.includes(marker),
+    `Creator trust preflight marker missing: ${marker}`
+  );
+}
+
+for (const marker of ['insert into ', 'update public.', 'delete from ', 'alter table ', 'grant ', 'revoke ']) {
+  assert(
+    !preflight.toLowerCase().includes(marker),
+    `Creator trust preflight must remain read-only: ${marker}`
   );
 }
 
