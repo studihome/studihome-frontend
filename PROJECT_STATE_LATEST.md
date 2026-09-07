@@ -486,6 +486,38 @@ This section supersedes earlier contradictory status sections.
 - PR #43 and PR #50 remain CLOSED AS SUPERSEDED.
 
 
+## Creator trust RPC hardening — synchronized branch state
+
+- production main after PR #79: `d32c7e04b5c3d916c85a57a5528f18e6501134a1`;
+- PR #79 verification: Vercel Production SUCCESS; Release Gate #638 PASS; Production Smoke #14 PASS;
+- PR #81 security branch must be synchronized with this production state before fresh Preview/CI;
+- prepared migration constrains unpublished direct trust-metric visibility while retaining published/owner/Admin access;
+- post-apply SQL verification and explicit rollback artifacts are present;
+- migration remains NOT APPLIED live pending fresh PR #81 Preview + Release Gate and post-apply SQL verification.
+
+
+## Current authority update — 7 Sep 2026 / refresh 4
+
+- production main: `d32c7e04b5c3d916c85a57a5528f18e6501134a1`; Vercel Production SUCCESS; Release Gate #638 PASS; Production Smoke #14 PASS;
+- PR #81: security hardening workstream; current validated head before this docs refresh `c89700a336850b716e602d2ebd903c1ee72d3679`; Release Gate #642 PASS; Vercel BLOCKED; migration NOT APPLIED;
+- live preflight PASS and exact migration SQL transaction-test PASS; published parity 0 mismatch; unpublished anonymous denial PASS; Admin PASS; owner workspace PASS; ACL/security contract preserved;
+- exact rollback SQL transaction-test PASS on 48 Creator rows with 0 output mismatch and exact function-definition restoration;
+- final live preflight after rollback PASS;
+- PR #88: stacked draft Issue #23 implementation on #81; exact feature head `4a01c183b282d3abbe07f67eabece35faa656afa`; Release Gate #643 PASS; Vercel BLOCKED; no schema/RLS/Auth/grant/data change;
+- Issue #90: overlapping portfolio media CHECK constraints audited; proposed unified policy is compatible with 139/139 live rows; no schema change applied.
+
+
+## Current authority update — 7 Sep 2026 / refresh 5
+
+- production main `d32c7e04b5c3d916c85a57a5528f18e6501134a1` remains VERIFIED;
+- PR #81 prior exact head `55abd94353f319ff085e132bb51ad61eb9df6885`: Release Gate #646 PASS; live preflight PASS; transactional apply PASS; exact rollback PASS; migration NOT APPLIED;
+- Vercel provider recovery confirmed on PR #88 exact head `3a1d5a681d56ee5f957487aabc8ffbd18ba1054e`: Release Gate #648 PASS; Preview SUCCESS;
+- PR #88 remains stacked and unmerged; URL credential/non-default-port hardening included;
+- Issue #90 migration contract READY with transactional apply/deny/rollback proof; no live schema change;
+- Issue #83 cleanup contract READY with transactional drop/planner/rollback proof; no live index change;
+- Issue #62 remains BLOCKED by unavailable invocation telemetry.
+
+
 ## Console hygiene remediation state — 7 Sep 2026
 
 Before continuing #81 -> #88, current console evidence was triaged.
@@ -496,3 +528,26 @@ Before continuing #81 -> #88, current console evidence was triaged.
 - Creator avatar DNS failures: all 5 reported storage objects exist in live `creator-media`; no data repair required.
 - isolated remediation branch adds strict same-origin avatar proxy, fallback image behavior, active Studio AI renderer integration, social-proof log cleanup, cache-buster updates, and regression coverage.
 - no persistent Supabase/storage/schema/RLS/Auth/grant change.
+
+
+## Current authority update — 7 Sep 2026 / refresh 6
+
+- production main: `2809811790ab12511886355f8a0cc42717a82745`;
+- PR #101 console hygiene/avatar resilience: PRODUCTION VERIFIED;
+- Release Gate #657 PASS; Production Smoke #15 PASS;
+- PR #81 synchronized with console runtime/CI and retains Creator trust migration/preflight/verification/rollback artifacts;
+- migration remains NOT APPLIED pending fresh exact-head gate + Preview validation.
+
+## Current authority update — 7 Sep 2026 / refresh 7
+
+- production main: `2809811790ab12511886355f8a0cc42717a82745`; console hygiene/avatar resilience is production-verified;
+- the five reported Creator avatar objects exist in live `creator-media`; the observed `ERR_NAME_NOT_RESOLVED` was not a missing-object/RLS failure and current main routes eligible avatar rendering through the strict same-origin resilience endpoint;
+- Creator trust RPC hardening preflight: PASS;
+- persistent Supabase apply: PASS; live migration history version `20260907063648` / `constrain_creator_trust_metrics_visibility`;
+- post-apply visibility verification: PASS for published, anonymous-unpublished denial, Admin, and eligible owner/workspace cases;
+- migration source/rollback/test references are being reconciled to `20260907063648` before merge to avoid local-vs-remote migration-history drift;
+- no table/RLS/grant/storage/application-data change was introduced by this migration;
+- Security Advisor rerun completed; the target RPC retains intentional public EXECUTE for published Creator metrics and therefore remains visible to generic SECURITY DEFINER linting even though unpublished authorization is now enforced inside the RPC;
+- Performance Advisor: INFO-only unused-index candidates; no index change performed;
+- before merging #81: require exact-head Release Gate PASS and confirm its diff remains DB/tests/docs/workflow only. PR #88 stays stacked until #81 is completed.
+

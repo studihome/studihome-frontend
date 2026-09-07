@@ -157,6 +157,33 @@ CURRENT AUTHORITY UPDATE — 7 SEP 2026 / REFRESH 2
 - Existing same-URL portfolio rows are legitimate service-context variants; #86 CLOSED with NO CLEANUP. Never impose global URL uniqueness without product/schema redesign.
 
 
+CREATOR TRUST RPC HARDENING — SYNCHRONIZED AFTER PR #79
+- PR #79 is production-verified at `d32c7e04b5c3d916c85a57a5528f18e6501134a1` (Vercel SUCCESS, Release Gate #638 PASS, Production Smoke #14 PASS).
+- PR #81 must be validated on top of that main; no merge from a stale branch.
+- Migration: `supabase/migrations/20260907063648_constrain_creator_trust_metrics_visibility.sql`.
+- Verification: `supabase/tests/creator_trust_metrics_visibility_verification.sql`.
+- Rollback: `supabase/rollbacks/20260907063648_restore_creator_trust_metrics_visibility.sql`.
+- Preserve function signature, SECURITY DEFINER, search_path='', and ACL; only constrain unpublished visibility to owner/Admin.
+- Migration remains NOT APPLIED until fresh PR #81 Release Gate + Vercel Preview and post-apply SQL verification succeed.
+
+
+CURRENT AUTHORITY UPDATE — 7 SEP 2026 / REFRESH 4
+- Production main remains `d32c7e04b5c3d916c85a57a5528f18e6501134a1`; PR #79 production verification is complete.
+- PR #81 preflight PASS; Release Gate #642 PASS; Vercel remains build-rate-limited; migration NOT APPLIED live.
+- PR #81 actual migration and actual rollback were both transaction-tested against live Supabase and rolled back completely. Published parity 0 mismatch; anonymous unpublished leak 0; Admin PASS; owner PASS; ACL/security contract preserved; rollback exact-match PASS.
+- PR #88 is stacked on #81 and must not merge first. Exact head `4a01c183b282d3abbe07f67eabece35faa656afa`; Release Gate #643 PASS; Vercel BLOCKED.
+- #88 uses canonical `dapur-editor.js` + `window.supabaseClient`, Admin recheck, HTTPS-only URLs, max 100 lines, normalized dedupe, one batch insert, draft inactive rows, no scraping.
+- Issue #90 owns portfolio media CHECK reconciliation. Do not change schema inside #88; current safe frontend maps direct video files to `link`.
+
+
+CURRENT AUTHORITY UPDATE — 7 SEP 2026 / REFRESH 5
+- PR #81 prior validated head `55abd94353f319ff085e132bb51ad61eb9df6885`: Release Gate #646 PASS; preflight/apply/rollback transaction tests PASS; migration NOT APPLIED.
+- Vercel capacity recovery is proven on PR #88 head `3a1d5a681d56ee5f957487aabc8ffbd18ba1054e`: Release Gate #648 PASS + Vercel Preview SUCCESS.
+- PR #88 remains DRAFT / STACKED on #81; latest URL hardening rejects embedded credentials and non-default platform ports from special media classification.
+- Issue #90 DB media-policy migration contract READY; Issue #83 redundant-index cleanup contract READY; neither is applied live.
+- Issue #62 remains blocked by missing Edge invocation telemetry.
+
+
 CONSOLE HYGIENE REMEDIATION — 7 SEP 2026
 - Remove first-party informational console noise, not diagnostic failures.
 - Preserve the custom PWA beforeinstallprompt contract; Chromium's "Banner not shown" message is expected when preventDefault is used for a deferred user-gesture prompt.
@@ -165,3 +192,22 @@ CONSOLE HYGIENE REMEDIATION — 7 SEP 2026
 - Use strict same-origin /api/creator-avatar resilience only for Studihome UUID[/UUID]/avatar.webp paths. Fixed upstream host, no arbitrary fetch, fallback 200 image, CDN cache.
 - Social-proof success/debug logs removed; real failures remain warnings.
 - Regression: tests/console-hygiene-avatar-resilience-regression.js.
+
+
+CURRENT AUTHORITY UPDATE — 7 SEP 2026 / REFRESH 6
+- Production main: `2809811790ab12511886355f8a0cc42717a82745`; PR #101 console hygiene/avatar resilience is production-verified.
+- PR #81 preserves PR #101 runtime/CI while retaining Creator trust migration/test artifacts.
+- Migration remains NOT APPLIED until fresh exact-head Release Gate + Vercel Preview PASS.
+
+CURRENT AUTHORITY UPDATE — 7 SEP 2026 / REFRESH 7
+- Production main remains `2809811790ab12511886355f8a0cc42717a82745`; PR #101 console hygiene/avatar resilience is production-verified.
+- Creator trust visibility hardening is APPLIED LIVE in Supabase as migration version `20260907063648` / `constrain_creator_trust_metrics_visibility`.
+- Immediate preflight PASS; post-apply published/anonymous-denial/Admin/eligible-owner verification PASS.
+- Canonical source migration: `supabase/migrations/20260907063648_constrain_creator_trust_metrics_visibility.sql`.
+- Canonical rollback: `supabase/rollbacks/20260907063648_restore_creator_trust_metrics_visibility.sql`.
+- No table, RLS, grant, storage-object, or application-data mutation belongs to this migration.
+- Security Advisor has been rerun. The target RPC intentionally retains anon/auth EXECUTE for published metrics, so generic SECURITY DEFINER lints remain expected; do not revoke public access or convert security mode without redesigning the public metrics contract.
+- Performance Advisor returned INFO-only unused-index candidates; do not drop them in this workstream.
+- Previous #81 Preview failure is Vercel Free-plan quota. Because #81 has no frontend/API runtime delta relative to the already deployed main, persistent DB apply used a documented DB-only deployment-equivalence exception. Exact-head Release Gate PASS plus a no-runtime-diff check are still mandatory before merge.
+- PR #88 remains stacked; reconcile it with main only after #81 completes.
+

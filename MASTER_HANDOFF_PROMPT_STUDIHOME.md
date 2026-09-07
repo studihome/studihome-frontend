@@ -374,6 +374,55 @@ This section supersedes earlier authority/status blocks in this document.
 - PR #43 and PR #50 remain CLOSED AS SUPERSEDED.
 
 
+## Creator trust RPC hardening — synchronized after PR #79
+
+Issue #80 / draft PR #81:
+- branch must stay synchronized with production-verified main `d32c7e04b5c3d916c85a57a5528f18e6501134a1`;
+- live `get_creator_trust_metrics(uuid)` currently returns non-NULL for both published and unpublished Creator IDs in unauthenticated context;
+- prepared migration: `supabase/migrations/20260907063648_constrain_creator_trust_metrics_visibility.sql`;
+- target behavior: published Creator -> metrics; active Admin -> metrics; owning Creator with workspace access -> metrics; every other unpublished access -> NULL;
+- preserve signature, SECURITY DEFINER, `search_path=''`, and current ACL;
+- no table/schema/RLS/grant/data change is included;
+- verification: `supabase/tests/creator_trust_metrics_visibility_verification.sql`;
+- rollback: `supabase/rollbacks/20260907063648_restore_creator_trust_metrics_visibility.sql`;
+- regression: `tests/creator-trust-metrics-visibility-regression.js`;
+- migration remains NOT APPLIED live until fresh PR #81 Release Gate + Vercel Preview succeed and post-apply SQL verification passes.
+
+## Current authority update — 7 Sep 2026 / refresh 3
+
+- PR #79 is MERGED / PRODUCTION VERIFIED at `d32c7e04b5c3d916c85a57a5528f18e6501134a1`; Vercel Production SUCCESS; Release Gate #638 PASS; Production Smoke #14 PASS.
+- PR #81 is the next priority security workstream and must be validated on top of that production state.
+- Issue #23 remains next after #81; canonical portfolio CRUD owner is `dapur-editor.js`, HTTPS-only for new rows, max 100-line bulk intake, no historical URL cleanup.
+- Issue #84/#85 remain deferred Studio AI/CSP follow-ups; Issue #62 remains blocked by missing Edge invocation evidence.
+
+
+## Current authority update — 7 Sep 2026 / refresh 4
+
+This section supersedes earlier status blocks.
+
+- production main remains `d32c7e04b5c3d916c85a57a5528f18e6501134a1`; PR #79 is production-verified with Vercel Production SUCCESS, Release Gate #638 PASS, Production Smoke #14 PASS;
+- PR #81 current head before this documentation refresh: `c89700a336850b716e602d2ebd903c1ee72d3679`; Release Gate #642 PASS; Vercel Preview BLOCKED by build-rate-limit; migration NOT APPLIED live;
+- PR #81 pre-apply guard `supabase/tests/creator_trust_metrics_preflight.sql` now validates signature, SECURITY DEFINER, empty search_path encoding, anon/authenticated EXECUTE ACL, expected metric dependencies, and fails closed on drift/already-hardened state;
+- live preflight PASS;
+- actual migration SQL has been executed transactionally against live Supabase and fully rolled back: 0 published output mismatches, 0 anonymous unpublished leaks, Admin access PASS, owner workspace access PASS, ACL/security contract preserved;
+- actual rollback SQL has been transaction-tested: 48 Creators checked, 0 output mismatches, security contract restored, pg_get_functiondef exact-match with baseline;
+- final live preflight after rollback PASS, proving production RPC remains on the original definition;
+- Issue #23 is implemented as stacked draft PR #88 on top of #81; exact feature head `4a01c183b282d3abbe07f67eabece35faa656afa`; Release Gate #643 PASS via temporary validation PR #89, Vercel BLOCKED; #88 must not merge before #81;
+- PR #88 canonical owner is `dapur-editor.js`, with Admin recheck, HTTPS-only normalization, 100-line bound, normalized dedupe, one bounded insert, draft rows only, no scraping, and direct video-file URLs mapped to `link` under current live CHECK constraints;
+- Issue #90 tracks reconciliation of overlapping portfolio media CHECK constraints; target unified policy was read-only tested against all 139 current rows with 139 compatible / 0 incompatible; no schema change has been made.
+
+
+## Current authority update — 7 Sep 2026 / refresh 5
+
+- production main remains `d32c7e04b5c3d916c85a57a5528f18e6501134a1`; PR #79 remains production-verified;
+- PR #81 prior exact head `55abd94353f319ff085e132bb51ad61eb9df6885`: Release Gate #646 PASS, preflight PASS, actual migration transactional test PASS, exact rollback transactional test PASS, migration NOT APPLIED live;
+- Vercel provider recovery is now proven by PR #88 exact head `3a1d5a681d56ee5f957487aabc8ffbd18ba1054e`: Release Gate #648 PASS + Vercel Preview SUCCESS;
+- PR #88 remains stacked on #81 and DRAFT; latest hardening rejects embedded URL credentials and prevents platform-specific typing on non-default ports;
+- Issue #90 media CHECK reconciliation contract is READY after transactional apply/deny tests and 4/4 exact rollback reconstruction; no live schema change;
+- Issue #83 redundant entitlement index cleanup contract is READY after transactional drop/planner/rollback verification; no live index change;
+- Issue #62 remains BLOCKED BY MISSING TELEMETRY because available Supabase tooling still exposes no Edge invocation logs.
+
+
 ## Console hygiene remediation — 7 Sep 2026
 
 User console evidence was re-audited before continuing the release chain.
@@ -395,3 +444,28 @@ First-party remediation branch:
 - asset bumps: creator card v7, social proof v14;
 - regression: `tests/console-hygiene-avatar-resilience-regression.js`;
 - no DB/RLS/Auth/grant/storage object change.
+
+
+## Current authority update — 7 Sep 2026 / refresh 6
+
+- production main is `2809811790ab12511886355f8a0cc42717a82745` after PR #101 console hygiene/avatar resilience;
+- PR #101 verification: Vercel Production SUCCESS, Release Gate #657 PASS, Production Smoke #15 PASS;
+- PR #81 now includes the verified console runtime + console regression while preserving Creator trust migration/preflight/rollback artifacts;
+- Creator trust migration remains NOT APPLIED live;
+- fresh exact-head Release Gate + Vercel Preview are required again after this synchronization before persistent migration/merge.
+
+## Current authority update — 7 Sep 2026 / refresh 7
+
+This section supersedes earlier contradictory status text.
+
+- production main remains `2809811790ab12511886355f8a0cc42717a82745`; PR #101 console hygiene/avatar resilience is production-verified (Vercel Production SUCCESS, Release Gate #657 PASS, Production Smoke #15 PASS);
+- live Supabase preflight for `get_creator_trust_metrics(uuid)` passed immediately before persistent apply;
+- Creator trust visibility hardening is now **APPLIED LIVE** as Supabase migration history version `20260907063648` / `constrain_creator_trust_metrics_visibility`;
+- post-apply verification passed: published Creator access retained, anonymous unpublished access denied, active Admin access retained, and eligible owner/workspace access retained;
+- repository migration and rollback filenames are reconciled to the exact live migration version `20260907063648`; no table, RLS, grant, storage-object, or application-data mutation is part of this migration;
+- Security Advisor was rerun. `get_creator_trust_metrics` still receives the generic anon/auth SECURITY DEFINER lint because public EXECUTE is intentionally retained for published Creator metrics; the function now performs internal publication/owner/Admin authorization. Other Advisor findings remain separate workstreams and must not be broadened into this focused change;
+- Performance Advisor reported INFO-level unused-index candidates only; do not drop indexes from this workstream;
+- the previous PR #81 Vercel Preview blocker was the Free-plan deployment quota. The #81 diff contains DB migration/tests/docs/workflow only, while current production runtime at main is already Vercel-successful. Treat this as a narrowly documented DB-only deployment-equivalence exception; exact-head Release Gate PASS and a no-runtime-diff check are still required before merge;
+- rollback: `supabase/rollbacks/20260907063648_restore_creator_trust_metrics_visibility.sql`;
+- PR #88 remains stacked and must be reconciled with main after #81 is merged.
+
