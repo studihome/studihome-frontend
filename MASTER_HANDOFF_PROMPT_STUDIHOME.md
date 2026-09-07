@@ -341,3 +341,17 @@ Fix:
 - closing blurs focus inside the modal before applying `inert` / `aria-hidden`, hides the modal, then restores focus to the invoking control when possible;
 - Dapur runtime asset bumped to `/dapur-entry.js?v=20260907a11y1`;
 - regression coverage: `tests/dapur-auth-modal-accessibility-regression.js` wired into Release Gate.
+
+
+## Current authority update — 7 Sep 2026
+
+This section supersedes older contradictory status text in this document.
+
+- production-verified main baseline before PR #79: `e213d6d98eab3c47f559cda8b285aebfb7a9895d`;
+- PR #79 remains open: prior Release Gate PASS; Vercel Preview currently BLOCKED by build-rate-limit; merge waits for a fresh Vercel SUCCESS;
+- Issue #24 is CLOSED / COMPLETED / production-verified;
+- Issue #19 audit: `studio-ai-enhancements.js`, `studio-ai-production-enhancements.js`, and `studio-ai-search.js` are DELETE-CANDIDATE / not currently loaded; `studio-ai-creator-card.js?v=6` is ACTIVE / KEEP;
+- strict CSP migration is deferred because current index.html still contains 25 inline scripts and 9 inline styles;
+- Issue #62: `smooth-action` ACTIVE v2 and `swift-endpoint` ACTIVE v1; retirement remains BLOCKED BY MISSING INVOCATION EVIDENCE;
+- Issue #23: live creator_portfolios schema/RLS supports bulk Admin intake without schema/RLS changes; default bulk rows inactive, dedupe normalized URL per Creator, no scraping or fabricated metadata;
+- PR #43 and PR #50 were closed as superseded on 7 Sep 2026.
