@@ -1,5 +1,5 @@
 -- Pre-apply guard for:
--- 20260907004000_constrain_creator_trust_metrics_visibility.sql
+-- 20260907063648_constrain_creator_trust_metrics_visibility.sql
 --
 -- READ-ONLY against application data and catalog state.
 -- Run immediately before applying the hardening migration.
