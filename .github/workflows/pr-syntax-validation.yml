@@ -546,6 +546,9 @@ jobs:
       - name: Admin Dapur Supabase singleton regression
         run: node tests/admin-dapur-supabase-singleton-regression.js
 
+      - name: Creator trust metrics visibility regression
+        run: node tests/creator-trust-metrics-visibility-regression.js
+
       - name: Public API resilience regression
         run: node tests/api-resilience-regression.js
 
