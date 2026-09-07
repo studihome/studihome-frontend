@@ -521,3 +521,11 @@ This section supersedes earlier contradictory status sections.
 - exact pre-sync head `4a01c183b282d3abbe07f67eabece35faa656afa` validated by Release Gate #643;
 - no schema/RLS/Auth/grant/production-data change;
 - do not merge ahead of PR #81.
+
+
+Bulk portfolio URL hardening — refresh 2
+- `normalizePortfolioUrl()` now rejects HTTPS URLs containing embedded username/password credentials.
+- platform-specific classification only applies on the expected host with no non-default port; otherwise the URL falls back to generic `link`.
+- lazy editor cache-buster is now `/dapur-editor.js?v=20260907bulk2` because editor source changed after the initial bulk feature build.
+- regression coverage includes embedded-credential rejection and non-default-port provider fallback.
+- no schema/RLS/Auth/grant/production-data change.
