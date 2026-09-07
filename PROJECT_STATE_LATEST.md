@@ -516,3 +516,24 @@ This section supersedes earlier contradictory status sections.
 - Issue #90 migration contract READY with transactional apply/deny/rollback proof; no live schema change;
 - Issue #83 cleanup contract READY with transactional drop/planner/rollback proof; no live index change;
 - Issue #62 remains BLOCKED by unavailable invocation telemetry.
+
+
+## Console hygiene remediation state — 7 Sep 2026
+
+Before continuing #81 -> #88, current console evidence was triaged.
+
+- Social proof successful boot/load logs: first-party noise, remediation prepared.
+- PWA beforeinstallprompt banner diagnostic: expected custom-install behavior; no functional change.
+- message-channel errors: extension/content-script provenance remains the supported classification; first-party extension-messaging regression guard remains active.
+- Creator avatar DNS failures: all 5 reported storage objects exist in live `creator-media`; no data repair required.
+- isolated remediation branch adds strict same-origin avatar proxy, fallback image behavior, active Studio AI renderer integration, social-proof log cleanup, cache-buster updates, and regression coverage.
+- no persistent Supabase/storage/schema/RLS/Auth/grant change.
+
+
+## Current authority update — 7 Sep 2026 / refresh 6
+
+- production main: `2809811790ab12511886355f8a0cc42717a82745`;
+- PR #101 console hygiene/avatar resilience: PRODUCTION VERIFIED;
+- Release Gate #657 PASS; Production Smoke #15 PASS;
+- PR #81 synchronized with console runtime/CI and retains Creator trust migration/preflight/verification/rollback artifacts;
+- migration remains NOT APPLIED pending fresh exact-head gate + Preview validation.
