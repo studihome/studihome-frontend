@@ -1197,7 +1197,7 @@
 
     <div id="auth-modal" class="fixed inset-0 z-50 hidden bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-3 sm:p-4">
         <div class="card-3d w-full max-w-md p-5 sm:p-7 rounded-3xl relative bg-white my-auto">
-            <button onclick="App.ui.toggleModal('auth-modal', false)" class="modal-close-btn absolute top-4 right-4 w-8 h-8 rounded-full flex items-center justify-center transition-all shadow-md font-extrabold hover:brightness-110 z-10">
+            <button id="auth-modal-close" type="button" class="modal-close-btn absolute top-4 right-4 w-8 h-8 rounded-full flex items-center justify-center transition-all shadow-md font-extrabold hover:brightness-110 z-10">
                 <i class="fa-solid fa-xmark"></i>
             </button>
                         <div class="text-center mb-5 sm:mb-6">
@@ -1206,7 +1206,7 @@
                 <p class="text-xs text-slate-500 mt-1">Akses modul pembelajaran & otomasi AI Anda</p>
             </div>
             <!-- Login Form -->
-            <form id="login-form" onsubmit="App.auth.handleLogin(event)" class="space-y-3.5">
+            <form id="login-form" class="space-y-3.5">
                 <div>
                     <label class="block text-xs sm:text-sm font-bold text-slate-700 mb-1">Alamat Email</label>
                     <input type="email" id="login-email" autocomplete="username" required placeholder="nama@email.com" class="w-full card-3d-inset px-3.5 py-2.5 sm:py-3 rounded-xl text-xs sm:text-sm outline-none focus:ring-2 focus:ring-[#151c75]">
@@ -1216,20 +1216,20 @@
                     <input type="password" id="login-password" autocomplete="current-password" required placeholder="••••••••" class="w-full card-3d-inset px-3.5 py-2.5 sm:py-3 rounded-xl text-xs sm:text-sm outline-none focus:ring-2 focus:ring-[#151c75]">
                 </div>
                 <div class="text-right mt-1">
-                    <button type="button" onclick="App.auth.toggleAuthMode('forgot-password')" class="text-[11px] font-bold text-[#151c75] hover:underline">Lupa Password?</button>
+                    <button type="button" data-auth-mode="forgot-password" class="text-[11px] font-bold text-[#151c75] hover:underline">Lupa Password?</button>
                 </div>
                 <button type="submit" class="w-full btn-brand-gradient py-3 sm:py-3.5 rounded-xl text-xs sm:text-sm font-extrabold transition-all shadow-md mt-2">
                     Masuk Sekarang
                 </button>
                 <div class="text-center pt-3 border-t border-slate-100 mt-4 flex items-center justify-center gap-1.5">
                     <span class="text-xs text-slate-500">Belum punya akun?</span>
-                    <button type="button" onclick="App.auth.toggleAuthMode('register')" class="px-3 py-1.5 rounded-xl font-bold text-xs bg-blue-50 text-[#151c75] border border-blue-200 hover:bg-blue-100 transition-all shadow-2xs">
+                    <button type="button" data-auth-mode="register" class="px-3 py-1.5 rounded-xl font-bold text-xs bg-blue-50 text-[#151c75] border border-blue-200 hover:bg-blue-100 transition-all shadow-2xs">
                         Daftar Akun Baru
                     </button>
                 </div>
             </form>
             <!-- Register Form -->
-            <form id="register-form" onsubmit="App.auth.handleRegister(event)" class="space-y-3.5 hidden">
+            <form id="register-form" class="space-y-3.5 hidden">
                 <div>
                     <label class="block text-xs sm:text-sm font-bold text-slate-700 mb-1">Nama Lengkap <span class="text-red-500">*</span></label>
                     <input type="text" id="reg-name" autocomplete="name" required placeholder="Budi Santoso" class="w-full card-3d-inset px-3.5 py-2.5 sm:py-3 rounded-xl text-xs sm:text-sm outline-none focus:ring-2 focus:ring-[#151c75]">
@@ -1252,13 +1252,13 @@
                 </button>
                 <div class="text-center pt-3 border-t border-slate-100 mt-4 flex items-center justify-center gap-1.5">
                     <span class="text-xs text-slate-500">Sudah punya akun?</span>
-                    <button type="button" onclick="App.auth.toggleAuthMode('login')" class="px-3 py-1.5 rounded-xl font-bold text-xs bg-blue-50 text-[#151c75] border border-blue-200 hover:bg-blue-100 transition-all shadow-2xs">
+                    <button type="button" data-auth-mode="login" class="px-3 py-1.5 rounded-xl font-bold text-xs bg-blue-50 text-[#151c75] border border-blue-200 hover:bg-blue-100 transition-all shadow-2xs">
                         Masuk Ke Akun
                     </button>
                 </div>
             </form>
             <!-- Forgot Password Form -->
-            <form id="forgot-form" onsubmit="App.auth.handleForgotPassword(event)" class="space-y-3.5 hidden">
+            <form id="forgot-form" class="space-y-3.5 hidden">
                 <div class="text-center mb-2">
                     <div class="text-amber-500 text-2xl mb-2"><i class="fa-solid fa-lock"></i></div>
                     <p class="text-xs text-slate-500">Masukkan email akun Anda. Kami akan mengirimkan link untuk mengatur ulang kata sandi.</p>
@@ -1276,7 +1276,7 @@
                     Kirim Link Reset
                 </button>
                 <div class="text-center pt-3 border-t border-slate-100 mt-4">
-                    <button type="button" onclick="App.auth.toggleAuthMode('login')" class="text-xs font-bold text-[#151c75] hover:underline">
+                    <button type="button" data-auth-mode="login" class="text-xs font-bold text-[#151c75] hover:underline">
                         <i class="fa-solid fa-arrow-left mr-1"></i> Kembali ke Masuk
                     </button>
                 </div>
@@ -11062,6 +11062,7 @@ window.StudihomeProductionPilotSimulation = {
 <!-- STATIC SEARCH ACTIONS — CSP PHASE A -->
 <script src="/static-search-actions.js?v=1"></script>
 <script src="/static-studio-brief-actions.js?v=1"></script>
+<script src="/static-auth-actions.js?v=1"></script>
 <!-- STUDIHOME CREATOR PROFILE FEATURES -->
 <script src="/studio-ai-creator-card.js?v=7"></script>
 <script src="/dapur-profile-enhancements.js?v=2"></script>
