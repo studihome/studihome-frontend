@@ -59,9 +59,10 @@ for (const forbidden of [
 }
 
 for (const marker of [
-  "getElementById('top-nav-links')",
-  "getElementById('mobile-nav-links')",
-  "getElementById('top-auth-area')",
+  'document.getElementById(containerId)',
+  "bindDelegatedClick(\n      'top-nav-links'",
+  "bindDelegatedClick(\n      'mobile-nav-links'",
+  "bindDelegatedClick(\n      'top-auth-area'",
   "target.closest(selector)",
   'button.dataset.appRoute',
   'window.App.router.navigate(route)',
