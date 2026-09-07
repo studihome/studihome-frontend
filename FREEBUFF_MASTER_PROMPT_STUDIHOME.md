@@ -125,3 +125,13 @@ ISSUE #24 VERIFIED RELEASE
 - Release Gate #621: PASS;
 - Production Smoke #12 / `34069115071`: PASS;
 - Admin Dapur now uses only `window.supabaseClient`; do not reintroduce a duplicate SDK loader/client.
+
+
+DAPUR AUTH MODAL ACCESSIBILITY
+- never set `aria-hidden=true` on the auth modal while focus is still inside it;
+- use `inert` for the hidden modal;
+- on close: move/blur focus out first, then set inert/aria-hidden/display-none, then restore focus to the invoker;
+- on open: clear inert, set aria-hidden=false, display, and focus a meaningful control;
+- keep the 6-character login minimum validation before `signInWithPassword`;
+- HTTP 400 from Supabase for rejected credentials is an auth response, not a frontend crash; handle it with UI messaging rather than suppressing network diagnostics;
+- regression test: `tests/dapur-auth-modal-accessibility-regression.js`.
