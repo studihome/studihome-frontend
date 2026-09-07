@@ -325,3 +325,18 @@ Production verification for Issue #24:
 - main Release Gate #621: PASS;
 - Production Smoke #12 / `34069115071`: PASS;
 - Issue #24: CLOSED / COMPLETED.
+
+
+## Creator trust RPC hardening — PREPARED / NOT APPLIED
+
+Issue #80 security work:
+- live `get_creator_trust_metrics(uuid)` is SECURITY DEFINER + `search_path=''` and is executable by anon/authenticated;
+- active public caller in the large `index.html` already rejects unpublished Creator profiles before calling the RPC;
+- defense-in-depth gap: the RPC itself previously accepted an arbitrary Creator UUID without an internal publication/owner/Admin visibility check;
+- current aggregate live audit: 1 unpublished Creator, 0 unpublished Creators with nonzero publicly-queryable trust metrics;
+- prepared migration: `supabase/migrations/20260907004000_constrain_creator_trust_metrics_visibility.sql`;
+- prepared behavior: published Creator -> metrics; active Admin -> metrics; owning Creator with workspace access -> metrics; every other caller -> NULL;
+- function signature, SECURITY DEFINER mode, `search_path=''`, and existing ACL are intentionally preserved;
+- no schema/table/RLS/grant/data change is included;
+- regression: `tests/creator-trust-metrics-visibility-regression.js` wired into Release Gate;
+- migration is repository-only and **has not been applied to live Supabase**.
