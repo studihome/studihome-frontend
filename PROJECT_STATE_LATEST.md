@@ -379,7 +379,7 @@ Classification:
 - `studio-ai-production-enhancements.js`: **DELETE-CANDIDATE / NOT CURRENTLY LOADED**.
 - Issue #21: **COMPLETED WITH CORRECTED EVIDENCE**.
 - Issue #22: **CLOSED / COMPLETED**.
-- Issue #24: **REOPENED** because active `admin-dapur-creator-v5.js` still contains a fallback Supabase SDK loader and secondary `window.__studihomeAdminSupabase` creation path.
+- Issue #24: **CLOSED / COMPLETED** after canonical singleton refactor was merged and production-verified.
 - no runtime file was deleted or changed in this audit.
 
 Audit rule: GitHub code search can miss references inside the very large `index.html`. Zero-consumer proof must include direct source parsing plus dynamic-loader inspection.
@@ -423,7 +423,7 @@ Preferred statement:
 “Tidak ditemukan known regression pada test scope yang telah dijalankan untuk SHA <sha>.”
 
 
-## Admin Dapur Supabase singleton — FIX IMPLEMENTED
+## Admin Dapur Supabase singleton — COMPLETED / PRODUCTION VERIFIED
 
 Issue #24:
 - removed duplicate hardcoded Supabase URL/key ownership from `admin-dapur-creator-v5.js`;
@@ -436,4 +436,4 @@ Issue #24:
 - added `tests/admin-dapur-supabase-singleton-regression.js` and wired it into Release Gate;
 - no schema, migration, RLS, grant, Auth configuration, or production data change.
 
-Merge remains gated by Release Gate + Vercel Preview; production verification is required after merge.
+Verified evidence: PR #77 Release Gate #620 PASS; Vercel Preview SUCCESS; merged main SHA `1c1702f1020c6743b09d84d0dce559484754284b`; Vercel Production SUCCESS; main Release Gate #621 PASS; Production Smoke #12 / `34069115071` PASS.

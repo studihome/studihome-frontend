@@ -87,7 +87,7 @@ Legacy/runtime ownership audit on current main:
 - `under-construction.js`: **KEEP**, dynamically loaded by `maintenance-gate.js` and `under-construction-gudang.js`;
 - `studio-ai-enhancements.js` and `studio-ai-production-enhancements.js`: **DELETE-CANDIDATE / NOT CURRENTLY LOADED** based on direct HTML parsing plus repository reference checks;
 - Issue #22 ownership audit: **CLOSED / COMPLETED**;
-- Issue #24 duplicate Supabase-client refactor: **REOPENED** because `admin-dapur-creator-v5.js` is active and still contains a fallback SDK loader + secondary `window.__studihomeAdminSupabase` client path;
+- Issue #24 duplicate Supabase-client refactor: **CLOSED / COMPLETED**; production-verified in merge SHA `1c1702f1020c6743b09d84d0dce559484754284b`.
 - no runtime file has been deleted or modified by this audit.
 
 Important: GitHub code search can miss matches inside the very large `index.html`. For zero-consumer claims, parse the actual `index.html` source and inspect dynamic loaders before classifying a runtime as unused.
@@ -306,7 +306,7 @@ Every substantive change report must include:
 Do not hide a blocker. Do not convert NOT VERIFIED into PASS.
 
 
-## Admin Dapur canonical Supabase singleton refactor — 7 Sep 2026
+## Admin Dapur canonical Supabase singleton refactor — COMPLETED / VERIFIED
 
 Issue #24 implementation:
 - active `admin-dapur-creator-v5.js` no longer owns a duplicate Supabase URL/key, SDK loader, or `window.__studihomeAdminSupabase` client;
@@ -315,3 +315,13 @@ Issue #24 implementation:
 - `index.html` still loads `supabase-config.js?v=boot5` before Admin Dapur and now loads `admin-dapur-creator-v5.js?v=11`;
 - regression coverage: `tests/admin-dapur-supabase-singleton-regression.js` plus Release Gate integration;
 - no DB, RLS, grant, Auth policy, Supabase project, or service-role change.
+
+
+Production verification for Issue #24:
+- PR #77 Vercel Preview: SUCCESS;
+- PR Release Gate #620: PASS;
+- merged main SHA: `1c1702f1020c6743b09d84d0dce559484754284b`;
+- Vercel Production: SUCCESS;
+- main Release Gate #621: PASS;
+- Production Smoke #12 / `34069115071`: PASS;
+- Issue #24: CLOSED / COMPLETED.
