@@ -449,3 +449,11 @@ Issue #80:
 - prepared migration adds published/owner/Admin visibility gating while preserving signature, SECURITY DEFINER, search_path, and ACL;
 - no live DB change has been made;
 - regression test is integrated into Release Gate.
+
+
+Issue #80 verification artifacts:
+- direct live read-only probe: published metrics returned; unpublished metrics also returned, confirming the internal visibility gap;
+- post-apply SQL verification script added for published success, unpublished anonymous denial, Admin access, and owner workspace access;
+- explicit rollback SQL added to restore the prior RPC definition;
+- migration remains repository-only / NOT APPLIED;
+- Vercel Preview remains provider-BLOCKED by build-rate-limit.
