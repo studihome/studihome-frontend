@@ -632,3 +632,14 @@ Before continuing #81 -> #88, current console evidence was triaged.
 - no Auth/Studio/template/CSS/CSP/DB/API change;
 - draft-only until Preview + browser parity are available.
 
+## Issue #98 Phase B preparation — 7 Sep 2026
+
+- stacked on Phase A;
+- bounded surface: static Studio AI Smart Brief only;
+- 6 static onclick attributes extracted;
+- static handler count: 18 -> 12;
+- three refinement chips now use data contracts;
+- close/submit behavior owned by external addEventListener binder;
+- regression + syntax/Release Gate wiring added;
+- draft/unmerged while Vercel Preview is unavailable.
+
