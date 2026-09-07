@@ -455,3 +455,16 @@ Implementation:
 - `dapur-entry.js` cache-buster bumped to `v=20260907a11y1`;
 - added `tests/dapur-auth-modal-accessibility-regression.js` and Release Gate integration;
 - no DB, RLS, Auth configuration, Supabase project, or security-header change.
+
+
+## Current authority update — 7 Sep 2026
+
+This section supersedes older contradictory status paragraphs in this file.
+
+- production-verified main baseline before PR #79: `e213d6d98eab3c47f559cda8b285aebfb7a9895d`;
+- PR #79 accessibility fix remains open; prior Release Gate PASS, Vercel Preview currently BLOCKED by build-rate-limit;
+- Issue #24: CLOSED / COMPLETED / production-verified;
+- Issue #19: Studio AI legacy files `studio-ai-enhancements.js`, `studio-ai-production-enhancements.js`, and `studio-ai-search.js` are DELETE-CANDIDATE / not loaded; no deletion yet. CSP tightening is deferred because index.html still contains 25 inline script blocks and 9 inline style blocks;
+- Issue #62: `smooth-action` ACTIVE v2, `swift-endpoint` ACTIVE v1; no repo runtime caller, but retirement remains BLOCKED by missing invocation-log evidence;
+- Issue #23: live creator_portfolios schema/grants/RLS support Admin bulk intake without DB changes; implementation contract is deterministic URL-only classification/title, same-Creator normalized URL dedupe, `is_active=false`, explicit added/skipped/duplicate/invalid counts, no scraping;
+- PR #43 and PR #50 were closed as superseded on 7 Sep 2026.
