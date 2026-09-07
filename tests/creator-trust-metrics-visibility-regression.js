@@ -2,11 +2,11 @@
 
 const fs = require('fs');
 
-const migrationPath = 'supabase/migrations/20260907004000_constrain_creator_trust_metrics_visibility.sql';
+const migrationPath = 'supabase/migrations/20260907063648_constrain_creator_trust_metrics_visibility.sql';
 const migration = fs.readFileSync(migrationPath, 'utf8');
 const preflight = fs.readFileSync('supabase/tests/creator_trust_metrics_preflight.sql', 'utf8');
 const verification = fs.readFileSync('supabase/tests/creator_trust_metrics_visibility_verification.sql', 'utf8');
-const rollback = fs.readFileSync('supabase/rollbacks/20260907004000_restore_creator_trust_metrics_visibility.sql', 'utf8');
+const rollback = fs.readFileSync('supabase/rollbacks/20260907063648_restore_creator_trust_metrics_visibility.sql', 'utf8');
 const index = fs.readFileSync('index.html', 'utf8');
 
 function assert(condition, message) {
