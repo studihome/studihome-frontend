@@ -9540,10 +9540,21 @@ window.addEventListener('DOMContentLoaded', App.init);
               <div class="text-[9px] font-black uppercase tracking-wider text-amber-600">SMART Strategy</div>
               <div class="text-xs sm:text-sm font-extrabold text-[#151c75] mt-0.5">${insight.title}</div>
               <div class="text-[10px] sm:text-xs text-slate-600 leading-relaxed mt-1">${insight.body}</div>
-              <button type="button" class="smart-team-solo-btn mt-2.5 px-3 py-2 rounded-xl text-[9px] font-extrabold" onclick="App.studioAI._executeNextBestAction('${insight.action}')">${insight.label} <i class="fa-solid fa-arrow-right ml-1 text-[#FACC15]"></i></button>
+              <button type="button" class="smart-team-solo-btn mt-2.5 px-3 py-2 rounded-xl text-[9px] font-extrabold" data-smart-next-action="${insight.action}">${insight.label} <i class="fa-solid fa-arrow-right ml-1 text-[#FACC15]"></i></button>
             </div>
           </div>
         </div>`;
+        if (box.dataset.smartTeamSoloActionBound !== '1') {
+          box.addEventListener('click', event => {
+            const target = event.target;
+            const button = target instanceof Element
+              ? target.closest('[data-smart-next-action]')
+              : null;
+            if (!button || !box.contains(button)) return;
+            smart._executeNextBestAction(button.dataset.smartNextAction || '');
+          });
+          box.dataset.smartTeamSoloActionBound = '1';
+        }
       },40);
     }catch(_){ }
     return result;
