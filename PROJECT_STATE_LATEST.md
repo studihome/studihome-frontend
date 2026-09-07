@@ -484,3 +484,15 @@ This section supersedes earlier contradictory status sections.
 - Issue #23: canonical CRUD owner corrected to `dapur-editor.js`. Live DB requires HTTPS-only portfolio URLs. Bulk intake contract: private Admin-only path, canonical Supabase singleton, normalize/dedupe new generic URLs only, no historical cleanup, max 100 lines, deterministic title, `service_id=null`, `description=''`, `is_active=false`, append deterministic sort order, no scraping;
 - Issue #86: CLOSED / COMPLETED with NO CLEANUP after proving 45 same-URL groups are service-linked variants, not safe duplicates;
 - PR #43 and PR #50 remain CLOSED AS SUPERSEDED.
+
+
+## Issue #84 inactive Studio AI runtime cleanup — draft state
+
+- cleanup branch created from production main;
+- three legacy Studio AI runtime files removed on branch only;
+- zero active loader/import/cache consumer proof reconfirmed;
+- active creator-card runtime preserved;
+- regression guard added and wired into Release Gate;
+- no production runtime has changed yet;
+- no CSS/CSP/DB/RLS/Auth/grant change;
+- final merge is deferred until #81 -> #88 completes and this branch is resynchronized.
