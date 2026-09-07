@@ -135,3 +135,12 @@ DAPUR AUTH MODAL ACCESSIBILITY
 - keep the 6-character login minimum validation before `signInWithPassword`;
 - HTTP 400 from Supabase for rejected credentials is an auth response, not a frontend crash; handle it with UI messaging rather than suppressing network diagnostics;
 - regression test: `tests/dapur-auth-modal-accessibility-regression.js`.
+
+
+CURRENT AUTHORITY UPDATE — 7 SEP 2026
+- PR #79 remains open: Release Gate previously PASS; Vercel Preview currently BLOCKED by build-rate-limit.
+- Issue #24: CLOSED / COMPLETED / production-verified.
+- Issue #19: three inactive Studio AI legacy files are DELETE-CANDIDATE only; no deletion or CSP tightening yet. Current index still has 25 inline scripts and 9 inline styles.
+- Issue #62: smooth-action ACTIVE v2 + swift-endpoint ACTIVE v1; retirement BLOCKED by missing invocation evidence.
+- Issue #23: live schema/RLS supports Admin bulk portfolio intake without DB changes; default new bulk rows inactive, dedupe normalized URLs, no scraping or fabricated metadata.
+- PR #43 and PR #50: closed as superseded; any revival requires a fresh current-main audit.
