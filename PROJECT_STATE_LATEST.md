@@ -518,15 +518,33 @@ This section supersedes earlier contradictory status sections.
 - Issue #62 remains BLOCKED by unavailable invocation telemetry.
 
 
-## Issue #23 stacked implementation — current sync
+## Console hygiene remediation state — 7 Sep 2026
 
-- dependency base: PR #81 `db56c5ae2ba6946c389f774f3d93a95c404b6166`;
-- feature branch: `feat/admin-bulk-portfolio-intake`;
-- canonical runtime files: `dapur-editor.js`, `dapur-entry.js`;
-- lazy editor asset: `/dapur-editor.js?v=20260907bulk2`;
-- Admin authorization rechecked server-side; bulk helper private;
-- HTTPS normalization rejects embedded credentials; platform classification rejects non-default-port provider forms to generic link;
-- 100-line bounded intake; normalized dedupe; one bounded insert; inactive draft rows only;
-- no schema/RLS/Auth/grant/data change;
-- exact pre-sync head `03c72292ee49c07e22f72a37e6c4d53cd2da6f55` validated by Release Gate #653;
-- fresh exact-head validation required after sync; do not merge ahead of PR #81.
+Before continuing #81 -> #88, current console evidence was triaged.
+
+- Social proof successful boot/load logs: first-party noise, remediation prepared.
+- PWA beforeinstallprompt banner diagnostic: expected custom-install behavior; no functional change.
+- message-channel errors: extension/content-script provenance remains the supported classification; first-party extension-messaging regression guard remains active.
+- Creator avatar DNS failures: all 5 reported storage objects exist in live `creator-media`; no data repair required.
+- isolated remediation branch adds strict same-origin avatar proxy, fallback image behavior, active Studio AI renderer integration, social-proof log cleanup, cache-buster updates, and regression coverage.
+- no persistent Supabase/storage/schema/RLS/Auth/grant change.
+
+
+## Current authority update — 7 Sep 2026 / refresh 6
+
+- production main: `2809811790ab12511886355f8a0cc42717a82745`;
+- PR #101 console hygiene/avatar resilience: PRODUCTION VERIFIED;
+- Release Gate #657 PASS; Production Smoke #15 PASS;
+- PR #81 synchronized with console runtime/CI and retains Creator trust migration/preflight/verification/rollback artifacts;
+- migration remains NOT APPLIED pending fresh exact-head gate + Preview validation.
+
+
+## Issue #23 current stacked state
+
+- PR #88 / `feat/admin-bulk-portfolio-intake` is stacked on current PR #81;
+- implementation files: `dapur-editor.js`, `dapur-entry.js`, regression test, workflow/docs;
+- security: server-backed Admin recheck, private helper, canonical Supabase singleton;
+- data: HTTPS-only, credentials rejected, 100-line cap, normalized dedupe, one bounded draft insert;
+- media: direct video -> link under current validated DB policy; Issue #90 handles future CHECK reconciliation;
+- no schema/RLS/Auth/grant/production-data change;
+- do not merge before #81; rerun exact-head gates after synchronization.
