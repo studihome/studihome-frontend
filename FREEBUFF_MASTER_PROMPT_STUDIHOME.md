@@ -322,3 +322,11 @@ ISSUE #98 PHASE G — GENERATED HOME ACTIONS PREP / 7 SEP 2026
 - No Studio AI/Creator/Admin/CSS/CSP/DB/API change.
 - Keep draft until prior phases land, branch is resynced, Preview succeeds, and Home/Hero browser acceptance passes.
 
+ISSUE #98 PHASE H — GENERATED UTILITY ACTIONS PREP / 7 SEP 2026
+- Continue on canonical PR #114.
+- Remove 2 utility generated HTML handlers: backend reload + reset-password back-home.
+- Generated handler count becomes 174; ui/auth sections each become zero.
+- Use data-global-action + delegated main-content listener.
+- Preserve window.location.reload and App.router.navigate('home') semantics.
+- No Shop/Studio AI/Creator/Admin/CSS/CSP/DB/API change.
+
