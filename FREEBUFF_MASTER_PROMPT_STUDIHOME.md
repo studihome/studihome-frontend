@@ -305,3 +305,11 @@ ISSUE #98 PHASE E — SMART GENERATED ACTION PREP / 7 SEP 2026
 - Do not change ranking, CSS, CSP enforcement, DB, API, or data.
 - Keep draft until prior phases land, branch is resynced, Preview succeeds, and SMART browser acceptance passes.
 
+ISSUE #98 PHASE F — GENERATED TOP SHELL PREP / 7 SEP 2026
+- Stack after A-E; never merge out of order.
+- Remove 4 generated top-nav/top-auth HTML handlers via data contracts + delegated listener.
+- Generated HTML event attributes become 179.
+- Preserve App.router.navigate, App.auth.logout, and auth-modal open behavior.
+- No other core handler/CSS/CSP/DB/API change.
+- Keep draft until prior phases land, branch is resynced, Preview succeeds, and top-nav/Auth browser acceptance passes.
+
