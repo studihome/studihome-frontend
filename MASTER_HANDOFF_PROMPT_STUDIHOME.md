@@ -642,3 +642,15 @@ This section supersedes earlier deployment/release status text.
 - no Studio AI/Creator/Admin handler work, CSS/style cleanup, CSP enforcement, DB, API, Storage, or data change belongs to this phase;
 - PREPARED ONLY while Vercel remains quota-blocked; after prior phases land, retarget/sync before Preview/browser acceptance.
 
+## Issue #98 Phase H — generated utility actions prepared / 7 Sep 2026
+
+- Phase H is appended directly to canonical PR #114 after Phase G; no new stacked PR is created;
+- removes the final generated event attribute from the `ui` section (backend-error reload) and the final generated event attribute from the `auth` section (reset-password back-home);
+- generated HTML event attributes after Phase H: 174;
+- `ui` generated event attributes: 1 -> 0;
+- `auth` generated event attributes: 1 -> 0;
+- same-origin `generated-utility-actions.js` delegates `data-global-action=reload|home` once from stable `main-content`;
+- existing `window.location.reload()` and `App.router.navigate('home')` behavior is unchanged;
+- regression locks core handler ceiling <=174, zero generated handlers in ui/auth sections, exact two data contracts, one loader, and delegated behavior markers;
+- no Home/Studio AI/Creator/Admin/Shop handler change, CSS/style cleanup, CSP enforcement, DB, API, Storage, or data change belongs to this phase.
+
