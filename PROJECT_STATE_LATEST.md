@@ -437,3 +437,21 @@ Issue #24:
 - no schema, migration, RLS, grant, Auth configuration, or production data change.
 
 Verified evidence: PR #77 Release Gate #620 PASS; Vercel Preview SUCCESS; merged main SHA `1c1702f1020c6743b09d84d0dce559484754284b`; Vercel Production SUCCESS; main Release Gate #621 PASS; Production Smoke #12 / `34069115071` PASS.
+
+
+## Dapur auth modal accessibility — FIX IMPLEMENTED
+
+User console evidence on `/dapur`:
+- AdobeClean slow-network intervention: external Chrome extension;
+- async message channel closed: external/extension provenance unless first-party stack is proven;
+- Supabase login 400: expected rejected-auth response, already caught by Dapur UI;
+- actionable Studihome warning: focused `.auth-close` remained inside `#dapur-auth-modal` when `aria-hidden=true` was applied.
+
+Implementation:
+- hidden modal starts `inert=true` + `aria-hidden=true`;
+- open flow clears inert and focuses `#login-email`;
+- close flow blurs contained focus before inert/aria-hidden, then restores invoking control focus;
+- login now blocks passwords shorter than 6 characters before network auth;
+- `dapur-entry.js` cache-buster bumped to `v=20260907a11y1`;
+- added `tests/dapur-auth-modal-accessibility-regression.js` and Release Gate integration;
+- no DB, RLS, Auth configuration, Supabase project, or security-header change.
