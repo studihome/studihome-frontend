@@ -288,3 +288,12 @@ ISSUE #98 PHASE C — STATIC AUTH PREP / 7 SEP 2026
 - No generated-template/CSS/CSP/DB/API change.
 - Keep draft until prior phases land, branch is resynced, Preview passes, and Auth browser acceptance passes.
 
+ISSUE #98 PHASE D — ZERO STATIC HANDLERS PREP / 7 SEP 2026
+- Stack after A -> B -> C; never merge out of order.
+- Extract final 4 static handlers to `static-shell-actions.js`.
+- Static inline event-handler count becomes ZERO.
+- Keep PWA href/default behavior and product iframe cleanup-before-close ordering.
+- javascript: URLs remain zero.
+- Generated template handlers/styles are a separate later phase.
+- Keep draft until prior phases land, branch is resynced, Preview succeeds, and PWA/modal browser acceptance passes.
+
