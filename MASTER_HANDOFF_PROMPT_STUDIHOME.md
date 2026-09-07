@@ -396,40 +396,38 @@ Issue #80 / draft PR #81:
 - Issue #84/#85 remain deferred Studio AI/CSP follow-ups; Issue #62 remains blocked by missing Edge invocation evidence.
 
 
+## Current authority update — 7 Sep 2026 / refresh 4
+
+This section supersedes earlier status blocks.
+
+- production main remains `d32c7e04b5c3d916c85a57a5528f18e6501134a1`; PR #79 is production-verified with Vercel Production SUCCESS, Release Gate #638 PASS, Production Smoke #14 PASS;
+- PR #81 current head before this documentation refresh: `c89700a336850b716e602d2ebd903c1ee72d3679`; Release Gate #642 PASS; Vercel Preview BLOCKED by build-rate-limit; migration NOT APPLIED live;
+- PR #81 pre-apply guard `supabase/tests/creator_trust_metrics_preflight.sql` now validates signature, SECURITY DEFINER, empty search_path encoding, anon/authenticated EXECUTE ACL, expected metric dependencies, and fails closed on drift/already-hardened state;
+- live preflight PASS;
+- actual migration SQL has been executed transactionally against live Supabase and fully rolled back: 0 published output mismatches, 0 anonymous unpublished leaks, Admin access PASS, owner workspace access PASS, ACL/security contract preserved;
+- actual rollback SQL has been transaction-tested: 48 Creators checked, 0 output mismatches, security contract restored, pg_get_functiondef exact-match with baseline;
+- final live preflight after rollback PASS, proving production RPC remains on the original definition;
+- Issue #23 is implemented as stacked draft PR #88 on top of #81; exact feature head `4a01c183b282d3abbe07f67eabece35faa656afa`; Release Gate #643 PASS via temporary validation PR #89, Vercel BLOCKED; #88 must not merge before #81;
+- PR #88 canonical owner is `dapur-editor.js`, with Admin recheck, HTTPS-only normalization, 100-line bound, normalized dedupe, one bounded insert, draft rows only, no scraping, and direct video-file URLs mapped to `link` under current live CHECK constraints;
+- Issue #90 tracks reconciliation of overlapping portfolio media CHECK constraints; target unified policy was read-only tested against all 139 current rows with 139 compatible / 0 incompatible; no schema change has been made.
+
+
 ## Issue #23 bulk portfolio intake — STACKED / PREPARED
 
 This workstream is stacked on top of PR #81 and must not merge to main before #81 completes.
 
-Implementation owner:
-- canonical CRUD remains `dapur-editor.js`;
-- lazy loader remains `dapur-entry.js`, bumped to `/dapur-editor.js?v=20260907bulk1`;
-- canonical Supabase client remains `window.supabaseClient`;
-- no new browser SDK/client/parallel asset.
-
-Security:
-- `adminPanel()` now rechecks server-backed `is_admin()`;
-- private `bulkPortfolioIntake(id)` rechecks `is_admin()` before DB reads/writes;
-- bulk helper is closure-private and is NOT exported on `window.AdminDapurUI`.
-
-Data contract:
-- one URL per line, max 100 lines;
-- HTTPS-only, fragment removed, query preserved;
-- normalized URL dedupe against existing Creator portfolio URLs and current batch;
-- historical service-linked same-URL rows are untouched;
-- bulk rows use `service_id=null`, `description=''`, deterministic title, append-only sort order, `is_active=false`;
-- one bounded insert after full validation;
-- explicit result counts: added / duplicate / invalid / skipped;
-- no scraping, OpenGraph fetch, AI generation, or external metadata API.
-
-Media contract correction from live CHECK constraints:
-- supported platform types: youtube / drive / tiktok / instagram;
-- image extension -> image;
-- generic HTTPS -> link;
-- direct video-file URLs currently fall back to link because validated `creator_portfolios_external_media_policy` does not permit `media_type='video'`.
-
-Single-item portfolio editor now shares the same HTTPS normalization/media detector, preventing DB-rejected HTTP/video-type requests.
-
-Regression:
-- `tests/admin-bulk-portfolio-intake-regression.js` executes the pure helper block extracted from `dapur-editor.js`;
-- Release Gate runs the bulk intake regression;
-- stacked PR must remain draft until PR #81 completes and its own Preview/CI/browser acceptance are successful.
+- canonical CRUD owner: `dapur-editor.js`;
+- lazy loader: `dapur-entry.js` -> `/dapur-editor.js?v=20260907bulk1`;
+- canonical Supabase client: `window.supabaseClient`;
+- `adminPanel()` and private `bulkPortfolioIntake(id)` both recheck server-backed `is_admin()`;
+- bulk helper remains closure-private and is not exported on `window.AdminDapurUI`;
+- max 100 lines; HTTPS-only; fragment removed; query preserved;
+- normalized URL dedupe against existing Creator rows and current batch;
+- historical service-linked same-URL rows remain untouched;
+- bulk rows: `service_id=null`, `description=''`, deterministic title, appended sort order, `is_active=false`;
+- one bounded insert; explicit added/duplicate/invalid/skipped result;
+- no scraping, OpenGraph fetch, AI generation, or external metadata API;
+- under current validated DB constraints, direct video-file URLs map to `link`;
+- regression: `tests/admin-bulk-portfolio-intake-regression.js`;
+- exact feature head before this sync: `4a01c183b282d3abbe07f67eabece35faa656afa`; Release Gate #643 PASS via temporary validation-only PR #89; Vercel BLOCKED;
+- Issue #90 owns future media CHECK reconciliation; #88 does not change schema.
