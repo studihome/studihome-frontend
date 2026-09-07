@@ -437,3 +437,15 @@ Issue #24:
 - no schema, migration, RLS, grant, Auth configuration, or production data change.
 
 Verified evidence: PR #77 Release Gate #620 PASS; Vercel Preview SUCCESS; merged main SHA `1c1702f1020c6743b09d84d0dce559484754284b`; Vercel Production SUCCESS; main Release Gate #621 PASS; Production Smoke #12 / `34069115071` PASS.
+
+
+## Creator trust RPC hardening — PREPARED / NOT APPLIED
+
+Issue #80:
+- live Security Advisor baseline remains unchanged: 3 RLS-no-policy INFO, 8 anon SECURITY DEFINER WARN, 20 authenticated SECURITY DEFINER WARN, 1 leaked-password WARN;
+- `get_creator_trust_metrics(uuid)` has an active caller in the large `index.html`, so anon EXECUTE cannot simply be revoked;
+- current caller rejects unpublished Creator before RPC, but live RPC does not enforce that rule internally;
+- live aggregate audit found 1 unpublished Creator and 0 with nonzero trust metrics, so no demonstrated current leak;
+- prepared migration adds published/owner/Admin visibility gating while preserving signature, SECURITY DEFINER, search_path, and ACL;
+- no live DB change has been made;
+- regression test is integrated into Release Gate.
