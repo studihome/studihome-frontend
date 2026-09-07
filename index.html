@@ -2143,7 +2143,7 @@ App.router.bindCanonicalLinkGuard();
 
                     if (nav) {
                         nav.innerHTML = items.map(item => `
-                            <button onclick="App.router.navigate('${item.key}')" class="px-3.5 py-1.5 rounded-xl transition-all flex items-center gap-1.5 ${
+                            <button data-app-route="${item.key}" class="px-3.5 py-1.5 rounded-xl transition-all flex items-center gap-1.5 ${
                                 hash === item.key
                                     ? 'btn-brand-gradient font-extrabold shadow-2xs'
                                     : 'text-slate-700 hover:text-[#151c75] font-bold'
@@ -2156,7 +2156,7 @@ App.router.bindCanonicalLinkGuard();
 
                     if (mNav) {
                         mNav.innerHTML = items.map(item => `
-                            <button onclick="App.router.navigate('${item.key}')" class="flex flex-col items-center py-1 px-3 rounded-xl transition-all ${
+                            <button data-app-route="${item.key}" class="flex flex-col items-center py-1 px-3 rounded-xl transition-all ${
                                 hash === item.key ? 'text-[#151c75] font-black' : 'text-slate-500 font-medium'
                             }">
                                 <i class="fa-solid ${item.icon} text-base mb-0.5"></i>
@@ -2178,14 +2178,14 @@ App.router.bindCanonicalLinkGuard();
                                     <span class="block text-xs font-extrabold text-[#151c75]">${App.utils.escapeHtml(App.state.user.name)}</span>
                                     <span class="block text-[9px] text-amber-600 font-extrabold uppercase">${App.state.user.role}</span>
                                 </div>
-                                <button onclick="App.auth.logout()" class="w-8 h-8 sm:w-9 sm:h-9 rounded-xl text-xs font-bold text-red-500 bg-red-50 hover:bg-red-100 flex items-center justify-center border border-red-200 transition-all shadow-2xs" title="Keluar">
+                                <button data-top-auth-action="logout" class="w-8 h-8 sm:w-9 sm:h-9 rounded-xl text-xs font-bold text-red-500 bg-red-50 hover:bg-red-100 flex items-center justify-center border border-red-200 transition-all shadow-2xs" title="Keluar">
                                     <i class="fa-solid fa-right-from-bracket"></i>
                                 </button>
                             </div>
                         `;
                     } else {
                         area.innerHTML = `
-                            <button onclick="App.ui.toggleModal('auth-modal', true)" class="btn-brand-gradient px-3.5 py-1.5 sm:py-2 rounded-xl text-xs font-bold flex items-center gap-1.5">
+                            <button data-top-auth-action="login" class="btn-brand-gradient px-3.5 py-1.5 sm:py-2 rounded-xl text-xs font-bold flex items-center gap-1.5">
                                 <i class="fa-solid fa-right-to-bracket text-[#FACC15]"></i>
                                 <span>Masuk</span>
                             </button>
@@ -11075,6 +11075,7 @@ window.StudihomeProductionPilotSimulation = {
 <script src="/static-studio-brief-actions.js?v=1"></script>
 <script src="/static-auth-actions.js?v=1"></script>
 <script src="/static-shell-actions.js?v=1"></script>
+<script src="/generated-top-shell-actions.js?v=1"></script>
 <!-- STUDIHOME CREATOR PROFILE FEATURES -->
 <script src="/studio-ai-creator-card.js?v=7"></script>
 <script src="/dapur-profile-enhancements.js?v=2"></script>
