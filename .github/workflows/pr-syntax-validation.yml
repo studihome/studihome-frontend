@@ -248,7 +248,7 @@ jobs:
 
           sw = Path('sw.js').read_text(encoding='utf-8')
           required_sw = [
-              "studihome-shell-v8",
+              "studihome-shell-v9",
               "studihome-runtime-v3",
               "cache.put(req, copy)",
               "if (!url.search)",
@@ -318,47 +318,60 @@ jobs:
                       f'in {html_name}.'
                   )
 
-          dapur = Path('dapur.html').read_text(encoding='utf-8')
-          dapur_beforeinstallprompt_listener = (
-              "addEventListener('beforeinstallprompt'" in dapur or
-              'addEventListener("beforeinstallprompt"' in dapur
-          )
-          if dapur_beforeinstallprompt_listener or 'deferred.prompt()' in dapur:
-              raise SystemExit(
-                  'Dapur must use native Chromium PWA install UI and must not '
-                  'register/retain a beforeinstallprompt action.'
-              )
+          required_custom_install = [
+              "window.addEventListener('beforeinstallprompt'",
+              'event.preventDefault()',
+              'deferredInstallPrompt = event',
+              'var promptEvent = deferredInstallPrompt',
+              'deferredInstallPrompt = null',
+              'await promptEvent.prompt()',
+              'class="sh-pwa-btn-install"',
+              'Instal Praktis',
+              'usesCustomInstallUI: true',
+              'persistentUntilAction: true',
+              "window.addEventListener('appinstalled'",
+          ]
+          for html_name in ('index.html', 'dapur.html'):
+              html = Path(html_name).read_text(encoding='utf-8')
+              for marker in required_custom_install:
+                  if marker not in html:
+                      raise SystemExit(
+                          f'Custom PWA install contract missing in '
+                          f'{html_name}: {marker}'
+                      )
+              if html.count("addEventListener('beforeinstallprompt'") != 1:
+                  raise SystemExit(
+                      f'{html_name} must register exactly one '
+                      f'beforeinstallprompt listener.'
+                  )
+              for forbidden in [
+                  'AUTO_HIDE_MS',
+                  'autoHideTimer',
+                  'setTimeout(hide,',
+                  'usesNativeInstallUI: true',
+              ]:
+                  if forbidden in html:
+                      raise SystemExit(
+                          f'Persistent PWA notice contract violated in '
+                          f'{html_name}: {forbidden}'
+                      )
 
           index = Path('index.html').read_text(encoding='utf-8')
           for marker in [
-              "addEventListener('beforeinstallprompt'",
-              'addEventListener("beforeinstallprompt"',
-              'deferred.prompt()',
-              'deferred.userChoice',
-          ]:
-              if marker in index:
-                  raise SystemExit(
-                      f'Home/Studio must use native Chromium PWA install UI: {marker}'
-                  )
-
-          for marker in [
-              'usesNativeInstallUI: true',
-              "window.addEventListener('appinstalled'",
               'AUTO_WINDOW_TTL = 24 * 60 * 60 * 1000',
               'AUTO_MAX_PER_WINDOW = 3',
               'SESSION_MAX = 3',
               'AUTO_MIN_GAP = 15 * 60 * 1000',
               'DISMISS_TTL = 24 * 60 * 60 * 1000',
-              'AUTO_HIDE_MS = 14 * 1000',
               'homeDelayMs: 18 * 1000',
               'studioDelayMs: 24 * 1000',
               'contentDelayMs: 30 * 1000',
-              'address bar atau menu browser',
+              'font-size:10px',
               'Tambahkan ke Dock',
           ]:
               if marker not in index:
                   raise SystemExit(
-                      f'Native PWA install guidance contract missing: {marker}'
+                      f'Custom PWA notice contract missing: {marker}'
                   )
 
           sw = Path('sw.js').read_text(encoding='utf-8')

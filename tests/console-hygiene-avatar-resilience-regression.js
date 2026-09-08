@@ -18,8 +18,10 @@ assert(index.includes('/social-proof-widget.js?v=15'), 'Social proof widget cach
 assert(index.includes("/api/creator-avatar?path="), 'Core safeUrl must route Studihome avatars through same-origin proxy');
 assert(index.includes("parsed.hostname === 'hbfmhwwxbgidsnljupca.supabase.co'"), 'Avatar proxy host allowlist missing');
 assert(index.includes("avatarPattern.test(objectPath)"), 'Avatar object-path allowlist missing');
-assert(index.includes('usesNativeInstallUI: true'), 'Home/Studio native Chromium install contract must remain active');
-assert(!index.includes('deferred.prompt()'), 'Home/Studio must not retain a deferred Chromium install prompt');
+assert(index.includes('usesCustomInstallUI: true'), 'Home/Studio custom install-button contract must remain active');
+assert(index.includes("window.addEventListener('beforeinstallprompt'"), 'Home/Studio must retain the installable Chromium event');
+assert(index.includes('deferredInstallPrompt = event'), 'Home/Studio must retain the Chromium install event for the user button');
+assert(index.includes('await promptEvent.prompt()'), 'Install Praktis must invoke the retained browser prompt from user action');
 
 assert(!social.includes("console.log('[SP]"), 'Social-proof success/debug console logs must stay removed');
 assert(!social.includes("console.warn('[SP] no active items found')"), 'Empty social-proof data is not a console warning');
@@ -36,28 +38,30 @@ assert(workflow.includes("'browser.runtime'"), 'First-party browser.runtime guar
 assert(index.includes("updateViaCache: 'none'"), 'Home must bypass HTTP cache when checking sw.js updates');
 assert(dapur.includes("updateViaCache: 'none'"), 'Dapur must bypass HTTP cache when checking sw.js updates');
 const sw = fs.readFileSync('sw.js', 'utf8');
-assert(sw.includes("studihome-shell-v8"), 'PWA shell cache generation must stay rotated to v8');
+assert(sw.includes("studihome-shell-v9"), 'PWA shell cache generation must stay rotated to v9');
 assert(sw.includes("studihome-runtime-v3"), 'PWA runtime cache generation must stay rotated to v3');
 assert(index.includes("AUTO_WINDOW_TTL = 24 * 60 * 60 * 1000"), 'PWA automatic quota window must reset after 24 hours');
 assert(index.includes("AUTO_MAX_PER_WINDOW = 3"), 'PWA automatic quota must allow at most 3 impressions per 24 hours');
 assert(index.includes("SESSION_MAX = 3"), 'PWA automatic quota must allow at most 3 impressions per session');
 assert(index.includes("AUTO_MIN_GAP = 15 * 60 * 1000"), 'PWA automatic notices must keep a 15-minute minimum gap');
 assert(index.includes("DISMISS_TTL = 24 * 60 * 60 * 1000"), 'PWA explicit dismissal must snooze for 24 hours');
-assert(index.includes("AUTO_HIDE_MS = 14 * 1000"), 'PWA notice auto-hide duration must stay proportional');
+assert(!index.includes('AUTO_HIDE_MS'), 'PWA notice must not auto-close on a timer');
+assert(!index.includes('autoHideTimer'), 'PWA notice must not retain an auto-hide timer');
+assert(index.includes('persistentUntilAction: true'), 'PWA notice must remain open until explicit user action');
 assert(index.includes("homeDelayMs: 18 * 1000"), 'Home PWA notice delay contract missing');
 assert(index.includes("studioDelayMs: 24 * 1000"), 'Studio AI PWA notice delay contract missing');
 assert(index.includes("contentDelayMs: 30 * 1000"), 'Content PWA notice delay contract missing');
 assert(index.includes("path === '/admin'") && index.includes("path === '/reset-password'"), 'Sensitive routes must stay excluded from automatic PWA notice');
 assert(index.includes("Tambahkan ke Dock"), 'Safari Mac install guidance missing');
 assert(dapur.includes("privateDelayMs: 45 * 1000"), 'Dapur PWA notice must keep the longer 45-second delay');
-assert(dapur.includes("AUTO_HIDE_MS = 14 * 1000"), 'Dapur PWA notice auto-hide contract missing');
-assert(
-  !dapur.includes("addEventListener('beforeinstallprompt'") &&
-  !dapur.includes('addEventListener("beforeinstallprompt"'),
-  'Dapur must rely on native Chromium install UI and not register beforeinstallprompt'
-);
-assert(!dapur.includes("deferred.prompt()"), 'Dapur must not retain a dead deferred install prompt');
-assert(!index.includes("addEventListener('beforeinstallprompt'"), 'Home/Studio must not intercept beforeinstallprompt');
+assert(!dapur.includes('AUTO_HIDE_MS'), 'Dapur PWA notice must not auto-close on a timer');
+assert(dapur.includes('persistentUntilAction: true'), 'Dapur PWA notice must stay open until explicit user action');
+assert(dapur.includes("window.addEventListener('beforeinstallprompt'"), 'Dapur must retain the Chromium install event for Install Praktis');
+assert(dapur.includes('await promptEvent.prompt()'), 'Dapur Install Praktis must invoke the browser prompt');
+assert(index.includes('Instal Praktis') && dapur.includes('Instal Praktis'), 'Install Praktis button must exist in both PWA shells');
+assert(index.includes('font-size:10px') && dapur.includes('font-size:10px'), 'Nanti saja must use the smaller 10px font');
+assert(index.includes('aria-label="Tutup pengingat instalasi"'), 'Nanti saja must be an explicit close action');
+assert(!index.includes('Gunakan ikon <b>Install</b> di address bar atau menu browser'), 'Old Chromium install instruction must not remain as the default popup content');
 
 const forbiddenMessaging = [
   'chrome.runtime',
