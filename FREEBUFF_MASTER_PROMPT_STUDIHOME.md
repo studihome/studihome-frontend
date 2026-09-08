@@ -271,3 +271,14 @@ CONSOLE HYGIENE FOLLOW-UP — 7 SEP 2026
 - First-party root JS/HTML must contain no `chrome.runtime`, `browser.runtime`, runtime `sendMessage`/onMessage, or global `unhandledrejection` suppression.
 - Repeated "message channel closed" console rejections observed with extensions are external unless reproducible in a clean browser with extensions disabled.
 - No DB/API/Auth/Storage/data change belongs to this console fix.
+
+## Console/PWA native-install correction — 8 Sep 2026
+
+- User-observed Studio AI Chromium banner diagnostic was confirmed first-party.
+- Home/Studio/Foyer no longer intercept `beforeinstallprompt`; Chromium/Desktop uses browser-native install UI, matching Dapur.
+- Footer Instal remains guidance-only: browser install icon/menu on Chromium/Desktop; Share -> Add to Home Screen on iOS.
+- `appinstalled` cleanup remains.
+- Release Gate forbids Home/Studio `beforeinstallprompt`, `deferred.prompt()`, and `deferred.userChoice`.
+- First-party source contains no browser-extension runtime messaging API; message-channel/receiving-end console errors remain external extension/content-script provenance unless reproduced in an extension-disabled browser.
+- Never add global `unhandledrejection` suppression to hide those errors.
+

@@ -563,3 +563,14 @@ This section supersedes earlier deployment/release status text.
 - Release Gate extension-messaging coverage is widened from a hand-maintained subset to all root first-party `.js` browser runtimes plus `index.html`/`dapur.html`.
 - CI now also forbids global `unhandledrejection` suppression across those first-party runtimes.
 - No Supabase/database/RLS/Auth/API/Storage/data change is included.
+
+## Console/PWA native-install correction — 8 Sep 2026
+
+- User-observed Studio AI Chromium banner diagnostic was confirmed first-party.
+- Home/Studio/Foyer no longer intercept `beforeinstallprompt`; Chromium/Desktop uses browser-native install UI, matching Dapur.
+- Footer Instal remains guidance-only: browser install icon/menu on Chromium/Desktop; Share -> Add to Home Screen on iOS.
+- `appinstalled` cleanup remains.
+- Release Gate forbids Home/Studio `beforeinstallprompt`, `deferred.prompt()`, and `deferred.userChoice`.
+- First-party source contains no browser-extension runtime messaging API; message-channel/receiving-end console errors remain external extension/content-script provenance unless reproduced in an extension-disabled browser.
+- Never add global `unhandledrejection` suppression to hide those errors.
+
