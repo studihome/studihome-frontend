@@ -24,8 +24,10 @@
   const fmt = (n) => Number(n || 0).toLocaleString('id-ID');
   const rupiah = (n) => 'Rp ' + fmt(n);
 
-  // Fetch every order whose payment is confirmed (PAID/CONFIRMED), paging in
-  // chunks of 1000 so totals stay accurate even past Supabase's row cap.
+  // Fetch only final sales that were accepted by Admin. This mirrors the
+  // canonical public social-proof contract: VERIFIED order + PAID payment +
+  // confirmation timestamp + verifier. Paging keeps totals accurate past the
+  // default Supabase row cap without widening any table permissions.
   async function fetchPaidSales(client) {
     const all = [];
     const seen = new Set();
@@ -34,9 +36,12 @@
     for (;;) {
       const { data, error } = await client
         .from('orders')
-        .select('id,product_id,total_amount,payment_status,created_at,products(title)')
-        .in('payment_status', ['PAID', 'CONFIRMED'])
-        .order('created_at', { ascending: false })
+        .select('id,product_id,total_amount,status,payment_status,payment_confirmed_at,verified_by,products(title)')
+        .eq('status', 'VERIFIED')
+        .eq('payment_status', 'PAID')
+        .not('payment_confirmed_at', 'is', null)
+        .not('verified_by', 'is', null)
+        .order('payment_confirmed_at', { ascending: false })
         .order('id', { ascending: false })
         .range(from, from + pageSize - 1);
       if (error) return { error };
@@ -49,7 +54,7 @@
           productId: o.product_id,
           title: o.products?.title || '',
           total: Number(o.total_amount) || 0,
-          createdAt: o.created_at
+          confirmedAt: o.payment_confirmed_at
         });
       }
       if (batch.length < pageSize) break;
@@ -147,7 +152,7 @@
   function paidRecap(paid, scopeKey) {
     const scoped = scopeKey === 'all'
       ? paid
-      : paid.filter(o => localMonthKey(o.createdAt) === scopeKey);
+      : paid.filter(o => localMonthKey(o.confirmedAt) === scopeKey);
     const count = scoped.length;
     const total = scoped.reduce((sum, o) => sum + (Number(o.total) || 0), 0);
     const byProduct = new Map();
@@ -180,8 +185,8 @@
       : '<div class="text-[10px] text-slate-400">Belum ada transaksi pada periode ini.</div>';
     return `
       <div class="grid grid-cols-2 gap-3">
-        <div class="rounded-2xl border border-amber-100 bg-amber-50/60 p-4"><div class="text-[9px] font-black uppercase tracking-[.1em] text-amber-600">Transaksi · ${esc(rec.scopeLabel)}</div><div class="mt-1.5 text-xl font-black text-[#151c75]">${fmt(rec.count)}</div></div>
-        <div class="rounded-2xl border border-emerald-100 bg-emerald-50/60 p-4"><div class="text-[9px] font-black uppercase tracking-[.1em] text-emerald-600">Total Harga · ${esc(rec.scopeLabel)}</div><div class="mt-1.5 text-xl font-black text-[#151c75]">${rupiah(rec.total)}</div></div>
+        <div class="rounded-2xl border border-amber-100 bg-amber-50/60 p-4"><div class="text-[9px] font-black uppercase tracking-[.1em] text-amber-600">Transaksi Terkonfirmasi · ${esc(rec.scopeLabel)}</div><div class="mt-1.5 text-xl font-black text-[#151c75]">${fmt(rec.count)}</div></div>
+        <div class="rounded-2xl border border-emerald-100 bg-emerald-50/60 p-4"><div class="text-[9px] font-black uppercase tracking-[.1em] text-emerald-600">Total Harga Terkonfirmasi · ${esc(rec.scopeLabel)}</div><div class="mt-1.5 text-xl font-black text-[#151c75]">${rupiah(rec.total)}</div></div>
       </div>
       <div class="mt-4"><div class="text-[9px] font-black uppercase tracking-[.1em] text-slate-500">PRODUK TERLARIS · ${esc(rec.scopeLabel)}</div><div class="mt-2.5 space-y-3">${bars}</div></div>`;
   }
@@ -206,7 +211,7 @@
     const paid = data.paid || [];
     const overallCount = paid.length;
     const overallTotal = paid.reduce((sum, o) => sum + (Number(o.total) || 0), 0);
-    const monthKeys = [...new Set(paid.map(o => localMonthKey(o.createdAt)).filter(Boolean))].sort().reverse();
+    const monthKeys = [...new Set(paid.map(o => localMonthKey(o.confirmedAt)).filter(Boolean))].sort().reverse();
     const currentMonthKey = localMonthKey(new Date().toISOString());
     const initialScope = monthKeys.includes(currentMonthKey) ? currentMonthKey : 'all';
 
@@ -238,8 +243,8 @@
             </div>
 
             <div class="grid grid-cols-2 gap-3">
-              <div class="rounded-2xl border border-slate-100 bg-slate-50/60 p-4"><div class="text-[9px] font-black uppercase tracking-[.1em] text-slate-500">Total Transaksi · Keseluruhan</div><div class="mt-1.5 text-xl font-black text-[#151c75]">${fmt(overallCount)}</div></div>
-              <div class="rounded-2xl border border-slate-100 bg-slate-50/60 p-4"><div class="text-[9px] font-black uppercase tracking-[.1em] text-slate-500">Total Harga · Keseluruhan</div><div class="mt-1.5 text-xl font-black text-[#151c75]">${rupiah(overallTotal)}</div></div>
+              <div class="rounded-2xl border border-slate-100 bg-slate-50/60 p-4"><div class="text-[9px] font-black uppercase tracking-[.1em] text-slate-500">Total Transaksi Terkonfirmasi · Keseluruhan</div><div class="mt-1.5 text-xl font-black text-[#151c75]">${fmt(overallCount)}</div></div>
+              <div class="rounded-2xl border border-slate-100 bg-slate-50/60 p-4"><div class="text-[9px] font-black uppercase tracking-[.1em] text-slate-500">Total Harga Terkonfirmasi · Keseluruhan</div><div class="mt-1.5 text-xl font-black text-[#151c75]">${rupiah(overallTotal)}</div></div>
             </div>
 
             <div id="g-recap-scope" class="mt-3">${recapScopeHtml(paidRecap(paid, initialScope))}</div>
@@ -247,7 +252,7 @@
             ${reviewingOrders ? `<div class="mt-3 rounded-xl border border-amber-100 bg-amber-50/70 px-3 py-2.5 text-[10px] text-amber-800"><b>${fmt(reviewingOrders)}</b> transaksi menunggu review Admin — kelola lewat menu Transaksi.</div>` : ''}
         </section>
 
-        <div class="rounded-2xl border border-slate-200 bg-slate-50/80 p-4 text-[10px] text-slate-600 leading-relaxed"><b class="text-[#151c75]">Logic Gudang:</b> satu dashboard untuk master data Studio AI (kategori) dan rekap penjualan transaksi berstatus PAID/CONFIRMED. Review Creator dikelola di menu Dapur Creator; di sini hanya tampil indikator antrian yang menunggu tindakan.</div>
+        <div class="rounded-2xl border border-slate-200 bg-slate-50/80 p-4 text-[10px] text-slate-600 leading-relaxed"><b class="text-[#151c75]">Logic Gudang:</b> satu dashboard untuk master data Studio AI (kategori) dan rekap penjualan transaksi final: status VERIFIED, payment_status PAID, sudah dikonfirmasi, dan memiliki verifier Admin. Review Creator dikelola di menu Dapur Creator; di sini hanya tampil indikator antrian yang menunggu tindakan.</div>
       </div>`;
   }
 

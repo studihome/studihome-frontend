@@ -672,3 +672,14 @@ Before continuing #81 -> #88, current console evidence was triaged.
 - Installed/standalone suppression, Admin/reset-password exclusion, native Chromium install guidance, Safari/iOS guidance, and the ban on custom `beforeinstallprompt.preventDefault()` remain unchanged.
 - Service-worker shell cache advances to `studihome-shell-v8` so installed clients receive this policy update without changing the network-first/offline strategy.
 
+## Gudang confirmed-sales revenue correction — 8 Sep 2026
+
+- Gudang sales recap now counts only final Admin-accepted transactions using the canonical verified-paid contract: `orders.status = VERIFIED`, `payment_status = PAID`, non-null `payment_confirmed_at`, and non-null `verified_by`.
+- The previous broad `payment_status IN (PAID, CONFIRMED)` filter is removed because it could include payment-state rows that were not yet final accepted sales.
+- Overall revenue, period revenue, transaction counts, and best-selling products now share the same confirmed-sales dataset.
+- Monthly recap recognition uses `payment_confirmed_at`, not order `created_at`, so a sale is attributed to the period when Admin actually confirmed it.
+- Gudang UI labels explicitly say `Terkonfirmasi` for transaction count and total price.
+- Active runtime reference advances to `/admin-gudang-v2.js?v=6` to prevent stale browser asset reuse.
+- Dedicated regression coverage `tests/admin-gudang-confirmed-sales-regression.js` is wired into the Release Gate.
+- No database/RLS/Auth/API/Storage/application-data mutation is included; this is a read/aggregation correction only.
+
