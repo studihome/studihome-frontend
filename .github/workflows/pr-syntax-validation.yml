@@ -32,7 +32,7 @@ jobs:
       - name: JavaScript syntax
         run: |
           set -euo pipefail
-          for file in             studio-ai-creator-card.js             dapur-entry.js             dapur-editor.js             sw.js             supabase-sdk-loader-v1.js             supabase-config.js             api/agent-search.js             api/index-push.js             api/markdown.js             api/sitemap.js             api/version.js             portfolio-route.js
+          for file in             studio-ai-creator-card.js             admin-gudang-v2.js             dapur-entry.js             dapur-editor.js             sw.js             supabase-sdk-loader-v1.js             supabase-config.js             api/agent-search.js             api/index-push.js             api/markdown.js             api/sitemap.js             api/version.js             portfolio-route.js
           do
             if [ -f "$file" ]; then
               echo "Checking $file"
@@ -591,6 +591,9 @@ jobs:
 
       - name: Admin Dapur Supabase singleton regression
         run: node tests/admin-dapur-supabase-singleton-regression.js
+
+      - name: Admin Gudang confirmed-sales regression
+        run: node tests/admin-gudang-confirmed-sales-regression.js
 
       - name: Dapur auth modal accessibility regression
         run: node tests/dapur-auth-modal-accessibility-regression.js
