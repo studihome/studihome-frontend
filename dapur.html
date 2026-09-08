@@ -50,41 +50,145 @@
     <script>
       (function () {
         var el;
-        var isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
-        var DISMISS_KEY = 'studihome-pwa-dismissed-v2';
+        var autoTimer;
+        var autoHideTimer;
+        var lastObservedPath = window.location.pathname || '/';
+        var ua = navigator.userAgent || '';
+        var isIOS = /iPad|iPhone|iPod/.test(ua) ||
+          (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+        var isSafari = /Safari/i.test(ua) && !/Chrome|Chromium|CriOS|Edg|OPR|SamsungBrowser/i.test(ua);
+        var isChromiumLike = /Chrome|Chromium|CriOS|Edg|OPR|SamsungBrowser/i.test(ua);
+        var DISMISS_KEY = 'studihome-pwa-dismissed-v3';
+        var LAST_AUTO_KEY = 'studihome-pwa-auto-shown-v1';
+        var SESSION_KEY = 'studihome-pwa-auto-session-v1';
+        var INSTALLED_KEY = 'studihome-pwa-installed-v1';
         var DISMISS_TTL = 7 * 24 * 60 * 60 * 1000;
+        var AUTO_REMINDER_TTL = 3 * 24 * 60 * 60 * 1000;
+        var INSTALLED_TTL = 30 * 24 * 60 * 60 * 1000;
+        var AUTO_HIDE_MS = 14 * 1000;
+
+        function readTimestamp(key, storage) {
+          try {
+            var raw = storage.getItem(key);
+            var value = Number(raw || 0);
+            return Number.isFinite(value) ? value : 0;
+          } catch (_) { return 0; }
+        }
+
+        function writeTimestamp(key, storage) {
+          try { storage.setItem(key, String(Date.now())); } catch (_) {}
+        }
 
         function isInstalled() {
           if (window.navigator.standalone) return true;
           if (window.matchMedia('(display-mode: standalone)').matches) return true;
-          return false;
+          var installedAt = readTimestamp(INSTALLED_KEY, localStorage);
+          return installedAt > 0 && (Date.now() - installedAt) < INSTALLED_TTL;
+        }
+
+        function isInstallGuidanceSupported() {
+          return isIOS || isSafari || isChromiumLike;
         }
 
         function isDismissed() {
           if (isInstalled()) return true;
+          var dismissedAt = readTimestamp(DISMISS_KEY, localStorage);
+          return dismissedAt > 0 && (Date.now() - dismissedAt) < DISMISS_TTL;
+        }
+
+        function wasRecentlyAutoShown() {
+          if (isInstalled()) return true;
           try {
-            var v = localStorage.getItem(DISMISS_KEY);
-            if (!v) return false;
-            return (Date.now() - Number(v)) < DISMISS_TTL;
-          } catch (_) { return false; }
+            if (sessionStorage.getItem(SESSION_KEY) === '1') return true;
+          } catch (_) {}
+          var lastAuto = readTimestamp(LAST_AUTO_KEY, localStorage);
+          return lastAuto > 0 && (Date.now() - lastAuto) < AUTO_REMINDER_TTL;
+        }
+
+        function markAutoShown() {
+          writeTimestamp(LAST_AUTO_KEY, localStorage);
+          try { sessionStorage.setItem(SESSION_KEY, '1'); } catch (_) {}
         }
 
         function dismiss() {
-          try { localStorage.setItem(DISMISS_KEY, String(Date.now())); } catch (_) {}
+          writeTimestamp(DISMISS_KEY, localStorage);
           hide();
         }
 
-        function show() {
-          if (!isIOS || isDismissed()) return;
-          if (!el) el = build();
-          el.classList.add('show');
+        function guidanceHtml() {
+          if (isIOS) {
+            return '<div class="sh-pwa-ios-note">Di Safari, ketuk <b>Bagikan ↑</b> → <b>Tambah ke Layar Utama</b>, aktifkan <b>Buka sebagai App Web</b>, lalu ketuk <b>Tambah</b>.</div>';
+          }
+          if (isSafari) {
+            return '<div class="sh-pwa-ios-note">Di Safari Mac, pilih <b>File → Tambahkan ke Dock</b> atau <b>Bagikan → Tambahkan ke Dock</b>.</div>';
+          }
+          return '<div class="sh-pwa-ios-note">Gunakan ikon <b>Install</b> di address bar atau menu browser, lalu pilih <b>Instal aplikasi</b> / <b>Tambahkan ke layar utama</b>.</div>';
         }
 
-        function hide() { if (el) el.classList.remove('show'); }
+        function delayForPath(pathname) {
+          var path = String(pathname || '/').toLowerCase().replace(/\/{2,}/g, '/').replace(/\/$/, '') || '/';
+          if (path === '/admin' || path.startsWith('/admin/') || path === '/reset-password') return null;
+          if (path === '/') return 18 * 1000;
+          if (path === '/studio-ai' || /^\/(?:ai-|kursus-ai|jasa-ai|ai-untuk-)/.test(path)) return 24 * 1000;
+          if (path === '/dapur' || path.startsWith('/dapur/')) return 45 * 1000;
+          return 45 * 1000;
+        }
+
+        function show(options) {
+          options = options || {};
+          if (!isInstallGuidanceSupported() || isInstalled()) return false;
+          if (!options.force && isDismissed()) return false;
+          if (options.auto && wasRecentlyAutoShown()) return false;
+          if (!el) el = build();
+          if (!el) return false;
+          el.classList.add('show');
+          el.setAttribute('aria-hidden', 'false');
+          if (options.auto) {
+            markAutoShown();
+            clearTimeout(autoHideTimer);
+            autoHideTimer = setTimeout(hide, AUTO_HIDE_MS);
+          }
+          return true;
+        }
+
+        function hide() {
+          clearTimeout(autoHideTimer);
+          if (el) {
+            el.classList.remove('show');
+            el.setAttribute('aria-hidden', 'true');
+          }
+        }
+
+        function scheduleAuto(delayOverride) {
+          clearTimeout(autoTimer);
+          if (!isInstallGuidanceSupported() || isInstalled() || isDismissed() || wasRecentlyAutoShown()) return;
+          var path = window.location.pathname || '/';
+          var delay = typeof delayOverride === 'number' ? delayOverride : delayForPath(path);
+          if (delay === null) return;
+          autoTimer = setTimeout(function () {
+            if ((window.location.pathname || '/') !== path) {
+              observeRouteChange();
+              return;
+            }
+            if (document.visibilityState === 'hidden') return;
+            show({ auto: true });
+          }, delay);
+        }
+
+        function observeRouteChange() {
+          var path = window.location.pathname || '/';
+          if (path === lastObservedPath) return;
+          lastObservedPath = path;
+          scheduleAuto();
+        }
 
         function build() {
           el = document.createElement('div');
           el.className = 'sh-pwa-overlay';
+          el.setAttribute('role', 'dialog');
+          el.setAttribute('aria-modal', 'true');
+          el.setAttribute('aria-labelledby', 'sh-pwa-title');
+          el.setAttribute('aria-hidden', 'true');
 
           var benefits = '<div class="sh-pwa-benefits">'
             + '<div class="sh-pwa-benefit"><i class="fa-solid fa-bolt"></i>Akses instan dari home screen</div>'
@@ -92,46 +196,56 @@
             + '<div class="sh-pwa-benefit"><i class="fa-solid fa-shield-halved"></i>Pengalaman lebih cepat & ringan</div>'
             + '</div>';
 
-          var actions = '<div class="sh-pwa-ios-note">'
-            + 'Tap ikon <b>Share \u2191</b> di Safari, lalu pilih <b>"Add to Home Screen"</b> untuk menginstal Studihome.'
-            + '</div>'
-            + '<div class="sh-pwa-actions" style="margin-top:.75rem">'
-            + '<button class="sh-pwa-dismiss" style="flex:1">Mengerti</button>'
-            + '</div>';
-
           el.innerHTML = '<div class="sh-pwa-card">'
             + '<div class="sh-pwa-header">'
-            + '<div class="sh-pwa-star">\u2726</div>'
-            + '<div class="sh-pwa-title">Instal Studihome</div>'
-            + '<div class="sh-pwa-sub">Akses cepat & pengalaman lebih baik</div>'
+            + '<div class="sh-pwa-star">✦</div>'
+            + '<div id="sh-pwa-title" class="sh-pwa-title">Instal Studihome</div>'
+            + '<div class="sh-pwa-sub">Lebih cepat dibuka, lebih nyaman dipakai</div>'
             + '</div>'
             + '<div class="sh-pwa-body">'
-            + benefits
-            + actions
-            + '</div></div>';
+            + benefits + guidanceHtml()
+            + '<div class="sh-pwa-actions" style="margin-top:.75rem">'
+            + '<button class="sh-pwa-dismiss" style="flex:1">Nanti saja</button>'
+            + '</div></div></div>';
 
           document.body.appendChild(el);
-
-          el.addEventListener('click', function (e) {
-            if (e.target === el) dismiss();
+          el.addEventListener('click', function (event) {
+            if (event.target === el) dismiss();
           });
-
           el.querySelector('.sh-pwa-dismiss').onclick = dismiss;
           return el;
         }
 
-        // Chromium/desktop uses the browser's native PWA install affordance on
-        // Dapur. Do not cancel beforeinstallprompt here: Dapur has no explicit
-        // custom install CTA, and retaining the event only produces a browser
-        // diagnostic while adding no user-action path to prompt().
         window.addEventListener('appinstalled', function () {
-          try { localStorage.setItem(DISMISS_KEY, String(Date.now())); } catch (_) {}
+          writeTimestamp(INSTALLED_KEY, localStorage);
           hide();
         });
 
-        if (isIOS && !window.navigator.standalone) {
-          setTimeout(show, 4000);
-        }
+        window.addEventListener('load', function () { scheduleAuto(); });
+        window.addEventListener('popstate', function () { setTimeout(observeRouteChange, 0); }, { passive: true });
+        window.addEventListener('hashchange', function () { setTimeout(observeRouteChange, 0); }, { passive: true });
+        document.addEventListener('click', function () { setTimeout(observeRouteChange, 120); }, { passive: true });
+        document.addEventListener('visibilitychange', function () {
+          if (document.visibilityState === 'visible' && !wasRecentlyAutoShown()) scheduleAuto(5 * 1000);
+        });
+
+        window.StudihomePWA = Object.assign(window.StudihomePWA || {}, {
+          show: function () { return show({ force: true }); },
+          hide: hide,
+          schedule: scheduleAuto,
+          isInstalled: isInstalled,
+          usesNativeInstallUI: true,
+          noticePolicy: {
+            homeDelayMs: 18 * 1000,
+            studioDelayMs: 24 * 1000,
+            contentDelayMs: 30 * 1000,
+            privateDelayMs: 45 * 1000,
+            autoHideMs: AUTO_HIDE_MS,
+            reminderTtlMs: AUTO_REMINDER_TTL,
+            dismissTtlMs: DISMISS_TTL
+          }
+        });
+
       })();
     </script>
 </head>

@@ -583,3 +583,13 @@ This section supersedes earlier deployment/release status text.
 - No Supabase/database/RLS/Auth/API/Storage/application-data change is included.
 - Browser-extension/content-script errors such as `Receiving end does not exist` and `message channel closed` are still not suppressed; they remain external unless reproduced in an extension-disabled browser.
 
+## PWA install-notice cadence — 8 Sep 2026
+
+- Guidance-only PWA notice is now eligible across supported install-capable browsers without restoring `beforeinstallprompt.preventDefault()` or deferred custom Chromium prompts.
+- Automatic timing is intentionally route-sensitive: Home 18s; Studio AI/category 24s; public content/product/Creator pages 30s; Kamar 40s; Dapur 45s; Admin and reset-password are excluded.
+- Auto notice closes after 14s if untouched, appears at most once per browser session, and is throttled for 3 days after an automatic impression. Explicit dismissal snoozes it for 7 days.
+- Installed/standalone sessions are suppressed. `appinstalled` records a 30-day browser-side installed hint to avoid immediately re-promoting from a normal browser tab.
+- iPhone/iPad guidance follows Safari Share -> Add to Home Screen -> Open as Web App. Safari on macOS uses Add to Dock. Chromium-family browsers retain native install UI guidance.
+- Service-worker shell cache advances to `studihome-shell-v7` so installed clients receive the updated notice shell while the existing network-first/offline strategy remains unchanged.
+- No Supabase/database/RLS/Auth/API/Storage/application-data change is included.
+
