@@ -248,7 +248,7 @@ jobs:
 
           sw = Path('sw.js').read_text(encoding='utf-8')
           required_sw = [
-              "studihome-shell-v6",
+              "studihome-shell-v7",
               "studihome-runtime-v3",
               "cache.put(req, copy)",
               "if (!url.search)",
@@ -344,8 +344,13 @@ jobs:
           for marker in [
               'usesNativeInstallUI: true',
               "window.addEventListener('appinstalled'",
-              'Add to Home Screen',
+              'AUTO_REMINDER_TTL = 3 * 24 * 60 * 60 * 1000',
+              'AUTO_HIDE_MS = 14 * 1000',
+              'homeDelayMs: 18 * 1000',
+              'studioDelayMs: 24 * 1000',
+              'contentDelayMs: 30 * 1000',
               'address bar atau menu browser',
+              'Tambahkan ke Dock',
           ]:
               if marker not in index:
                   raise SystemExit(

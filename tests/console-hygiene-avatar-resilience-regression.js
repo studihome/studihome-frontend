@@ -36,8 +36,17 @@ assert(workflow.includes("'browser.runtime'"), 'First-party browser.runtime guar
 assert(index.includes("updateViaCache: 'none'"), 'Home must bypass HTTP cache when checking sw.js updates');
 assert(dapur.includes("updateViaCache: 'none'"), 'Dapur must bypass HTTP cache when checking sw.js updates');
 const sw = fs.readFileSync('sw.js', 'utf8');
-assert(sw.includes("studihome-shell-v6"), 'PWA shell cache generation must stay rotated to v6');
+assert(sw.includes("studihome-shell-v7"), 'PWA shell cache generation must stay rotated to v7');
 assert(sw.includes("studihome-runtime-v3"), 'PWA runtime cache generation must stay rotated to v3');
+assert(index.includes("AUTO_REMINDER_TTL = 3 * 24 * 60 * 60 * 1000"), 'PWA auto reminder must be throttled to 3 days');
+assert(index.includes("AUTO_HIDE_MS = 14 * 1000"), 'PWA notice auto-hide duration must stay proportional');
+assert(index.includes("homeDelayMs: 18 * 1000"), 'Home PWA notice delay contract missing');
+assert(index.includes("studioDelayMs: 24 * 1000"), 'Studio AI PWA notice delay contract missing');
+assert(index.includes("contentDelayMs: 30 * 1000"), 'Content PWA notice delay contract missing');
+assert(index.includes("path === '/admin'") && index.includes("path === '/reset-password'"), 'Sensitive routes must stay excluded from automatic PWA notice');
+assert(index.includes("Tambahkan ke Dock"), 'Safari Mac install guidance missing');
+assert(dapur.includes("privateDelayMs: 45 * 1000"), 'Dapur PWA notice must keep the longer 45-second delay');
+assert(dapur.includes("AUTO_HIDE_MS = 14 * 1000"), 'Dapur PWA notice auto-hide contract missing');
 assert(
   !dapur.includes("addEventListener('beforeinstallprompt'") &&
   !dapur.includes('addEventListener("beforeinstallprompt"'),
