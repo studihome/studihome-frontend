@@ -88,6 +88,12 @@ jobs:
                   'JavaScript blocks.'
               )
 
+      - name: GitHub Actions YAML syntax
+        shell: bash
+        run: |
+          set -euo pipefail
+          ruby -e 'require "yaml"; ARGV.each { |path| YAML.parse_file(path); puts "GitHub Actions YAML syntax: PASS #{path}" }' .github/workflows/*.yml
+
       - name: Structured configuration validation
         shell: python3 {0}
         run: |

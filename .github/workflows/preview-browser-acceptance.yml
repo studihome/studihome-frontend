@@ -94,9 +94,7 @@ jobs:
             binding=""
 
             for candidate in $(git rev-list --first-parent --max-count=6 "$EXPECTED_SHA"); do
-              state="$(gh api "repos/$GITHUB_REPOSITORY/commits/$candidate/status" \
-                --jq '.statuses[] | select(.context == "Vercel") | .state' \
-                | head -n 1 || true)"
+              state="$(gh api "repos/$GITHUB_REPOSITORY/commits/$candidate/status" --jq '.statuses[] | select(.context == "Vercel") | .state' | head -n 1 || true)"
               [ "$state" = "success" ] || continue
 
               if [ "$candidate" = "$EXPECTED_SHA" ]; then
@@ -105,88 +103,7 @@ jobs:
                 break
               fi
 
-              unsafe="$(git diff --name-only "$candidate" "$EXPECTED_SHA" \
-                | grep -Ev '^(\.github/workflows/(preview-browser-acceptance|pr-syntax-validation)\.yml|scripts/preview-browser-acceptance\.py|tests/csp-actions-browser-smoke\.html|PROJECT_STATE_LATEST\.md|MASTER_HANDOFF_PROMPT_STUDIHOME\.md|FREEBUFF_MASTER_PROMPT_STUDIHOME\.md|RELEASE_CHECKLIST_STUDIHOME\.md)
-          deployed_sha=""
-          version_state="unavailable"
-          curl_args=(-fsS --max-time 15)
-          if [ -n "${VERCEL_AUTOMATION_BYPASS_SECRET:-}" ]; then
-            echo "Vercel automation bypass: configured"
-            curl_args+=(-H "x-vercel-protection-bypass: $VERCEL_AUTOMATION_BYPASS_SECRET")
-          else
-            echo "Vercel automation bypass: not configured"
-          fi
-          if curl "${curl_args[@]}" "$preview/api/version" \
-            > /tmp/studihome-preview-version 2>/dev/null; then
-            deployed_sha="$(python3 -c 'import json,sys; p=json.load(open(sys.argv[1],encoding="utf-8")); print(str(p.get("commit") or ""))' /tmp/studihome-preview-version 2>/dev/null || true)"
-            version_state="$(python3 -c 'import json,sys; p=json.load(open(sys.argv[1],encoding="utf-8")); print(str(p.get("status") or ""))' /tmp/studihome-preview-version 2>/dev/null || true)"
-            [ -n "$version_state" ] || version_state="non-json"
-          fi
-
-          if [ -n "$deployed_sha" ] && [ "$deployed_sha" != "$deployed_source_sha" ]; then
-            echo "Preview alias reports $deployed_sha but selected Vercel source is $deployed_source_sha." >&2
-            exit 1
-          fi
-
-          echo "Preview source binding: $binding"
-          echo "Selected Vercel source: $deployed_source_sha"
-          echo "/api/version status: $version_state"
-          echo "PREVIEW_URL=$preview" >> "$GITHUB_ENV"
-          echo "PREVIEW_BINDING=$binding" >> "$GITHUB_ENV"
-          echo "DEPLOYED_SOURCE_SHA=$deployed_source_sha" >> "$GITHUB_ENV"
-
-      - name: Start local ChromeDriver
-        shell: bash
-        run: |
-          set -euo pipefail
-          command -v google-chrome >/dev/null
-          command -v chromedriver >/dev/null
-          chromedriver --port=9515 --log-level=WARNING --log-path=/tmp/studihome-chromedriver.log &
-          echo "CHROMEDRIVER_PID=$!" >> "$GITHUB_ENV"
-
-          ready=0
-          for _ in $(seq 1 40); do
-            if curl -fsS http://127.0.0.1:9515/status >/dev/null; then
-              ready=1
-              break
-            fi
-            sleep 0.25
-          done
-          if [ "$ready" -ne 1 ]; then
-            cat /tmp/studihome-chromedriver.log >&2 || true
-            echo "ChromeDriver did not become ready." >&2
-            exit 1
-          fi
-
-      - name: Public Preview browser acceptance
-        run: |
-          set -euo pipefail
-          echo "Preview binding: $PREVIEW_BINDING"
-          echo "Deployed source: $DEPLOYED_SOURCE_SHA"
-          python3 scripts/preview-browser-acceptance.py --preview-url "$PREVIEW_URL"
-
-      - name: ChromeDriver diagnostics on failure
-        if: failure()
-        shell: bash
-        run: |
-          if [ -n "${VERCEL_AUTOMATION_BYPASS_SECRET:-}" ]; then
-            echo "ChromeDriver diagnostics withheld because Vercel automation bypass is configured."
-          else
-            cat /tmp/studihome-chromedriver.log >&2 || true
-          fi
-          if [ -f /tmp/studihome-preview-browser-failure.png ]; then
-            echo "Failure screenshot captured at /tmp/studihome-preview-browser-failure.png"
-          fi
-
-      - name: Stop ChromeDriver
-        if: always()
-        shell: bash
-        run: |
-          if [ -n "${CHROMEDRIVER_PID:-}" ]; then
-            kill "$CHROMEDRIVER_PID" >/dev/null 2>&1 || true
-          fi
- \
-                || true)"
+              unsafe="$(git diff --name-only "$candidate" "$EXPECTED_SHA" | grep -Ev '^(\.github/workflows/(preview-browser-acceptance|pr-syntax-validation)\.yml|scripts/preview-browser-acceptance\.py|tests/csp-actions-browser-smoke\.html|PROJECT_STATE_LATEST\.md|MASTER_HANDOFF_PROMPT_STUDIHOME\.md|FREEBUFF_MASTER_PROMPT_STUDIHOME\.md|RELEASE_CHECKLIST_STUDIHOME\.md)$' || true)"
               if [ -z "$unsafe" ]; then
                 deployed_source_sha="$candidate"
                 binding="runtime-equivalent-vercel-ancestor"
