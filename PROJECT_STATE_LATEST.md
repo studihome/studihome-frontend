@@ -342,7 +342,7 @@ User-supplied `/studio-ai` console evidence was audited against current main:
 - repeated `Receiving end does not exist` / asynchronous message-channel-closed errors are **not proven Studihome defects** and are classified as likely browser-extension/content-script noise;
 - YouTube embed emits `compute-pressure` Permissions Policy warning; current Studihome policy remains unchanged because playback does not require weakening the security boundary;
 - Chromium Windows emits `powerPreference option is currently ignored` diagnostic from the embedded player path;
-- PWA banner warning reflects `beforeinstallprompt.preventDefault()` semantics; no runtime change is justified without evidence that the custom install CTA fails;
+- SUPERSEDED 8 Sep 2026: Home/Studio/Foyer now use native Chromium install UI; do not restore the custom `beforeinstallprompt.preventDefault()` flow.
 - social-proof widget diagnostics show successful client readiness and 3 loaded items.
 
 No application/runtime/security-header change was made for the reported third-party/extension-origin console messages. Required reproduction rule: test with extensions disabled/incognito and obtain a Studihome-owned stack frame before opening a runtime-fix PR.
@@ -350,7 +350,7 @@ No application/runtime/security-header change was made for the reported third-pa
 Console regression guard — ACTIVE:
 - CI scans audited first-party browser runtimes and rejects `chrome.runtime` / `browser.runtime` extension messaging;
 - CI rejects a Service Worker `message` listener unless the release guard is deliberately updated with an audited contract;
-- CI verifies the custom PWA install flow retains `beforeinstallprompt`, `preventDefault`, saved deferred event, `prompt()`, `userChoice`, and `appinstalled`;
+- SUPERSEDED 8 Sep 2026: CI now forbids Home/Studio `beforeinstallprompt` interception/deferred prompt and locks native Chromium install guidance.
 - no global `unhandledrejection`/`window.onerror` suppression was introduced.
 
 ## Legacy/runtime ownership audit — COMPLETED WITH CORRECTION
@@ -772,3 +772,15 @@ Before continuing #81 -> #88, current console evidence was triaged.
 - ChromeDriver runs at WARNING log level; raw diagnostics are withheld when bypass is configured to avoid credential/cookie disclosure.
 - Release Gate forbids bypass secrets in query strings and verbose ChromeDriver mode.
 - This support changes CI/browser acceptance only; no application runtime, API contract, Supabase, Auth, Storage, RLS, or data behavior changes.
+
+## Console/PWA native-install correction — 8 Sep 2026
+
+- User-observed `studio-ai: Banner not shown: beforeinstallpromptevent.preventDefault()` was confirmed first-party.
+- Home/Studio/Foyer shell no longer intercepts `beforeinstallprompt`; Chromium/Desktop now relies on browser-native install affordance, matching Dapur.
+- Footer `Instal` remains functional as guidance: Chromium/Desktop explains using the browser install icon/menu; iOS keeps Share -> Add to Home Screen.
+- `appinstalled` cleanup remains.
+- Release Gate now forbids `beforeinstallprompt`, `deferred.prompt()`, and `deferred.userChoice` in the Home/Studio shell and requires `usesNativeInstallUI: true`.
+- First-party runtime still contains no `chrome.runtime`, `browser.runtime`, runtime sendMessage/onMessage, or global `unhandledrejection` suppression.
+- Repeated `Could not establish connection. Receiving end does not exist` / `message channel closed` console lines have no matching Studihome messaging API and remain browser-extension/content-script provenance unless reproduced in a clean extension-disabled browser.
+- Do not add page-level rejection suppression to hide extension noise.
+

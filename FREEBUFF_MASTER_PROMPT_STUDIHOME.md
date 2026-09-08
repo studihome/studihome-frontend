@@ -42,13 +42,13 @@ CONSOLE TRIAGE BASELINE — 7 SEP 2026
 - `/studio-ai` message-channel errors (`Receiving end does not exist`, `listener indicated an asynchronous response... channel closed`) have no matching `chrome.runtime`/`browser.runtime`/`sendMessage`/`onMessage` implementation in the repository; classify as external/browser-extension provenance unless a Studihome-owned stack frame is proven;
 - YouTube `compute-pressure` warnings are third-party iframe diagnostics; do not relax Studihome Permissions-Policy to silence them;
 - Chromium `powerPreference ... ignored on Windows` is browser diagnostic noise;
-- `beforeinstallprompt.preventDefault()` can be expected for a custom install flow; only change code if the user-facing install action itself is broken;
+- SUPERSEDED 8 Sep 2026: Home/Studio/Foyer use browser-native Chromium install UI; custom interception must not be restored.
 - reproduce console reports with extensions disabled/incognito before modifying runtime.
 
 FIRST-PARTY CONSOLE REGRESSION GUARD
 - Release Gate must reject `chrome.runtime` / `browser.runtime` messaging in first-party browser runtimes unless deliberately audited;
 - Service Worker `message` channels require an explicit audited contract;
-- preserve the custom PWA install chain: beforeinstallprompt + preventDefault + saved event + prompt + userChoice + appinstalled;
+- SUPERSEDED 8 Sep 2026: preserve native Chromium install UI + iOS guidance + appinstalled cleanup; do not restore beforeinstallprompt interception.
 - never add global error/rejection swallowing merely to hide third-party console noise.
 
 PORTFOLIO CANONICAL CONTRACT
@@ -367,7 +367,7 @@ VERCEL PREVIEW PROTECTION BLOCKER — 7 SEP 2026
 CONSOLE HYGIENE FOLLOW-UP — 7 SEP 2026
 - Treat `social-proof-widget.js?v=13` success logs as stale-client evidence; current widget source contains only real failure warnings. Current fix bumps the runtime reference to v15.
 - Dapur must not cancel `beforeinstallprompt`; Chromium uses native PWA install UI there, while iOS retains Share -> Add to Home Screen guidance.
-- Home intentionally retains the standards-documented custom Chromium flow: cancel `beforeinstallprompt`, store it, call `prompt()` only from a user action. Do not degrade that UX solely to hide Chrome's diagnostic.
+- SUPERSEDED 8 Sep 2026: Home/Studio/Foyer intentionally use native Chromium install UI to eliminate the first-party banner diagnostic while keeping install guidance.
 - First-party root JS/HTML must contain no `chrome.runtime`, `browser.runtime`, runtime `sendMessage`/onMessage, or global `unhandledrejection` suppression.
 - Repeated "message channel closed" console rejections observed with extensions are external unless reproducible in a clean browser with extensions disabled.
 - No DB/API/Auth/Storage/data change belongs to this console fix.
@@ -380,3 +380,15 @@ PREVIEW PROTECTION AUTOMATION SUPPORT — 8 SEP 2026
 - ChromeDriver runs at WARNING log level; raw diagnostics are withheld when bypass is configured to avoid credential/cookie disclosure.
 - Release Gate forbids bypass secrets in query strings and verbose ChromeDriver mode.
 - This support changes CI/browser acceptance only; no application runtime, API contract, Supabase, Auth, Storage, RLS, or data behavior changes.
+
+## Console/PWA native-install correction — 8 Sep 2026
+
+- User-observed `studio-ai: Banner not shown: beforeinstallpromptevent.preventDefault()` was confirmed first-party.
+- Home/Studio/Foyer shell no longer intercepts `beforeinstallprompt`; Chromium/Desktop now relies on browser-native install affordance, matching Dapur.
+- Footer `Instal` remains functional as guidance: Chromium/Desktop explains using the browser install icon/menu; iOS keeps Share -> Add to Home Screen.
+- `appinstalled` cleanup remains.
+- Release Gate now forbids `beforeinstallprompt`, `deferred.prompt()`, and `deferred.userChoice` in the Home/Studio shell and requires `usesNativeInstallUI: true`.
+- First-party runtime still contains no `chrome.runtime`, `browser.runtime`, runtime sendMessage/onMessage, or global `unhandledrejection` suppression.
+- Repeated `Could not establish connection. Receiving end does not exist` / `message channel closed` console lines have no matching Studihome messaging API and remain browser-extension/content-script provenance unless reproduced in a clean extension-disabled browser.
+- Do not add page-level rejection suppression to hide extension noise.
+

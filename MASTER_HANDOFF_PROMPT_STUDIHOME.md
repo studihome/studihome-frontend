@@ -100,7 +100,7 @@ Current `/studio-ai` console report was triaged against current main:
 - `Could not establish connection. Receiving end does not exist.` and `A listener indicated an asynchronous response... channel closed` are therefore classified **EXTERNAL / BROWSER-EXTENSION PROVENANCE LIKELY**, not a proven Studihome runtime defect;
 - YouTube `compute-pressure` Permissions Policy warnings originate inside `youtube.com` embed code. Do **not** weaken Studihome `Permissions-Policy` merely to silence that warning;
 - Chromium `powerPreference option is currently ignored... on Windows` is browser/driver diagnostic noise, not a Studihome application error;
-- `beforeinstallprompt.preventDefault()` warning is expected when a custom PWA install flow suppresses the browser banner. Treat as actionable only if the custom install CTA itself fails to call the saved prompt after a user gesture;
+- SUPERSEDED 8 Sep 2026: the Home/Studio custom Chromium prompt was intentionally retired to remove the first-party diagnostic; native browser install UI is authoritative.
 - social-proof logs `supabaseClient ready immediately` and `loaded 3 items` are normal successful diagnostics.
 
 Before changing app code for similar reports, reproduce with extensions disabled/incognito and identify a Studihome-owned stack frame or failed feature. Do not add catch-all handlers or relax security headers solely to make DevTools quiet.
@@ -108,7 +108,7 @@ Before changing app code for similar reports, reproduce with extensions disabled
 First-party console-noise regression guard — 7 Sep 2026:
 - Release Gate now rejects `chrome.runtime` / `browser.runtime` extension-messaging APIs in audited first-party browser runtimes;
 - Release Gate rejects an unaudited Service Worker `message` channel;
-- Release Gate locks the custom PWA install contract: `beforeinstallprompt` -> `preventDefault()` -> saved event -> `prompt()` -> `userChoice` -> `appinstalled`;
+- SUPERSEDED 8 Sep 2026: Release Gate locks the native Chromium install contract and forbids deferred custom prompt state.
 - this guard does not suppress external browser-extension or YouTube warnings; it prevents Studihome from accidentally becoming their source.
 
 ## 5. Portfolio canonical URL contract — DO NOT REGRESS
@@ -720,3 +720,15 @@ This section supersedes earlier deployment/release status text.
 - ChromeDriver runs at WARNING log level; raw diagnostics are withheld when bypass is configured to avoid credential/cookie disclosure.
 - Release Gate forbids bypass secrets in query strings and verbose ChromeDriver mode.
 - This support changes CI/browser acceptance only; no application runtime, API contract, Supabase, Auth, Storage, RLS, or data behavior changes.
+
+## Console/PWA native-install correction — 8 Sep 2026
+
+- User-observed `studio-ai: Banner not shown: beforeinstallpromptevent.preventDefault()` was confirmed first-party.
+- Home/Studio/Foyer shell no longer intercepts `beforeinstallprompt`; Chromium/Desktop now relies on browser-native install affordance, matching Dapur.
+- Footer `Instal` remains functional as guidance: Chromium/Desktop explains using the browser install icon/menu; iOS keeps Share -> Add to Home Screen.
+- `appinstalled` cleanup remains.
+- Release Gate now forbids `beforeinstallprompt`, `deferred.prompt()`, and `deferred.userChoice` in the Home/Studio shell and requires `usesNativeInstallUI: true`.
+- First-party runtime still contains no `chrome.runtime`, `browser.runtime`, runtime sendMessage/onMessage, or global `unhandledrejection` suppression.
+- Repeated `Could not establish connection. Receiving end does not exist` / `message channel closed` console lines have no matching Studihome messaging API and remain browser-extension/content-script provenance unless reproduced in a clean extension-disabled browser.
+- Do not add page-level rejection suppression to hide extension noise.
+

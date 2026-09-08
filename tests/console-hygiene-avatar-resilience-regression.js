@@ -18,8 +18,8 @@ assert(index.includes('/social-proof-widget.js?v=15'), 'Social proof widget cach
 assert(index.includes("/api/creator-avatar?path="), 'Core safeUrl must route Studihome avatars through same-origin proxy');
 assert(index.includes("parsed.hostname === 'hbfmhwwxbgidsnljupca.supabase.co'"), 'Avatar proxy host allowlist missing');
 assert(index.includes("avatarPattern.test(objectPath)"), 'Avatar object-path allowlist missing');
-assert(index.includes("e.preventDefault();"), 'Custom PWA install contract must remain intact');
-assert(index.includes("deferred.prompt();"), 'Custom PWA install action must remain callable');
+assert(index.includes('usesNativeInstallUI: true'), 'Home/Studio native Chromium install contract must remain active');
+assert(!index.includes('deferred.prompt()'), 'Home/Studio must not retain a deferred Chromium install prompt');
 
 assert(!social.includes("console.log('[SP]"), 'Social-proof success/debug console logs must stay removed');
 assert(!social.includes("console.warn('[SP] no active items found')"), 'Empty social-proof data is not a console warning');
@@ -39,7 +39,7 @@ assert(
   'Dapur must rely on native Chromium install UI and not register beforeinstallprompt'
 );
 assert(!dapur.includes("deferred.prompt()"), 'Dapur must not retain a dead deferred install prompt');
-assert(index.includes("deferred.prompt();"), 'Home custom PWA install action must remain user-callable');
+assert(!index.includes("addEventListener('beforeinstallprompt'"), 'Home/Studio must not intercept beforeinstallprompt');
 
 const forbiddenMessaging = [
   'chrome.runtime',
