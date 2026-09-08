@@ -361,7 +361,7 @@ jobs:
               '--log-level=WARNING',
               'for readiness_attempt in $(seq 1 30); do',
               'Vercel source not ready yet (attempt $readiness_attempt/30)',
-              'ChromeDriver diagnostics withheld because Vercel automation bypass is configured.',
+              'ChromeDriver diagnostics withheld because protected CI credentials are configured.',
           ]
           harness_required = [
               'def protection_headers(',
