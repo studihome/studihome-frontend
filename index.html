@@ -64,7 +64,7 @@
           (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
         var isSafari = /Safari/i.test(ua) && !/Chrome|Chromium|CriOS|Edg|OPR|SamsungBrowser/i.test(ua);
         var isChromiumLike = /Chrome|Chromium|CriOS|Edg|OPR|SamsungBrowser/i.test(ua);
-        var DISMISS_KEY = 'studihome-pwa-dismissed-v3';
+        var DISMISS_KEY = 'studihome-pwa-dismissed-v2';
         var LAST_AUTO_KEY = 'studihome-pwa-auto-shown-v1';
         var SESSION_KEY = 'studihome-pwa-auto-session-v1';
         var INSTALLED_KEY = 'studihome-pwa-installed-v1';
@@ -123,7 +123,7 @@
 
         function guidanceHtml() {
           if (isIOS) {
-            return '<div class="sh-pwa-ios-note">Di Safari, ketuk <b>Bagikan ↑</b> → <b>Tambah ke Layar Utama</b>, aktifkan <b>Buka sebagai App Web</b>, lalu ketuk <b>Tambah</b>.</div>';
+            return '<div class="sh-pwa-ios-note">Di iPhone/iPad, gunakan <b>Safari</b>: ketuk <b>Bagikan ↑</b> → <b>Tambah ke Layar Utama</b>, aktifkan <b>Buka sebagai App Web</b>, lalu ketuk <b>Tambah</b>.</div>';
           }
           if (isSafari) {
             return '<div class="sh-pwa-ios-note">Di Safari Mac, pilih <b>File → Tambahkan ke Dock</b> atau <b>Bagikan → Tambahkan ke Dock</b>.</div>';
