@@ -45,6 +45,7 @@ assert(
 );
 
 for (const marker of [
+  "event.preventDefault()",
   "window.StudihomePWA.show()",
   "document.querySelectorAll('#product-detail-modal iframe')",
   "frame.src = ''",
@@ -66,3 +67,16 @@ assert(!actions.includes('fetch('), 'Shell binder must not perform network calls
 assert(!actions.includes('supabase'), 'Shell binder must not touch Supabase');
 
 console.log('CSP static shell actions regression: PASS');
+
+assert(
+  index.includes('usesNativeInstallUI: true'),
+  'Home/Studio AI shell must use native Chromium install UI'
+);
+for (const forbidden of [
+  "addEventListener('beforeinstallprompt'",
+  'addEventListener("beforeinstallprompt"',
+  'deferred.prompt()',
+  'deferred.userChoice'
+]) {
+  assert(!index.includes(forbidden), 'Legacy custom Chromium install flow restored: ' + forbidden);
+}

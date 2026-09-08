@@ -8,7 +8,8 @@
     const moduleClose = document.getElementById('module-modal-close');
 
     if (install) {
-      install.addEventListener('click', () => {
+      install.addEventListener('click', event => {
+        event.preventDefault();
         if (window.StudihomePWA) {
           window.StudihomePWA.show();
         }

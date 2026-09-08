@@ -55,13 +55,13 @@
     </style>
     <script>
       (function () {
-        var deferred, el;
+        var el;
         var isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
         var DISMISS_KEY = 'studihome-pwa-dismissed-v2';
-        var DISMISS_TTL = 7 * 24 * 60 * 60 * 1000; // 7 days
+        var DISMISS_TTL = 7 * 24 * 60 * 60 * 1000;
 
         function isInstalled() {
-          if (window.navigator.standalone) return true; // iOS standalone
+          if (window.navigator.standalone) return true;
           if (window.matchMedia('(display-mode: standalone)').matches) return true;
           return false;
         }
@@ -99,78 +99,44 @@
             + '<div class="sh-pwa-benefit"><i class="fa-solid fa-shield-halved"></i>Pengalaman lebih cepat & ringan</div>'
             + '</div>';
 
-          var actions;
-          if (ios) {
-            actions = '<div class="sh-pwa-ios-note">'
-              + 'Tap ikon <b>Share \u2191</b> di Safari, lalu pilih <b>"Add to Home Screen"</b> untuk menginstal Studihome.'
-              + '</div>'
-              + '<div class="sh-pwa-actions" style="margin-top:.75rem">'
-              + '<button class="sh-pwa-dismiss" style="flex:1">Mengerti</button>'
-              + '</div>';
-          } else {
-            actions = '<div class="sh-pwa-actions">'
-              + '<button class="sh-pwa-dismiss">Nanti Saja</button>'
-              + '<button class="sh-pwa-btn-install">Instal Sekarang</button>'
-              + '</div>';
-          }
+          var guidance = ios
+            ? '<div class="sh-pwa-ios-note">Tap ikon <b>Share ↑</b> di Safari, lalu pilih <b>"Add to Home Screen"</b>.</div>'
+            : '<div class="sh-pwa-ios-note">Gunakan ikon <b>Install</b> di address bar atau menu browser untuk memasang Studihome.</div>';
 
           el.innerHTML = '<div class="sh-pwa-card">'
             + '<div class="sh-pwa-header">'
-            + '<div class="sh-pwa-star">\u2726</div>'
+            + '<div class="sh-pwa-star">✦</div>'
             + '<div class="sh-pwa-title">Instal Studihome</div>'
             + '<div class="sh-pwa-sub">Akses cepat & pengalaman lebih baik</div>'
             + '</div>'
             + '<div class="sh-pwa-body">'
             + benefits
-            + actions
-            + '</div></div>';
+            + guidance
+            + '<div class="sh-pwa-actions" style="margin-top:.75rem">'
+            + '<button class="sh-pwa-dismiss" style="flex:1">Mengerti</button>'
+            + '</div></div></div>';
 
           document.body.appendChild(el);
-
-          // Close on backdrop click
-          el.addEventListener('click', function (e) {
-            if (e.target === el) dismiss();
+          el.addEventListener('click', function (event) {
+            if (event.target === el) dismiss();
           });
-
-          // Dismiss button
           el.querySelector('.sh-pwa-dismiss').onclick = dismiss;
-
-          // Install button (Android/Desktop)
-          var ib = el.querySelector('.sh-pwa-btn-install');
-          if (ib) ib.onclick = function () {
-            if (!deferred) return;
-            deferred.prompt();
-            deferred.userChoice.then(function (r) {
-              if (r.outcome === 'accepted') {
-                try { localStorage.setItem(DISMISS_KEY, String(Date.now())); } catch (_) {}
-              }
-              hide();
-              deferred = null;
-            });
-          };
-
           return el;
         }
 
-        // Android/Desktop: listen for beforeinstallprompt
-        window.addEventListener('beforeinstallprompt', function (e) {
-          e.preventDefault();
-          deferred = e;
-          show();
-        });
-
-        // On successful install
         window.addEventListener('appinstalled', function () {
           try { localStorage.setItem(DISMISS_KEY, String(Date.now())); } catch (_) {}
           hide();
-          deferred = null;
         });
 
-        // iOS: show after short delay (no beforeinstallprompt on iOS)
         if (isIOS && !window.navigator.standalone) {
           setTimeout(show, 4000);
         }
-        window.StudihomePWA = { show: show };
+
+        window.StudihomePWA = {
+          show: show,
+          usesNativeInstallUI: true
+        };
 
         /* Push Notification Subscription Manager */
         window.StudihomePWA = window.StudihomePWA || {};
