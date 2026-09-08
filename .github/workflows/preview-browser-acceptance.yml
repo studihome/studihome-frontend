@@ -47,6 +47,8 @@ jobs:
       PR_NUMBER: ${{ github.event.pull_request.number }}
       MANUAL_PREVIEW_URL: ${{ inputs.preview_url }}
       VERCEL_AUTOMATION_BYPASS_SECRET: ${{ secrets.VERCEL_AUTOMATION_BYPASS_SECRET }}
+      STUDIHOME_E2E_EMAIL: ${{ secrets.STUDIHOME_E2E_EMAIL }}
+      STUDIHOME_E2E_PASSWORD: ${{ secrets.STUDIHOME_E2E_PASSWORD }}
 
     steps:
       - name: Checkout exact source
@@ -185,8 +187,8 @@ jobs:
         if: failure()
         shell: bash
         run: |
-          if [ -n "${VERCEL_AUTOMATION_BYPASS_SECRET:-}" ]; then
-            echo "ChromeDriver diagnostics withheld because Vercel automation bypass is configured."
+          if [ -n "${VERCEL_AUTOMATION_BYPASS_SECRET:-}" ] || [ -n "${STUDIHOME_E2E_PASSWORD:-}" ]; then
+            echo "ChromeDriver diagnostics withheld because protected CI credentials are configured."
           else
             cat /tmp/studihome-chromedriver.log >&2 || true
           fi

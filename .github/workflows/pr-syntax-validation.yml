@@ -369,6 +369,11 @@ jobs:
               'def parse_bypass_cookies(',
               'Network.setCookie',
               'x-vercel-set-bypass-cookie',
+              'def run_authenticated_checkout_dry_run(',
+              'STUDIHOME_E2E_EMAIL',
+              'STUDIHOME_E2E_PASSWORD',
+              'window.__studihomeE2EOriginalPost=App.api.post',
+              '"database_mutation": False',
           ]
           for marker in workflow_required:
               if marker not in workflow:
@@ -382,6 +387,8 @@ jobs:
               '?x-vercel-protection-bypass=',
               '&x-vercel-protection-bypass=',
               'chromedriver --port=9515 --verbose',
+              '--e2e-email',
+              '--e2e-password',
           ]
           for marker in forbidden:
               if marker in combined:

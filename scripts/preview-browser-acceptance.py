@@ -33,6 +33,11 @@ class PreviewAccessBlocked(AcceptanceError):
     pass
 
 
+class AcceptancePrerequisiteBlocked(AcceptanceError):
+    """Required protected acceptance credentials or fixtures are unavailable."""
+    pass
+
+
 def require(condition: bool, message: str) -> None:
     if not condition:
         raise AcceptanceError(message)
@@ -333,7 +338,133 @@ def wait_app(driver: Driver, expected_host: str) -> None:
     raise AcceptanceError(f"Timed out waiting for Studihome App boot; last={last!r}")
 
 
-def run(preview_url: str, driver_url: str, screenshot: str, bypass_secret: str = "") -> None:
+
+def run_authenticated_checkout_dry_run(
+    driver: Driver,
+    email: str,
+    password: str,
+) -> dict[str, Any]:
+    if not email or not password:
+        raise AcceptancePrerequisiteBlocked(
+            "Authenticated checkout secrets STUDIHOME_E2E_EMAIL/STUDIHOME_E2E_PASSWORD are not configured."
+        )
+
+    driver.js("App.ui.toggleModal('auth-modal',true); App.auth.toggleAuthMode('login'); return true;")
+    wait_js(driver, visible("#login-form"), "authenticated login form")
+    driver.keys("#login-email", email)
+    driver.keys("#login-password", password)
+    driver.js("document.getElementById('login-form').requestSubmit(); return true;")
+    user = wait_js(
+        driver,
+        "return App.state.user && App.state.user.id ? {id:App.state.user.id,role:String(App.state.user.role||'')} : null;",
+        "authenticated member session",
+        30,
+    )
+    role = str((user or {}).get("role") or "").lower()
+    require(role not in {"admin", "staff"}, "E2E checkout account must be a non-admin member")
+
+    candidate = driver.js("""
+      const products=(App.state.publicData?.products||[]).filter(
+        p => !p.isFree && Number(p.price)>0 && App.products.getUserProductStatus(p.id)==='AVAILABLE'
+      );
+      const p=products[0];
+      return p ? {id:p.id,title:p.title,price:Number(p.price)} : null;
+    """)
+    require(bool(candidate and candidate.get("id")), "No safe AVAILABLE paid product exists for the E2E member")
+
+    prepared = driver.js("""
+      const p=(App.state.publicData?.products||[]).find(x=>x.id===arguments[0]);
+      if(!p)return false;
+      window.__studihomeE2EOriginalPost=App.api.post;
+      window.__studihomeE2ECalls=[];
+      App.api.post=async function(action,payload={}){
+        if(action==='CREATE_ORDER'){
+          window.__studihomeE2ECalls.push({action,productId:payload.productId||''});
+          return {orderId:'preview-e2e-order'};
+        }
+        if(action==='SUBMIT_PAYMENT'){
+          window.__studihomeE2ECalls.push({action,orderId:payload.orderId||''});
+          return {success:true};
+        }
+        if(action==='GET_MEMBER_DASHBOARD'){
+          return App.state.memberData;
+        }
+        return window.__studihomeE2EOriginalPost.call(App.api,action,payload);
+      };
+      window.open=()=>null;
+      const master=App.state.publicData.master||(App.state.publicData.master={});
+      const slots=Array.isArray(master.qrisSlots)?master.qrisSlots:[];
+      master.qrisSlots=[
+        ...slots.filter(q=>Number(q.price)!==Number(p.price)),
+        {price:Number(p.price),qrisUrl:location.origin+'/icons/icon-192.png'}
+      ];
+      App.shop.startCheckout(p.id);
+      return true;
+    """, str(candidate["id"]))
+    require(bool(prepared), "Unable to prepare non-mutating checkout dry-run")
+
+    wait_js(driver, visible("#checkout-modal"), "checkout modal")
+    wait_js(
+        driver,
+        "return !!document.querySelector('#checkout-modal-content [data-shop-submit=\"order-step1\"]');",
+        "checkout step 1",
+    )
+    if not driver.js("return !!document.getElementById('co-name')?.value.trim();"):
+        driver.js("document.getElementById('co-name').value='Preview E2E Member'; return true;")
+    if not driver.js("return !!document.getElementById('co-phone')?.value.trim();"):
+        driver.js("document.getElementById('co-phone').value='628111111111'; return true;")
+
+    driver.js(
+        "document.querySelector('#checkout-modal-content [data-shop-submit=\"order-step1\"]').requestSubmit(); return true;"
+    )
+    wait_js(driver, "return !!document.getElementById('confirm-payment-checkbox');", "checkout payment step", 30)
+    require(
+        driver.js("return App.state.checkout.orderId==='preview-e2e-order';"),
+        "Checkout Step 1 did not use the non-mutating synthetic order",
+    )
+
+    require(
+        driver.js("return document.getElementById('btn-confirm-payment')?.disabled===true;"),
+        "Payment confirm must start disabled",
+    )
+    driver.click("#confirm-payment-checkbox")
+    wait_js(
+        driver,
+        "return document.getElementById('btn-confirm-payment')?.disabled===false;",
+        "payment confirm enabled",
+    )
+    driver.click("#btn-confirm-payment")
+    wait_js(
+        driver,
+        "return document.getElementById('checkout-modal')?.classList.contains('hidden');",
+        "checkout close after confirmation",
+        30,
+    )
+
+    calls = driver.js("return window.__studihomeE2ECalls||[];")
+    actions = [str(item.get("action") or "") for item in (calls or []) if isinstance(item, dict)]
+    require(
+        actions == ["CREATE_ORDER", "SUBMIT_PAYMENT"],
+        f"Unexpected checkout mutation interception sequence: {actions!r}",
+    )
+
+    driver.js("""
+      if(window.__studihomeE2EOriginalPost){
+        App.api.post=window.__studihomeE2EOriginalPost;
+        delete window.__studihomeE2EOriginalPost;
+      }
+      return true;
+    """)
+
+    return {
+        "role": role,
+        "product_id": str(candidate["id"]),
+        "mutations_intercepted": actions,
+        "database_mutation": False,
+    }
+
+
+def run(preview_url: str, driver_url: str, screenshot: str, bypass_secret: str = "", e2e_email: str = "", e2e_password: str = "") -> None:
     preview_url = normalize_base_url(preview_url)
     host = urllib.parse.urlparse(preview_url).netloc
     bypass_cookies = fetch_bypass_cookies(preview_url, bypass_secret)
@@ -476,6 +607,12 @@ def run(preview_url: str, driver_url: str, screenshot: str, bypass_secret: str =
         d.click("#preview-acceptance-utility-home")
         wait_js(d, "return location.pathname==='/';", "utility home")
 
+        authenticated_checkout = run_authenticated_checkout_dry_run(
+            d,
+            e2e_email,
+            e2e_password,
+        )
+
         findings = [x for entry in d.logs() if (x := classify_log(entry, host))]
         require(not findings, "First-party browser findings: " + " | ".join(findings))
 
@@ -488,7 +625,7 @@ def run(preview_url: str, driver_url: str, screenshot: str, bypass_secret: str =
                 "top_auth_login", "home_to_foyer", "desktop_top_shell_route",
                 "mobile_top_shell_route", "utility_home", "first_party_console_runtime",
             ],
-            "authenticated_checkout": "NOT_VERIFIED",
+            "authenticated_checkout": authenticated_checkout,
         }, indent=2))
     except Exception:
         try:
@@ -548,6 +685,10 @@ def self_test() -> None:
         cookies == [{"name": "_vercel_jwt", "value": "example-cookie", "url": "https://x.vercel.app"}],
         "bypass cookie parsing",
     )
+    source = Path(__file__).read_text(encoding="utf-8")
+    require("window.__studihomeE2EOriginalPost=App.api.post" in source, "E2E API interception")
+    require("action==='CREATE_ORDER'" in source and "action==='SUBMIT_PAYMENT'" in source, "E2E mutation interception")
+    require('"database_mutation": False' in source, "E2E non-mutating result contract")
     print("Preview browser acceptance harness self-test: PASS")
 
 
@@ -564,14 +705,21 @@ def main() -> int:
     url = args.preview_url or os.environ.get("PREVIEW_URL", "")
     if not url:
         p.error("--preview-url or PREVIEW_URL is required")
-    run(url, args.driver_url, args.screenshot_path, os.environ.get("VERCEL_AUTOMATION_BYPASS_SECRET", ""))
+    run(
+        url,
+        args.driver_url,
+        args.screenshot_path,
+        os.environ.get("VERCEL_AUTOMATION_BYPASS_SECRET", ""),
+        os.environ.get("STUDIHOME_E2E_EMAIL", ""),
+        os.environ.get("STUDIHOME_E2E_PASSWORD", ""),
+    )
     return 0
 
 
 if __name__ == "__main__":
     try:
         raise SystemExit(main())
-    except PreviewAccessBlocked as exc:
+    except (PreviewAccessBlocked, AcceptancePrerequisiteBlocked) as exc:
         print(f"Preview browser acceptance: BLOCKED: {exc}", file=sys.stderr)
         raise SystemExit(2)
     except AcceptanceError as exc:
