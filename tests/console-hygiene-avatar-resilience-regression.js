@@ -33,6 +33,11 @@ assert(
 
 assert(workflow.includes("'chrome.runtime'"), 'First-party extension-messaging guard must remain active');
 assert(workflow.includes("'browser.runtime'"), 'First-party browser.runtime guard must remain active');
+assert(index.includes("updateViaCache: 'none'"), 'Home must bypass HTTP cache when checking sw.js updates');
+assert(dapur.includes("updateViaCache: 'none'"), 'Dapur must bypass HTTP cache when checking sw.js updates');
+const sw = fs.readFileSync('sw.js', 'utf8');
+assert(sw.includes("studihome-shell-v6"), 'PWA shell cache generation must stay rotated to v6');
+assert(sw.includes("studihome-runtime-v3"), 'PWA runtime cache generation must stay rotated to v3');
 assert(
   !dapur.includes("addEventListener('beforeinstallprompt'") &&
   !dapur.includes('addEventListener("beforeinstallprompt"'),

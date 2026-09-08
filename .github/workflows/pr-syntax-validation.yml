@@ -248,8 +248,8 @@ jobs:
 
           sw = Path('sw.js').read_text(encoding='utf-8')
           required_sw = [
-              "studihome-shell-v5",
-              "studihome-runtime-v2",
+              "studihome-shell-v6",
+              "studihome-runtime-v3",
               "cache.put(req, copy)",
               "if (!url.search)",
           ]
@@ -305,6 +305,18 @@ jobs:
                           f'Global promise rejection suppression is forbidden '
                           f'in first-party runtime {path}: {marker}'
                       )
+
+          expected_sw_registration = (
+              "navigator.serviceWorker.register('/sw.js', "
+              "{ scope: '/', updateViaCache: 'none' })"
+          )
+          for html_name in ('index.html', 'dapur.html'):
+              html = Path(html_name).read_text(encoding='utf-8')
+              if expected_sw_registration not in html:
+                  raise SystemExit(
+                      f'Service worker updateViaCache=none guard missing '
+                      f'in {html_name}.'
+                  )
 
           dapur = Path('dapur.html').read_text(encoding='utf-8')
           dapur_beforeinstallprompt_listener = (

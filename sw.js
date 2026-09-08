@@ -1,5 +1,5 @@
 /* ============================================================
-   Studihome Service Worker v5
+   Studihome Service Worker v6
    ─────────────────────────────────────────────────────────────
    Strategy:
      - Navigations: network-first; EVERY successful same-origin
@@ -23,8 +23,8 @@
    ============================================================ */
 'use strict';
 
-const SHELL_CACHE   = 'studihome-shell-v5';
-const RUNTIME_CACHE = 'studihome-runtime-v2';
+const SHELL_CACHE   = 'studihome-shell-v6';
+const RUNTIME_CACHE = 'studihome-runtime-v3';
 const RUNTIME_MAX   = 80;
 
 /* App shell — precached at install (tolerantly, one by one).

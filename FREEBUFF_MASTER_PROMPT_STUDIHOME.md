@@ -282,3 +282,12 @@ CONSOLE HYGIENE FOLLOW-UP — 7 SEP 2026
 - First-party source contains no browser-extension runtime messaging API; message-channel/receiving-end console errors remain external extension/content-script provenance unless reproduced in an extension-disabled browser.
 - Never add global `unhandledrejection` suppression to hide those errors.
 
+## Console stale-shell cache hardening — 8 Sep 2026
+
+- Follow-up after the native Chromium PWA install correction: current first-party source contains no `beforeinstallprompt` listener, but an older route shell can survive in a previously installed service worker runtime cache.
+- Service-worker cache namespaces are rotated to `studihome-shell-v6` and `studihome-runtime-v3`, causing activation to evict the previous v5/v2 caches without changing the network-first/offline strategy.
+- Home/Studio/Foyer and Dapur register `/sw.js` with `updateViaCache: 'none'` so update checks do not reuse an HTTP-cached worker script.
+- Release Gate and regression coverage lock the cache generations and registration contract.
+- No Supabase/database/RLS/Auth/API/Storage/application-data change is included.
+- Browser-extension/content-script errors such as `Receiving end does not exist` and `message channel closed` are still not suppressed; they remain external unless reproduced in an extension-disabled browser.
+
