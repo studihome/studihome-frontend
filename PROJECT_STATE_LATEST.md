@@ -683,3 +683,16 @@ Before continuing #81 -> #88, current console evidence was triaged.
 - Dedicated regression coverage `tests/admin-gudang-confirmed-sales-regression.js` is wired into the Release Gate.
 - No database/RLS/Auth/API/Storage/application-data mutation is included; this is a read/aggregation correction only.
 
+## PWA practical install button — 8 Sep 2026
+
+This section supersedes earlier native-only PWA prompt guidance where it conflicts.
+
+- The PWA popup now presents a primary `Instal Praktis` button instead of the default Chromium text that told users to find the browser install icon/menu.
+- Chromium-family browsers use the documented in-app install pattern: capture `beforeinstallprompt`, call `preventDefault()`, retain the event, and invoke `prompt()` only from the user's `Instal Praktis` click. The retained event is cleared before use because each event can only be prompted once.
+- Safari/iOS do not support `beforeinstallprompt`; the same button progressively falls back to concise native Safari installation guidance.
+- The popup no longer auto-closes after 14 seconds. It stays visible until the user chooses `Nanti saja` (24-hour snooze), uses an equivalent explicit dismissal, or installation succeeds.
+- `Nanti saja` is the secondary close action and its font is reduced to 10px so `Instal Praktis` remains visually dominant.
+- The prior frequency policy remains: max 3 automatic impressions per session and per 24-hour window, with a 15-minute minimum gap and route-sensitive initial delays.
+- Service-worker shell cache advances to `studihome-shell-v9` so stale route shells cannot retain the former auto-hide/native-only popup.
+- No Supabase/database/RLS/Auth/API/Storage/application-data change is included.
+

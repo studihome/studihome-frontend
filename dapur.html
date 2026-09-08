@@ -40,7 +40,7 @@
       .sh-pwa-actions{display:flex;gap:.5rem}
       .sh-pwa-btn-install{flex:1;padding:.75rem;border:none;border-radius:.875rem;background:linear-gradient(135deg,#EAB308,#F59E0B);color:#0F172A;font-weight:900;font-size:13px;cursor:pointer;transition:box-shadow .2s,transform .15s;box-shadow:0 4px 14px rgba(234,179,8,.25)}
       .sh-pwa-btn-install:hover{box-shadow:0 6px 20px rgba(234,179,8,.4);transform:translateY(-1px)}
-      .sh-pwa-btn-dismiss{padding:.75rem 1rem;border:1px solid #e2e8f0;border-radius:.875rem;background:#f8fafc;color:#64748b;font-weight:700;font-size:12px;cursor:pointer;transition:background .15s}
+      .sh-pwa-btn-dismiss{flex:0 0 auto;padding:.75rem .85rem;border:1px solid #e2e8f0;border-radius:.875rem;background:#f8fafc;color:#64748b;font-weight:700;font-size:10px;cursor:pointer;transition:background .15s}
       .sh-pwa-btn-dismiss:hover{background:#f1f5f9}
       .sh-pwa-ios-note{background:#f0f7ff;border:1px solid #bfdbfe;border-radius:.75rem;padding:.75rem;font-size:11px;color:#1e40af;line-height:1.6}
       .sh-pwa-ios-note b{font-weight:800}
@@ -51,7 +51,7 @@
       (function () {
         var el;
         var autoTimer;
-        var autoHideTimer;
+        var deferredInstallPrompt = null;
         var lastObservedPath = window.location.pathname || '/';
         var ua = navigator.userAgent || '';
         var isIOS = /iPad|iPhone|iPod/.test(ua) ||
@@ -69,7 +69,6 @@
         var SESSION_MAX = 3;
         var AUTO_MIN_GAP = 15 * 60 * 1000;
         var INSTALLED_TTL = 30 * 24 * 60 * 60 * 1000;
-        var AUTO_HIDE_MS = 14 * 1000;
 
         function readTimestamp(key, storage) {
           try {
@@ -151,14 +150,47 @@
           hide();
         }
 
-        function guidanceHtml() {
+        function fallbackInstallGuidance() {
           if (isIOS) {
-            return '<div class="sh-pwa-ios-note">Di iPhone/iPad, gunakan <b>Safari</b>: ketuk <b>Bagikan ↑</b> → <b>Tambah ke Layar Utama</b>, aktifkan <b>Buka sebagai App Web</b>, lalu ketuk <b>Tambah</b>.</div>';
+            return 'Di iPhone/iPad, gunakan <b>Safari</b>: ketuk <b>Bagikan ↑</b> → <b>Tambah ke Layar Utama</b>, aktifkan <b>Buka sebagai App Web</b>, lalu ketuk <b>Tambah</b>.';
           }
           if (isSafari) {
-            return '<div class="sh-pwa-ios-note">Di Safari Mac, pilih <b>File → Tambahkan ke Dock</b> atau <b>Bagikan → Tambahkan ke Dock</b>.</div>';
+            return 'Di Safari Mac, pilih <b>File → Tambahkan ke Dock</b> atau <b>Bagikan → Tambahkan ke Dock</b>.';
           }
-          return '<div class="sh-pwa-ios-note">Gunakan ikon <b>Install</b> di address bar atau menu browser, lalu pilih <b>Instal aplikasi</b> / <b>Tambahkan ke layar utama</b>.</div>';
+          return 'Prompt instalasi langsung belum tersedia. Buka menu browser lalu pilih <b>Instal aplikasi</b> atau <b>Tambahkan ke layar utama</b>.';
+        }
+
+        function setInstallStatus(html) {
+          if (!el) return;
+          var status = el.querySelector('#sh-pwa-install-status');
+          if (!status) return;
+          status.innerHTML = html || '';
+          status.hidden = !html;
+        }
+
+        async function installPraktis() {
+          if (isInstalled()) {
+            hide();
+            return;
+          }
+
+          if (!deferredInstallPrompt) {
+            setInstallStatus(fallbackInstallGuidance());
+            return;
+          }
+
+          var promptEvent = deferredInstallPrompt;
+          deferredInstallPrompt = null;
+          setInstallStatus('');
+
+          try {
+            var result = await promptEvent.prompt();
+            if (result && result.outcome === 'dismissed') {
+              setInstallStatus('Instalasi belum dilanjutkan. Kamu bisa memilih <b>Nanti saja</b> atau mencoba lagi saat browser menawarkan instalasi berikutnya.');
+            }
+          } catch (_) {
+            setInstallStatus(fallbackInstallGuidance());
+          }
         }
 
         function delayForPath(pathname) {
@@ -181,14 +213,11 @@
           el.setAttribute('aria-hidden', 'false');
           if (options.auto) {
             markAutoShown();
-            clearTimeout(autoHideTimer);
-            autoHideTimer = setTimeout(hide, AUTO_HIDE_MS);
           }
           return true;
         }
 
         function hide() {
-          clearTimeout(autoHideTimer);
           if (el) {
             el.classList.remove('show');
             el.setAttribute('aria-hidden', 'true');
@@ -239,20 +268,26 @@
             + '<div class="sh-pwa-sub">Lebih cepat dibuka, lebih nyaman dipakai</div>'
             + '</div>'
             + '<div class="sh-pwa-body">'
-            + benefits + guidanceHtml()
+            + benefits
+            + '<div id="sh-pwa-install-status" class="sh-pwa-ios-note" hidden></div>'
             + '<div class="sh-pwa-actions" style="margin-top:.75rem">'
-            + '<button class="sh-pwa-dismiss" style="flex:1">Nanti saja</button>'
+            + '<button type="button" class="sh-pwa-btn-install"><i class="fa-solid fa-download" aria-hidden="true"></i> Instal Praktis</button>'
+            + '<button type="button" class="sh-pwa-dismiss" aria-label="Tutup pengingat instalasi">Nanti saja</button>'
             + '</div></div></div>';
 
           document.body.appendChild(el);
-          el.addEventListener('click', function (event) {
-            if (event.target === el) dismiss();
-          });
+          el.querySelector('.sh-pwa-btn-install').onclick = installPraktis;
           el.querySelector('.sh-pwa-dismiss').onclick = dismiss;
           return el;
         }
 
+        window.addEventListener('beforeinstallprompt', function (event) {
+          event.preventDefault();
+          deferredInstallPrompt = event;
+        });
+
         window.addEventListener('appinstalled', function () {
+          deferredInstallPrompt = null;
           writeTimestamp(INSTALLED_KEY, localStorage);
           hide();
         });
@@ -270,13 +305,13 @@
           hide: hide,
           schedule: scheduleAuto,
           isInstalled: isInstalled,
-          usesNativeInstallUI: true,
+          usesCustomInstallUI: true,
           noticePolicy: {
             homeDelayMs: 18 * 1000,
             studioDelayMs: 24 * 1000,
             contentDelayMs: 30 * 1000,
             privateDelayMs: 45 * 1000,
-            autoHideMs: AUTO_HIDE_MS,
+            persistentUntilAction: true,
             maxPerSession: SESSION_MAX,
             maxPer24Hours: AUTO_MAX_PER_WINDOW,
             minGapMs: AUTO_MIN_GAP,
