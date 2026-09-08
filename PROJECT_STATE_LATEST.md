@@ -663,3 +663,12 @@ Before continuing #81 -> #88, current console evidence was triaged.
 - Service-worker shell cache advances to `studihome-shell-v7` so installed clients receive the updated notice shell while the existing network-first/offline strategy remains unchanged.
 - No Supabase/database/RLS/Auth/API/Storage/application-data change is included.
 
+## PWA notice frequency tuning — 8 Sep 2026
+
+- Automatic PWA guidance is tuned to a maximum of 3 impressions per browser session and 3 impressions per rolling 24-hour window.
+- A 15-minute minimum gap prevents route hopping from causing back-to-back install notices.
+- Explicit `Nanti saja` now snoozes the notice for 24 hours instead of 7 days.
+- The previous 3-day automatic cooldown is replaced by the 24-hour quota window; route-sensitive initial delays and the 14-second auto-hide remain unchanged.
+- Installed/standalone suppression, Admin/reset-password exclusion, native Chromium install guidance, Safari/iOS guidance, and the ban on custom `beforeinstallprompt.preventDefault()` remain unchanged.
+- Service-worker shell cache advances to `studihome-shell-v8` so installed clients receive this policy update without changing the network-first/offline strategy.
+

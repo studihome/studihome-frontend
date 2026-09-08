@@ -1,5 +1,5 @@
 /* ============================================================
-   Studihome Service Worker v7
+   Studihome Service Worker v8
    ─────────────────────────────────────────────────────────────
    Strategy:
      - Navigations: network-first; EVERY successful same-origin
@@ -23,7 +23,7 @@
    ============================================================ */
 'use strict';
 
-const SHELL_CACHE   = 'studihome-shell-v7';
+const SHELL_CACHE   = 'studihome-shell-v8';
 const RUNTIME_CACHE = 'studihome-runtime-v3';
 const RUNTIME_MAX   = 80;
 
