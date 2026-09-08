@@ -42,13 +42,13 @@ CONSOLE TRIAGE BASELINE — 7 SEP 2026
 - `/studio-ai` message-channel errors (`Receiving end does not exist`, `listener indicated an asynchronous response... channel closed`) have no matching `chrome.runtime`/`browser.runtime`/`sendMessage`/`onMessage` implementation in the repository; classify as external/browser-extension provenance unless a Studihome-owned stack frame is proven;
 - YouTube `compute-pressure` warnings are third-party iframe diagnostics; do not relax Studihome Permissions-Policy to silence them;
 - Chromium `powerPreference ... ignored on Windows` is browser diagnostic noise;
-- `beforeinstallprompt.preventDefault()` can be expected for a custom install flow; only change code if the user-facing install action itself is broken;
+- SUPERSEDED 8 Sep 2026: Home/Studio/Foyer use browser-native Chromium install UI; custom interception must not be restored.
 - reproduce console reports with extensions disabled/incognito before modifying runtime.
 
 FIRST-PARTY CONSOLE REGRESSION GUARD
 - Release Gate must reject `chrome.runtime` / `browser.runtime` messaging in first-party browser runtimes unless deliberately audited;
 - Service Worker `message` channels require an explicit audited contract;
-- preserve the custom PWA install chain: beforeinstallprompt + preventDefault + saved event + prompt + userChoice + appinstalled;
+- SUPERSEDED 8 Sep 2026: preserve native Chromium install UI + iOS guidance + appinstalled cleanup; do not restore beforeinstallprompt interception.
 - never add global error/rejection swallowing merely to hide third-party console noise.
 
 PORTFOLIO CANONICAL CONTRACT
@@ -264,21 +264,131 @@ ISSUE #83 LIVE APPLY — 7 SEP 2026
 - Canonical rollback: `supabase/rollbacks/20260907110644_restore_redundant_entitlements_user_product_index.sql`.
 - PR #105 must rerun exact-head Release Gate + Vercel Preview after source-version reconciliation before merge.
 
+ISSUE #98 PHASE A — STATIC SEARCH ACTIONS PREP / 7 SEP 2026
+- Extract only 7 static Search/home-brand handlers from HTML into same-origin `static-search-actions.js`.
+- Static handler count becomes 18 from 25; static onkeydown becomes zero.
+- Preserve desktop/mobile open, close buttons, Enter submit, button submit, and brand-home navigation.
+- Do not mix Auth, Smart Brief, generated templates, CSS, CSP enforcement, DB, or API changes.
+- Regression + JS syntax gate required.
+- Keep draft/unmerged until Vercel Preview + Search keyboard/mouse browser acceptance pass.
+
+ISSUE #98 PHASE B — STATIC STUDIO BRIEF PREP / 7 SEP 2026
+- Stack on Phase A; never merge Phase B first.
+- Extract exactly 6 Smart Brief static onclick handlers to `static-studio-brief-actions.js`.
+- Static handler count becomes 12.
+- Preserve both close actions, three exact refinement values, and submit button element semantics.
+- No Auth/generated-template/CSS/CSP/DB/API change.
+- Keep draft until Phase A lands, branch is resynced, Preview succeeds, and Smart Brief browser acceptance passes.
+
+ISSUE #98 PHASE C — STATIC AUTH PREP / 7 SEP 2026
+- Stack after Phase A then B; never merge out of order.
+- Extract exactly 8 Auth static handlers to `static-auth-actions.js`.
+- Static handler count becomes 4; static onsubmit/onkeydown become zero.
+- Preserve login/register/forgot native submit Event objects, auth-mode switches, and auth modal close behavior.
+- No generated-template/CSS/CSP/DB/API change.
+- Keep draft until prior phases land, branch is resynced, Preview passes, and Auth browser acceptance passes.
+
+ISSUE #98 PHASE D — ZERO STATIC HANDLERS PREP / 7 SEP 2026
+- Stack after A -> B -> C; never merge out of order.
+- Extract final 4 static handlers to `static-shell-actions.js`.
+- Static inline event-handler count becomes ZERO.
+- Keep PWA href/default behavior and product iframe cleanup-before-close ordering.
+- javascript: URLs remain zero.
+- Generated template handlers/styles are a separate later phase.
+- Keep draft until prior phases land, branch is resynced, Preview succeeds, and PWA/modal browser acceptance passes.
+
+ISSUE #98 PHASE E — SMART GENERATED ACTION PREP / 7 SEP 2026
+- Correct generated HTML-event baseline is 184; DOM property `.onclick = fn` assignments are not script-src-attr blockers.
+- Stack after static A-D.
+- Remove only the one SMART Team-vs-Solo generated onclick via `data-smart-next-action` + delegated listener.
+- Generated HTML event attributes become 183, all in core runtime script #5.
+- Do not change ranking, CSS, CSP enforcement, DB, API, or data.
+- Keep draft until prior phases land, branch is resynced, Preview succeeds, and SMART browser acceptance passes.
+
+ISSUE #98 PHASE F — GENERATED TOP SHELL PREP / 7 SEP 2026
+- Stack after A-E; never merge out of order.
+- Remove 4 generated top-nav/top-auth HTML handlers via data contracts + delegated listener.
+- Generated HTML event attributes become 179.
+- Preserve App.router.navigate, App.auth.logout, and auth-modal open behavior.
+- No other core handler/CSS/CSP/DB/API change.
+- Keep draft until prior phases land, branch is resynced, Preview succeeds, and top-nav/Auth browser acceptance passes.
+
+ISSUE #98 PHASE G — GENERATED HOME ACTIONS PREP / 7 SEP 2026
+- Stack after A-F; never merge out of order.
+- Remove all 3 Home generated HTML event attributes plus the Home runtime setAttribute('onclick') write.
+- Generated handler count becomes 176; dynamic onclick setters become 2.
+- Use data-home-cta-url / data-home-route + delegated main-content listener.
+- Preserve App.home.handleCtaClick, App.router.navigate, and existing Hero Promo selector semantics.
+- No Studio AI/Creator/Admin/CSS/CSP/DB/API change.
+- Keep draft until prior phases land, branch is resynced, Preview succeeds, and Home/Hero browser acceptance passes.
+
+ISSUE #98 PHASE H — GENERATED UTILITY ACTIONS PREP / 7 SEP 2026
+- Continue on canonical PR #114.
+- Remove 2 utility generated HTML handlers: backend reload + reset-password back-home.
+- Generated handler count becomes 174; ui/auth sections each become zero.
+- Use data-global-action + delegated main-content listener.
+- Preserve window.location.reload and App.router.navigate('home') semantics.
+- No Shop/Studio AI/Creator/Admin/CSS/CSP/DB/API change.
+
+ISSUE #98 PHASE I — GENERATED SHOP ACTIONS PREP / 7 SEP 2026
+- Continue on canonical PR #114 after Phase H.
+- Remove exactly 4 Shop generated HTML event attributes: submitOrderStep1 onsubmit, payment checkbox onchange, payment-confirm onclick, checkout-close onclick.
+- Generated handler count becomes 170; Shop section becomes zero.
+- Use data-shop-submit / data-shop-change / data-shop-action with one delegated binder on checkout-modal-content.
+- Preserve native submit Event -> App.shop.submitOrderStep1(event), App.shop.updatePaymentConfirmButton(), App.shop.submitPaymentConfirmation(), and App.ui.toggleModal('checkout-modal', false).
+- Regression must lock <=170 global generated handlers, zero Shop generated handlers, exact data-contract cardinality, one loader, no network/Supabase/markup injection, and executable VM DOM simulation for submit/change/click, idempotency, nested targets, unknown actions, and outside-container rejection.
+- No CSS/style cleanup, strict CSP enforcement, DB, API, Storage, Creator, Admin, or Studio AI behavior change.
+- Keep draft/unmerged until exact-head Release Gate PASS, Vercel Preview SUCCESS, Shop browser acceptance, and no new first-party console errors.
+
+RELEASE CHECKLIST AUTHORITY REFRESH — 7 SEP 2026
+- Treat `RELEASE_CHECKLIST_STUDIHOME.md` as current release-decision authority.
+- Source main: `175110a8a3165611798919f0ed0bc37939d24661`; last fully production-verified application runtime: `57cd6e5e95890706f6954ee085bca0fadba088a7`.
+- PR #114 A–I is automated-gate green at Release Gate #723 but still browser-acceptance BLOCKED.
+- Never turn NOT VERIFIED browser items into PASS from source/VM tests alone.
+- Supabase leaked-password protection is accepted/plan-limited on Free.
+- Do not expand PR #114 into Phase J before A–I browser acceptance/merge.
+
+REAL-CHROMIUM CSP ACTION-BINDER SMOKE — 7 SEP 2026
+- Release Gate owns `tests/csp-actions-browser-smoke.html`: dependency-free local real-Chromium smoke for A–I external action binders.
+- Use the runner-provided Chrome/Chromium + local Python HTTP server; do not add npm/Playwright solely for this bounded binder test.
+- Treat PASS as real browser event/delegation evidence only, not authenticated Preview/production E2E or visual parity.
+- Browser errors/unhandled rejections in the harness are failures.
+- Full PR #114 browser acceptance remains required before merge.
+\n\nEXACT-HEAD PREVIEW BROWSER ACCEPTANCE AUTOMATION — 7 SEP 2026\n- `scripts/preview-browser-acceptance.py` + `Studihome Preview Browser Acceptance` are the public Preview browser gate.\n- The workflow must resolve a `https://*.vercel.app` Preview and require `/api/version.commit == PR head SHA` before testing.\n- Use runner ChromeDriver directly; do not add Selenium/Playwright/npm solely for this gate.\n- Treat its PASS as public full-App Preview interaction evidence, not authenticated checkout/payment E2E.\n- Authenticated paid checkout remains a separate blocker until real credentials/evidence are available.\n- Do not expand PR #114 into Phase J while that blocker remains.\n\n\nPREVIEW ACCEPTANCE RESOLVER CORRECTION — 7 SEP 2026\n- Run #1 failure occurred before ChromeDriver; classify it as resolver automation failure, not app regression.\n- Exact-head resolver now requires Vercel commit status SUCCESS for the PR head SHA and extracts Preview URL with Python.\n- `/api/version` matching remains preferred when JSON; non-JSON bodies must never crash parsing.\n- Browser App boot + public interaction assertions remain fail-closed.\n\n\nPREVIEW WORKFLOW SYNTAX + QUOTA-SAFE BINDING — 7 SEP 2026\n- Run #2 zero-job failure was invalid YAML in the CI workflow, not an app/browser failure.\n- Preview workflow must remain heredoc-free unless block indentation is validated.\n- If exact-head Vercel is quota-blocked, nearest first-parent Vercel-SUCCESS ancestor may be used only when every intervening path is in the explicit non-runtime allowlist.\n- Any unknown/runtime path disables fallback.\n- `/api/version` non-empty commit mismatch is always fatal.\n- Browser App boot + interaction assertions still must PASS.\n
+
+VERCEL PREVIEW PROTECTION BLOCKER — 7 SEP 2026
+- Release Gate #728 PASS at head `7ad104f32aeb5f7d5afa1a4a74c67774807658d8`.
+- Preview Browser #3 reached ChromeDriver but Vercel redirected the Preview to `vercel.com/login?...sso-api...` before Studihome boot.
+- Treat this as Deployment Protection/SSO BLOCKED, never as a Studihome console/runtime regression.
+- Harness must fail fast with `Preview browser acceptance: BLOCKED` for Vercel login/SSO redirects.
+- Do not exclude or suppress genuine errors after the browser remains on the expected Preview host.
+- PR #114 stays draft; authenticated paid checkout remains NOT VERIFIED; Phase J stays unopened.
+
 CONSOLE HYGIENE FOLLOW-UP — 7 SEP 2026
 - Treat `social-proof-widget.js?v=13` success logs as stale-client evidence; current widget source contains only real failure warnings. Current fix bumps the runtime reference to v15.
 - Dapur must not cancel `beforeinstallprompt`; Chromium uses native PWA install UI there, while iOS retains Share -> Add to Home Screen guidance.
-- Home intentionally retains the standards-documented custom Chromium flow: cancel `beforeinstallprompt`, store it, call `prompt()` only from a user action. Do not degrade that UX solely to hide Chrome's diagnostic.
+- SUPERSEDED 8 Sep 2026: Home/Studio/Foyer intentionally use native Chromium install UI to eliminate the first-party banner diagnostic while keeping install guidance.
 - First-party root JS/HTML must contain no `chrome.runtime`, `browser.runtime`, runtime `sendMessage`/onMessage, or global `unhandledrejection` suppression.
 - Repeated "message channel closed" console rejections observed with extensions are external unless reproducible in a clean browser with extensions disabled.
 - No DB/API/Auth/Storage/data change belongs to this console fix.
 
+PREVIEW PROTECTION AUTOMATION SUPPORT — 8 SEP 2026
+- Preview Browser automation supports optional Vercel Protection Bypass without hardcoded credentials.
+- GitHub Actions reads only `VERCEL_AUTOMATION_BYPASS_SECRET`; missing/empty secret preserves fail-closed Deployment Protection classification.
+- Resolver requests use `x-vercel-protection-bypass` when configured.
+- Browser acceptance never receives the raw bypass secret. A direct protected `/api/version` bootstrap requests a bypass cookie without following redirects, then injects only that cookie into Chrome before navigation.
+- ChromeDriver runs at WARNING log level; raw diagnostics are withheld when bypass is configured to avoid credential/cookie disclosure.
+- Release Gate forbids bypass secrets in query strings and verbose ChromeDriver mode.
+- This support changes CI/browser acceptance only; no application runtime, API contract, Supabase, Auth, Storage, RLS, or data behavior changes.
+
 ## Console/PWA native-install correction — 8 Sep 2026
 
-- User-observed Studio AI Chromium banner diagnostic was confirmed first-party.
-- Home/Studio/Foyer no longer intercept `beforeinstallprompt`; Chromium/Desktop uses browser-native install UI, matching Dapur.
-- Footer Instal remains guidance-only: browser install icon/menu on Chromium/Desktop; Share -> Add to Home Screen on iOS.
+- User-observed `studio-ai: Banner not shown: beforeinstallpromptevent.preventDefault()` was confirmed first-party.
+- Home/Studio/Foyer shell no longer intercepts `beforeinstallprompt`; Chromium/Desktop now relies on browser-native install affordance, matching Dapur.
+- Footer `Instal` remains functional as guidance: Chromium/Desktop explains using the browser install icon/menu; iOS keeps Share -> Add to Home Screen.
 - `appinstalled` cleanup remains.
-- Release Gate forbids Home/Studio `beforeinstallprompt`, `deferred.prompt()`, and `deferred.userChoice`.
-- First-party source contains no browser-extension runtime messaging API; message-channel/receiving-end console errors remain external extension/content-script provenance unless reproduced in an extension-disabled browser.
-- Never add global `unhandledrejection` suppression to hide those errors.
+- Release Gate now forbids `beforeinstallprompt`, `deferred.prompt()`, and `deferred.userChoice` in the Home/Studio shell and requires `usesNativeInstallUI: true`.
+- First-party runtime still contains no `chrome.runtime`, `browser.runtime`, runtime sendMessage/onMessage, or global `unhandledrejection` suppression.
+- Repeated `Could not establish connection. Receiving end does not exist` / `message channel closed` console lines have no matching Studihome messaging API and remain browser-extension/content-script provenance unless reproduced in a clean extension-disabled browser.
+- Do not add page-level rejection suppression to hide extension noise.
 

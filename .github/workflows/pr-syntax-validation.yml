@@ -32,7 +32,7 @@ jobs:
       - name: JavaScript syntax
         run: |
           set -euo pipefail
-          for file in             studio-ai-creator-card.js             dapur-entry.js             dapur-editor.js             sw.js             supabase-sdk-loader-v1.js             supabase-config.js             api/agent-search.js             api/index-push.js             api/markdown.js             api/sitemap.js             api/version.js             portfolio-route.js
+          for file in             static-search-actions.js             static-studio-brief-actions.js             static-auth-actions.js             static-shell-actions.js             generated-top-shell-actions.js             generated-home-actions.js             generated-utility-actions.js             generated-shop-actions.js             studio-ai-creator-card.js             dapur-entry.js             dapur-editor.js             sw.js             supabase-sdk-loader-v1.js             supabase-config.js             api/agent-search.js             api/index-push.js             api/markdown.js             api/sitemap.js             api/version.js             portfolio-route.js
           do
             if [ -f "$file" ]; then
               echo "Checking $file"
@@ -87,6 +87,12 @@ jobs:
                   f'{html_name}: validated {checked} inline '
                   'JavaScript blocks.'
               )
+
+      - name: GitHub Actions YAML syntax
+        shell: bash
+        run: |
+          set -euo pipefail
+          ruby -e 'require "yaml"; ARGV.each { |path| YAML.parse_file(path); puts "GitHub Actions YAML syntax: PASS #{path}" }' .github/workflows/*.yml
 
       - name: Structured configuration validation
         shell: python3 {0}
@@ -349,6 +355,55 @@ jobs:
 
           print('First-party messaging/PWA prompt guardrails: PASS')
 
+      - name: Preview protection automation guardrails
+        shell: python3 {0}
+        run: |
+          from pathlib import Path
+
+          workflow = Path('.github/workflows/preview-browser-acceptance.yml').read_text(encoding='utf-8')
+          harness = Path('scripts/preview-browser-acceptance.py').read_text(encoding='utf-8')
+
+          workflow_required = [
+              'VERCEL_AUTOMATION_BYPASS_SECRET:',
+              'x-vercel-protection-bypass',
+              '--log-level=WARNING',
+              'for readiness_attempt in $(seq 1 30); do',
+              'Vercel source not ready yet (attempt $readiness_attempt/30)',
+              'ChromeDriver diagnostics withheld because protected CI credentials are configured.',
+          ]
+          harness_required = [
+              'def protection_headers(',
+              'def fetch_bypass_cookies(',
+              'def parse_bypass_cookies(',
+              'Network.setCookie',
+              'x-vercel-set-bypass-cookie',
+              'def run_authenticated_checkout_dry_run(',
+              'STUDIHOME_E2E_EMAIL',
+              'STUDIHOME_E2E_PASSWORD',
+              'window.__studihomeE2EOriginalPost=App.api.post',
+              '"database_mutation": False',
+          ]
+          for marker in workflow_required:
+              if marker not in workflow:
+                  raise SystemExit(f'Preview workflow bypass guard missing: {marker}')
+          for marker in harness_required:
+              if marker not in harness:
+                  raise SystemExit(f'Preview harness bypass guard missing: {marker}')
+
+          combined = workflow + '\n' + harness
+          forbidden = [
+              '?x-vercel-protection-bypass=',
+              '&x-vercel-protection-bypass=',
+              'chromedriver --port=9515 --verbose',
+              '--e2e-email',
+              '--e2e-password',
+          ]
+          for marker in forbidden:
+              if marker in combined:
+                  raise SystemExit(f'Unsafe Preview bypass pattern detected: {marker}')
+
+          print('Preview protection automation guardrails: PASS')
+
       - name: SEO, trust, and crawl guardrails
         shell: python3 {0}
         run: |
@@ -573,6 +628,85 @@ jobs:
 
       - name: Dapur auth modal accessibility regression
         run: node tests/dapur-auth-modal-accessibility-regression.js
+
+      - name: CSP static Search actions regression
+        run: node tests/csp-static-search-actions-regression.js
+
+      - name: CSP static Studio Brief actions regression
+        run: node tests/csp-static-studio-brief-actions-regression.js
+
+      - name: CSP static Auth actions regression
+        run: node tests/csp-static-auth-actions-regression.js
+
+      - name: CSP zero static inline handlers regression
+        run: node tests/csp-static-shell-actions-regression.js
+
+      - name: CSP SMART generated action regression
+        run: node tests/csp-smart-generated-action-regression.js
+
+      - name: CSP generated top-shell actions regression
+        run: node tests/csp-generated-top-shell-actions-regression.js
+
+      - name: CSP generated Home actions regression
+        run: node tests/csp-generated-home-actions-regression.js
+
+      - name: CSP generated utility actions regression
+        run: node tests/csp-generated-utility-actions-regression.js
+
+      - name: CSP generated Shop actions regression
+        run: node tests/csp-generated-shop-actions-regression.js
+
+      - name: CSP action binders real-Chromium smoke
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          browser=""
+          for candidate in google-chrome chromium google-chrome-stable chromium-browser; do
+            if command -v "$candidate" >/dev/null 2>&1; then
+              browser="$(command -v "$candidate")"
+              break
+            fi
+          done
+          if [ -z "$browser" ]; then
+            echo "No Chrome/Chromium binary found on the GitHub runner." >&2
+            exit 1
+          fi
+
+          python3 -m http.server 8765 --bind 127.0.0.1             >/tmp/studihome-csp-browser-http.log 2>&1 &
+          server_pid=$!
+          trap 'kill "$server_pid" >/dev/null 2>&1 || true' EXIT
+
+          ready=0
+          for _ in $(seq 1 20); do
+            if curl -fsS               http://127.0.0.1:8765/tests/csp-actions-browser-smoke.html               >/dev/null; then
+              ready=1
+              break
+            fi
+            sleep 0.25
+          done
+          if [ "$ready" -ne 1 ]; then
+            cat /tmp/studihome-csp-browser-http.log >&2 || true
+            echo "Local browser-smoke server did not become ready." >&2
+            exit 1
+          fi
+
+          if ! timeout 20s "$browser"             --headless=new             --disable-gpu             --no-sandbox             --virtual-time-budget=3000             --dump-dom             http://127.0.0.1:8765/tests/csp-actions-browser-smoke.html             >/tmp/studihome-csp-browser-dom.html             2>/tmp/studihome-csp-browser-chrome.log; then
+            cat /tmp/studihome-csp-browser-chrome.log >&2 || true
+            exit 1
+          fi
+
+          cat /tmp/studihome-csp-browser-dom.html
+          if ! grep -q 'id="csp-browser-smoke-result">PASS<'             /tmp/studihome-csp-browser-dom.html; then
+            cat /tmp/studihome-csp-browser-chrome.log >&2 || true
+            echo "Real-Chromium CSP action-binder smoke did not pass." >&2
+            exit 1
+          fi
+
+      - name: Preview browser acceptance harness self-test
+        run: |
+          python3 -m py_compile scripts/preview-browser-acceptance.py
+          python3 scripts/preview-browser-acceptance.py --self-test
 
       - name: Admin bulk portfolio intake regression
         run: node tests/admin-bulk-portfolio-intake-regression.js

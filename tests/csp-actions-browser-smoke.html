@@ -1,0 +1,305 @@
+<!doctype html>
+<html lang="en" data-csp-browser-smoke="pending">
+<head>
+  <meta charset="utf-8">
+  <title>Studihome CSP action binder browser smoke</title>
+</head>
+<body>
+  <pre id="csp-browser-smoke-result">PENDING</pre>
+
+  <a id="studihome-brand-home" href="#brand">Brand</a>
+  <button id="global-search-open-desktop">Open desktop</button>
+  <button id="global-search-open-mobile">Open mobile</button>
+  <button id="global-search-close-icon">Close icon</button>
+  <button id="global-search-close-secondary">Close secondary</button>
+  <input id="global-search-modal-input" value="kelas empat">
+  <button id="global-search-submit">Submit search</button>
+
+  <button id="studio-smart-close-icon">Studio close icon</button>
+  <button id="studio-smart-close-secondary">Studio close secondary</button>
+  <button data-studio-refinement="yang lebih murah">Murah</button>
+  <button data-studio-refinement="khusus TikTok">TikTok</button>
+  <button data-studio-refinement="selesai 3 hari">3 hari</button>
+  <button id="studio-smart-submit">Studio submit</button>
+
+  <button id="auth-modal-close">Auth close</button>
+  <button data-auth-mode="login">Login mode</button>
+  <button data-auth-mode="register">Register mode</button>
+  <button data-auth-mode="forgot">Forgot mode</button>
+  <button data-auth-mode="login">Back login mode</button>
+  <form id="login-form"><button type="submit">Login submit</button></form>
+  <form id="register-form"><button type="submit">Register submit</button></form>
+  <form id="forgot-form"><button type="submit">Forgot submit</button></form>
+
+  <a id="pwa-install-link" href="#install">Install</a>
+  <div id="product-detail-modal"><iframe src="about:blank"></iframe></div>
+  <button id="product-detail-modal-close">Product close</button>
+  <button id="checkout-modal-close">Checkout close static</button>
+  <button id="module-modal-close">Module close</button>
+
+  <div id="top-nav-links">
+    <button data-app-route="products"><span id="desktop-route-child">Products</span></button>
+  </div>
+  <div id="mobile-nav-links">
+    <button data-app-route="home"><span id="mobile-route-child">Home</span></button>
+  </div>
+  <div id="top-auth-area">
+    <button data-top-auth-action="login"><span id="top-login-child">Login</span></button>
+    <button data-top-auth-action="logout"><span id="top-logout-child">Logout</span></button>
+  </div>
+
+  <main id="main-content">
+    <button data-home-cta-url="https://example.test/cta"><span id="home-cta-child">CTA</span></button>
+    <button data-home-route="studio-ai"><span id="home-route-child">Studio</span></button>
+    <button data-global-action="home"><span id="utility-home-child">Back home</span></button>
+    <button data-global-action="reload" id="utility-reload">Reload</button>
+  </main>
+
+  <div id="checkout-modal-content">
+    <form data-shop-submit="order-step1" id="shop-step1-form">
+      <button type="submit">Shop submit</button>
+    </form>
+    <input type="checkbox" data-shop-change="payment-confirm" id="shop-payment-check">
+    <button data-shop-action="payment-confirm" id="shop-payment-confirm"><span id="shop-confirm-child">Confirm</span></button>
+    <button data-shop-action="checkout-close" id="shop-checkout-close"><span id="shop-close-child">Close</span></button>
+  </div>
+
+  <script>
+    (() => {
+      'use strict';
+
+      const calls = {
+        routes: [],
+        searchOpen: 0,
+        searchClose: 0,
+        searchSubmit: [],
+        studioClose: 0,
+        refinements: [],
+        studioSubmit: [],
+        authModes: [],
+        authLogin: [],
+        authRegister: [],
+        authForgot: [],
+        modal: [],
+        logout: 0,
+        pwa: 0,
+        homeCta: [],
+        shopSubmit: [],
+        shopChange: 0,
+        shopConfirm: 0
+      };
+      const errors = [];
+
+      window.__CSP_SMOKE__ = { calls, errors };
+
+      window.addEventListener('error', event => {
+        errors.push(String(event.message || event.error || 'window error'));
+      });
+      window.addEventListener('unhandledrejection', event => {
+        errors.push(String(event.reason || 'unhandled rejection'));
+      });
+
+      window.App = {
+        router: {
+          navigate(route) { calls.routes.push(route); }
+        },
+        search: {
+          openModal() { calls.searchOpen += 1; },
+          closeModal() { calls.searchClose += 1; },
+          submitFromModal(value) { calls.searchSubmit.push(value); }
+        },
+        studioAI: {
+          closeSmartBrief() { calls.studioClose += 1; },
+          _applyConversationalRefinement(value) { calls.refinements.push(value); },
+          submitSmartBrief(button) { calls.studioSubmit.push(button?.id || ''); }
+        },
+        ui: {
+          toggleModal(...args) { calls.modal.push(args); }
+        },
+        auth: {
+          toggleAuthMode(mode) { calls.authModes.push(mode); },
+          handleLogin(event) { event.preventDefault(); calls.authLogin.push(event); },
+          handleRegister(event) { event.preventDefault(); calls.authRegister.push(event); },
+          handleForgotPassword(event) { event.preventDefault(); calls.authForgot.push(event); },
+          logout() { calls.logout += 1; }
+        },
+        home: {
+          handleCtaClick(url) { calls.homeCta.push(url); }
+        },
+        shop: {
+          submitOrderStep1(event) { event.preventDefault(); calls.shopSubmit.push(event); },
+          updatePaymentConfirmButton() { calls.shopChange += 1; },
+          submitPaymentConfirmation() { calls.shopConfirm += 1; }
+        }
+      };
+
+      window.StudihomePWA = {
+        show() { calls.pwa += 1; }
+      };
+    })();
+  </script>
+
+  <script src="../static-search-actions.js"></script>
+  <script src="../static-studio-brief-actions.js"></script>
+  <script src="../static-auth-actions.js"></script>
+  <script src="../static-shell-actions.js"></script>
+  <script src="../generated-top-shell-actions.js"></script>
+  <script src="../generated-home-actions.js"></script>
+  <script src="../generated-utility-actions.js"></script>
+  <script src="../generated-shop-actions.js"></script>
+
+  <script>
+    (() => {
+      'use strict';
+
+      function require(condition, message) {
+        if (!condition) throw new Error(message);
+      }
+
+      function click(id) {
+        document.getElementById(id).click();
+      }
+
+      function submit(id) {
+        const event = new Event('submit', { bubbles: true, cancelable: true });
+        const allowed = document.getElementById(id).dispatchEvent(event);
+        require(allowed === false, id + ' submit must be prevented by existing handler');
+        return event;
+      }
+
+      function finish(status, detail) {
+        const result = document.getElementById('csp-browser-smoke-result');
+        result.textContent = status + (detail ? ': ' + detail : '');
+        document.documentElement.dataset.cspBrowserSmoke = status.toLowerCase();
+        document.title = 'Studihome CSP browser smoke — ' + status;
+      }
+
+      window.addEventListener('load', () => {
+        setTimeout(() => {
+          try {
+            const { calls, errors } = window.__CSP_SMOKE__;
+
+            click('studihome-brand-home');
+            click('global-search-open-desktop');
+            click('global-search-open-mobile');
+            click('global-search-close-icon');
+            click('global-search-close-secondary');
+            document.getElementById('global-search-modal-input').dispatchEvent(
+              new KeyboardEvent('keydown', { key: 'Enter', bubbles: true })
+            );
+            click('global-search-submit');
+
+            click('studio-smart-close-icon');
+            click('studio-smart-close-secondary');
+            document.querySelectorAll('[data-studio-refinement]').forEach(button => button.click());
+            click('studio-smart-submit');
+
+            click('auth-modal-close');
+            document.querySelectorAll('[data-auth-mode]').forEach(button => button.click());
+            const loginEvent = submit('login-form');
+            const registerEvent = submit('register-form');
+            const forgotEvent = submit('forgot-form');
+
+            click('pwa-install-link');
+            click('product-detail-modal-close');
+            click('checkout-modal-close');
+            click('module-modal-close');
+
+            click('desktop-route-child');
+            click('mobile-route-child');
+            click('top-login-child');
+            click('top-logout-child');
+
+            click('home-cta-child');
+            click('home-route-child');
+            click('utility-home-child');
+
+            const shopSubmitEvent = submit('shop-step1-form');
+            document.getElementById('shop-payment-check').dispatchEvent(
+              new Event('change', { bubbles: true })
+            );
+            click('shop-confirm-child');
+            click('shop-close-child');
+
+            require(calls.searchOpen === 2, 'Search open count mismatch');
+            require(calls.searchClose === 2, 'Search close count mismatch');
+            require(
+              JSON.stringify(calls.searchSubmit) === JSON.stringify(['kelas empat', 'kelas empat']),
+              'Search submit values mismatch'
+            );
+            require(calls.studioClose === 2, 'Studio close count mismatch');
+            require(
+              JSON.stringify(calls.refinements) === JSON.stringify([
+                'yang lebih murah', 'khusus TikTok', 'selesai 3 hari'
+              ]),
+              'Studio refinement values mismatch'
+            );
+            require(
+              JSON.stringify(calls.studioSubmit) === JSON.stringify(['studio-smart-submit']),
+              'Studio submit button identity mismatch'
+            );
+            require(
+              JSON.stringify(calls.authModes) === JSON.stringify(['login', 'register', 'forgot', 'login']),
+              'Auth mode sequence mismatch'
+            );
+            require(calls.authLogin[0] === loginEvent, 'Login must receive original submit Event');
+            require(calls.authRegister[0] === registerEvent, 'Register must receive original submit Event');
+            require(calls.authForgot[0] === forgotEvent, 'Forgot must receive original submit Event');
+            require(calls.pwa === 1, 'PWA show count mismatch');
+            require(
+              document.querySelector('#product-detail-modal iframe').getAttribute('src') === '',
+              'Product iframe must be cleared before close'
+            );
+            require(
+              JSON.stringify(calls.routes) === JSON.stringify([
+                'home', 'products', 'home', 'studio-ai', 'home'
+              ]),
+              'Route action sequence mismatch'
+            );
+            require(calls.logout === 1, 'Top-auth logout count mismatch');
+            require(
+              calls.modal.some(args => args[0] === 'auth-modal' && args[1] === false),
+              'Auth modal close missing'
+            );
+            require(
+              calls.modal.some(args => args[0] === 'auth-modal' && args[1] === true),
+              'Top-auth login modal open missing'
+            );
+            require(
+              calls.modal.some(args => args[0] === 'product-detail-modal' && args[1] === false),
+              'Product modal close missing'
+            );
+            require(
+              calls.modal.some(args => args[0] === 'checkout-modal' && args[1] === false),
+              'Checkout modal close missing'
+            );
+            require(
+              calls.modal.some(args => args[0] === 'module-modal' && args[1] === false),
+              'Module modal close missing'
+            );
+            require(
+              JSON.stringify(calls.homeCta) === JSON.stringify(['https://example.test/cta']),
+              'Home CTA value mismatch'
+            );
+            require(calls.shopSubmit[0] === shopSubmitEvent, 'Shop must receive original submit Event');
+            require(calls.shopChange === 1, 'Shop change count mismatch');
+            require(calls.shopConfirm === 1, 'Shop confirm count mismatch');
+
+            require(document.getElementById('main-content').dataset.homeActionsBound === '1', 'Home binder flag missing');
+            require(document.getElementById('main-content').dataset.utilityActionsBound === '1', 'Utility binder flag missing');
+            require(document.getElementById('checkout-modal-content').dataset.shopActionsBound === '1', 'Shop binder flag missing');
+            require(document.getElementById('top-nav-links').dataset.appRouteBound === '1', 'Desktop top-nav binder flag missing');
+            require(document.getElementById('mobile-nav-links').dataset.appRouteBound === '1', 'Mobile top-nav binder flag missing');
+            require(document.getElementById('top-auth-area').dataset.topAuthActionBound === '1', 'Top-auth binder flag missing');
+
+            require(errors.length === 0, 'Browser errors: ' + errors.join(' | '));
+            finish('PASS');
+          } catch (error) {
+            finish('FAIL', error?.message || String(error));
+          }
+        }, 0);
+      }, { once: true });
+    })();
+  </script>
+</body>
+</html>

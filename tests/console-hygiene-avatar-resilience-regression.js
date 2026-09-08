@@ -152,3 +152,14 @@ function makeRes() {
   console.error(err);
   process.exitCode = 1;
 });
+
+for (const [label, source] of [['Home/Studio shell', index], ['Dapur', dapur]]) {
+  for (const forbidden of [
+    "addEventListener('beforeinstallprompt'",
+    'addEventListener("beforeinstallprompt"',
+    'deferred.prompt()'
+  ]) {
+    assert(!source.includes(forbidden), label + ' must rely on native Chromium install UI: ' + forbidden);
+  }
+}
+assert(index.includes('usesNativeInstallUI: true'), 'Home/Studio native install contract missing');

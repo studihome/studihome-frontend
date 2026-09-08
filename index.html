@@ -92,11 +92,13 @@
           el = document.createElement('div');
           el.className = 'sh-pwa-overlay';
           var ios = isIOS && !window.navigator.standalone;
+
           var benefits = '<div class="sh-pwa-benefits">'
             + '<div class="sh-pwa-benefit"><i class="fa-solid fa-bolt"></i>Akses instan dari home screen</div>'
             + '<div class="sh-pwa-benefit"><i class="fa-solid fa-wifi-slash"></i>Bisa dipakai meski offline</div>'
             + '<div class="sh-pwa-benefit"><i class="fa-solid fa-shield-halved"></i>Pengalaman lebih cepat & ringan</div>'
             + '</div>';
+
           var guidance = ios
             ? '<div class="sh-pwa-ios-note">Tap ikon <b>Share ↑</b> di Safari, lalu pilih <b>"Add to Home Screen"</b>.</div>'
             : '<div class="sh-pwa-ios-note">Gunakan ikon <b>Install</b> di address bar atau menu browser untuk memasang Studihome.</div>';
@@ -108,7 +110,8 @@
             + '<div class="sh-pwa-sub">Akses cepat & pengalaman lebih baik</div>'
             + '</div>'
             + '<div class="sh-pwa-body">'
-            + benefits + guidance
+            + benefits
+            + guidance
             + '<div class="sh-pwa-actions" style="margin-top:.75rem">'
             + '<button class="sh-pwa-dismiss" style="flex:1">Mengerti</button>'
             + '</div></div></div>';
@@ -1016,7 +1019,7 @@
         <div class="max-w-7xl mx-auto flex items-center justify-between gap-2 sm:gap-4">
 
             <!-- Brand Logo: Clean icon & Studihome without subtext -->
-            <div class="flex items-center gap-2 cursor-pointer select-none" onclick="App.router.navigate('home')">
+            <div id="studihome-brand-home" class="flex items-center gap-2 cursor-pointer select-none">
                 <span class="text-[#EAB308] font-black text-2xl sm:text-3xl animate-spin-slow leading-none flex items-center justify-center">✦</span>
                 <span class="font-black text-xl sm:text-2xl text-[#151c75] tracking-tight leading-none">Studihome</span>
             </div>
@@ -1029,7 +1032,7 @@
             <!-- Top Right Utilities -->
             <div class="flex items-center gap-2 sm:gap-3">
                 <!-- Global Search — Desktop Icon -->
-                <button type="button" onclick="App.search.openModal()" aria-label="Buka pencarian" title="Cari di Foyer" class="hidden lg:flex w-9 h-9 items-center justify-center rounded-xl text-[#151c75] hover:bg-blue-50 transition-all">
+                <button id="global-search-open-desktop" type="button" aria-label="Buka pencarian" title="Cari di Foyer" class="hidden lg:flex w-9 h-9 items-center justify-center rounded-xl text-[#151c75] hover:bg-blue-50 transition-all">
                     <i class="fa-solid fa-magnifying-glass text-sm"></i>
                 </button>
 
@@ -1039,7 +1042,7 @@
                 </div>
 
                 <!-- Global Search — Mobile Icon -->
-                <button type="button" onclick="App.search.openModal()" aria-label="Buka pencarian" title="Cari produk" class="flex sm:hidden w-9 h-9 items-center justify-center rounded-xl text-[#151c75] hover:bg-blue-50 transition-all">
+                <button id="global-search-open-mobile" type="button" aria-label="Buka pencarian" title="Cari produk" class="flex sm:hidden w-9 h-9 items-center justify-center rounded-xl text-[#151c75] hover:bg-blue-50 transition-all">
                     <i class="fa-solid fa-magnifying-glass text-sm"></i>
                 </button>
 
@@ -1065,7 +1068,7 @@
     <!-- GLOBAL SEARCH MODAL -->
     <div id="search-modal" class="fixed inset-0 z-[90] hidden bg-slate-900/60 backdrop-blur-sm items-center justify-center p-4">
         <div class="card-3d w-full max-w-md rounded-3xl relative bg-white p-5 sm:p-6">
-            <button type="button" onclick="App.search.closeModal()" aria-label="Tutup pencarian" class="modal-close-btn absolute top-4 right-4 w-8 h-8 rounded-full flex items-center justify-center font-extrabold shadow-md">
+            <button id="global-search-close-icon" type="button" aria-label="Tutup pencarian" class="modal-close-btn absolute top-4 right-4 w-8 h-8 rounded-full flex items-center justify-center font-extrabold shadow-md">
                 <i class="fa-solid fa-xmark"></i>
             </button>
             <div class="pr-10">
@@ -1075,11 +1078,11 @@
             </div>
             <div class="mt-4 flex items-center gap-2 card-3d-inset px-3 py-2.5 rounded-xl">
                 <i class="fa-solid fa-magnifying-glass text-[#151c75]"></i>
-                <input id="global-search-modal-input" type="search" autocomplete="off" placeholder="Contoh: guru, UMKM, automation..." class="w-full bg-transparent text-xs sm:text-sm font-semibold text-slate-700 outline-none" onkeydown="if(event.key==='Enter') App.search.submitFromModal(this.value)">
+                <input id="global-search-modal-input" type="search" autocomplete="off" placeholder="Contoh: guru, UMKM, automation..." class="w-full bg-transparent text-xs sm:text-sm font-semibold text-slate-700 outline-none">
             </div>
             <div class="mt-4 flex items-center justify-between gap-2">
-                <button type="button" onclick="App.search.closeModal()" class="px-4 py-2.5 rounded-xl text-xs font-bold text-slate-600 bg-slate-100 hover:bg-slate-200 transition-all">Nanti dulu</button>
-                <button type="button" onclick="App.search.submitFromModal(document.getElementById('global-search-modal-input').value)" class="btn-brand-gradient px-4 py-2.5 rounded-xl text-xs font-extrabold">Cari Sekarang <i class="fa-solid fa-arrow-right ml-1 text-[#FACC15]"></i></button>
+                <button id="global-search-close-secondary" type="button" class="px-4 py-2.5 rounded-xl text-xs font-bold text-slate-600 bg-slate-100 hover:bg-slate-200 transition-all">Nanti dulu</button>
+                <button id="global-search-submit" type="button" class="btn-brand-gradient px-4 py-2.5 rounded-xl text-xs font-extrabold">Cari Sekarang <i class="fa-solid fa-arrow-right ml-1 text-[#FACC15]"></i></button>
             </div>
         </div>
     </div>
@@ -1087,7 +1090,7 @@
     <!-- STUDIO AI SMART DISCOVERY MODAL (Desktop Ringkas di Tengah, Mobile Layar Penuh) -->
     <div id="studio-smart-brief-modal" class="fixed inset-0 z-[91] hidden bg-slate-900/60 backdrop-blur-sm items-center justify-center p-0 sm:p-4">
         <div class="studio-smart-modal-card card-3d w-full h-full sm:h-auto max-h-full sm:max-h-[88vh] sm:max-w-xl rounded-none sm:rounded-3xl bg-white p-5 sm:p-6 my-auto mx-auto relative overflow-y-auto border border-blue-100 shadow-2xl">
-            <button type="button" onclick="App.studioAI.closeSmartBrief()" aria-label="Tutup pencarian kebutuhan" class="modal-close-btn absolute top-4 right-4 w-8 h-8 rounded-full flex items-center justify-center font-extrabold shadow-md">
+            <button id="studio-smart-close-icon" type="button" aria-label="Tutup pencarian kebutuhan" class="modal-close-btn absolute top-4 right-4 w-8 h-8 rounded-full flex items-center justify-center font-extrabold shadow-md">
                 <i class="fa-solid fa-xmark"></i>
             </button>
             <div class="pr-10">
@@ -1112,9 +1115,9 @@
                         </div>
                     </div>
                     <div class="mt-3 flex flex-wrap gap-2">
-                        <button type="button" class="studio-smart-conversation-chip px-3 py-1.5 rounded-full text-xs font-extrabold text-[#151c75] bg-blue-50/80 border border-blue-200 hover:bg-blue-100 transition-all" onclick="App.studioAI._applyConversationalRefinement('yang lebih murah')">+ yang lebih murah</button>
-                        <button type="button" class="studio-smart-conversation-chip px-3 py-1.5 rounded-full text-xs font-extrabold text-[#151c75] bg-blue-50/80 border border-blue-200 hover:bg-blue-100 transition-all" onclick="App.studioAI._applyConversationalRefinement('khusus TikTok')">+ khusus TikTok</button>
-                        <button type="button" class="studio-smart-conversation-chip px-3 py-1.5 rounded-full text-xs font-extrabold text-[#151c75] bg-blue-50/80 border border-blue-200 hover:bg-blue-100 transition-all" onclick="App.studioAI._applyConversationalRefinement('selesai 3 hari')">+ selesai 3 hari</button>
+                        <button type="button" data-studio-refinement="yang lebih murah" class="studio-smart-conversation-chip px-3 py-1.5 rounded-full text-xs font-extrabold text-[#151c75] bg-blue-50/80 border border-blue-200 hover:bg-blue-100 transition-all">+ yang lebih murah</button>
+                        <button type="button" data-studio-refinement="khusus TikTok" class="studio-smart-conversation-chip px-3 py-1.5 rounded-full text-xs font-extrabold text-[#151c75] bg-blue-50/80 border border-blue-200 hover:bg-blue-100 transition-all">+ khusus TikTok</button>
+                        <button type="button" data-studio-refinement="selesai 3 hari" class="studio-smart-conversation-chip px-3 py-1.5 rounded-full text-xs font-extrabold text-[#151c75] bg-blue-50/80 border border-blue-200 hover:bg-blue-100 transition-all">+ selesai 3 hari</button>
                     </div>
                 </div>
 
@@ -1127,8 +1130,8 @@
             <div id="studio-smart-brief-results" class="mt-4"></div>
 
             <div class="mt-5 flex flex-wrap justify-end gap-2">
-                <button type="button" onclick="App.studioAI.closeSmartBrief()" class="px-4 py-2.5 rounded-xl text-xs font-bold text-slate-600 bg-slate-100 hover:bg-slate-200 transition-all">Nanti dulu</button>
-                <button type="button" onclick="App.studioAI.submitSmartBrief(this)" class="btn-brand-gradient px-5 py-2.5 rounded-xl text-xs sm:text-sm font-extrabold shadow-md transition-all">Cari yang Paling Nyambung <i class="fa-solid fa-arrow-right ml-1 text-[#FACC15]"></i></button>
+                <button id="studio-smart-close-secondary" type="button" class="px-4 py-2.5 rounded-xl text-xs font-bold text-slate-600 bg-slate-100 hover:bg-slate-200 transition-all">Nanti dulu</button>
+                <button id="studio-smart-submit" type="button" class="btn-brand-gradient px-5 py-2.5 rounded-xl text-xs sm:text-sm font-extrabold shadow-md transition-all">Cari yang Paling Nyambung <i class="fa-solid fa-arrow-right ml-1 text-[#FACC15]"></i></button>
             </div>
         </div>
     </div>
@@ -1148,7 +1151,7 @@
                 <span class="text-blue-100">2026 &copy; All Rights Reserved.</span>
             </div>
             <div class="flex items-center gap-4 sm:gap-6">
-                <a href="#install" onclick="window.StudihomePWA && window.StudihomePWA.show()" class="text-blue-100 hover:text-white transition-colors">Instal</a>
+                <a id="pwa-install-link" href="#install" class="text-blue-100 hover:text-white transition-colors">Instal</a>
                 <a href="/privasi" class="text-blue-100 hover:text-white transition-colors">Privasi</a>
                 <a href="/ketentuan" class="text-blue-100 hover:text-white transition-colors">Ketentuan</a>
                 <a href="https://wa.me/6285111581115" target="_blank" rel="noopener noreferrer" class="hover:brightness-110 font-bold flex items-center gap-1.5 text-slate-900 bg-gradient-to-r from-[#EAB308] to-[#F59E0B] px-3.5 py-1.5 rounded-xl shadow-xs transition-all text-xs">
@@ -1160,7 +1163,7 @@
 
     <div id="auth-modal" class="fixed inset-0 z-50 hidden bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-3 sm:p-4">
         <div class="card-3d w-full max-w-md p-5 sm:p-7 rounded-3xl relative bg-white my-auto">
-            <button onclick="App.ui.toggleModal('auth-modal', false)" class="modal-close-btn absolute top-4 right-4 w-8 h-8 rounded-full flex items-center justify-center transition-all shadow-md font-extrabold hover:brightness-110 z-10">
+            <button id="auth-modal-close" type="button" class="modal-close-btn absolute top-4 right-4 w-8 h-8 rounded-full flex items-center justify-center transition-all shadow-md font-extrabold hover:brightness-110 z-10">
                 <i class="fa-solid fa-xmark"></i>
             </button>
                         <div class="text-center mb-5 sm:mb-6">
@@ -1169,7 +1172,7 @@
                 <p class="text-xs text-slate-500 mt-1">Akses modul pembelajaran & otomasi AI Anda</p>
             </div>
             <!-- Login Form -->
-            <form id="login-form" onsubmit="App.auth.handleLogin(event)" class="space-y-3.5">
+            <form id="login-form" class="space-y-3.5">
                 <div>
                     <label class="block text-xs sm:text-sm font-bold text-slate-700 mb-1">Alamat Email</label>
                     <input type="email" id="login-email" autocomplete="username" required placeholder="nama@email.com" class="w-full card-3d-inset px-3.5 py-2.5 sm:py-3 rounded-xl text-xs sm:text-sm outline-none focus:ring-2 focus:ring-[#151c75]">
@@ -1179,20 +1182,20 @@
                     <input type="password" id="login-password" autocomplete="current-password" required placeholder="••••••••" class="w-full card-3d-inset px-3.5 py-2.5 sm:py-3 rounded-xl text-xs sm:text-sm outline-none focus:ring-2 focus:ring-[#151c75]">
                 </div>
                 <div class="text-right mt-1">
-                    <button type="button" onclick="App.auth.toggleAuthMode('forgot-password')" class="text-[11px] font-bold text-[#151c75] hover:underline">Lupa Password?</button>
+                    <button type="button" data-auth-mode="forgot-password" class="text-[11px] font-bold text-[#151c75] hover:underline">Lupa Password?</button>
                 </div>
                 <button type="submit" class="w-full btn-brand-gradient py-3 sm:py-3.5 rounded-xl text-xs sm:text-sm font-extrabold transition-all shadow-md mt-2">
                     Masuk Sekarang
                 </button>
                 <div class="text-center pt-3 border-t border-slate-100 mt-4 flex items-center justify-center gap-1.5">
                     <span class="text-xs text-slate-500">Belum punya akun?</span>
-                    <button type="button" onclick="App.auth.toggleAuthMode('register')" class="px-3 py-1.5 rounded-xl font-bold text-xs bg-blue-50 text-[#151c75] border border-blue-200 hover:bg-blue-100 transition-all shadow-2xs">
+                    <button type="button" data-auth-mode="register" class="px-3 py-1.5 rounded-xl font-bold text-xs bg-blue-50 text-[#151c75] border border-blue-200 hover:bg-blue-100 transition-all shadow-2xs">
                         Daftar Akun Baru
                     </button>
                 </div>
             </form>
             <!-- Register Form -->
-            <form id="register-form" onsubmit="App.auth.handleRegister(event)" class="space-y-3.5 hidden">
+            <form id="register-form" class="space-y-3.5 hidden">
                 <div>
                     <label class="block text-xs sm:text-sm font-bold text-slate-700 mb-1">Nama Lengkap <span class="text-red-500">*</span></label>
                     <input type="text" id="reg-name" autocomplete="name" required placeholder="Budi Santoso" class="w-full card-3d-inset px-3.5 py-2.5 sm:py-3 rounded-xl text-xs sm:text-sm outline-none focus:ring-2 focus:ring-[#151c75]">
@@ -1215,13 +1218,13 @@
                 </button>
                 <div class="text-center pt-3 border-t border-slate-100 mt-4 flex items-center justify-center gap-1.5">
                     <span class="text-xs text-slate-500">Sudah punya akun?</span>
-                    <button type="button" onclick="App.auth.toggleAuthMode('login')" class="px-3 py-1.5 rounded-xl font-bold text-xs bg-blue-50 text-[#151c75] border border-blue-200 hover:bg-blue-100 transition-all shadow-2xs">
+                    <button type="button" data-auth-mode="login" class="px-3 py-1.5 rounded-xl font-bold text-xs bg-blue-50 text-[#151c75] border border-blue-200 hover:bg-blue-100 transition-all shadow-2xs">
                         Masuk Ke Akun
                     </button>
                 </div>
             </form>
             <!-- Forgot Password Form -->
-            <form id="forgot-form" onsubmit="App.auth.handleForgotPassword(event)" class="space-y-3.5 hidden">
+            <form id="forgot-form" class="space-y-3.5 hidden">
                 <div class="text-center mb-2">
                     <div class="text-amber-500 text-2xl mb-2"><i class="fa-solid fa-lock"></i></div>
                     <p class="text-xs text-slate-500">Masukkan email akun Anda. Kami akan mengirimkan link untuk mengatur ulang kata sandi.</p>
@@ -1239,7 +1242,7 @@
                     Kirim Link Reset
                 </button>
                 <div class="text-center pt-3 border-t border-slate-100 mt-4">
-                    <button type="button" onclick="App.auth.toggleAuthMode('login')" class="text-xs font-bold text-[#151c75] hover:underline">
+                    <button type="button" data-auth-mode="login" class="text-xs font-bold text-[#151c75] hover:underline">
                         <i class="fa-solid fa-arrow-left mr-1"></i> Kembali ke Masuk
                     </button>
                 </div>
@@ -1250,7 +1253,7 @@
     <div id="product-detail-modal" class="fixed inset-0 z-50 hidden bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-3 sm:p-4">
         <div class="card-3d w-full max-w-xl p-5 sm:p-6 rounded-3xl relative bg-white max-h-[90vh] overflow-y-auto my-auto">
             <!-- Modal Close Button repositioned to extreme top-right corner z-30 -->
-            <button onclick="document.querySelectorAll('#product-detail-modal iframe').forEach(f=>f.src='');App.ui.toggleModal('product-detail-modal', false)" class="modal-close-btn absolute top-3 right-3 sm:top-4 sm:right-4 w-9 h-9 rounded-full flex items-center justify-center transition-all shadow-lg font-extrabold hover:brightness-110 z-30 bg-white/20 backdrop-blur-sm text-white">
+            <button id="product-detail-modal-close" class="modal-close-btn absolute top-3 right-3 sm:top-4 sm:right-4 w-9 h-9 rounded-full flex items-center justify-center transition-all shadow-lg font-extrabold hover:brightness-110 z-30 bg-white/20 backdrop-blur-sm text-white">
                 <i class="fa-solid fa-xmark text-sm"></i>
             </button>
             <div id="product-detail-modal-content">
@@ -1261,7 +1264,7 @@
     <!-- CHECKOUT MODAL -->
     <div id="checkout-modal" class="fixed inset-0 z-50 hidden bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-3 sm:p-4">
         <div class="card-3d w-full max-w-lg p-5 sm:p-6 rounded-3xl relative bg-white max-h-[90vh] overflow-y-auto my-auto">
-            <button onclick="App.ui.toggleModal('checkout-modal', false)" class="modal-close-btn absolute top-4 right-4 w-8 h-8 rounded-full flex items-center justify-center transition-all shadow-md font-extrabold hover:brightness-110 z-20">
+            <button id="checkout-modal-close" class="modal-close-btn absolute top-4 right-4 w-8 h-8 rounded-full flex items-center justify-center transition-all shadow-md font-extrabold hover:brightness-110 z-20">
                 <i class="fa-solid fa-xmark"></i>
             </button>
             <div id="checkout-modal-content">
@@ -1272,7 +1275,7 @@
     <!-- MODULE PLAYER MODAL -->
     <div id="module-modal" class="fixed inset-0 z-50 hidden bg-slate-900/75 backdrop-blur-md flex items-center justify-center p-3 sm:p-4">
         <div class="card-3d w-full max-w-4xl p-5 sm:p-6 rounded-3xl relative max-h-[92vh] flex flex-col bg-white my-auto">
-            <button onclick="App.ui.toggleModal('module-modal', false)" class="modal-close-btn absolute top-4 right-4 w-9 h-9 rounded-full flex items-center justify-center font-extrabold z-20 shadow-md hover:brightness-110">
+            <button id="module-modal-close" class="modal-close-btn absolute top-4 right-4 w-9 h-9 rounded-full flex items-center justify-center font-extrabold z-20 shadow-md hover:brightness-110">
                 <i class="fa-solid fa-xmark text-lg"></i>
             </button>
             <div id="module-modal-content" class="flex-1 overflow-y-auto pr-1">
@@ -1901,7 +1904,7 @@ App.router.bindCanonicalLinkGuard();
                                 <summary class="text-[11px] font-bold text-slate-600 cursor-pointer">Detail teknis</summary>
                                 <pre class="mt-2 whitespace-pre-wrap text-[10px] text-red-600 break-words">${App.utils.escapeHtml(message)}</pre>
                             </details>
-                            <button onclick="window.location.reload()" class="btn-brand-gradient px-5 py-2.5 rounded-xl text-xs font-bold mt-4">Muat Ulang</button>
+                            <button data-global-action="reload" class="btn-brand-gradient px-5 py-2.5 rounded-xl text-xs font-bold mt-4">Muat Ulang</button>
                         </div>`;
                 },
 
@@ -2106,7 +2109,7 @@ App.router.bindCanonicalLinkGuard();
 
                     if (nav) {
                         nav.innerHTML = items.map(item => `
-                            <button onclick="App.router.navigate('${item.key}')" class="px-3.5 py-1.5 rounded-xl transition-all flex items-center gap-1.5 ${
+                            <button data-app-route="${item.key}" class="px-3.5 py-1.5 rounded-xl transition-all flex items-center gap-1.5 ${
                                 hash === item.key
                                     ? 'btn-brand-gradient font-extrabold shadow-2xs'
                                     : 'text-slate-700 hover:text-[#151c75] font-bold'
@@ -2119,7 +2122,7 @@ App.router.bindCanonicalLinkGuard();
 
                     if (mNav) {
                         mNav.innerHTML = items.map(item => `
-                            <button onclick="App.router.navigate('${item.key}')" class="flex flex-col items-center py-1 px-3 rounded-xl transition-all ${
+                            <button data-app-route="${item.key}" class="flex flex-col items-center py-1 px-3 rounded-xl transition-all ${
                                 hash === item.key ? 'text-[#151c75] font-black' : 'text-slate-500 font-medium'
                             }">
                                 <i class="fa-solid ${item.icon} text-base mb-0.5"></i>
@@ -2141,14 +2144,14 @@ App.router.bindCanonicalLinkGuard();
                                     <span class="block text-xs font-extrabold text-[#151c75]">${App.utils.escapeHtml(App.state.user.name)}</span>
                                     <span class="block text-[9px] text-amber-600 font-extrabold uppercase">${App.state.user.role}</span>
                                 </div>
-                                <button onclick="App.auth.logout()" class="w-8 h-8 sm:w-9 sm:h-9 rounded-xl text-xs font-bold text-red-500 bg-red-50 hover:bg-red-100 flex items-center justify-center border border-red-200 transition-all shadow-2xs" title="Keluar">
+                                <button data-top-auth-action="logout" class="w-8 h-8 sm:w-9 sm:h-9 rounded-xl text-xs font-bold text-red-500 bg-red-50 hover:bg-red-100 flex items-center justify-center border border-red-200 transition-all shadow-2xs" title="Keluar">
                                     <i class="fa-solid fa-right-from-bracket"></i>
                                 </button>
                             </div>
                         `;
                     } else {
                         area.innerHTML = `
-                            <button onclick="App.ui.toggleModal('auth-modal', true)" class="btn-brand-gradient px-3.5 py-1.5 sm:py-2 rounded-xl text-xs font-bold flex items-center gap-1.5">
+                            <button data-top-auth-action="login" class="btn-brand-gradient px-3.5 py-1.5 sm:py-2 rounded-xl text-xs font-bold flex items-center gap-1.5">
                                 <i class="fa-solid fa-right-to-bracket text-[#FACC15]"></i>
                                 <span>Masuk</span>
                             </button>
@@ -3551,7 +3554,7 @@ App.router.bindCanonicalLinkGuard();
                                         <p id="reset-error" class="hidden text-center text-red-500 text-xs font-bold"></p>
                                     </form>
                                     <div class="text-center mt-5 pt-4 border-t border-gray-100">
-                                        <button onclick="App.router.navigate('home')" class="text-xs font-bold text-[#151c75] hover:underline">← Kembali ke Studihome</button>
+                                        <button data-global-action="home" class="text-xs font-bold text-[#151c75] hover:underline">← Kembali ke Studihome</button>
                                     </div>
                                 </div>
                             </div>
@@ -3852,11 +3855,11 @@ App.router.bindCanonicalLinkGuard();
                                         </div>
                                     </div>
                                     <div class="flex flex-wrap items-center gap-3">
-                                        <button onclick="App.home.handleCtaClick('${App.utils.escapeHtml(primaryUrl)}')" class="font-extrabold px-5 sm:px-6 py-3 rounded-2xl text-xs sm:text-sm shadow-lg transition-all flex items-center gap-2" style="background:linear-gradient(135deg,#facc15,#f59e0b);color:#0f172a;box-shadow:0 4px 20px rgba(250,204,21,.3)">
+                                        <button data-home-cta-url="${App.utils.escapeHtml(primaryUrl)}" class="font-extrabold px-5 sm:px-6 py-3 rounded-2xl text-xs sm:text-sm shadow-lg transition-all flex items-center gap-2" style="background:linear-gradient(135deg,#facc15,#f59e0b);color:#0f172a;box-shadow:0 4px 20px rgba(250,204,21,.3)">
                                             <span>${App.utils.escapeHtml(primaryLabel)}</span>
                                             <i class="fa-solid fa-arrow-right"></i>
                                         </button>
-                                        <button onclick="App.home.handleCtaClick('${App.utils.escapeHtml(secondaryUrl)}')" class="font-bold px-5 sm:px-6 py-3 rounded-2xl text-xs sm:text-sm transition-all shadow-2xs" style="background:rgba(255,255,255,.08);color:#fff;border:1px solid rgba(255,255,255,.15);backdrop-filter:blur(8px)">
+                                        <button data-home-cta-url="${App.utils.escapeHtml(secondaryUrl)}" class="font-bold px-5 sm:px-6 py-3 rounded-2xl text-xs sm:text-sm transition-all shadow-2xs" style="background:rgba(255,255,255,.08);color:#fff;border:1px solid rgba(255,255,255,.15);backdrop-filter:blur(8px)">
                                             ${App.utils.escapeHtml(secondaryLabel)}
                                         </button>
                                     </div>
@@ -3874,7 +3877,7 @@ App.router.bindCanonicalLinkGuard();
                                     <h2 class="text-lg sm:text-xl font-extrabold text-[#151c75]">Paling banyak diminati</h2>
                                     <p class="text-xs text-slate-500">Solusi paling populer pilihan komunitas</p>
                                 </div>
-                                <button onclick="App.router.navigate('products')" class="inline-flex items-center gap-1.5 px-4 py-1.5 bg-blue-50 hover:bg-blue-100 text-blue-900 text-sm md:text-base font-bold rounded-full transition-colors duration-200 shadow-sm hover:shadow">
+                                <button data-home-route="products" class="inline-flex items-center gap-1.5 px-4 py-1.5 bg-blue-50 hover:bg-blue-100 text-blue-900 text-sm md:text-base font-bold rounded-full transition-colors duration-200 shadow-sm hover:shadow">
                                     Foyer <i class="fa-solid fa-chevron-right text-[10px] text-amber-500" aria-hidden="true"></i>
                                 </button>
                             </div>
@@ -3948,9 +3951,9 @@ App.router.bindCanonicalLinkGuard();
                     /* Cross-device hero promo sync: ensure CTA button always reflects module state */
                     function _syncHeroPromoCtaButton(mods) {
                         if (!mods || mods.length === 0) return;
-                        var ctaBtn = document.querySelector('.btn-brand-amber[onclick*="handleCtaClick"]');
+                        var ctaBtn = document.querySelector('.btn-brand-amber[data-home-cta-url]');
                         if (!ctaBtn) return;
-                        ctaBtn.setAttribute('onclick', "App.home.handleCtaClick('#hero-promo-modules')");
+                        ctaBtn.dataset.homeCtaUrl = '#hero-promo-modules';
                         var span = ctaBtn.querySelector('span');
                         if (span && (!span.textContent || span.textContent === 'Jelajahi Produk' || span.textContent === 'Selengkapnya')) {
                             span.textContent = 'Lihat Modul Hero Promo';
@@ -9137,7 +9140,7 @@ renderStudioAiControl: async () => {
                                 <h4 class="font-bold text-sm text-[#151c75]">${App.utils.escapeHtml(p.title)}</h4>
                                 <span class="font-black text-xs text-[#151c75]">Rp ${Number(p.price).toLocaleString('id-ID')}</span>
                             </div>
-                            <form onsubmit="App.shop.submitOrderStep1(event)" class="space-y-3.5">
+                            <form data-shop-submit="order-step1" class="space-y-3.5">
                                 <div>
                                     <label class="block text-xs sm:text-sm font-bold text-slate-700 mb-1">Nama Lengkapmu</label>
                                     <input type="text" id="co-name" required value="${App.utils.escapeHtml(App.state.user?.name || '')}" class="w-full card-3d-inset px-3.5 py-2.5 rounded-xl text-xs sm:text-sm outline-none">
@@ -9185,14 +9188,14 @@ renderStudioAiControl: async () => {
                                     <div class="flex justify-between gap-3"><span class="text-slate-500">Total:</span><span class="font-black text-[#151c75]">Rp ${Number(qris.price).toLocaleString('id-ID')}</span></div>
                                 </div>
                                 <label class="flex items-start gap-2 text-left bg-amber-50 border border-amber-200 rounded-xl p-3 cursor-pointer">
-                                    <input id="confirm-payment-checkbox" type="checkbox" onchange="App.shop.updatePaymentConfirmButton()" class="mt-0.5 shrink-0">
+                                    <input id="confirm-payment-checkbox" type="checkbox" data-shop-change="payment-confirm" class="mt-0.5 shrink-0">
                                     <span class="text-xs text-slate-700 leading-relaxed"><strong>Lakukan Pembayaran lalu Centang ya</strong></span>
                                 </label>
-                                <button id="btn-confirm-payment" disabled onclick="App.shop.submitPaymentConfirmation()" class="w-full py-3 rounded-xl text-xs sm:text-sm font-extrabold text-white bg-emerald-600 disabled:bg-slate-300 disabled:cursor-not-allowed hover:bg-emerald-700 flex items-center justify-center gap-2 shadow-md transition-all">
+                                <button id="btn-confirm-payment" disabled data-shop-action="payment-confirm" class="w-full py-3 rounded-xl text-xs sm:text-sm font-extrabold text-white bg-emerald-600 disabled:bg-slate-300 disabled:cursor-not-allowed hover:bg-emerald-700 flex items-center justify-center gap-2 shadow-md transition-all">
                                     <i class="fa-solid fa-check"></i> KONFIRMASI PEMBAYARAN
                                 </button>
                                 <p class="text-[10px] text-slate-500">Jika ada kendala pembayaran, hubungi Admin ya..</p>
-                                <button onclick="App.ui.toggleModal('checkout-modal', false)" class="text-xs font-bold text-slate-500 hover:text-slate-800">Tutup</button>
+                                <button data-shop-action="checkout-close" class="text-xs font-bold text-slate-500 hover:text-slate-800">Tutup</button>
                             </div>`;
                         App.state.checkout.waUrl = waUrl;
                     }
@@ -9503,10 +9506,21 @@ window.addEventListener('DOMContentLoaded', App.init);
               <div class="text-[9px] font-black uppercase tracking-wider text-amber-600">SMART Strategy</div>
               <div class="text-xs sm:text-sm font-extrabold text-[#151c75] mt-0.5">${insight.title}</div>
               <div class="text-[10px] sm:text-xs text-slate-600 leading-relaxed mt-1">${insight.body}</div>
-              <button type="button" class="smart-team-solo-btn mt-2.5 px-3 py-2 rounded-xl text-[9px] font-extrabold" onclick="App.studioAI._executeNextBestAction('${insight.action}')">${insight.label} <i class="fa-solid fa-arrow-right ml-1 text-[#FACC15]"></i></button>
+              <button type="button" class="smart-team-solo-btn mt-2.5 px-3 py-2 rounded-xl text-[9px] font-extrabold" data-smart-next-action="${insight.action}">${insight.label} <i class="fa-solid fa-arrow-right ml-1 text-[#FACC15]"></i></button>
             </div>
           </div>
         </div>`;
+        if (box.dataset.smartTeamSoloActionBound !== '1') {
+          box.addEventListener('click', event => {
+            const target = event.target;
+            const button = target instanceof Element
+              ? target.closest('[data-smart-next-action]')
+              : null;
+            if (!button || !box.contains(button)) return;
+            smart._executeNextBestAction(button.dataset.smartNextAction || '');
+          });
+          box.dataset.smartTeamSoloActionBound = '1';
+        }
       },40);
     }catch(_){ }
     return result;
@@ -11022,6 +11036,15 @@ window.StudihomeProductionPilotSimulation = {
   #creator-media-modal iframe,#creator-media-modal video{height:100%;max-height:none}
 }
 </style>
+<!-- STATIC SEARCH ACTIONS — CSP PHASE A -->
+<script src="/static-search-actions.js?v=1"></script>
+<script src="/static-studio-brief-actions.js?v=1"></script>
+<script src="/static-auth-actions.js?v=1"></script>
+<script src="/static-shell-actions.js?v=1"></script>
+<script src="/generated-top-shell-actions.js?v=1"></script>
+<script src="/generated-home-actions.js?v=1"></script>
+<script src="/generated-utility-actions.js?v=1"></script>
+<script src="/generated-shop-actions.js?v=1"></script>
 <!-- STUDIHOME CREATOR PROFILE FEATURES -->
 <script src="/studio-ai-creator-card.js?v=7"></script>
 <script src="/dapur-profile-enhancements.js?v=2"></script>
