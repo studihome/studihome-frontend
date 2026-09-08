@@ -65,11 +65,15 @@
         var isSafari = /Safari/i.test(ua) && !/Chrome|Chromium|CriOS|Edg|OPR|SamsungBrowser/i.test(ua);
         var isChromiumLike = /Chrome|Chromium|CriOS|Edg|OPR|SamsungBrowser/i.test(ua);
         var DISMISS_KEY = 'studihome-pwa-dismissed-v2';
-        var LAST_AUTO_KEY = 'studihome-pwa-auto-shown-v1';
-        var SESSION_KEY = 'studihome-pwa-auto-session-v1';
+        var AUTO_WINDOW_KEY = 'studihome-pwa-auto-window-v2';
+        var SESSION_COUNT_KEY = 'studihome-pwa-auto-session-count-v2';
+        var LAST_AUTO_KEY = 'studihome-pwa-auto-last-v2';
         var INSTALLED_KEY = 'studihome-pwa-installed-v1';
-        var DISMISS_TTL = 7 * 24 * 60 * 60 * 1000;
-        var AUTO_REMINDER_TTL = 3 * 24 * 60 * 60 * 1000;
+        var DISMISS_TTL = 24 * 60 * 60 * 1000;
+        var AUTO_WINDOW_TTL = 24 * 60 * 60 * 1000;
+        var AUTO_MAX_PER_WINDOW = 3;
+        var SESSION_MAX = 3;
+        var AUTO_MIN_GAP = 15 * 60 * 1000;
         var INSTALLED_TTL = 30 * 24 * 60 * 60 * 1000;
         var AUTO_HIDE_MS = 14 * 1000;
 
@@ -102,18 +106,50 @@
           return dismissedAt > 0 && (Date.now() - dismissedAt) < DISMISS_TTL;
         }
 
-        function wasRecentlyAutoShown() {
-          if (isInstalled()) return true;
+        function readCount(key, storage) {
           try {
-            if (sessionStorage.getItem(SESSION_KEY) === '1') return true;
-          } catch (_) {}
+            var value = Number(storage.getItem(key) || 0);
+            return Number.isFinite(value) && value > 0 ? Math.floor(value) : 0;
+          } catch (_) { return 0; }
+        }
+
+        function autoWindowState() {
+          var now = Date.now();
+          try {
+            var raw = localStorage.getItem(AUTO_WINDOW_KEY);
+            var state = raw ? JSON.parse(raw) : null;
+            var start = Number(state && state.start || 0);
+            var count = Number(state && state.count || 0);
+            if (!start || (now - start) >= AUTO_WINDOW_TTL) {
+              return { start: now, count: 0 };
+            }
+            return { start: start, count: Math.max(0, Math.floor(count || 0)) };
+          } catch (_) {
+            return { start: now, count: 0 };
+          }
+        }
+
+        function canAutoShow() {
+          if (isInstalled()) return false;
+          var sessionCount = readCount(SESSION_COUNT_KEY, sessionStorage);
+          if (sessionCount >= SESSION_MAX) return false;
+          var windowState = autoWindowState();
+          if (windowState.count >= AUTO_MAX_PER_WINDOW) return false;
           var lastAuto = readTimestamp(LAST_AUTO_KEY, localStorage);
-          return lastAuto > 0 && (Date.now() - lastAuto) < AUTO_REMINDER_TTL;
+          if (lastAuto > 0 && (Date.now() - lastAuto) < AUTO_MIN_GAP) return false;
+          return true;
         }
 
         function markAutoShown() {
+          var now = Date.now();
+          var windowState = autoWindowState();
+          windowState.count += 1;
+          try { localStorage.setItem(AUTO_WINDOW_KEY, JSON.stringify(windowState)); } catch (_) {}
           writeTimestamp(LAST_AUTO_KEY, localStorage);
-          try { sessionStorage.setItem(SESSION_KEY, '1'); } catch (_) {}
+          try {
+            var sessionCount = readCount(SESSION_COUNT_KEY, sessionStorage);
+            sessionStorage.setItem(SESSION_COUNT_KEY, String(sessionCount + 1));
+          } catch (_) {}
         }
 
         function dismiss() {
@@ -144,7 +180,7 @@
           options = options || {};
           if (!isInstallGuidanceSupported() || isInstalled()) return false;
           if (!options.force && isDismissed()) return false;
-          if (options.auto && wasRecentlyAutoShown()) return false;
+          if (options.auto && !canAutoShow()) return false;
           if (!el) el = build();
           if (!el) return false;
           el.classList.add('show');
@@ -167,7 +203,7 @@
 
         function scheduleAuto(delayOverride) {
           clearTimeout(autoTimer);
-          if (!isInstallGuidanceSupported() || isInstalled() || isDismissed() || wasRecentlyAutoShown()) return;
+          if (!isInstallGuidanceSupported() || isInstalled() || isDismissed() || !canAutoShow()) return;
           var path = window.location.pathname || '/';
           var delay = typeof delayOverride === 'number' ? delayOverride : delayForPath(path);
           if (delay === null) return;
@@ -232,7 +268,7 @@
         window.addEventListener('hashchange', function () { setTimeout(observeRouteChange, 0); }, { passive: true });
         document.addEventListener('click', function () { setTimeout(observeRouteChange, 120); }, { passive: true });
         document.addEventListener('visibilitychange', function () {
-          if (document.visibilityState === 'visible' && !wasRecentlyAutoShown()) scheduleAuto(5 * 1000);
+          if (document.visibilityState === 'visible' && !!canAutoShow()) scheduleAuto(5 * 1000);
         });
 
         window.StudihomePWA = Object.assign(window.StudihomePWA || {}, {
@@ -247,7 +283,10 @@
             contentDelayMs: 30 * 1000,
             privateDelayMs: 40 * 1000,
             autoHideMs: AUTO_HIDE_MS,
-            reminderTtlMs: AUTO_REMINDER_TTL,
+            maxPerSession: SESSION_MAX,
+            maxPer24Hours: AUTO_MAX_PER_WINDOW,
+            minGapMs: AUTO_MIN_GAP,
+            windowTtlMs: AUTO_WINDOW_TTL,
             dismissTtlMs: DISMISS_TTL
           }
         });

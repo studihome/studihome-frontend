@@ -36,9 +36,13 @@ assert(workflow.includes("'browser.runtime'"), 'First-party browser.runtime guar
 assert(index.includes("updateViaCache: 'none'"), 'Home must bypass HTTP cache when checking sw.js updates');
 assert(dapur.includes("updateViaCache: 'none'"), 'Dapur must bypass HTTP cache when checking sw.js updates');
 const sw = fs.readFileSync('sw.js', 'utf8');
-assert(sw.includes("studihome-shell-v7"), 'PWA shell cache generation must stay rotated to v7');
+assert(sw.includes("studihome-shell-v8"), 'PWA shell cache generation must stay rotated to v8');
 assert(sw.includes("studihome-runtime-v3"), 'PWA runtime cache generation must stay rotated to v3');
-assert(index.includes("AUTO_REMINDER_TTL = 3 * 24 * 60 * 60 * 1000"), 'PWA auto reminder must be throttled to 3 days');
+assert(index.includes("AUTO_WINDOW_TTL = 24 * 60 * 60 * 1000"), 'PWA automatic quota window must reset after 24 hours');
+assert(index.includes("AUTO_MAX_PER_WINDOW = 3"), 'PWA automatic quota must allow at most 3 impressions per 24 hours');
+assert(index.includes("SESSION_MAX = 3"), 'PWA automatic quota must allow at most 3 impressions per session');
+assert(index.includes("AUTO_MIN_GAP = 15 * 60 * 1000"), 'PWA automatic notices must keep a 15-minute minimum gap');
+assert(index.includes("DISMISS_TTL = 24 * 60 * 60 * 1000"), 'PWA explicit dismissal must snooze for 24 hours');
 assert(index.includes("AUTO_HIDE_MS = 14 * 1000"), 'PWA notice auto-hide duration must stay proportional');
 assert(index.includes("homeDelayMs: 18 * 1000"), 'Home PWA notice delay contract missing');
 assert(index.includes("studioDelayMs: 24 * 1000"), 'Studio AI PWA notice delay contract missing');
