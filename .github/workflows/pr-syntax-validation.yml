@@ -353,6 +353,8 @@ jobs:
               'VERCEL_AUTOMATION_BYPASS_SECRET:',
               'x-vercel-protection-bypass',
               '--log-level=WARNING',
+              'for readiness_attempt in $(seq 1 30); do',
+              'Vercel source not ready yet (attempt $readiness_attempt/30)',
               'ChromeDriver diagnostics withheld because Vercel automation bypass is configured.',
           ]
           harness_required = [
