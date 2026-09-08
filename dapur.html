@@ -49,7 +49,7 @@
     </style>
     <script>
       (function () {
-        var deferred, el;
+        var el;
         var isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
         var DISMISS_KEY = 'studihome-pwa-dismissed-v2';
         var DISMISS_TTL = 7 * 24 * 60 * 60 * 1000;
@@ -75,7 +75,7 @@
         }
 
         function show() {
-          if (isDismissed()) return;
+          if (!isIOS || isDismissed()) return;
           if (!el) el = build();
           el.classList.add('show');
         }
@@ -85,7 +85,6 @@
         function build() {
           el = document.createElement('div');
           el.className = 'sh-pwa-overlay';
-          var ios = isIOS && !window.navigator.standalone;
 
           var benefits = '<div class="sh-pwa-benefits">'
             + '<div class="sh-pwa-benefit"><i class="fa-solid fa-bolt"></i>Akses instan dari home screen</div>'
@@ -93,20 +92,12 @@
             + '<div class="sh-pwa-benefit"><i class="fa-solid fa-shield-halved"></i>Pengalaman lebih cepat & ringan</div>'
             + '</div>';
 
-          var actions;
-          if (ios) {
-            actions = '<div class="sh-pwa-ios-note">'
-              + 'Tap ikon <b>Share \u2191</b> di Safari, lalu pilih <b>"Add to Home Screen"</b> untuk menginstal Studihome.'
-              + '</div>'
-              + '<div class="sh-pwa-actions" style="margin-top:.75rem">'
-              + '<button class="sh-pwa-dismiss" style="flex:1">Mengerti</button>'
-              + '</div>';
-          } else {
-            actions = '<div class="sh-pwa-actions">'
-              + '<button class="sh-pwa-dismiss">Nanti Saja</button>'
-              + '<button class="sh-pwa-btn-install">Instal Sekarang</button>'
-              + '</div>';
-          }
+          var actions = '<div class="sh-pwa-ios-note">'
+            + 'Tap ikon <b>Share \u2191</b> di Safari, lalu pilih <b>"Add to Home Screen"</b> untuk menginstal Studihome.'
+            + '</div>'
+            + '<div class="sh-pwa-actions" style="margin-top:.75rem">'
+            + '<button class="sh-pwa-dismiss" style="flex:1">Mengerti</button>'
+            + '</div>';
 
           el.innerHTML = '<div class="sh-pwa-card">'
             + '<div class="sh-pwa-header">'
@@ -126,33 +117,16 @@
           });
 
           el.querySelector('.sh-pwa-dismiss').onclick = dismiss;
-
-          var ib = el.querySelector('.sh-pwa-btn-install');
-          if (ib) ib.onclick = function () {
-            if (!deferred) return;
-            deferred.prompt();
-            deferred.userChoice.then(function (r) {
-              if (r.outcome === 'accepted') {
-                try { localStorage.setItem(DISMISS_KEY, String(Date.now())); } catch (_) {}
-              }
-              hide();
-              deferred = null;
-            });
-          };
-
           return el;
         }
 
-        window.addEventListener('beforeinstallprompt', function (e) {
-          e.preventDefault();
-          deferred = e;
-          show();
-        });
-
+        // Chromium/desktop uses the browser's native PWA install affordance on
+        // Dapur. Do not cancel beforeinstallprompt here: Dapur has no explicit
+        // custom install CTA, and retaining the event only produces a browser
+        // diagnostic while adding no user-action path to prompt().
         window.addEventListener('appinstalled', function () {
           try { localStorage.setItem(DISMISS_KEY, String(Date.now())); } catch (_) {}
           hide();
-          deferred = null;
         });
 
         if (isIOS && !window.navigator.standalone) {

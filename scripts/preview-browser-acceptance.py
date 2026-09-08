@@ -5,6 +5,7 @@ from __future__ import annotations
 
 import argparse
 import base64
+import http.cookies
 import json
 import os
 import sys
@@ -68,6 +69,95 @@ def preview_destination_issue(value: str, expected_host: str) -> tuple[str, str]
         "unexpected-origin",
         f"Preview navigation left expected host {expected!r} for {host!r}.",
     )
+
+
+
+class NoRedirect(urllib.request.HTTPRedirectHandler):
+    """Capture Vercel bypass-cookie redirects without forwarding secret headers."""
+
+    def redirect_request(
+        self,
+        req: urllib.request.Request,
+        fp: Any,
+        code: int,
+        msg: str,
+        headers: Any,
+        newurl: str,
+    ) -> None:
+        return None
+
+
+def protection_headers(secret: str) -> dict[str, str]:
+    value = str(secret or "")
+    if not value:
+        return {}
+    return {
+        "x-vercel-protection-bypass": value,
+        "x-vercel-set-bypass-cookie": "true",
+        "User-Agent": "Studihome-Preview-Acceptance/1.0",
+    }
+
+
+def parse_bypass_cookies(values: list[str], preview_url: str) -> list[dict[str, str]]:
+    result: list[dict[str, str]] = []
+    for raw in values:
+        parsed = http.cookies.SimpleCookie()
+        parsed.load(str(raw or ""))
+        for name, morsel in parsed.items():
+            if name and morsel.value:
+                result.append({"name": name, "value": morsel.value, "url": preview_url})
+    return result
+
+
+def fetch_bypass_cookies(preview_url: str, secret: str) -> list[dict[str, str]]:
+    headers = protection_headers(secret)
+    if not headers:
+        return []
+
+    url = preview_url.rstrip("/") + "/api/version"
+    request = urllib.request.Request(url, headers=headers, method="GET")
+    opener = urllib.request.build_opener(NoRedirect())
+    response_headers: Any = None
+    location = ""
+    try:
+        with opener.open(request, timeout=30) as response:
+            response_headers = response.headers
+            location = str(response.headers.get("Location") or "")
+            response.read(1024)
+    except urllib.error.HTTPError as exc:
+        if 300 <= exc.code < 400:
+            response_headers = exc.headers
+            location = str(exc.headers.get("Location") or "")
+        elif exc.code in {401, 403}:
+            raise PreviewAccessBlocked(
+                "Vercel Automation Bypass was configured but rejected; Studihome did not load."
+            ) from exc
+        else:
+            raise AcceptanceError(
+                f"Vercel Automation Bypass bootstrap returned HTTP {exc.code}."
+            ) from exc
+    except (urllib.error.URLError, TimeoutError) as exc:
+        raise AcceptanceError(f"Vercel Automation Bypass bootstrap failed: {exc}") from exc
+
+    if location:
+        destination = urllib.parse.urljoin(url, location)
+        issue = preview_destination_issue(
+            destination,
+            urllib.parse.urlparse(preview_url).netloc,
+        )
+        if issue is not None and issue[0] == "blocked":
+            raise PreviewAccessBlocked(
+                "Vercel Automation Bypass was configured but Deployment Protection still redirected to login."
+            )
+
+    raw_cookies = (
+        list(response_headers.get_all("Set-Cookie") or [])
+        if response_headers is not None
+        else []
+    )
+    cookies = parse_bypass_cookies(raw_cookies, preview_url)
+    require(bool(cookies), "Vercel Automation Bypass did not return an authorization cookie.")
+    return cookies
 
 
 def classify_log(entry: dict[str, Any], host: str) -> str | None:
@@ -139,6 +229,18 @@ class Driver:
     def path(self, suffix: str) -> str:
         require(bool(self.session), "ChromeDriver session not active")
         return f"/session/{self.session}{suffix}"
+
+    def cdp(self, command: str, params: dict[str, Any]) -> Any:
+        return self.request(
+            "POST",
+            self.path("/goog/cdp/execute"),
+            {"cmd": command, "params": params},
+        )
+
+    def set_cookie(self, cookie: dict[str, str]) -> None:
+        value = self.cdp("Network.setCookie", dict(cookie))
+        if isinstance(value, dict) and value.get("success") is False:
+            raise AcceptanceError(f"Chrome rejected bypass cookie {cookie.get('name')!r}")
 
     def nav(self, url: str) -> None:
         self.request("POST", self.path("/url"), {"url": url})
@@ -231,12 +333,17 @@ def wait_app(driver: Driver, expected_host: str) -> None:
     raise AcceptanceError(f"Timed out waiting for Studihome App boot; last={last!r}")
 
 
-def run(preview_url: str, driver_url: str, screenshot: str) -> None:
+def run(preview_url: str, driver_url: str, screenshot: str, bypass_secret: str = "") -> None:
     preview_url = normalize_base_url(preview_url)
     host = urllib.parse.urlparse(preview_url).netloc
+    bypass_cookies = fetch_bypass_cookies(preview_url, bypass_secret)
     d = Driver(driver_url)
     d.start()
     try:
+        if bypass_cookies:
+            d.cdp("Network.enable", {})
+            for cookie in bypass_cookies:
+                d.set_cookie(cookie)
         d.nav(preview_url)
         wait_js(d, "return document.readyState==='complete';", "initial load", 30)
         require_preview_origin(d, host)
@@ -429,6 +536,18 @@ def self_test() -> None:
         unexpected is not None and unexpected[0] == "unexpected-origin",
         "unexpected Preview origin classification",
     )
+    require(protection_headers("") == {}, "empty bypass secret")
+    headers = protection_headers("example-secret")
+    require(headers.get("x-vercel-protection-bypass") == "example-secret", "bypass header construction")
+    require(headers.get("x-vercel-set-bypass-cookie") == "true", "bypass cookie request")
+    cookies = parse_bypass_cookies(
+        ["_vercel_jwt=example-cookie; Path=/; Secure; HttpOnly"],
+        "https://x.vercel.app",
+    )
+    require(
+        cookies == [{"name": "_vercel_jwt", "value": "example-cookie", "url": "https://x.vercel.app"}],
+        "bypass cookie parsing",
+    )
     print("Preview browser acceptance harness self-test: PASS")
 
 
@@ -445,7 +564,7 @@ def main() -> int:
     url = args.preview_url or os.environ.get("PREVIEW_URL", "")
     if not url:
         p.error("--preview-url or PREVIEW_URL is required")
-    run(url, args.driver_url, args.screenshot_path)
+    run(url, args.driver_url, args.screenshot_path, os.environ.get("VERCEL_AUTOMATION_BYPASS_SECRET", ""))
     return 0
 
 

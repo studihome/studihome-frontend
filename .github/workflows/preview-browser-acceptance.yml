@@ -46,6 +46,7 @@ jobs:
       EXPECTED_SHA: ${{ github.event_name == 'pull_request' && github.event.pull_request.head.sha || inputs.expected_sha }}
       PR_NUMBER: ${{ github.event.pull_request.number }}
       MANUAL_PREVIEW_URL: ${{ inputs.preview_url }}
+      VERCEL_AUTOMATION_BYPASS_SECRET: ${{ secrets.VERCEL_AUTOMATION_BYPASS_SECRET }}
 
     steps:
       - name: Checkout exact source
@@ -117,7 +118,14 @@ jobs:
 
           deployed_sha=""
           version_state="unavailable"
-          if curl -fsS --max-time 15 "$preview/api/version" \
+          curl_args=(-fsS --max-time 15)
+          if [ -n "${VERCEL_AUTOMATION_BYPASS_SECRET:-}" ]; then
+            echo "Vercel automation bypass: configured"
+            curl_args+=(-H "x-vercel-protection-bypass: $VERCEL_AUTOMATION_BYPASS_SECRET")
+          else
+            echo "Vercel automation bypass: not configured"
+          fi
+          if curl "${curl_args[@]}" "$preview/api/version" \
             > /tmp/studihome-preview-version 2>/dev/null; then
             deployed_sha="$(python3 -c 'import json,sys; p=json.load(open(sys.argv[1],encoding="utf-8")); print(str(p.get("commit") or ""))' /tmp/studihome-preview-version 2>/dev/null || true)"
             version_state="$(python3 -c 'import json,sys; p=json.load(open(sys.argv[1],encoding="utf-8")); print(str(p.get("status") or ""))' /tmp/studihome-preview-version 2>/dev/null || true)"
@@ -142,7 +150,7 @@ jobs:
           set -euo pipefail
           command -v google-chrome >/dev/null
           command -v chromedriver >/dev/null
-          chromedriver --port=9515 --verbose --log-path=/tmp/studihome-chromedriver.log &
+          chromedriver --port=9515 --log-level=WARNING --log-path=/tmp/studihome-chromedriver.log &
           echo "CHROMEDRIVER_PID=$!" >> "$GITHUB_ENV"
 
           ready=0
@@ -170,7 +178,11 @@ jobs:
         if: failure()
         shell: bash
         run: |
-          cat /tmp/studihome-chromedriver.log >&2 || true
+          if [ -n "${VERCEL_AUTOMATION_BYPASS_SECRET:-}" ]; then
+            echo "ChromeDriver diagnostics withheld because Vercel automation bypass is configured."
+          else
+            cat /tmp/studihome-chromedriver.log >&2 || true
+          fi
           if [ -f /tmp/studihome-preview-browser-failure.png ]; then
             echo "Failure screenshot captured at /tmp/studihome-preview-browser-failure.png"
           fi

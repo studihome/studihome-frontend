@@ -363,3 +363,20 @@ VERCEL PREVIEW PROTECTION BLOCKER — 7 SEP 2026
 - Harness must fail fast with `Preview browser acceptance: BLOCKED` for Vercel login/SSO redirects.
 - Do not exclude or suppress genuine errors after the browser remains on the expected Preview host.
 - PR #114 stays draft; authenticated paid checkout remains NOT VERIFIED; Phase J stays unopened.
+
+CONSOLE HYGIENE FOLLOW-UP — 7 SEP 2026
+- Treat `social-proof-widget.js?v=13` success logs as stale-client evidence; current widget source contains only real failure warnings. Current fix bumps the runtime reference to v15.
+- Dapur must not cancel `beforeinstallprompt`; Chromium uses native PWA install UI there, while iOS retains Share -> Add to Home Screen guidance.
+- Home intentionally retains the standards-documented custom Chromium flow: cancel `beforeinstallprompt`, store it, call `prompt()` only from a user action. Do not degrade that UX solely to hide Chrome's diagnostic.
+- First-party root JS/HTML must contain no `chrome.runtime`, `browser.runtime`, runtime `sendMessage`/onMessage, or global `unhandledrejection` suppression.
+- Repeated "message channel closed" console rejections observed with extensions are external unless reproducible in a clean browser with extensions disabled.
+- No DB/API/Auth/Storage/data change belongs to this console fix.
+
+PREVIEW PROTECTION AUTOMATION SUPPORT — 8 SEP 2026
+- Preview Browser automation supports optional Vercel Protection Bypass without hardcoded credentials.
+- GitHub Actions reads only `VERCEL_AUTOMATION_BYPASS_SECRET`; missing/empty secret preserves fail-closed Deployment Protection classification.
+- Resolver requests use `x-vercel-protection-bypass` when configured.
+- Browser acceptance never receives the raw bypass secret. A direct protected `/api/version` bootstrap requests a bypass cookie without following redirects, then injects only that cookie into Chrome before navigation.
+- ChromeDriver runs at WARNING log level; raw diagnostics are withheld when bypass is configured to avoid credential/cookie disclosure.
+- Release Gate forbids bypass secrets in query strings and verbose ChromeDriver mode.
+- This support changes CI/browser acceptance only; no application runtime, API contract, Supabase, Auth, Storage, RLS, or data behavior changes.

@@ -751,3 +751,24 @@ Before continuing #81 -> #88, current console evidence was triaged.
 - Same-host Preview paths remain valid; any other unexpected host remains a hard acceptance failure.
 - No application/runtime/index/CSS/API/Supabase/Storage/data file changed in this correction.
 - PR #114 stays DRAFT/unmerged. Phase J remains unopened.
+
+## Console hygiene follow-up — 7 Sep 2026
+
+- User-reported `social-proof-widget.js?v=13` success logs are stale-client evidence: current source already removed success/debug `[SP]` logs and referenced v14.
+- Runtime cache-buster advanced to `/social-proof-widget.js?v=15` so a refreshed current shell cannot satisfy the widget request from v13/v14 cache entries.
+- Social-proof warning/error diagnostics for real RPC/fetch failures remain intact.
+- Dapur no longer cancels/retains `beforeinstallprompt` on Chromium. Dapur has no explicit custom install CTA, so Chromium/desktop now uses the browser-native PWA install affordance; iOS keeps the existing Share -> Add to Home Screen guidance.
+- Home keeps its intentional custom Chromium install flow (`preventDefault` + deferred `prompt()` on a user action). The Chromium "Banner not shown..." message on that custom flow is a browser diagnostic, not an application exception; do not suppress it globally.
+- GitHub code search found no first-party `chrome.runtime`, `browser.runtime`, or runtime `sendMessage` usage. The user-reported "message channel closed" rejection matches browser-extension/content-script behavior, not Studihome messaging.
+- Release Gate extension-messaging coverage is widened from a hand-maintained subset to all root first-party `.js` browser runtimes plus `index.html`/`dapur.html`.
+- CI now also forbids global `unhandledrejection` suppression across those first-party runtimes.
+- No Supabase/database/RLS/Auth/API/Storage/data change is included.
+
+## Preview Protection automation support — 8 Sep 2026
+- Preview Browser automation supports optional Vercel Protection Bypass without hardcoded credentials.
+- GitHub Actions reads only `VERCEL_AUTOMATION_BYPASS_SECRET`; missing/empty secret preserves fail-closed Deployment Protection classification.
+- Resolver requests use `x-vercel-protection-bypass` when configured.
+- Browser acceptance never receives the raw bypass secret. A direct protected `/api/version` bootstrap requests a bypass cookie without following redirects, then injects only that cookie into Chrome before navigation.
+- ChromeDriver runs at WARNING log level; raw diagnostics are withheld when bypass is configured to avoid credential/cookie disclosure.
+- Release Gate forbids bypass secrets in query strings and verbose ChromeDriver mode.
+- This support changes CI/browser acceptance only; no application runtime, API contract, Supabase, Auth, Storage, RLS, or data behavior changes.

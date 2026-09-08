@@ -271,22 +271,22 @@ jobs:
         run: |
           from pathlib import Path
 
-          browser_runtime_files = [
+          browser_runtime_files = sorted({
               Path('index.html'),
               Path('dapur.html'),
-              Path('sw.js'),
-              Path('creator-public.js'),
-              Path('studio-ai-creator-card.js'),
-              Path('social-proof-widget.js'),
-              Path('dapur-entry.js'),
-              Path('dapur-editor.js'),
-          ]
+              *Path('.').glob('*.js'),
+          })
 
           forbidden_extension_messaging = [
               'chrome.runtime',
               'browser.runtime',
               '.runtime.sendMessage(',
               '.runtime.onMessage',
+          ]
+          forbidden_global_suppression = [
+              "addEventListener('unhandledrejection'",
+              'addEventListener("unhandledrejection"',
+              'window.onunhandledrejection',
           ]
 
           for path in browser_runtime_files:
@@ -299,6 +299,23 @@ jobs:
                           f'Unexpected browser-extension messaging API in '
                           f'first-party runtime {path}: {marker}'
                       )
+              for marker in forbidden_global_suppression:
+                  if marker in body:
+                      raise SystemExit(
+                          f'Global promise rejection suppression is forbidden '
+                          f'in first-party runtime {path}: {marker}'
+                      )
+
+          dapur = Path('dapur.html').read_text(encoding='utf-8')
+          dapur_beforeinstallprompt_listener = (
+              "addEventListener('beforeinstallprompt'" in dapur or
+              'addEventListener("beforeinstallprompt"' in dapur
+          )
+          if dapur_beforeinstallprompt_listener or 'deferred.prompt()' in dapur:
+              raise SystemExit(
+                  'Dapur must use native Chromium PWA install UI and must not '
+                  'register/retain a beforeinstallprompt action.'
+              )
 
           index = Path('index.html').read_text(encoding='utf-8')
           pwa_markers = [
@@ -323,6 +340,46 @@ jobs:
               )
 
           print('First-party messaging/PWA prompt guardrails: PASS')
+
+      - name: Preview protection automation guardrails
+        shell: python3 {0}
+        run: |
+          from pathlib import Path
+
+          workflow = Path('.github/workflows/preview-browser-acceptance.yml').read_text(encoding='utf-8')
+          harness = Path('scripts/preview-browser-acceptance.py').read_text(encoding='utf-8')
+
+          workflow_required = [
+              'VERCEL_AUTOMATION_BYPASS_SECRET:',
+              'x-vercel-protection-bypass',
+              '--log-level=WARNING',
+              'ChromeDriver diagnostics withheld because Vercel automation bypass is configured.',
+          ]
+          harness_required = [
+              'def protection_headers(',
+              'def fetch_bypass_cookies(',
+              'def parse_bypass_cookies(',
+              'Network.setCookie',
+              'x-vercel-set-bypass-cookie',
+          ]
+          for marker in workflow_required:
+              if marker not in workflow:
+                  raise SystemExit(f'Preview workflow bypass guard missing: {marker}')
+          for marker in harness_required:
+              if marker not in harness:
+                  raise SystemExit(f'Preview harness bypass guard missing: {marker}')
+
+          combined = workflow + '\n' + harness
+          forbidden = [
+              '?x-vercel-protection-bypass=',
+              '&x-vercel-protection-bypass=',
+              'chromedriver --port=9515 --verbose',
+          ]
+          for marker in forbidden:
+              if marker in combined:
+                  raise SystemExit(f'Unsafe Preview bypass pattern detected: {marker}')
+
+          print('Preview protection automation guardrails: PASS')
 
       - name: SEO, trust, and crawl guardrails
         shell: python3 {0}
